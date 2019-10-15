@@ -1,0 +1,29 @@
+{
+  "address": {
+    "formatted": "formatted",
+    "street_address": "street address",
+    "locality": "locality",
+    "region": "region",
+    "postal_code": "90210",
+    "country": "US"
+  },
+  "sub": "sub",
+  "name": "name",
+  "given_name": "given name",
+  "family_name": "family name",
+  "middle_name": "middle name",
+  "nickname": "nick name",
+  "preferred_username": "preferred username",
+  "profile": "http:\/\/profile",
+  "picture": "http:\/\/picture",
+  "website": "http:\/\/website",
+  "email": "test@email.com",
+  "email_verified": true,
+  "gender": "male",
+  "birthdate": "2008-01-30",
+  "zoneinfo": "zoneinfo",
+  "locale": "locale",
+  "phone_number": "phone number",
+  "phone_number_verified": true,
+  "updated_at": 800000
+}

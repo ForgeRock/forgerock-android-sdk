@@ -1,0 +1,47 @@
+<!--
+  ~ Copyright (c) 2019 ForgeRock. All rights reserved.
+  ~
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license. See the LICENSE file for details.
+  -->
+
+<resources>
+    <string name="app_name">authui</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="username">Username</string>
+    <string name="submit">Submit</string>
+    <string name="password">password</string>
+    <string name="logo">Logo</string>
+    <string name="signIn">Sign in</string>
+    <string name="register">Register</string>
+    <string name="signInHeading">Sign in</string>
+    <string name="authenticateError">Sorry that isn\'t right. Try again.</string>
+    <string name="next">Next</string>
+    <string name="content">Content</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="please_enter_one_time_password">Please Enter One Time Password</string>
+    <string name="otpFailed">Invalid One Time Password</string>
+    <string name="select_delivery_channel">Select Delivery Channel</string>
+    <string name="select_question">Select Question</string>
+
+    <!-- Validation Error -->
+    <string name="UNIQUE">{prompt} Must be Unique</string>
+    <string name="MIN_LENGTH">{prompt} Must longer than {minLength} characters</string>
+    <string name="MAX_LENGTH">{prompt} Must not longer than {maxLength} characters</string>
+    <string name="AT_LEAST_X_CAPITAL_LETTERS">{prompt} At least {numCaps} capital letters</string>
+    <string name="AT_LEAST_X_NUMBERS">{prompt} At least {numNums} numbers</string>
+    <string name="VALID_EMAIL_ADDRESS_FORMAT">{prompt} Invalid email address format</string>
+
+
+    <string name="createdate">CreateDate</string>
+    <string name="version">version</string>
+    <string name="accept">Accept</string>
+    <string name="verify_recaptcha">Retry reCAPTCHA</string>
+    <string name="privacy">Allow %1$s to access your %2$s</string>
+
+</resources>

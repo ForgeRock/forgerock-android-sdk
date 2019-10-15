@@ -1,0 +1,36 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6InJlZ2lzdHJhdGlvbiB0cmVlIiwib3RrIjoiYXRzc25wMWs4dmYxZXFoOTZvY2dsOW9nbzUiLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU2paaFdFRnBUMmxLVDFRd05VWkphWGRwV2xjMWFrbHFiMmxSVkVWNVQwVk9RMUY1TVVsVmVra3hUbWxKYzBsdFJuTmFlVWsyU1cxU2NHTnBTamt1TG1wTExVRkdPVEZ5TmxCSUxTMVVXbEZTVG1aaU4yY3VXV2gwTFRCaFgyb3hjRWh1VURObGFVMTZkbFp1TmxGdFpFcFhkWEp4TTJ4cGIyMVRkMGhGTld0MldIQlliRlZYVjJRNWVtOU1TMGxMVW1GaU0xUm5aVlpWT0V0WVExOUlUemRUWkRFeVZTMUdUbWhYTUZGdlIyeFlVWEJxYUc1cmFYaDVValZHU21nNE1VZGxjRXN5UWpJMExXdzFRVWhFY214Sk56ZGFSRVpKZG5wemRrNURaWFZVVDJWR04wSnVPV3RJZWtseVRGY3RUM2hxWjJNNU5teHBTMjk2TVZKQ1RVcGxSemxUTlhwbmVYTkhkRGs0WkVGeWMyZERaakZ5Y0RSVGVqQlVhbTVmWVhOa2FqQXdMVjlaY1c1ME4wbE1SbkF5VG1kc04xQnVTRjluTlRKQ1VEbFZhV3hHVkZKNmNrSkpVR3BMU1hwR1RuTXdVSGN5VmxsdlNHdFZhVm94YTNOTVMwdGlkRmc0UjNoSWVGcE1ZV1ZtTTFSYWRIQndNalZWT1d4V1FWOHdabGx4VUZWS1YyRnJjVWg2VW1acVVIZDRRbU5PYW5wdVpVRmlhMXBJWm5JMWNsRkZRMDh5YWpkVmIwVlpVV1ZwYnpneVNVNDBaVVZTTkZWRFNsbFlUWFoyVVVjMFpXWkdTa2RJYkY5UlFqUjNZWEZTUVhaMExVTllaVWh5WjE5VFlUUnhiMFpxVDBwU1UyNUxMV1ZWV0dScExVcHpUVWN4WWtoblpGWlNlRTVZVkVjMGFWQlhOVUpEWmtWa2MzVnhaVWxaVXpaU2FtVnpVRGRsWDBOU1JEUjJOMGREUTFSWE5HdzJjbVZaV1ZFMmRHUjFSMHhTZEZscVN6SjBWa3RKT0V3M1EydFBVMEV0ZEZwdkxUQkJTbWd3UlVSVk1GcFpWM2R1WWpkaFFVbGZjbXRXZWpsT2MyNXVVWE5OWmxsdVRrbG9TbUZrVDNSc1lWQktRelZQWlVKeGVXNTNTVGxJUzNReE1VcHRPRTl1ZUdGWlFteEpYelZJY1hoSmJtaE1iRUUwWDJ3d2JXaEljblZWZHk1cWFFNWFiRlkxYmpoRmVFWjBNMVkwTW1wcVNYZEIuR052NjFJcEJ0VWZ6UGJ1NjBVVkY0ZGpXa3p3RFo4eEt3OEFTTng3Q3dhTSIsImV4cCI6MTU2Mjg2OTUyMywiaWF0IjoxNTYyODY5MjIzfQ.S_hOso0afC9xDrbadMZv5hEVocrEQsJHl6aIO4Rte2Q",
+  "callbacks": [
+    {
+      "type": "ValidatedCreateUsernameCallback",
+      "output": [
+        {
+          "name": "policies",
+          "value": [
+            "unique",
+            "no-internal-user-conflict",
+            "cannot-contain-characters",
+            "minimum-length",
+            "maximum-length"
+          ]
+        },
+        {
+          "name": "failedPolicies",
+          "value": [
+            "{ \"params\": { \"minLength\": 3 }, \"policyRequirement\": \"MIN_LENGTH\" }"
+          ]
+        },
+        {
+          "name": "prompt",
+          "value": "Username"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": "an"
+        }
+      ]
+    }
+  ]
+}

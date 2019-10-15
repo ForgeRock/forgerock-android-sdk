@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2019 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+package org.forgerock.android.auth;
+
+import android.content.Context;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.util.List;
+
+/**
+ * Follow the {@link Interceptor.Chain} and executes each {@link Interceptor}
+ * in the chain.
+ */
+@Builder
+public class InterceptorHandler implements Interceptor.Chain {
+
+    private static final String TAG = InterceptorHandler.class.getSimpleName();
+
+    @Getter
+    private Context context;
+    private List<? extends Interceptor> interceptors;
+    @Getter
+    private FRListener listener;
+    private int index;
+
+    @Override
+    public void proceed(Object object) {
+        if (index >= interceptors.size()) {
+            //end of the Chain, execute the caller Listener
+            Listener.onSuccess(listener, object);
+        } else {
+            //process the next interceptor in the Chain
+            try {
+                Interceptor interceptor = interceptors.get(index);
+                Logger.debug(TAG, "Processing interceptor: %s", interceptor.getClass().getSimpleName());
+                interceptor.intercept(new InterceptorHandler(context, interceptors, listener, index + 1), object);
+            } catch (ClassCastException e) {
+                //skip the interceptor
+                index++;
+                proceed(object);
+            } catch (Exception e) {
+                listener.onException(e);
+            }
+        }
+    }
+
+}

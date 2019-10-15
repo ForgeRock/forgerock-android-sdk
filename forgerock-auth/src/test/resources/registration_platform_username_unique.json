@@ -1,0 +1,36 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6InJlZ2lzdHJhdGlvbiB0cmVlIiwib3RrIjoiNjJiNms5cXRkbmppZW5lZDM5aGt1NHU5aGoiLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU2paaFdFRnBUMmxLVDFRd05VWkphWGRwV2xjMWFrbHFiMmxSVkVWNVQwVk9RMUY1TVVsVmVra3hUbWxKYzBsdFJuTmFlVWsyU1cxU2NHTnBTamt1TG5sWWEyUkpaRzAzZFRWdWMwdG1jWFEwV1hoR1luY3VjbEYwV21WS1pucHhia0Z3YmtkSVYydGthSGhvVVd4RVZXeHRObGQ1YUdGVWMwdFZUWE10UlZZM2FUSTNiR0YzT1ZWMVFYRTJOMWxPVVc5S04yeElPWFJwWmtobWRraEJMVk4xVWxaRk9XZFVZWGhsTUZWWGQxTTVjMVpVTlhwbWFsbE1OSFpqWHkxclkyaEhXSEZwVmxNeFIxUlVZVXAzV1MxbFFWcHpUMjFPVDJFME5HZElVSEpCT1ZaQ1RYTXRUVTVSWTFkVVYwbHdlbk4zTjFkd05XTjBUSEZFUW5kcGFDMDBWWEkzVERKMFVXWnNWMFpLVUVWS04yVTFhbkpEVkRNeGJXaHRVa0phZVdoMFpWaHVja3BYVEZKRWNFd3hRa1ZGUjJKWWMxSk1TekpsWWpoUlRFRnpjWE5QUlhKMmFWaFZkVTlKWDJodFdWOXZXVjk1T0hGblR6Snliek5yTVY5NlR6WldRa0l0VkVoaVVWQnVlazFtUWtRMFFrOW1YM051VTBGNVpreHhXVGd4Y0dGc04wNTNkWG95VDFWTlIzaFZUWFZIZVRBMlJITXdRVFV4V0dGMFgxYzRWbFE1ZGxaYVMyVTRjR1JRWWtkQ09XSTBOMVpvYVdWTE5qbHRibWRHYlRCMVRWSnVZa2hGTURsa1dGZDRkR2xUUVZWMFYxQkthMlV4TTNnNFlYaGZTMnRUVFhSUFZUZ3plbU5NUmxSR2RWVmpRVEZvTVhoMmVIQnRlRFJLY25oRWVITlVPSGh4TXpoVlZFUlJNbHBOWVRacGVXNW9MVGRZWmxWbFptVk1UVU5pVTFodVowNDVOMWRvZVU5Q2MwRnNPVjlVTFdNeE9HNVZkWE5pVW10R1FWY3laSGw1ZEVaVU9XWXpjVmRWY3pJNWJVcE1ha3REUTJweE1UUTBYMVYyVkRsYWNsZHJOWEZUT1Zkc1ZVTkZkamhCWm5KTldHOWZRbWsxVlZwMWRuRkJRVGc0Y1ZKME0yVnhXbXRHY2tJMGJURmtPVmR0VlRST2VFdEtWa3B4VGpsWWJVUmZPR0V4Wnk1RlEycFJhMGgwUjBWQmJucGplR1JDZUdaS0xXWkIuck40X2RPbVFnS3pOVXZ2RGNETWFMWXRDOG9idm50ZVBDMDRkaGNSd2pVRSIsImV4cCI6MTU2Mjg2ODE0NCwiaWF0IjoxNTYyODY3ODQ0fQ.97dVTY4RXDhLuHuhcIpn_2hEVDBBEKlsK9hLBG5q4gs",
+  "callbacks": [
+    {
+      "type": "ValidatedCreateUsernameCallback",
+      "output": [
+        {
+          "name": "policies",
+          "value": [
+            "unique",
+            "no-internal-user-conflict",
+            "cannot-contain-characters",
+            "minimum-length",
+            "maximum-length"
+          ]
+        },
+        {
+          "name": "failedPolicies",
+          "value": [
+            "{ \"policyRequirement\": \"UNIQUE\" }"
+          ]
+        },
+        {
+          "name": "prompt",
+          "value": "Username"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": "andy7"
+        }
+      ]
+    }
+  ]
+}

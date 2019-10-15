@@ -1,0 +1,8 @@
+{
+  "code": 401,
+  "reason": "Unauthorized",
+  "message": "Login failure",
+  "detail": {
+    "failureUrl": ""
+  }
+}

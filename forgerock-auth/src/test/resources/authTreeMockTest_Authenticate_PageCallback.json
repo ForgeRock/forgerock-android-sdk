@@ -1,0 +1,38 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IlN0YWdlIiwib3RrIjoiYXNoOWR1OHY2YXFqdmUxM3VqNmFra25nOGYiLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU2paaFdFRnBUMmxLVDFRd05VWkphWGRwV2xjMWFrbHFiMmxSVkVWNVQwVk9RMUY1TVVsVmVra3hUbWxKYzBsdFJuTmFlVWsyU1cxU2NHTnBTamt1TGtWWGFqRlhlRTV6TjAweFdqVlFaa0pHTkdKaGVWRXVSbkoyVFVsT1FtNU9iRU5ZVEY5YVRtbFhXa2hOVTBsV1FrczBVR1ZvVEVwZlowRTBhSGhqVEdsRmEyaEJVVmhJVld0a1gybFNiMjUwYmxKYVkyMUlia05QTUdwSk1qVndUbFp1T1VGemQzVk5iWFpFVDFBdGRUTjVXRXg0U1ZNdFp6ZEdaRWhsYzA5QmNXVjBiVVJSYWxoRVFsOTNjR3RxYmtkT1RHOU9NMkZXTlZoUmRVaElhVGxHZW1aRmNXSnBWVUpXV0c5QmRuWnJSa2Q0VUhjdFNXOTVSVmgzUzNrM05XaGZlbkZqVmw5UGJEVXlkbTFMYVdwVlYwNWlVMjk1U1dKUVdIWnhXVTV5TkRscWFreFRNSEJKUVRac1VWWmhYelJDU2psd00wSjJOVnBLTkhWc1YzQTVlV0ZVWkVOUGVGaFpWVFpzT1VoTGVEbHJVRUkyWkc5WFNYVkdWRGxQVWtWdk5GUTBRemMwVGpOalNEZHZaekZFYkdzd0xUVlhiWE10UWtZeGFWOHlaM05PZEdFNFUwVlpOMWt3T0hsTlZWbDJiazFmWjFCc1VHZHZSSEpmUm5OaE5GaDZjMWx4TmtzMWRscHBTV2hFVVd0aWFFeFNRbFZpZUc5WE9FOWxjR2N0VVZWUGJrbGpiVmd4VkZaQ1NqbE9PVGxQVmxSTFRFVnBRbFo0TVdGb1QyczJlbkppTlVSemVXbFJWM0F5VVdwWlExOXJkakpNZDAwMVdGRjRkamxhTVhNMmRsWk1Xa2RFVjJGcFZrSTBRVmcwTm14b2VIaDVWVVZXY0RCRVNqSlhlV1JhUTFoV2VGRmZhVUUyVURCV2FXWjJURmhaYTJsUldIaDZMVEkxY1habFRUQmlSbmxLUmpabE1IUk9NbTluWTNob2VHSldZbkpzZFhadlMxbGFMVGxqWkhwdlpVaFdjVnB5WkZGcWMyRlBPSHB4T1RCUVRtaGljbDl5UzNWWk1UVmZVRkZUY0ZGUFJFcFdSVWRTYVhaeE1FOTJRbGd4V21wc1kyRkZSVUZXVlU1cFJXbDVjV3B3WjFWWldIaE9TVEJ5V2xKZlNXbE9hSEoxY0RodGMwbzVkMFpDUVVGaE9XSXRVVVZqTjNwc1lWVldTUzR4TmtabmNGZHZVRzR5VkdkM056aFNhM05wU1doQi4ybVk0RVJXUXh4ck1iMElmUlA0X1M4eUJ5TUhPVTNRWUMzVW5iSU9xeHNzIiwiZXhwIjoxNTYxNTg2NjA4LCJpYXQiOjE1NjE1ODYzMDh9.L2Z0r3aZSpCb3SzX9h9qB9UmStWGr-w5WAQkfvEPyZI",
+  "callbacks": [
+    {
+      "type": "NameCallback",
+      "output": [
+        {
+          "name": "prompt",
+          "value": "User Name"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": ""
+        }
+      ],
+      "_id": 0
+    },
+    {
+      "type": "PasswordCallback",
+      "output": [
+        {
+          "name": "prompt",
+          "value": "Password"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken2",
+          "value": ""
+        }
+      ],
+      "_id": 1
+    }
+  ],
+  "stage": "UsernamePassword"
+}

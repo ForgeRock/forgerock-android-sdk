@@ -1,0 +1,20 @@
+<!--
+  ~ Copyright (c) 2019 ForgeRock. All rights reserved.
+  ~
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license. See the LICENSE file for details.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="30.65134"
+    android:viewportHeight="30.65134"
+    android:tint="#32C933">
+  <group android:translateX="3.0418618"
+      android:translateY="2.8999574">
+      <path
+          android:fillColor="#FF000000"
+          android:pathData="M9,16.2L4.8,12l-1.4,1.4L9,19 21,7l-1.4,-1.4L9,16.2z"/>
+  </group>
+</vector>

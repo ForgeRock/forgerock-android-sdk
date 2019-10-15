@@ -1,0 +1,200 @@
+/*
+ * Copyright (c) 2019 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+package org.forgerock.android.auth;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.security.KeyStore;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+
+import static org.junit.Assert.*;
+
+/**
+ *
+ * Instrumented test, which will execute on an Android device.
+ * Use real device keystore to test the encrypt/decrypt
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+@RunWith(AndroidVersionAwareTestRunner.class)
+public class SecuredSharedPreferencesTest {
+
+    private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
+    private static final String TEST_ALIAS = "TestAlias";
+
+    private SharedPreferences sharedPreferences;
+    private Context context = ApplicationProvider.getApplicationContext();
+
+    @Before
+    public void setUp() {
+        sharedPreferences = new SecuredSharedPreferences(context, "test", TEST_ALIAS);
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
+        keyStore.load(null);
+        keyStore.deleteEntry(TEST_ALIAS);
+
+        Context context = ApplicationProvider.getApplicationContext();
+        String filePath = context.getFilesDir().getParent() + "/shared_prefs/test.xml";
+        File deletePrefFile = new File(filePath);
+        deletePrefFile.delete();
+    }
+
+    @Test
+    public void testPutString() {
+        sharedPreferences.edit().putString("Test", "Value").commit();
+        assertEquals("Value", sharedPreferences.getString("Test", null));
+    }
+
+    @Test
+    public void testPutInt() {
+        sharedPreferences.edit().putInt("Test", 100).commit();
+        assertEquals(100, sharedPreferences.getInt("Test", 0));
+    }
+
+    @Test
+    public void testPutFloat() {
+        sharedPreferences.edit().putFloat("Test", 1.5f).commit();
+        assertEquals(1.5f, sharedPreferences.getFloat("Test", 1.5f), 0);
+    }
+
+    @Test
+    public void testPutLong() {
+        sharedPreferences.edit().putLong("Test", 100L).commit();
+        assertEquals(100L, sharedPreferences.getLong("Test", 0L));
+    }
+
+    @Test
+    public void testPutBoolean() {
+        sharedPreferences.edit().putBoolean("Test", true).commit();
+        assertTrue(sharedPreferences.getBoolean("Test", false));
+    }
+
+    @Test
+    public void testPutStringSet() {
+        Set<String> stringSet = new HashSet<>();
+        stringSet.add("Test1");
+        stringSet.add("Test2");
+        sharedPreferences.edit().putStringSet("Test", stringSet).commit();
+        assertEquals(2, sharedPreferences.getStringSet("Test", null).size());
+    }
+
+    @Test
+    public void testClear() {
+        sharedPreferences.edit().putString("Test", "Value").commit();
+        sharedPreferences.edit().clear().putString("Test2", "Value").commit();
+
+        assertNull(sharedPreferences.getString("Test", null));
+        assertEquals("Value", sharedPreferences.getString("Test2", null));
+    }
+
+    @Test
+    public void testGetAll() {
+        sharedPreferences.edit()
+                .putString("Test", "Value")
+                .putString("Test2", "Value2").commit();
+
+        assertEquals(2, sharedPreferences.getAll().size());
+        assertEquals("Value", sharedPreferences.getAll().get("Test"));
+        assertEquals("Value2", sharedPreferences.getAll().get("Test2"));
+    }
+
+    @Test
+    public void testListenerOnCommit() throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                countDownLatch.countDown();
+            }
+        });
+        sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                countDownLatch.countDown();
+            }
+        });
+        sharedPreferences.edit().putString("Test", "Value").commit();
+        countDownLatch.await();
+    }
+
+    @Test
+    public void testListenerOnApply() throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                countDownLatch.countDown();
+            }
+        });
+        sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                countDownLatch.countDown();
+            }
+        });
+        sharedPreferences.edit().putString("Test", "Value").apply();
+        countDownLatch.await();
+    }
+
+    @Test
+    public void testSetNull() {
+        sharedPreferences.edit().putString("Test", "Value").commit();
+        sharedPreferences.edit().putString("Test", null).commit();
+        assertNull(sharedPreferences.getString("Test", null));
+    }
+
+    @TargetApi(23)
+    @Test
+    public void upgradeFromAndroidLToAndroidMGet() {
+        AndroidLSecuredSharedPreferences androidL = new AndroidLSecuredSharedPreferences(context, "test", TEST_ALIAS);
+        AndroidMSecuredSharedPreferences androidM = new AndroidMSecuredSharedPreferences(context, "test", TEST_ALIAS);
+
+        //Using android L to store data
+        androidL.edit().putString("Test", "AndroidL").commit();
+
+        //Get after upgrade to android M, expect null since key is changed.
+        assertNull(androidM.getString("Test", null));
+
+        //After upgrade, should back to normal
+        androidM.edit().putString("Test", "AndroidM").commit();
+        assertEquals("AndroidM", sharedPreferences.getString("Test", null));
+    }
+
+    @TargetApi(23)
+    @Test
+    public void upgradeFromAndroidLToAndroidMPut() {
+        AndroidLSecuredSharedPreferences androidL = new AndroidLSecuredSharedPreferences(context, "test", TEST_ALIAS);
+        AndroidMSecuredSharedPreferences androidM = new AndroidMSecuredSharedPreferences(context, "test", TEST_ALIAS);
+
+        //Using android L to store data
+        androidL.edit().putString("Test", "AndroidL").commit();
+
+        //Get after upgrade to android M, set new Value.
+        androidM.edit().putString("Test2", "AndroidM").commit();
+
+        //Old value are gone
+        assertNull(androidM.getString("Test", null));
+
+        //New value persist
+        assertEquals("AndroidM", sharedPreferences.getString("Test2", null));
+
+    }
+}

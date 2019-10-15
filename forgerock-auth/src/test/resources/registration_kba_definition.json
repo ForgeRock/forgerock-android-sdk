@@ -1,0 +1,57 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IlJlZ2lzdHJhdGlvbiBUcmVlMiIsIm90ayI6ImEyOTl1OTZpaHN1ODh0c25pbmJtdmlyaHI3IiwiYXV0aEluZGV4VHlwZSI6InNlcnZpY2UiLCJyZWFsbSI6Ii8iLCJzZXNzaW9uSWQiOiIqQUFKVFNRQUNNREVBQkhSNWNHVUFDRXBYVkY5QlZWUklBQUpUTVFBQSpleUowZVhBaU9pSktWMVFpTENKamRIa2lPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LlpYbEtNR1ZZUVdsUGFVcExWakZSYVV4RFNqWmhXRUZwVDJsS1QxUXdOVVpKYVhkcFdsYzFha2xxYjJsUlZFVjVUMFZPUTFGNU1VbFZla2t4VG1sSmMwbHRSbk5hZVVrMlNXMVNjR05wU2prdUxuRkhUbEJqZWtWME0wNTNTa05JUVdJM04xOUpXVkV1U1c5T1ptMWpOWFY0Y0ZSMmMwZG1TMVpMVXpKb1NWUXhNamxvVkRsdFIzWk9jMmRxVFU1UVQxSkdRMHc1YnpCVFJrNVNTbXR1VkRaMU5tRkpla1poU1Rac2NuVnBka2d6WlhoSFJXOXVSRTVCUTFWTWIxOUhRMFZPZEZSalgyb3pabmxMT0RCM2VESlBiV1pxZUdNMFZWRm5VRE5WYVdac2IwVTNjVzExZERCVFZtNDBUME0xTkhwS1oxRjJlWFl6ZURrdFkwdHpVVVoxTld0amNISk5hMjl2YlhoTGNFMXRiWE5UYW1ab1lsRjViME5IZERKck1tUkZPR3N0UlVabk1uWmxZemc0YURWYVZtNWhUV0pGY0dNNU1rWlRUV2hFV0dKVk5uQklZVWRPZUZadVVuSlJNVFl0Ym5sRmRqVkhhVVF3UkhGTk9VOHlNVmRJTlZKU1dFY3pkR0ZvUlhONGRYRldTWFZNV0dFMlJXSm9hMlZpYjNoSmJtRTNZekl5YkZoUVNYSm1jbHBxU2s5YVJGUmtiVEpLVHkxeWIwZHhWbXcwZEZsd2RYTkhUMUZEU3pOdVp6VXpjbmw0ZGkxM1ozbHRRVWhLVHpsTVYzTnhXRTFKYkZscWRWaDNXRU5EUlhOV1p6RnFWRGRtTFdsaGVWWm9hVUZCTldNM2FrbE9PVFZUVjFob09EaHFibFp5YTBnek0zSmhlVzVDVURKRFZtTmZOVWxET1VrekxXVlZaM2RVY2t4aWNrRnBhVFpUYkdseWMxaGFOV2N5VERod1RXdDVSa2hKUzNCRFEyNDJPVkJpUjFCWmNXZExZMjlQV25sWFh6ZFFTazAxVXpKVldIVmtlVWxMYUc5aFFtOWtZMlV0Ym5Nd1RuUjFhQzEyWXkxdE5rVktNRFJCTUVSSE5ubEtjMFpOVW1WUWJ6UTBhR2xSTXpkUWF6Y3pVVTlMVEVzelFXUlBWa3BVTTFGYVgxcFBSemRzYVRaSlVuZHVlbXN5VDFkZmFtbFFXR2g2WWxGcVpXWkNWWHBxYkdablZGbDVWbk5NVTNGR2VFUmFPVWs0TUZoNlRXUmxhelJaVlVOa2FsTkVabVZuTVhkcmR6QkpZekpPTlhacE1uRmZkelpDTlhORWRqbFlXbnBqVEhKTk5GWkRkM0prVDAweWQwOUxTRkJJWVVWMFpEa3hSREpZV2xkUlQzaE5VMk5hTkhZNVpUVm5OWG96Y1hoSFZXTmZhblpmUXpoc1dtSTBXa0pVZG5Zd1ZraFFTbUkwVkZoblpTMXdTV3hJUWpOTmExcGhTRlF6Y0RWR1gxcE5WbVZ2TVZOamRqTTRSMjFNTWpoSVptUlNiR3BNTUhZeVZUWjRVSFI0ZWpneWFtSk5URVYyYmxCQlpHOHlZMDR6UkRNMGIxTTFaV2x6VVVScVptbGxOM1V5Y21WS1UxazFkSEJLV2pod2F6ZEZlbUUyU1dZNFgzcE9VWEZoVkRGTlVscEllVWRSZFRWWlZWWkpUbVF5UlZKRlR6VTJPVlZXYldVNFdIazRkVlZPZWpGdVJrNUdia1JrU0ZrMVVGaDZSSGRhYVZWdVlqSjRUR3BoWms1eVprc3lkMHAxUzJGdWFIVjVWa1UzYkVwSWR6Uk5NaTAxUTBjd1dFTTBZMUZsT1Zsdk0yNUNabHBMWWtwTWJURklTRlZXZEhCUU5WUnBOWEZhVjBaMU9GWjRlbGRTYm1acE16RlRabUZCUnpGbGR6WkRTbkZ4ZG1aUVpHMWhjR0ZQZDJKQmMwZDBVSFJqWkdzM2EzcERZbVJKZWxsdFlrUm1NVWRVVlhSRmVWRTNaa0oxYWxoeVFtMDRiRUpZVDE5c1gzTjJOMFpyT0hoWVdrcDJkV0ZIVEhWTWFDMVFPVGhxWVdZdFZYQmhOMmxmTjI1SmVUZFNZbk5XYVU1RGRqbDFkbWhxUVd0aFJtSTBhVjlwWVd4M0xqaFhObVZJWXpkdVdFZDVjRzR3WmtGbFNqbDZkVUUuRHVUTG9Lb1c3MnVsWXdObXZqbWtiUkRUQktRZ0ZpYnBQM3h1RGliaUpwcyIsImV4cCI6MTU2Mjg4NDYwNSwiaWF0IjoxNTYyODg0MzA1fQ.sW8BtCOYzj05P6xBqAeCxUE1I3AROF5ETxUBJTXe0ww",
+  "callbacks": [
+    {
+      "type": "KbaCreateCallback",
+      "output": [
+        {
+          "name": "prompt",
+          "value": "Choose a question"
+        },
+        {
+          "name": "predefinedQuestions",
+          "value": [
+            "What's your favorite color?",
+            "Who was your first employer?"
+          ]
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1question",
+          "value": ""
+        },
+        {
+          "name": "IDToken1answer",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "KbaCreateCallback",
+      "output": [
+        {
+          "name": "prompt",
+          "value": "Choose a question"
+        },
+        {
+          "name": "predefinedQuestions",
+          "value": [
+            "What's your favorite color?",
+            "Who was your first employer?"
+          ]
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken2question",
+          "value": ""
+        },
+        {
+          "name": "IDToken2answer",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

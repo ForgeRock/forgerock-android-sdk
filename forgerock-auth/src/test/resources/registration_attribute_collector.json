@@ -1,0 +1,119 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6InJlZ2lzdHJhdGlvbiB0cmVlIiwib3RrIjoiMTY1ajI4MjNvZXI1bGpjbWhlMDJsaDhlNXAiLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU2paaFdFRnBUMmxLVDFRd05VWkphWGRwV2xjMWFrbHFiMmxSVkVWNVQwVk9RMUY1TVVsVmVra3hUbWxKYzBsdFJuTmFlVWsyU1cxU2NHTnBTamt1TG1aUGJIVlVaWGRPV21wNmJUSllPRWR2UXpCcFJuY3VPRzgxY0c0NGVUbDFaM00xUWtwUVRFcExjRUZHWTNCRU9WOW1aazR3VVZKZmJGcFpZamREYjBkc1FYUkhUWE5PVW1kb09WOVlRbEpJUTJaelgwTldjMnhFT0ZaVE5HTldabUZzTUVReFdsaFBZWEJRVTBvNFpVMXRTR0pGYjFCQ2VDMVhTV3hPWVc5TmIyOUJXblpOVURaaFMxZENjblV5ZVZsbmNqTlhjbmswYzFOcVFrZEJhbXd3WVdKUlRpMTJiMDVEU1hORlNqaDFXbk5OT1MxR1NXVnJMVlJxT1VKd1QybHhUbEJoTW1KVldYRnhWRTFrV0dGME0xaFBTRFJVWVV4bWNYUmFhMjB6TmxvNFFWVXRNMmR4V1RRMk5UbFVXamw1VTJOVlJscHdZbUV6UXpoSlIxUmFabWh0WWtRdE9HUlVhelJtVVVsM1JXSk5XREJOVW1wRWRUWXpPV0V5UWt0ZlJVVXpNV1YzWmtsd1pXbFdVRkJoUmtKRGQxUjNWRWxoV1c1b1NucFRXRE5CY1doTFpEaExNWHAzUVhWRE1tdFVkbEZ2VGpFNGNHY3pkazFZVFdobmFFVlNiRXhKVTJkcVdXMXZjV2RvY1dOTkxYQnlWVkJUWWxkd1EyUk5OR3h0WW5Oa1kwbzFVek5TY25aNWVqa3hOVkpyTm5OTGVFTmZaME52TlhNeGJHZzNWR2hMUVhwUVJFMXlYMFkwVEhJNVYxTXpWRkZwT1ZkdVRFdENiMmxNYzJkTmRqQlBYM2d3TFVzMFdrOWFaa05TTkZWRlFVTlpTa3RVVlZOQldIaHdTVGM0UzFGMlkzTjBPV1JCWWt4eGVGTnViakJZYW1GMVFVUkhPVEZ5ZVZjd01rNTZSVkozWkZad1JXZFBVRUpJYzJOV1EyRmZiVUZ1ZUhoYVRIUkxRVlJFWXpkVFpqSk9ZbVJzT1VSb2NHdEZZV2xZVTIxaVJqRnBlV3Q1Y2xaTE1IcFBNelZWVlRsZlNWWkllakEyTFU5MlZEaG9kVkl3U3pkMVJEazVUbDlqUWtRdFJrRm5VRzVqWVRrME1sZzRlSEp5TUVaT1VUQTBOR3hoVjFrNFRVNXRSVlZRUVhsSE5IUm5jVkk1ZDFKaU1qZHJaaTFYYjJoU1EwMVpVekZVWHpkbGNrTjFNMVZLYjNGUFpYZEtUakkzTkZScmIwaEVlbXhQVFdSVVJHMVZPRWx6WkZOMExXaEhTazFoUjFkelYwY3dTVkpuU0hWVWFrcGZSV2ROVUVSQ2FVUkhUWFl3VTJaSlYzRm9abGxQZGxKT1JTMUhTM0pyT0dOWmJWQjVSVEJRVkZsQk5rNVFPV3BUZDFCS1MxRmxTRFoxWTJkWmRYSnFWV1EwUzJNMlMxaEdiemRoWTI1bGNtbHFXbkY0UkdGaGJHaEZVRFpyVUU5bFdXNW1jbVk1U1d0c1Qzb3pSMUpZUVZSWVlXVjFNalJ1TlhWRE9VcDVRelp6WTJOa1JsUXRiM1ZTVEVZM01reDRWek5IY0VnNWVtSnhTeTFpYWkxd04zQnNhV2hJVjIweWVXWnFOek40V1dweVlYWXlURmhhWVV0aFVteGphM2x0TlhkUWRXTnlhRll4VkhST01VcEdTa2N4ZUU5bFVFWkpjVGg0VFZoc1gwTkZZbXBZZDFGWVUxTlBRbEowU0RSa1J6WjBhM1l6ZFVOSE4xQTJiR3BhV1VWUWExVmlhbTlVU3pGcFNWQkJkMGRaTVRSSmJHbE5UelpxVjJ4eFpWSlpjSEl6VVM0eU1DMVZVRlZUVTFoNVgwZE5VMHhXY1hKSmRXTjMuU1hRYnVSb0w1Smd0Z0lzdV9JZEJlVDk1SjVtMjd0UnE4UVFEeEJOUF9NNCIsImV4cCI6MTU2Mjg2NTE4MywiaWF0IjoxNTYyODY0ODgzfQ.QgAENDDHjJbxZZgoxlwzaENB45N9h9zgypyxDCJ6fY8",
+  "callbacks": [
+    {
+      "type": "StringAttributeInputCallback",
+      "output": [
+        {
+          "name": "name",
+          "value": "mail"
+        },
+        {
+          "name": "prompt",
+          "value": "Email Address"
+        },
+        {
+          "name": "required",
+          "value": true
+        },
+        {
+          "name": "policies",
+          "value": [
+            "valid-email-address-format",
+            "maximum-length"
+          ]
+        },
+        {
+          "name": "failedPolicies",
+          "value": []
+        },
+        {
+          "name": "value",
+          "value": ""
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "StringAttributeInputCallback",
+      "output": [
+        {
+          "name": "name",
+          "value": "givenName"
+        },
+        {
+          "name": "prompt",
+          "value": "First Name"
+        },
+        {
+          "name": "required",
+          "value": true
+        },
+        {
+          "name": "policies",
+          "value": [
+            "minimum-length",
+            "maximum-length"
+          ]
+        },
+        {
+          "name": "failedPolicies",
+          "value": []
+        },
+        {
+          "name": "value",
+          "value": ""
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken2",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "StringAttributeInputCallback",
+      "output": [
+        {
+          "name": "name",
+          "value": "sn"
+        },
+        {
+          "name": "prompt",
+          "value": "Last Name"
+        },
+        {
+          "name": "required",
+          "value": true
+        },
+        {
+          "name": "policies",
+          "value": [
+            "minimum-length",
+            "maximum-length"
+          ]
+        },
+        {
+          "name": "failedPolicies",
+          "value": []
+        },
+        {
+          "name": "value",
+          "value": ""
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken3",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "code": 401,
+  "reason": "Unauthorized",
+  "message": "Session has timed out",
+  "detail": {
+    "errorCode": "110"
+  }
+}
