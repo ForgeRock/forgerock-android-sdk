@@ -18,6 +18,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.collection.IsIn;
 import org.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -114,6 +115,7 @@ public class FRUserMockTest extends BaseTest {
 
     }
 
+    @Ignore("For now not to cache userinfo in memory")
     @Test
     public void userInfoIsCached() throws InterruptedException, ExecutionException, MalformedURLException, ParseException, JSONException {
         frUserHappyPath();
