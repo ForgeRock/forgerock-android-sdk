@@ -30,6 +30,7 @@
     <string name="select_question">Select Question</string>
 
     <!-- Validation Error -->
+    <string name="VALID_USERNAME">{prompt} is not valid</string>
     <string name="UNIQUE">{prompt} Must be Unique</string>
     <string name="MIN_LENGTH">{prompt} Must longer than {minLength} characters</string>
     <string name="MAX_LENGTH">{prompt} Must not longer than {maxLength} characters</string>
