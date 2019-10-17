@@ -11,7 +11,7 @@
 
     <application>
         <service
-                android:name=".authenticator.AuthenticatorService">
+                android:name=".authenticator.AuthenticatorService" android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>

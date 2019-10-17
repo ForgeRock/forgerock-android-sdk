@@ -106,7 +106,7 @@ public class FRDeviceProfileTest {
                     jsonObject.put("name", "value");
                     listener.onSuccess(jsonObject);
                 } catch (JSONException e) {
-                    //ignore
+                    throw new RuntimeException(e);
                 }
             }
         }).build();

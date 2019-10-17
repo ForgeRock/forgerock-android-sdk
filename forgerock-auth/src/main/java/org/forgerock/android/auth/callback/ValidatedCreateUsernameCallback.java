@@ -33,7 +33,6 @@ public class ValidatedCreateUsernameCallback extends AbstractValidatedCallback {
     @Override
     protected void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
-        //ignore
         if ("prompt".equals(name)) {
             this.prompt = (String) value;
         }

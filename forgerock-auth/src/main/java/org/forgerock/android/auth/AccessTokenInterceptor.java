@@ -24,6 +24,7 @@ import java.net.HttpURLConnection;
 @RequiredArgsConstructor
 class AccessTokenInterceptor implements Interceptor {
 
+    private final String TAG = AccessTokenInterceptor.class.getSimpleName();
     private final SessionManager sessionManager;
 
     @NotNull
@@ -37,7 +38,7 @@ class AccessTokenInterceptor implements Interceptor {
                         .build());
 
             } catch (AuthenticationRequiredException e) {
-                //ignore, failed to inject a valid access token
+                Logger.warn(TAG, e, "Failed to inject a valid access token");
            }
         return chain.proceed(chain.request());
     }

@@ -11,10 +11,10 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.net.wifi.WifiManager;
+
 import org.forgerock.android.auth.FRListener;
-import org.forgerock.android.auth.Interceptor;
 import org.forgerock.android.auth.Listener;
+import org.forgerock.android.auth.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +22,8 @@ import org.json.JSONObject;
  * Collector to collect device Bluetooth information
  */
 public class BluetoothCollector implements DeviceCollector {
+
+    private static final String TAG = BluetoothCollector.class.getSimpleName();
 
     @Override
     public String getName() {
@@ -73,7 +75,7 @@ public class BluetoothCollector implements DeviceCollector {
         try {
             data.put(getName(), collect(chain.getContext()));
         } catch (JSONException e) {
-            //ignore
+            Logger.warn(TAG, e, "Failed to set data.");
         }
         chain.proceed(data);
     }

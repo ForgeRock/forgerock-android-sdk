@@ -10,10 +10,14 @@ package org.forgerock.android.auth.detector;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import org.forgerock.android.auth.Logger;
+
 /**
  * User Package Manager and see if application is installed.
  */
 public abstract class PackageDetector implements RootDetector {
+
+    private static final String TAG = PackageDetector.class.getSimpleName();
 
     boolean exists(Context context, String[] packages) {
 
@@ -24,7 +28,7 @@ public abstract class PackageDetector implements RootDetector {
                 packageManager.getPackageInfo(packageName, 0);
                 return true;
             } catch (PackageManager.NameNotFoundException e) {
-                //ignore
+                Logger.debug(TAG, "Package %s not found", packageName);
             }
         }
 

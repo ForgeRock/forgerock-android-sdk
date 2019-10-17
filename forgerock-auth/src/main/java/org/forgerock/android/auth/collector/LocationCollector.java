@@ -57,7 +57,7 @@ public class LocationCollector implements DeviceCollector {
                         result.put("longitude", location.getLongitude());
                         Listener.onSuccess(listener, result);
                     } catch (JSONException e) {
-                        //ignore
+                        fallback(context, listener);
                     }
                 } else {
                     fallback(context, listener);

@@ -9,12 +9,16 @@ package org.forgerock.android.auth.detector;
 
 import android.content.Context;
 
+import org.forgerock.android.auth.Logger;
+
 import java.io.File;
 
 /**
  * Check if there are well-known root apk files exist
  */
 public class RootApkDetector implements RootDetector {
+
+    private static final String TAG = RootApkDetector.class.getSimpleName();
 
     private static final String[] ROOT_APK = {
             "/system/app/Superuser.apk",
@@ -31,7 +35,7 @@ public class RootApkDetector implements RootDetector {
                 }
             }
         } catch (Exception e) {
-            //ignore
+            Logger.warn(TAG, e, "Failed to check apks");
         }
         return false;
     }

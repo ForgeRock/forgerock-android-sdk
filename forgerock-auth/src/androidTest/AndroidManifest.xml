@@ -15,14 +15,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
-            android:allowBackup="true"
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:usesCleartextTraffic="true">
 
-
         <service
-                android:name=".authenticator.AuthenticatorService">
+                android:name=".authenticator.AuthenticatorService" android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>

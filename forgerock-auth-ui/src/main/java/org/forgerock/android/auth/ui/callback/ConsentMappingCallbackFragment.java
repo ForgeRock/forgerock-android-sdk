@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.callback.ConsentMappingCallback;
 import org.forgerock.android.auth.ui.R;
 
@@ -30,6 +31,7 @@ import java.net.URL;
 public class ConsentMappingCallbackFragment extends CallbackFragment<ConsentMappingCallback> {
 
     private ImageView icon;
+    private static final String TAG = ConsentMappingCallbackFragment.class.getSimpleName();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,7 +76,7 @@ public class ConsentMappingCallbackFragment extends CallbackFragment<ConsentMapp
                         icon.setImageDrawable(drawable);
                     });
                 } catch (Exception e) {
-                    //ignore
+                    Logger.warn(TAG, e, "Failed to load image." );
                 }
             }).start();
         }

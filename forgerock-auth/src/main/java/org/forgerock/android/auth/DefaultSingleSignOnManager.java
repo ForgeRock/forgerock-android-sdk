@@ -149,7 +149,6 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                     future.getResult();
                 } catch (Exception e) {
                     Logger.warn(TAG, e, "Failed to remove Account %s.", acc.name);
-                    //ignore
                 }
             }
         }

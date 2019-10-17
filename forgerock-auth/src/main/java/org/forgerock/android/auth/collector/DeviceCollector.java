@@ -12,6 +12,7 @@ import android.content.Context;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Interceptor;
 import org.forgerock.android.auth.InterceptorHandler;
+import org.forgerock.android.auth.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,6 +22,8 @@ import java.util.List;
  * Collector to collect device information
  */
 public interface DeviceCollector extends Interceptor<JSONObject> {
+
+    String TAG = DeviceCollector.class.getSimpleName();
 
     /**
      * Retrieve the name of the Collector
@@ -64,7 +67,7 @@ public interface DeviceCollector extends Interceptor<JSONObject> {
                 try {
                     data.put(getName(), result);
                 } catch (JSONException e) {
-                    //ignore
+                    Logger.warn(TAG, e, "Failed to set data");
                 }
                 chain.proceed(data);
             }

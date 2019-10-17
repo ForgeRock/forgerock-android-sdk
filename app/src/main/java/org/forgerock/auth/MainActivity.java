@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private ImageView success;
     private TextView content;
@@ -146,14 +147,14 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 content.setText(result.toString(4));
                             } catch (JSONException e) {
-                                //ignore
+                                Logger.warn(TAG, e, "Failed to convert json to string");
                             }
                         });
                     }
 
                     @Override
                     public void onException(Exception e) {
-                        //ignore
+                        Logger.warn(TAG, e, "Failed to retrieve device profile");
                     }
                 });
                 return true;
