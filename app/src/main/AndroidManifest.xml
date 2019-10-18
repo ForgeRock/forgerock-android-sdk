@@ -33,7 +33,7 @@
                     android:resource="@xml/forgerock_authenticator" />
         </service>
 
-        <activity android:name="org.forgerock.auth.MainActivity" android:exported="false">
+        <activity android:name="org.forgerock.auth.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
