@@ -26,7 +26,6 @@ public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String ACCEPT_API_VERSION = "Accept-API-Version";
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     /**
@@ -86,7 +85,7 @@ public class OAuth2Client {
                     .url(getAuthorizeUrl(token))
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -139,7 +138,7 @@ public class OAuth2Client {
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
 
@@ -178,7 +177,7 @@ public class OAuth2Client {
                     .url(getRevokeUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
 
@@ -224,7 +223,7 @@ public class OAuth2Client {
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {

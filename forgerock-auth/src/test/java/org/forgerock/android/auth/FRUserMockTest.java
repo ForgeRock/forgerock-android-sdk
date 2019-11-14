@@ -388,7 +388,7 @@ public class FRUserMockTest extends BaseTest {
             ssoTokenRevoke = revoke2;
         }
         assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
-        assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
+        assertEquals(ServerConfig.XML_HTTP_REQUEST, ssoTokenRevoke.getHeader(ServerConfig.X_REQUESTED_WITH));
 
         String body = refreshTokenRevoke.getBody().readUtf8();
         assertTrue(body.contains(OAuth2.TOKEN));
@@ -425,7 +425,7 @@ public class FRUserMockTest extends BaseTest {
         rr = server.takeRequest(); //Post to /sessions?_action=logout endpoint
         //assertEquals("/json/realms/root/sessions?_action=logout", rr.getPath());
         assertNotNull(rr.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
-        assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
+        assertEquals(ServerConfig.XML_HTTP_REQUEST, rr.getHeader(ServerConfig.X_REQUESTED_WITH));
     }
 
     @Test
