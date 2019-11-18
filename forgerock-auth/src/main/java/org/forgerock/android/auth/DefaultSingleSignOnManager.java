@@ -205,7 +205,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         Request request = new Request.Builder()
                 .header(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
-                .header(ServerConfig.ACCEPT_API_VERSION, ServerConfig.API_VERSION_3_1)
+                .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                 .url(logout)
                 .post(RequestBody.create(new byte[0]))
                 .build();

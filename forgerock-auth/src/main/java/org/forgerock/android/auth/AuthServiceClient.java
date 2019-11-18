@@ -24,7 +24,6 @@ class AuthServiceClient {
 
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");
-    private static final String ACCEPT_API_VERSION = "Accept-API-Version";
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
     private static final String SERVICE = "service";
@@ -48,7 +47,7 @@ class AuthServiceClient {
             Request request = new Request.Builder()
                     .url(getUrl(authService.getName()))
                     .post(RequestBody.create(new byte[0]))
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -80,7 +79,7 @@ class AuthServiceClient {
             Request request = new Request.Builder()
                     .url(getUrl())
                     .post(RequestBody.create(node.toJsonObject().toString(), JSON))
-                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
