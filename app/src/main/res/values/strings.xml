@@ -13,7 +13,7 @@
     <string name="login">Login</string>
 
 
-    <!--  Forgerock SDK Configuration -->
+    <!--  ForgeRock SDK Configuration -->
 
     <!-- OAuth -->
     <string name="forgerock_oauth_client_id" translatable="false">andy_app</string>
@@ -22,6 +22,7 @@
     <string name="forgerock_oauth_url" translatable="false">http://openam.example.com:8081/openam</string>
     <integer name="forgerock_oauth_threshold" translatable="false">30</integer> <!-- in second -->
 
+    <!-- The following setting is for local development environment only -->
     <!-- Server -->
     <string name="forgerock_url" translatable="false">http://openam.example.com:8081/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
