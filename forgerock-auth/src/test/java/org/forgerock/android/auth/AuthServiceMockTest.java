@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import android.net.Uri;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
@@ -99,8 +101,17 @@ public class AuthServiceMockTest extends BaseTest {
         assertEquals("POST", recordedRequest.getMethod());
         assertEquals(nodes.get(1).toJsonObject().toString(), recordedRequest.getBody().readUtf8());
         recordedRequest = server.takeRequest();
-        assertEquals("/oauth2/realms/root/authorize?iPlanetDirectoryPro=" + nodeListenerFuture.get().getValue(), recordedRequest.getPath());
-        assertEquals("POST", recordedRequest.getMethod());
+        Uri uri = Uri.parse(recordedRequest.getPath());
+        assertEquals("/oauth2/realms/root/authorize", uri.getPath());
+        assertEquals(nodeListenerFuture.get().getValue(), uri.getQueryParameter("iPlanetDirectoryPro"));
+        assertEquals("andy_app", uri.getQueryParameter("client_id"));
+        assertEquals("openid email address", uri.getQueryParameter("scope"));
+        assertEquals("code", uri.getQueryParameter("response_type"));
+        assertEquals("http://www.example.com:8080/callback", uri.getQueryParameter("redirect_uri"));
+        assertNotNull(uri.getQueryParameter("code_challenge"));
+        assertEquals("S256", uri.getQueryParameter("code_challenge_method"));
+
+        assertEquals("GET", recordedRequest.getMethod());
         //assertEquals("scope=write&state=abc123&client_id=andy_app&csrf=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&response_type=code&redirect_uri=http%3A%2F%2Fwww.example.com%3A8080%2Fcallback&decision=allow&code_challenge=IpSeJZQ9QOUL0TIn3rX_eZTYiq-zOXgaaZQBUX8G-I4&code_challenge_method=S256"
         //        , recordedRequest.getBody().readString(Charset.defaultCharset());
     }

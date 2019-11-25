@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -74,19 +75,10 @@ public class OAuth2Client {
             }
 
             final PKCE pkce = generateCodeChallenge();
-            RequestBody body = builder.add(OAuth2.CLIENT_ID, clientId)
-                    .add(OAuth2.CSRF, token.getValue())
-                    .add(OAuth2.RESPONSE_TYPE, responseType)
-                    .add(OAuth2.REDIRECT_URI, redirectUri)
-                    .add(OAuth2.DECISION, "allow")
-                    .add(OAuth2.CODE_CHALLENGE, pkce.getCodeChallenge())
-                    .add(OAuth2.CODE_CHALLENGE_METHOD, pkce.getCodeChallengeMethod())
-                    .build();
 
             Request request = new Request.Builder()
-                    .url(getAuthorizeUrl(token))
-                    .post(body)
-                    .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
+                    .url(getAuthorizeUrl(token, pkce))
+                    .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
@@ -247,7 +239,8 @@ public class OAuth2Client {
     }
 
 
-    private URL getAuthorizeUrl(Token token) throws MalformedURLException {
+    private URL getAuthorizeUrl(Token token, PKCE pkce) throws MalformedURLException, UnsupportedEncodingException {
+
         return new URL(Uri.parse(serverConfig.getUrl())
                 .buildUpon()
                 .appendPath("oauth2")
@@ -255,6 +248,12 @@ public class OAuth2Client {
                 .appendPath(serverConfig.getRealm())
                 .appendPath("authorize")
                 .appendQueryParameter(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
+                .appendQueryParameter(OAuth2.CLIENT_ID, clientId)
+                .appendQueryParameter(OAuth2.SCOPE, scope)
+                .appendQueryParameter(OAuth2.RESPONSE_TYPE, responseType)
+                .appendQueryParameter(OAuth2.REDIRECT_URI, redirectUri)
+                .appendQueryParameter(OAuth2.CODE_CHALLENGE, pkce.getCodeChallenge())
+                .appendQueryParameter(OAuth2.CODE_CHALLENGE_METHOD, pkce.getCodeChallengeMethod())
                 .build().toString());
     }
 
@@ -287,7 +286,7 @@ public class OAuth2Client {
         String codeVerifier = Base64.encodeToString(randomBytes, encodeFlags);
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(codeVerifier.getBytes("ISO_8859_1"));
+            messageDigest.update(codeVerifier.getBytes(StandardCharsets.ISO_8859_1));
             byte[] digestBytes = messageDigest.digest();
             return new PKCE(Base64.encodeToString(digestBytes, encodeFlags), "S256", codeVerifier);
         } catch (NoSuchAlgorithmException e) {
