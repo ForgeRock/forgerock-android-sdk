@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+import static org.forgerock.android.auth.ServerConfig.API_VERSION_2_1;
+
 /**
  * Client to interact with the auth tree APIs
  */
@@ -47,7 +50,7 @@ class AuthServiceClient {
             Request request = new Request.Builder()
                     .url(getUrl(authService.getName()))
                     .post(RequestBody.create(new byte[0]))
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, API_VERSION_2_1)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -79,7 +82,7 @@ class AuthServiceClient {
             Request request = new Request.Builder()
                     .url(getUrl())
                     .post(RequestBody.create(node.toJsonObject().toString(), JSON))
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {

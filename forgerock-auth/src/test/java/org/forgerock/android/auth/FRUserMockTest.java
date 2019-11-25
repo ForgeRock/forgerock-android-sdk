@@ -8,14 +8,18 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import org.checkerframework.checker.nullness.qual.AssertNonNullIfNonNull;
-import org.forgerock.android.auth.callback.*;
+
+import org.forgerock.android.auth.callback.Callback;
+import org.forgerock.android.auth.callback.NameCallback;
+import org.forgerock.android.auth.callback.PasswordCallback;
+import org.forgerock.android.auth.callback.StringAttributeInputCallback;
+import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Matcher;
 import org.hamcrest.collection.IsIn;
 import org.json.JSONException;
 import org.junit.Ignore;
@@ -24,19 +28,22 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRUserMockTest extends BaseTest {
@@ -388,7 +395,7 @@ public class FRUserMockTest extends BaseTest {
             ssoTokenRevoke = revoke2;
         }
         assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
-        assertEquals(ServerConfig.XML_HTTP_REQUEST, ssoTokenRevoke.getHeader(ServerConfig.X_REQUESTED_WITH));
+        assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
 
         String body = refreshTokenRevoke.getBody().readUtf8();
         assertTrue(body.contains(OAuth2.TOKEN));
@@ -425,7 +432,7 @@ public class FRUserMockTest extends BaseTest {
         rr = server.takeRequest(); //Post to /sessions?_action=logout endpoint
         //assertEquals("/json/realms/root/sessions?_action=logout", rr.getPath());
         assertNotNull(rr.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
-        assertEquals(ServerConfig.XML_HTTP_REQUEST, rr.getHeader(ServerConfig.X_REQUESTED_WITH));
+        assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
     }
 
     @Test

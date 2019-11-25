@@ -22,6 +22,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+
 public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
@@ -85,7 +87,7 @@ public class OAuth2Client {
                     .url(getAuthorizeUrl(token))
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -138,7 +140,7 @@ public class OAuth2Client {
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
 
@@ -177,7 +179,7 @@ public class OAuth2Client {
                     .url(getRevokeUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
 
@@ -223,7 +225,7 @@ public class OAuth2Client {
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
-                    .header(ServerConfig.X_REQUESTED_WITH, ServerConfig.XML_HTTP_REQUEST)
+                    .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
