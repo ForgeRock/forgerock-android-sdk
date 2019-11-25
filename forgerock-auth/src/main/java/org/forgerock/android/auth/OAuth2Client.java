@@ -22,11 +22,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+
 public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String ACCEPT_API_VERSION = "Accept-API-Version";
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     /**

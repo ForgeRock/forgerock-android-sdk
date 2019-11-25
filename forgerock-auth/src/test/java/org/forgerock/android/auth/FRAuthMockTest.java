@@ -10,9 +10,10 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import org.checkerframework.checker.units.qual.C;
+
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
@@ -26,7 +27,10 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
 
 import static android.content.Context.MODE_PRIVATE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -163,7 +167,7 @@ public class FRAuthMockTest extends BaseTest {
     }
 
     @Test
-    public void testAccessTokenAndSSODisabled() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+    public void testAccessTokenWithSharedPreferencesSSOManager() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -179,9 +183,9 @@ public class FRAuthMockTest extends BaseTest {
                 .sharedPreferences(context.getSharedPreferences("Test", Context.MODE_PRIVATE))
                 .build();
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
+        final SingleSignOnManager singleSignOnManager = SharedPreferencesSignOnManager.builder()
                 .context(context)
-                .disableSSO(true)
+                .sharedPreferences(context.getSharedPreferences("Test", Context.MODE_PRIVATE))
                 .build();
 
         final FRAuth frAuth = FRAuth.builder()
@@ -223,7 +227,7 @@ public class FRAuthMockTest extends BaseTest {
 
         //Check SSOToken Storage
         Token token = singleSignOnManager.getToken();
-        assertNull(token);
+        assertNotNull(token);
     }
 
     @Test
