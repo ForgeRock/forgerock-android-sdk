@@ -20,7 +20,7 @@ dependencies {
 
 | Feature        | Dependency | 
 | -------------  |:-------------:| 
-| UI Template    | implementation 'org.forgerock:forgerock-auth-ui:0.9.0| 
+| UI Template    | implementation 'org.forgerock:forgerock-auth-ui:1.0.0| 
 | ReCAPTCHA     | implementation 'com.google.android.gms:play-services-safetynet:17.0.0'      |
 | Location for Device Profile | implementation 'com.google.android.gms:play-services-safetynet:17.0.0' |
 
