@@ -8,14 +8,18 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import org.checkerframework.checker.nullness.qual.AssertNonNullIfNonNull;
-import org.forgerock.android.auth.callback.*;
+
+import org.forgerock.android.auth.callback.Callback;
+import org.forgerock.android.auth.callback.NameCallback;
+import org.forgerock.android.auth.callback.PasswordCallback;
+import org.forgerock.android.auth.callback.StringAttributeInputCallback;
+import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Matcher;
 import org.hamcrest.collection.IsIn;
 import org.json.JSONException;
 import org.junit.Ignore;
@@ -24,19 +28,22 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRUserMockTest extends BaseTest {

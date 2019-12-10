@@ -75,13 +75,8 @@ class DefaultTokenManager implements TokenManager {
                                Long threshold) {
 
         Config config = Config.getInstance(context);
-        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, new Function<Context, SharedPreferences>() {
-            @Override
-            public SharedPreferences apply(Context var) {
-                return new SecuredSharedPreferences(var
-                        , ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS);
-            }
-        });
+        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, var -> new SecuredSharedPreferences(var
+                , ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS));
 
         Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());
 

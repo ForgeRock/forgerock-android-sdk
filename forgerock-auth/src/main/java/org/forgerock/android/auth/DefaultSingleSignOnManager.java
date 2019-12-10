@@ -9,21 +9,9 @@ package org.forgerock.android.auth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.annotation.SuppressLint;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
-import android.content.res.XmlResourceParser;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
-import android.util.Base64;
-
-import org.forgerock.android.auth.authenticator.AuthenticatorService;
-import org.jetbrains.annotations.NotNull;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -38,141 +26,54 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static org.forgerock.android.auth.SSOToken.IPLANET_DIRECTORY_PRO;
+import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+import static org.forgerock.android.auth.ServerConfig.API_VERSION_3_1;
+
 /**
- * Manage the Single Sign On Token, the token will be encrypted and store to {@link AccountManager}, for Android L, the
- * encrypted {@link javax.crypto.SecretKey} will be stored as user's password using
- * {@link AccountManager#setPassword(Account, String)}, for Android M+ the SecretKey will be store in the KeyChain.
+ * Manage the Single Sign On Token, the token will be encrypted and store to {@link AccountManager}
+ * or {@link SharedPreferences}.
  */
-class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListener, SecretKeyStore, ResponseHandler {
+class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler {
 
     private static final String TAG = DefaultSingleSignOnManager.class.getSimpleName();
-    //Alias to store the SecretKey
-    static final String ORG_FORGEROCK_V_1_SSO_KEYS = "org.forgerock.v1.SSO_KEYS";
-    private static final String ACCOUNT_TYPE = "accountType";
-    private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
-    private String accountType;
-    private Encryptor encryptor;
-    private AccountManager accountManager;
-    private Account account;
-    private boolean ssoEnabled = true;
+
+    private SingleSignOnManager singleSignOnManager;
     private ServerConfig serverConfig;
 
     @Builder
-    DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, Boolean disableSSO) {
-        if (disableSSO != null && disableSSO) {
-            ssoEnabled = false;
-            return;
-        }
-        Config config = Config.getInstance(context);
+    DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
+
         try {
-            this.accountType = getAccountType(context);
+            singleSignOnManager = AccountSingleSignOnManager.builder().context(context).encryptor(encryptor).build();
         } catch (Exception e) {
-            //consider SSO is disabled.
-            Logger.warn(TAG, "Single Sign On is disabled due to: %s", e.getMessage());
-            ssoEnabled = false;
-            return;
+            Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
+            singleSignOnManager = SharedPreferencesSignOnManager.builder().context(context).sharedPreferences(sharedPreferences).build();
         }
-        this.accountManager = AccountManager.get(context);
-        this.account = new Account(config.getAccountName(), accountType);
-        this.encryptor = config.applyDefaultIfNull(encryptor, context, this::getEncryptor);
-        Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
+
+
+        Config config = Config.getInstance(context);
         this.serverConfig = config.applyDefaultIfNull(serverConfig);
     }
 
     @Override
     public void persist(SSOToken token) {
-        persist(token, true);
-    }
-
-    @SuppressLint("NewApi")
-    protected Encryptor getEncryptor(Context context) {
-        switch (Build.VERSION.SDK_INT) {
-            case Build.VERSION_CODES.LOLLIPOP:
-            case Build.VERSION_CODES.LOLLIPOP_MR1:
-                return new AndroidLEncryptor(context, ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            case Build.VERSION_CODES.M:
-                return new AndroidMEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            case Build.VERSION_CODES.N:
-                return new AndroidNEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            default:
-                return new AndroidNEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-        }
-    }
-
-
-    private void persist(SSOToken token, boolean retry) {
-        if (!ssoEnabled) return;
-        accountManager.addAccountExplicitly(account, null, null);
-        try {
-            accountManager.setUserData(account, SSO_TOKEN,
-                    Base64.encodeToString(encryptor.encrypt(token.getValue().getBytes()), Base64.DEFAULT));
-        } catch (Exception e) {
-            try {
-                encryptor.reset();
-                if (retry) {
-                    persist(token, false);
-                } else {
-                    throw new RuntimeException(e);
-                }
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-
-        }
-    }
-
-    @Override
-    public void persist(String encryptedSecretKey) {
-        accountManager.setPassword(account, encryptedSecretKey);
-    }
-
-    @Override
-    public String getEncryptedSecretKey() {
-        return accountManager.getPassword(account);
-    }
-
-    @Override
-    public void remove() {
-        accountManager.setPassword(account, null);
+        singleSignOnManager.persist(token);
     }
 
     @Override
     public void clear() {
-        if (!ssoEnabled) return;
-        Account[] accounts = accountManager.getAccountsByType(accountType);
-        for (Account acc : accounts) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                accountManager.removeAccountExplicitly(acc);
-            } else {
-                AccountManagerFuture<Boolean> future = accountManager.removeAccount(acc, null, null);
-                try {
-                    future.getResult();
-                } catch (Exception e) {
-                    Logger.warn(TAG, e, "Failed to remove Account %s.", acc.name);
-                }
-            }
-        }
+        singleSignOnManager.clear();
     }
 
     @Override
     public SSOToken getToken() {
-        if (!ssoEnabled) return null;
-        try {
-            String encryptedToken = accountManager.getUserData(account, SSO_TOKEN);
-            if (encryptedToken != null) {
-                return new SSOToken(new String(encryptor.decrypt(Base64.decode(encryptedToken, Base64.DEFAULT))));
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            return null;
-        }
+        return singleSignOnManager.getToken();
     }
 
     @Override
     public boolean hasToken() {
-        if (!ssoEnabled) return false;
-        return accountManager.getUserData(account, SSO_TOKEN) != null;
+        return singleSignOnManager.hasToken();
     }
 
     @Override
@@ -185,7 +86,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
         }
 
         //No matter success or fail, we clear the token
-        clear();
+        singleSignOnManager.revoke(null);
 
         URL logout = null;
         try {
@@ -204,20 +105,20 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         Request request = new Request.Builder()
-                .header(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
-                .header(ServerConfig.ACCEPT_API_VERSION, ServerConfig.API_VERSION_3_1)
+                .header(IPLANET_DIRECTORY_PRO, token.getValue())
+                .header(ACCEPT_API_VERSION, API_VERSION_3_1)
                 .url(logout)
                 .post(RequestBody.create(new byte[0]))
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            public void onFailure(Call call, IOException e) {
                 Listener.onException(listener, e);
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
+            public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
                 } else {
@@ -225,42 +126,6 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                 }
             }
         });
-    }
-
-    private String getAccountType(Context context) throws PackageManager.NameNotFoundException, IOException, XmlPullParserException {
-        // Get the authenticator XML file from AndroidManifest.xml
-        ComponentName cn = new ComponentName(context, AuthenticatorService.class);
-        ServiceInfo info = context.getPackageManager().getServiceInfo(cn, PackageManager.GET_META_DATA);
-        int resourceId = info.metaData.getInt("android.accounts.AccountAuthenticator");
-
-        // Parse the authenticator XML file to get the accountType
-        return parse(context, resourceId);
-    }
-
-    private String parse(Context context, int resourceId) throws IOException, XmlPullParserException {
-        XmlResourceParser xrp = context.getResources().getXml(resourceId);
-        xrp.next();
-        int eventType = xrp.getEventType();
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            if (eventType == XmlPullParser.START_TAG || eventType == XmlPullParser.END_TAG) {
-                for (int i = 0; i < xrp.getAttributeCount(); i++) {
-                    String name = xrp.getAttributeName(i);
-                    if (ACCOUNT_TYPE.equals(name)) {
-                        return xrp.getAttributeValue(i);
-                    }
-                }
-            }
-            eventType = xrp.next();
-        }
-        throw new IllegalArgumentException("AccountType is not defined under forgerock_authenticator.xml");
-    }
-
-    /**
-     * When the keys that use to encrypt the data are updated (Platform upgrade from Android L to Android M)
-     */
-    @Override
-    public void onKeyUpdated() {
-        clear();
     }
 
 }
