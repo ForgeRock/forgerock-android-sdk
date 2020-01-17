@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 
@@ -50,7 +51,7 @@ public class DefaultTokenManagerTest {
     }
 
     @Test
-    public void storeAccessToken() throws AuthenticationRequiredException {
+    public void storeAccessToken() throws AuthenticationRequiredException, ExecutionException, InterruptedException {
         AccessToken accessToken = AccessToken.builder()
                 .value("access token")
                 .idToken("id token")
@@ -62,7 +63,9 @@ public class DefaultTokenManagerTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken = tokenManager.getAccessToken();
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        tokenManager.getAccessToken(null, future);
+        AccessToken storedAccessToken = future.get();
         assertEquals("access token", storedAccessToken.getValue());
         assertEquals("id token", storedAccessToken.getIdToken());
         assertTrue(storedAccessToken.getScope().contains("openid"));
@@ -73,7 +76,7 @@ public class DefaultTokenManagerTest {
     }
 
     @Test(expected = AuthenticationRequiredException.class)
-    public void clearAccessToken() throws AuthenticationRequiredException {
+    public void clearAccessToken() throws Throwable {
         AccessToken accessToken = AccessToken.builder()
                 .value("access token")
                 .idToken("id token")
@@ -86,7 +89,16 @@ public class DefaultTokenManagerTest {
         tokenManager.persist(accessToken);
         tokenManager.clear();
 
-        tokenManager.getAccessToken();
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        tokenManager.getAccessToken(null, future);
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        } catch (InterruptedException e) {
+            throw e;
+        }
+
     }
 
 }

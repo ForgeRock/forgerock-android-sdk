@@ -7,16 +7,16 @@
 
 package org.forgerock.android.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
-
 import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * Domain object to hold generic Token
  */
+@EqualsAndHashCode
 @AllArgsConstructor
 @Getter
 public class Token implements Serializable {

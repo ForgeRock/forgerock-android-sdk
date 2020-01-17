@@ -52,7 +52,7 @@ class OAuth2ResponseHandler implements ResponseHandler {
      *
      * @param response The response from /token endpoint
      */
-    void handleTokenResponse(Response response, FRListener<AccessToken> listener) {
+    void handleTokenResponse(SSOToken sessionToken, Response response, FRListener<AccessToken> listener) {
         if (response.isSuccessful()) {
             try {
                 JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.body()).string());
@@ -63,6 +63,7 @@ class OAuth2ResponseHandler implements ResponseHandler {
                         .scope(AccessToken.Scope.parse(jsonObject.optString(SCOPE, null)))
                         .tokenType(jsonObject.optString(TOKEN_TYPE, null))
                         .expiresIn(jsonObject.optLong(EXPIRES_IN, 0))
+                        .sessionToken(sessionToken)
                         .build());
             } catch (Exception e) {
                 Listener.onException(listener, e);

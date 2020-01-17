@@ -29,7 +29,7 @@ public class OAuth2MockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -53,7 +53,7 @@ public class OAuth2MockTest extends BaseTest {
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -75,7 +75,7 @@ public class OAuth2MockTest extends BaseTest {
                 .addHeader("Location", "http://www.example.com:8080/callback?error_description=Failed%20to%20get%20resource%20owner%20session%20from%20request&state=abc123&error=invalid_request")
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -107,7 +107,7 @@ public class OAuth2MockTest extends BaseTest {
                 .setBody(errorMessage)
         );
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 

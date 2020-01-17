@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import android.content.Context;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import org.forgerock.android.auth.callback.*;
@@ -26,6 +28,8 @@ import static org.junit.Assert.*;
 @RunWith(RobolectricTestRunner.class)
 public class FRAuthRegistrationMockTest extends BaseTest {
 
+    private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
+
     /**
      * Start -> Platform Username -> Platform Password -> Attribute Collector -> Create Object
      */
@@ -41,23 +45,11 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -110,9 +102,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
@@ -155,24 +147,12 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
-
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
+        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
 
         final boolean[] unique = {false};
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -217,9 +197,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
     }
 
@@ -239,24 +219,12 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
-
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
+        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
 
         final boolean[] minLength = {false};
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -302,9 +270,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
     }
 
@@ -324,23 +292,11 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -384,9 +340,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector
@@ -435,23 +391,11 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -492,9 +436,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        Assert.assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector
