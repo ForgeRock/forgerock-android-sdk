@@ -54,7 +54,7 @@ public class AuthServiceMockTest extends BaseTest {
                 .build();
 
         final List<Node> nodes = new ArrayList<>();
-        NodeListenerFuture<Token> nodeListenerFuture = new NodeListenerFuture<Token>() {
+        NodeListenerFuture<SSOToken> nodeListenerFuture = new NodeListenerFuture<SSOToken>() {
 
             @Override
             public void onCallbackReceived(Node state) {

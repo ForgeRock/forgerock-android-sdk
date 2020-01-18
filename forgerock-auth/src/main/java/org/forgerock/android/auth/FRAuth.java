@@ -53,12 +53,16 @@ public class FRAuth {
         }
     }
 
+    /**
+     * @deprecated As of release 1.1, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
+     */
+    @Deprecated
     @Builder
     public FRAuth(@NonNull Context context,
-                  String serviceName,
-                  ServerConfig serverConfig,
-                  SessionManager sessionManager,
-                  @Singular List<Interceptor> interceptors) {
+                   String serviceName,
+                   ServerConfig serverConfig,
+                   SessionManager sessionManager,
+                   @Singular List<Interceptor> interceptors) {
 
         Config config = Config.getInstance(context);
 
@@ -67,9 +71,7 @@ public class FRAuth {
         AuthService.AuthServiceBuilder builder = AuthService.builder()
                 .name(serviceName)
                 .serverConfig(config.applyDefaultIfNull(serverConfig))
-                .interceptor(new SingleSignOnInterceptor(this.sessionManager.getSingleSignOnManager()))
-                .interceptor(new OAuthInterceptor(this.sessionManager.getOAuth2Client()))
-                .interceptor(new AccessTokenStoreInterceptor(this.sessionManager.getTokenManager()));
+                .interceptor(new SingleSignOnInterceptor(this.sessionManager));
 
         for (Interceptor interceptor : interceptors) {
             builder.interceptor(interceptor);
@@ -78,31 +80,8 @@ public class FRAuth {
         authService = builder.build();
     }
 
-    public static FRAuthBuilder builder() {
+    static FRAuthBuilder builder() {
         return new FRAuthBuilder();
-    }
-
-    /**
-     * Move on to the next node in the auth process. If user session already exists, return the existing user session.
-     *
-     * @param context  The Application Context
-     * @param listener Listener for receiving {@link FRAuth} related changes
-     */
-    public void next(final Context context, final NodeListener listener) {
-
-        sessionManager.getAccessToken(new FRListener<AccessToken>() {
-            @Override
-            public void onSuccess(AccessToken result) {
-                //Session exists, run the interceptor
-                authService.next(context, result, listener);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                //Start new flow
-                authService.next(context, listener);
-            }
-        });
     }
 
     /**
@@ -110,13 +89,14 @@ public class FRAuth {
      *
      * @param context  The Application Context
      * @param listener Listener for receiving {@link FRAuth} related changes
+     * @deprecated  As of release 1.1, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
      */
-    public void start(final Context context, final NodeListener listener) {
-        sessionManager.close();
+    @Deprecated
+    public void next(final Context context, final NodeListener listener) {
         authService.next(context, listener);
     }
 
-    public static class FRAuthBuilder {
+    static class FRAuthBuilder {
 
         public FRAuth build() {
             List<Interceptor> interceptors;

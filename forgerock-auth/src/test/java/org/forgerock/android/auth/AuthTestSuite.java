@@ -38,6 +38,7 @@ import org.junit.runners.Suite;
         DefaultSingleSignOnManagerTest.class,
 
         FRUserMockTest.class,
+        FRSessionMockTest.class,
         RootDetectorTest.class,
         FRDeviceTest.class,
 

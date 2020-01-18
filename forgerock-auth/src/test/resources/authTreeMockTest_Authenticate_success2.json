@@ -1,0 +1,5 @@
+{
+  "tokenId": "dummy sso token",
+  "successUrl": "/openam/console",
+  "realm": "/"
+}

@@ -64,7 +64,7 @@ public class OAuth2Client {
      * @param token    The SSO Token received with the result of {@link AuthService}
      * @param listener Listener that listens to changes resulting from OAuth endpoints .
      */
-    public void exchangeToken(@NonNull Token token, final FRListener<AccessToken> listener) {
+    public void exchangeToken(@NonNull SSOToken token, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchanging Access Token with SSO Token.");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
         try {
@@ -99,7 +99,7 @@ public class OAuth2Client {
 
                         @Override
                         public void onSuccess(String code) {
-                            token(code, pkce, handler, listener);
+                            token(token, code, pkce, handler, listener);
                         }
                     });
                 }
@@ -111,7 +111,7 @@ public class OAuth2Client {
         }
     }
 
-    public void refresh(@NonNull String refreshToken, final FRListener<AccessToken> listener) {
+    public void refresh(@NonNull SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Refreshing Access Token");
 
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -145,7 +145,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(response, listener);
+                    handler.handleTokenResponse(sessionToken, response, listener);
                 }
             });
 
@@ -196,11 +196,12 @@ public class OAuth2Client {
     /**
      * Sends an token request to the authorization service.
      *
+     * @param sessionToken    The Session Token
      * @param code    The Authorization code.
      * @param pkce    The Proof Key for Code Exchange
      * @param handler Handle changes resulting from OAuth endpoints.
      */
-    private void token(@NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
+    private void token(@NonNull SSOToken sessionToken, @NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchange Access Token with Authorization Code");
         try {
             FormBody.Builder builder = new FormBody.Builder();
@@ -228,7 +229,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(response, listener);
+                    handler.handleTokenResponse(sessionToken, response, listener);
                 }
 
             });

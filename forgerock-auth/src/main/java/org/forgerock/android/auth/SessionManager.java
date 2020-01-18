@@ -39,8 +39,8 @@ class SessionManager {
         this.oAuth2Client = config.applyDefaultIfNull(oAuth2Client);
 
         this.interceptors = Arrays.asList(
-                new RetrieveAccessTokenInterceptor(this.tokenManager),
                 new RetrieveSSOTokenInterceptor(this.singleSignOnManager),
+                new RetrieveAccessTokenInterceptor(this.tokenManager),
                 new OAuthInterceptor(this.oAuth2Client),
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }
@@ -57,12 +57,12 @@ class SessionManager {
     }
 
     /**
-     * Retrieve the {@link AccessToken}, if the {@link AccessToken} is expired, {@link AccessToken#refreshToken} will
+     * Retrieve the {@link AccessToken}, if the {@link AccessToken} is expired, {@link AccessToken#getRefreshToken()} will
      * be used.
      *
      * @param listener The Listener to listen for the result
      */
-    public void getAccessToken(final FRListener<AccessToken> listener) {
+    void getAccessToken(final FRListener<AccessToken> listener) {
         InterceptorHandler interceptorHandler = new InterceptorHandler(null, interceptors, listener, 0);
         interceptorHandler.proceed(null);
     }
@@ -72,14 +72,14 @@ class SessionManager {
      *
      * @return whether there are valid or invalid session stored on this manager.
      */
-    public boolean hasSession() {
+    boolean hasSession() {
         return (singleSignOnManager.hasToken() || tokenManager.hasToken());
     }
 
     /**
      * Close the session, all tokens will be removed.
      */
-    public void close() {
+    void close() {
         tokenManager.revoke(null);
         singleSignOnManager.revoke(null);
     }

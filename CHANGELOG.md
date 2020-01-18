@@ -1,5 +1,12 @@
 # Version 1.0.0
 
+## [1.0.1]
+
+#### Fixed
+- Interface alignment with other platforms and introduce FRSession [SDKS-177]
+- FRAuth.next() is now deprecated, user FRSession.authenticate instead [SDKS-177] 
+
+
 ## [1.0.0]
 - General Availability release for SDKs
 

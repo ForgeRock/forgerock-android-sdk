@@ -15,11 +15,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class SingleSignOnInterceptor implements Interceptor<SSOToken> {
 
-    private final SingleSignOnManager singleSignOnManager;
+    private final SessionManager sessionManager;
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
-        singleSignOnManager.persist(token);
+        Token storedToken = sessionManager.getSingleSignOnManager().getToken();
+        //If token changed, we need to revoke Access Token
+        if (storedToken != null &&
+                !storedToken.equals(token)) {
+            sessionManager.getTokenManager().revoke(null);
+        }
+        sessionManager.getSingleSignOnManager().persist(token);
         chain.proceed(token);
     }
 
