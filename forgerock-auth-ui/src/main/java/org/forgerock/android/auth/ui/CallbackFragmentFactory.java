@@ -55,6 +55,7 @@ public class CallbackFragmentFactory {
         register(TextOutputCallback.class, TextOutputCallbackFragment.class);
         register(ReCaptchaCallback.class, ReCaptchaCallbackFragment.class);
         register(ConsentMappingCallback.class, ConsentMappingCallbackFragment.class);
+        register(DeviceAttributeCallback.class, DeviceProfileCallbackFragment.class);
     }
 
     public static CallbackFragmentFactory getInstance() {

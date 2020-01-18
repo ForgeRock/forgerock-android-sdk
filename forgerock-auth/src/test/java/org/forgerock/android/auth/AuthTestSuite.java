@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
         TextOutputCallbackTest.class,
         ReCaptchaCallbackTest.class,
         ConsentMappingCallbackTest.class,
+        DeviceAttributeCollectorCallbackTest.class,
 
         AuthServiceMockTest.class,
         AuthServiceTest.class,
@@ -43,6 +44,8 @@ import org.junit.runners.Suite;
         FRDeviceTest.class,
 
         LoggerTest.class,
+
+        KeyStoreManagerTest.class
 
 })
 public class AuthTestSuite {

@@ -44,7 +44,7 @@ public class NameCallbackTest {
         assertEquals(((JSONObject)nameCallback.getContentAsJson().getJSONArray("input").get(0)).getString("value"),
                 "tester");
 
-        assertEquals(0, nameCallback.getId());
+        assertEquals(0, nameCallback.get_id());
 
     }
 }

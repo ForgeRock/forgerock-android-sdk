@@ -44,5 +44,6 @@
     <string name="accept">Accept</string>
     <string name="verify_recaptcha">Retry reCAPTCHA</string>
     <string name="privacy">Allow %1$s to access your %2$s</string>
+    <string name="fetching_device_profile">Fetching Device Profile</string>
 
 </resources>

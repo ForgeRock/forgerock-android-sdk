@@ -5,66 +5,48 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-package org.forgerock.android.auth.collector;
+package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.provider.Settings;
 import android.security.KeyPairGeneratorSpec;
-import android.util.Base64;
-import org.jetbrains.annotations.NotNull;
 
-import javax.security.auth.x500.X500Principal;
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import javax.security.auth.x500.X500Principal;
+
+import lombok.Builder;
+
 import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 
-/**
- * Model of Device Identifier
- */
-class DeviceIdentifier {
+public class KeyStoreManager {
 
-    private String keyAlias;
     private Context context;
+
     private static final String CN_FORGE_ROCK = "CN=ForgeRock";
     private static final int KEY_SIZE = 1024;
 
-    DeviceIdentifier(@NotNull Context context) {
-
-        this.keyAlias = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    @Builder
+    public KeyStoreManager(@NonNull Context context) {
         this.context = context.getApplicationContext();
     }
 
-    /**
-     * Retrieve the Device Identifier, the device identifier is stable except when:
-     * <p>
-     *     * App is restored on a new device
-     * <p>
-     *     * User uninstalls/reinstall the App
-     * <p>
-     *     * User clears app data.
-     *
-     * @return The Device Identifier.
-     */
-    String getIdentifier() {
-        try {
-            return keyAlias + "-" + Base64.encodeToString(MessageDigest.getInstance("SHA1").digest(getPublicKey().getEncoded()), Base64.DEFAULT);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Key getPublicKey() throws GeneralSecurityException, IOException {
+    public Key getIdentifierKey(String keyAlias) throws GeneralSecurityException, IOException {
         KeyPairGenerator keyPairGenerator = null;
         KeyStore keyStore = getKeyStore();
         if (!keyStore.containsAlias(keyAlias)) {
             keyPairGenerator = KeyPairGenerator.getInstance("RSA", ANDROID_KEYSTORE);
-            keyPairGenerator.initialize(getSpec(context));
+            keyPairGenerator.initialize(getSpec(keyAlias));
             return keyPairGenerator.generateKeyPair().getPublic();
         } else {
             return keyStore.getCertificate(keyAlias).getPublicKey();
@@ -79,7 +61,7 @@ class DeviceIdentifier {
     }
 
 
-    private KeyPairGeneratorSpec getSpec(Context context) {
+    private KeyPairGeneratorSpec getSpec(String keyAlias) {
 
         Calendar cal = Calendar.getInstance();
         Date now = cal.getTime();
@@ -99,4 +81,5 @@ class DeviceIdentifier {
 
         return builder.build();
     }
+
 }

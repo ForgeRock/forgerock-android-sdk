@@ -20,7 +20,7 @@ public interface Callback extends Serializable {
      *
      * @return The callback id.
      */
-    int getId();
+    int get_id();
 
     /**
      * Return the raw content of the Callback.
