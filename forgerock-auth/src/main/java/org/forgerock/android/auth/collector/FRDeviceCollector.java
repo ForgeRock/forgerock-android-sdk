@@ -11,10 +11,11 @@ import android.content.Context;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+
+import org.forgerock.android.auth.DeviceIdentifier;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.InterceptorHandler;
 import org.forgerock.android.auth.Listener;
-import org.forgerock.android.auth.detector.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,7 +58,7 @@ public class FRDeviceCollector implements DeviceCollector {
 
     private JSONObject collect(Context context) throws JSONException {
         JSONObject result = new JSONObject();
-        result.put("identifier", new DeviceIdentifier(context).getIdentifier());
+        result.put("identifier", DeviceIdentifier.builder().context(context).build().getIdentifier());
         result.put("version", "1.0");
         return result;
     }

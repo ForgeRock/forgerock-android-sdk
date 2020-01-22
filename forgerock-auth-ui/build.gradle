@@ -47,7 +47,7 @@ android {
             ant.taskdef(name: 'delombok',
                     classname: 'lombok.delombok.ant.Tasks$Delombok',
                     classpath: configurations.delombok.asPath)
-            ant.delombok(verbose:'true', from:srcJava, to:"$buildDir/src-delomboked")
+            ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
         }
     }
 
@@ -107,7 +107,7 @@ bintray {
         version {
             name = project.version
             desc = 'Forgerock Android SDK'
-            released  = new Date()
+            released = new Date()
         }
     }
 }

@@ -29,6 +29,7 @@ import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.auth.OAuth2Client;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.ui.SimpleLoginActivity;
 import org.forgerock.android.auth.ui.SimpleRegisterActivity;
@@ -55,16 +56,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FRAuth.start(this);
+        Logger.set(Logger.Level.DEBUG);
         super.onCreate(savedInstanceState);
 
         setContentView(org.forgerock.auth.R.layout.activity_main);
-        FRAuth.start(this);
-        Logger.set(Logger.Level.DEBUG);
         success = findViewById(org.forgerock.auth.R.id.success);
         content = findViewById(org.forgerock.auth.R.id.content);
         progressBar = findViewById(org.forgerock.auth.R.id.progressBar);
         progressBar.setVisibility(INVISIBLE);
-   }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

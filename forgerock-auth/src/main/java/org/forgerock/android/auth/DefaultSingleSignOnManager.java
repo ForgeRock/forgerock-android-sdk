@@ -51,7 +51,6 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
             singleSignOnManager = SharedPreferencesSignOnManager.builder().context(context).sharedPreferences(sharedPreferences).build();
         }
 
-
         Config config = Config.getInstance(context);
         this.serverConfig = config.applyDefaultIfNull(serverConfig);
     }

@@ -92,7 +92,7 @@ public class Node implements Serializable {
         }
         //Handle Page Callback with Index
         for (int i = 0; i < callbacks.size(); i++) {
-            if (callback.getId() == callbacks.get(i).getId()) {
+            if (callback.get_id() == callbacks.get(i).get_id()) {
                 callbacks.set(i, callback);
                 return;
             }

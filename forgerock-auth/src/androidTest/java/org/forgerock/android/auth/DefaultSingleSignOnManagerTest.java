@@ -32,7 +32,7 @@ public class DefaultSingleSignOnManagerTest {
     @After
     public void cleanup() throws Exception {
         tokenManager.clear();
-        new AsymmetricEncryptor(context, DefaultSingleSignOnManager.ORG_FORGEROCK_V_1_SSO_KEYS).reset();
+        new AsymmetricEncryptor(context, "org.forgerock.v1.SSO_TOKEN").reset();
     }
 
     @Test
@@ -58,22 +58,29 @@ public class DefaultSingleSignOnManagerTest {
     @Test
     @TargetApi(23)
     public void testUpgrade() {
-        SingleSignOnManager androidLSSOManager = new AndroidLSingleSignOnManager(context, null);
+        SecretKeyStore secretKeyStore = new SharedPreferencesSecretKeyStore("Test", context.getSharedPreferences("test", Context.MODE_PRIVATE));
+        tokenManager = DefaultSingleSignOnManager.builder()
+                .encryptor(new AndroidLEncryptor(context, "org.forgerock.v1.SSO_KEYS", secretKeyStore))
+                .context(context).build();
+
         SSOToken token = new SSOToken("MyTokenValue");
-        androidLSSOManager.persist(token);
-        Token storedToken = androidLSSOManager.getToken();
+        tokenManager.persist(token);
+        Token storedToken = tokenManager.getToken();
         assertEquals("MyTokenValue", storedToken.getValue());
 
         //upgrade now
-        SingleSignOnManager androidMSSOManager = new AndroidMSingleSignOnManager(context, null);
-        storedToken = androidMSSOManager.getToken();
+        tokenManager = DefaultSingleSignOnManager.builder()
+                .encryptor(new AndroidMEncryptor("org.forgerock.v1.SSO_KEYS", null))
+                .context(context).build();
+
+        storedToken = tokenManager.getToken();
         assertNull(storedToken);
 
         token = new SSOToken("MyTokenValue2");
 
-        androidMSSOManager.persist(token);
+        tokenManager.persist(token);
 
-        storedToken = androidMSSOManager.getToken();
+        storedToken = tokenManager.getToken();
         assertEquals("MyTokenValue2", storedToken.getValue());
 
     }

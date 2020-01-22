@@ -35,6 +35,8 @@ android {
         }
     }
 
+    /* Comment this to debug instrument Test,
+    * There is an issue for AS to run NDK with intrument Test */
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'
@@ -126,7 +128,7 @@ bintray {
         version {
             name = project.version
             desc = 'Forgerock Android SDK'
-            released  = new Date()
+            released = new Date()
         }
     }
 }
@@ -181,9 +183,13 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation 'org.mockito:mockito-core:2.27.0'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
+    testImplementation 'org.assertj:assertj-core:3.14.0'
+
+    testImplementation 'org.mockito:mockito-core:2.27.0'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"

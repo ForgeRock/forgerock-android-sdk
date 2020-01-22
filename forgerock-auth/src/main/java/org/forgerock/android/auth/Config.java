@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import androidx.annotation.VisibleForTesting;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,6 +49,9 @@ public class Config {
     private SharedPreferences sharedPreferences;
     private long cacheIntervalMillis = 0L;
     private long threshold;
+
+    //KeyStoreManager
+    private KeyStoreManager keyStoreManager;
 
     private Config(Context context) {
         this.context = context.getApplicationContext();
@@ -123,6 +129,21 @@ public class Config {
 
     }
 
+    @VisibleForTesting
+    public void setKeyStoreManager(KeyStoreManager keyStoreManager) {
+        this.keyStoreManager = keyStoreManager;
+    }
+
+
+    @VisibleForTesting
+    KeyStoreManager getKeyStoreManager() {
+        if (keyStoreManager == null) {
+            return KeyStoreManager.builder().context(context).build();
+        } else {
+            return keyStoreManager;
+        }
+    }
+
     List<String> applyDefaultIfNull(List<String> pins) {
         return applyIfNull(pins, null, (Function<Void, List<String>>) var -> getPins());
     }
@@ -185,6 +206,11 @@ public class Config {
     SessionManager applyDefaultIfNull(SessionManager sessionManager) {
         return applyIfNull(sessionManager, null, (Function<Void, SessionManager>) var -> getSessionManager());
     }
+
+    KeyStoreManager applyDefaultIfNull(KeyStoreManager keyStoreManager) {
+        return applyIfNull(keyStoreManager, null, (Function<Void, KeyStoreManager>) var -> getKeyStoreManager());
+    }
+
 
     private <T, R> R applyIfNull(R obj, T val, Function<T, R> func) {
         if (obj == null) {

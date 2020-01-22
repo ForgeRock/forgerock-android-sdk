@@ -12,6 +12,7 @@ import android.provider.Settings;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.Config;
+import org.forgerock.android.auth.DeviceIdentifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,22 +33,25 @@ public class FRDeviceIdentifierTest {
     public void testDeviceId() {
 
         Config.getInstance(context);
-        String instanceId = new DeviceIdentifier(context).getIdentifier();
+        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder().context(context).build();
+
+        String instanceId = deviceIdentifier.getIdentifier();
         //Just make sure it generate the same value every it calls getInstanceId()
-        assertEquals(instanceId, new DeviceIdentifier(context).getIdentifier());
-        assertEquals(instanceId, new DeviceIdentifier(context).getIdentifier());
-        assertEquals(instanceId, new DeviceIdentifier(context).getIdentifier());
+        assertEquals(instanceId, deviceIdentifier.getIdentifier());
+        assertEquals(instanceId, deviceIdentifier.getIdentifier());
+        assertEquals(instanceId, deviceIdentifier.getIdentifier());
     }
 
     @Test
     public void testRegenerateDeviceId() throws GeneralSecurityException, IOException {
 
         Config.getInstance(context);
-        String instanceId = new DeviceIdentifier(context).getIdentifier();
+        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder().context(context).build();
+        String instanceId = deviceIdentifier.getIdentifier();
 
         getKeyStore().deleteEntry(Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
         //Just make sure it generate the same value every it calls getInstanceId()
-        assertNotEquals(instanceId, new DeviceIdentifier(context).getIdentifier());
+        assertNotEquals(instanceId, deviceIdentifier.getIdentifier());
 
     }
 

@@ -24,8 +24,9 @@ public abstract class AbstractCallback implements Callback {
 
     //The content is as JSON representation, JSONObject is not Serializable
     protected static final String VALUE = "value";
+
     protected String content;
-    protected int id;
+    protected int _id;
 
     protected JSONObject getContentAsJson() throws JSONException {
         return new JSONObject(content);
@@ -33,15 +34,17 @@ public abstract class AbstractCallback implements Callback {
 
     public AbstractCallback(JSONObject raw, int index) {
         setContent(raw);
-        id = raw.optInt("_id", index);
+        _id = raw.optInt("_id", index);
 
         JSONArray output = raw.optJSONArray("output");
-        for (int i = 0; i < output.length(); i++) {
-            try {
-                JSONObject elm = output.getJSONObject(i);
-                setAttribute(getName(elm), elm.get(VALUE));
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+        if (output != null) {
+            for (int i = 0; i < output.length(); i++) {
+                try {
+                    JSONObject elm = output.getJSONObject(i);
+                    setAttribute(getName(elm), elm.get(VALUE));
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

@@ -26,6 +26,7 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
 
     private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
 
+    //The SharedPreferences to store the token
     private SharedPreferences sharedPreferences;
 
     @Builder

@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.junit.Assert;
@@ -16,6 +17,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRSessionMockTest extends BaseTest {
@@ -112,7 +115,10 @@ public class FRSessionMockTest extends BaseTest {
                 .context(context)
                 .build();
 
-        Assert.assertNull(singleSignOnManager.getToken());
+        assertThat(singleSignOnManager.getToken()).isNull();
+
+        assertThat(FRSession.getCurrentSession()).isNull();
+
 
     }
 }

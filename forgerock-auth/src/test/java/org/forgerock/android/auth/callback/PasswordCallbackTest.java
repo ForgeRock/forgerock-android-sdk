@@ -43,7 +43,7 @@ public class PasswordCallbackTest {
         assertEquals(((JSONObject)passwordCallback.getContentAsJson().getJSONArray("input").get(0)).getString("value"),
                 "tester");
 
-        assertEquals(1, passwordCallback.getId());
+        assertEquals(1, passwordCallback.get_id());
 
     }
 }
