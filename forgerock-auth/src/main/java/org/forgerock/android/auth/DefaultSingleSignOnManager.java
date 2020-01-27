@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,6 +15,7 @@ import android.net.Uri;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 
 import lombok.Builder;
 import lombok.NonNull;
@@ -61,6 +61,11 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     }
 
     @Override
+    public void persist(Collection<String> cookies) {
+        singleSignOnManager.persist(cookies);
+    }
+
+    @Override
     public void clear() {
         singleSignOnManager.clear();
     }
@@ -68,6 +73,11 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     @Override
     public SSOToken getToken() {
         return singleSignOnManager.getToken();
+    }
+
+    @Override
+    public Collection<String> getCookies() {
+        return singleSignOnManager.getCookies();
     }
 
     @Override
@@ -118,13 +128,17 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
             @Override
             public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
+               if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
                 } else {
                     handleError(response, listener);
                 }
             }
         });
+
+        //Cleanup the cached cookies
+        OkHttpClientProvider.getInstance().clear();
+
     }
 
 }

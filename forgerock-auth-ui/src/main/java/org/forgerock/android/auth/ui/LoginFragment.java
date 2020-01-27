@@ -31,7 +31,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     private static final String CURRENT_EMBEDDED_FRAGMENT = "CURRENT_EMBEDDED_FRAGMENT";
     private boolean loadOnStartup;
-    FRUserViewModel viewModel;
+    FRViewModel<FRSession> viewModel;
     ProgressBar progressBar;
     //Listener to listener for Login Event
     private FRListener<Void> listener;
@@ -44,7 +44,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
         progressBar = view.findViewById(R.id.progress);
         setListener(getParentFragment());
 
-        viewModel = ViewModelProviders.of(this).get(FRUserViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(FRSessionViewModel.class);
 
         if (savedInstanceState == null) {
             if (loadOnStartup) {
@@ -89,7 +89,6 @@ public class LoginFragment extends Fragment implements AuthHandler {
             this.listener = (FRListener<Void>) o;
         }
     }
-
 
     public void start() {
         progressBar.setVisibility(VISIBLE);

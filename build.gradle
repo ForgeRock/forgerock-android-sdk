@@ -27,17 +27,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        /*
-         * For private repository
-         *
-        maven {
-            url  "https://dl.bintray.com/forgerock-sdk/maven"
-            credentials {
-                username 'forgerock-sdk'
-                password 'd55d3ecbcf4ca0d4e771da6de3a7fcdc97fca581'
-            }
-        }
-         */
     }
 }
 

@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.junit.Assert;
@@ -22,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRSessionMockTest extends BaseTest {
+
 
     @Test
     public void frSessionHappyPath() throws InterruptedException, ExecutionException {

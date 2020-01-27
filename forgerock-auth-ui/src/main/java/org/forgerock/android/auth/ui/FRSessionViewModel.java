@@ -8,28 +8,29 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
-import androidx.lifecycle.*;
-import lombok.Getter;
-import org.forgerock.android.auth.FRUser;
+
+import androidx.lifecycle.ViewModel;
+
+import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 
 /**
- * {@link ViewModel} Wrapper for {@link FRUser}
+ * {@link ViewModel} Wrapper for {@link org.forgerock.android.auth.FRSession}
  */
-public class FRUserViewModel extends FRViewModel<FRUser> {
+public class FRSessionViewModel extends FRViewModel<FRSession> {
 
-    private NodeListener<FRUser> nodeListener;
+    private NodeListener<FRSession> nodeListener;
 
-    public FRUserViewModel() {
-        nodeListener = new NodeListener<FRUser>() {
+    public FRSessionViewModel() {
+        nodeListener = new NodeListener<FRSession>() {
             @Override
             public void onCallbackReceived(Node node) {
                 getNodeLiveData().postValue(new SingleLiveEvent<>(node));
             }
 
             @Override
-            public void onSuccess(FRUser result) {
+            public void onSuccess(FRSession result) {
                 getResultLiveData().postValue(result);
             }
 
@@ -41,11 +42,11 @@ public class FRUserViewModel extends FRViewModel<FRUser> {
     }
 
     public void login(Context context) {
-        FRUser.login(context, nodeListener);
+        FRSession.authenticate(context, context.getString(R.string.forgerock_auth_service), nodeListener);
     }
 
     public void register(Context context) {
-        FRUser.register(context, nodeListener);
+        FRSession.authenticate(context, context.getString(R.string.forgerock_registration_service), nodeListener);
     }
 
     public void next(Context context, Node node) {

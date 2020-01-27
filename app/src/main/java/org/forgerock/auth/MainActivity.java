@@ -29,7 +29,6 @@ import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
-import org.forgerock.android.auth.OAuth2Client;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.ui.SimpleLoginActivity;
 import org.forgerock.android.auth.ui.SimpleRegisterActivity;
