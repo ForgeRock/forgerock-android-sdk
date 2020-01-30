@@ -10,7 +10,7 @@ package org.forgerock.android.auth;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Interceptor to intercept the received token and exchange to {@link AccessToken}.
+ * Interceptor to intercept the received token.
  */
 @RequiredArgsConstructor
 class SingleSignOnInterceptor implements Interceptor<SSOToken> {
@@ -21,9 +21,13 @@ class SingleSignOnInterceptor implements Interceptor<SSOToken> {
     public void intercept(final Chain chain, SSOToken token) {
         Token storedToken = sessionManager.getSingleSignOnManager().getToken();
         //If token changed, we need to revoke Access Token
-        if (storedToken != null &&
-                !storedToken.equals(token)) {
-            sessionManager.getTokenManager().revoke(null);
+        if (storedToken != null ) {
+            if (storedToken.equals(token)) {
+                chain.proceed(token);
+                return;
+            } else {
+                sessionManager.getTokenManager().revoke(null);
+            }
         }
         sessionManager.getSingleSignOnManager().persist(token);
         chain.proceed(token);

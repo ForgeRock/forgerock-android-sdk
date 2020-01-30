@@ -25,6 +25,7 @@ public class BaseTest {
 
     protected MockWebServer server;
 
+    private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
     public Context context = ApplicationProvider.getApplicationContext();
     public ServerConfig serverConfig;
     public OAuth2Client oAuth2Client;
@@ -43,6 +44,9 @@ public class BaseTest {
         server = new MockWebServer();
         server.start();
         serverConfig = getServerConfig();
+
+        Config.getInstance(context).setUrl(getUrl());
+        Config.getInstance(context).setEncryptor(new MockEncryptor());
         oAuth2Client = getOAuth2Client();
 
     }

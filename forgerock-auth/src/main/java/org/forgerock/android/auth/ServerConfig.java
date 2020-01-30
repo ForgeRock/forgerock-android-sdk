@@ -40,12 +40,15 @@ public class ServerConfig {
 
     private String host;
 
+    private boolean enableCookie;
+
     @lombok.Builder
     public ServerConfig(@NonNull Context context,
                         @NonNull String url,
                         String realm,
                         Integer timeout,
                         TimeUnit timeUnit,
+                        Boolean enableCookie,
                         @Singular List<String> pins) {
 
         Config config = Config.getInstance(context);
@@ -60,6 +63,8 @@ public class ServerConfig {
         this.timeout = config.applyDefaultIfNull(timeout);
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = config.applyDefaultIfNull(pins);
+        this.enableCookie = config.applyDefaultIfNull(enableCookie);
+
 
     }
 

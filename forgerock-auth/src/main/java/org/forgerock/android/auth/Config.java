@@ -40,6 +40,7 @@ public class Config {
     private String realm;
     private int timeout;
     private List<String> pins;
+    private boolean enableCookie;
 
     //SSO Token Manager
     private String accountName;
@@ -64,6 +65,7 @@ public class Config {
         realm = context.getString(R.string.forgerock_realm);
         timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
         accountName = context.getString(R.string.forgerock_account_name);
+        enableCookie = context.getResources().getBoolean(R.bool.forgerock_enable_cookie);
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
     }
 
@@ -152,10 +154,13 @@ public class Config {
         return applyIfNull(realm, null, (Function<Void, String>) var -> getRealm());
     }
 
+    boolean applyDefaultIfNull(Boolean enableCookie) {
+        return applyIfNull(enableCookie, null, (Function<Void, Boolean>) var -> isEnableCookie());
+    }
+
     Integer applyDefaultIfNull(Integer timeout) {
         return applyIfNull(timeout, null, (Function<Void, Integer>) var -> getTimeout());
     }
-
 
     Encryptor applyDefaultIfNull(Encryptor encryptor, final Context context, final Function<Context, Encryptor> function) {
         return applyIfNull(encryptor, null, (Function<Void, Encryptor>) var -> {
@@ -170,7 +175,7 @@ public class Config {
 
     SharedPreferences applyDefaultIfNull(SharedPreferences sharedPreferences, final Context context, final Function<Context, SharedPreferences> function) {
         return applyIfNull(sharedPreferences, null, (Function<Void, SharedPreferences>) var -> {
-            SharedPreferences s = getSharedPreferences();
+            SharedPreferences s = getSharedPreferences();// Override testing
             if (s == null) {
                 return function.apply(context);
             } else {

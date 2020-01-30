@@ -7,12 +7,13 @@
 
 package org.forgerock.android.auth;
 
-import okhttp3.CertificatePinner;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import okhttp3.CertificatePinner;
+import okhttp3.CookieJar;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
 
@@ -23,7 +24,7 @@ class OkHttpClientProvider {
 
     private static final OkHttpClientProvider INSTANCE = new OkHttpClientProvider();
 
-    private Map<ServerConfig, OkHttpClient> cache = new ConcurrentHashMap();
+    private Map<ServerConfig, OkHttpClient> cache = new ConcurrentHashMap<>();
 
     private OkHttpClientProvider() {
     }
@@ -38,7 +39,7 @@ class OkHttpClientProvider {
      * @param serverConfig The Server configuration
      * @return The OkHttpClient
      */
-    public OkHttpClient lookup(ServerConfig serverConfig) {
+    OkHttpClient lookup(ServerConfig serverConfig) {
         OkHttpClient client = cache.get(serverConfig);
 
         if (client != null) {
@@ -50,6 +51,12 @@ class OkHttpClientProvider {
                 .readTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
                 .writeTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
                 .followRedirects(false);
+
+        if (serverConfig.isEnableCookie()) {
+            builder.cookieJar(SecureCookieJar.builder().build());
+        } else {
+            builder.cookieJar(CookieJar.NO_COOKIES);
+        }
 
         if (Logger.isDebugEnabled()) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();

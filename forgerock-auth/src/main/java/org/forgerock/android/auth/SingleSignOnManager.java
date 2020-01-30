@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import java.util.Collection;
+
 /**
  * Manage SSO related attributes
  */
@@ -19,9 +21,16 @@ public interface SingleSignOnManager {
      */
     void persist(SSOToken token);
 
+    /**
+     * Persist the Cookies to storage
+     *
+     * @param cookies The cookies `Set-Cookie` HTTP header value
+     */
+    void persist(Collection<String> cookies);
+
 
     /**
-     * Remove the stored {@link Token}
+     * Remove the stored {@link Token} and Cookies
      */
     void clear();
 
@@ -30,6 +39,13 @@ public interface SingleSignOnManager {
      * @return The SSO Token
      */
     SSOToken getToken();
+
+    /**
+     * Retrieve the Stored cookies
+     * @return The Cookies
+     */
+    Collection<String> getCookies();
+
 
     /**
      * Check if token exists in the storage.

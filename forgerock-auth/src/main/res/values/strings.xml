@@ -19,6 +19,7 @@
     <string name="forgerock_url" translatable="false">place holder</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
+    <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <string-array name="forgerock_pins">
     </string-array>
 

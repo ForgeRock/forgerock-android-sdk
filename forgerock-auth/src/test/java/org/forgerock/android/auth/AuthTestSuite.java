@@ -45,7 +45,9 @@ import org.junit.runners.Suite;
 
         LoggerTest.class,
 
-        KeyStoreManagerTest.class
+        KeyStoreManagerTest.class,
+        PersistentCookieTest.class
+
 
 })
 public class AuthTestSuite {
