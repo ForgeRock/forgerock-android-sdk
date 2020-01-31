@@ -27,4 +27,9 @@
           android:icon="@android:drawable/ic_menu_compass"
           android:title="@string/instanceId"
           app:showAsAction="collapseActionView"/>
+
+    <item android:id="@+id/invoke"
+        android:icon="@android:drawable/ic_menu_call"
+        android:title="@string/invoke"
+        app:showAsAction="collapseActionView"/>
 </menu>

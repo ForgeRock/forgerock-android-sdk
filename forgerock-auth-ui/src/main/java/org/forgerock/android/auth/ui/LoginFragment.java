@@ -92,7 +92,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     public void start() {
         progressBar.setVisibility(VISIBLE);
-        viewModel.login(getContext());
+        viewModel.authenticate(getContext());
     }
 
     @Override
@@ -108,7 +108,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     private boolean handleException(final Exception e) {
         if (e instanceof AuthenticationRequiredException || e instanceof AuthenticationTimeoutException) {
-            viewModel.login(getContext());
+            viewModel.authenticate(getContext());
         } else if (e instanceof AuthenticationException) {
             Fragment fragment = getChildFragmentManager().findFragmentByTag(CURRENT_EMBEDDED_FRAGMENT);
             if (fragment instanceof AuthenticationExceptionListener) {

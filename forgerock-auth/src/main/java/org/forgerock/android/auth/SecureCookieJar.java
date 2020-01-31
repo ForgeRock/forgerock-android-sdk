@@ -25,7 +25,7 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
-class SecureCookieJar implements CookieJar {
+public class SecureCookieJar implements CookieJar {
 
     private SingleSignOnManager singleSignOnManager;
     private AtomicReference<Set<Cookie>> cacheRef = new AtomicReference<>();

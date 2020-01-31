@@ -46,7 +46,8 @@ import org.junit.runners.Suite;
         LoggerTest.class,
 
         KeyStoreManagerTest.class,
-        PersistentCookieTest.class
+        PersistentCookieTest.class,
+        PolicyAdviceTest.class
 
 
 })

@@ -24,18 +24,32 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.forgerock.android.auth.PolicyAdvice;
+import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
+import org.forgerock.android.auth.interceptor.AdviceHandler;
+import org.forgerock.android.auth.interceptor.IdentityGatewayAdviceInterceptor;
+import org.forgerock.android.auth.ui.AdviceDialogHandler;
 import org.forgerock.android.auth.ui.SimpleLoginActivity;
 import org.forgerock.android.auth.ui.SimpleRegisterActivity;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -158,7 +172,43 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 return true;
+            case org.forgerock.auth.R.id.invoke:
+                OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                        .followRedirects(false);
 
+                builder.addInterceptor(new IdentityGatewayAdviceInterceptor() {
+                    @Override
+                    public AdviceHandler getAdviceHandler(PolicyAdvice advice) {
+                        return new AdviceDialogHandler();
+                    }
+                });
+                builder.addInterceptor(new AccessTokenInterceptor());
+                builder.cookieJar(SecureCookieJar.builder().build());
+
+                OkHttpClient client = builder.build();
+                Request request = new Request.Builder().url("http://openig.example.com:8080/products").build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        runOnUiThread(() -> content.setText(e.getMessage()));
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        runOnUiThread(() -> {
+                            if (response.isSuccessful()) {
+                                try {
+                                    content.setText("Response:" + response.body().string());
+                                } catch (IOException e) {
+                                    content.setText(e.getMessage());
+                                }
+                            } else {
+                                content.setText("Failed:" + response.message());
+                            }
+                        });
+                   }
+                });
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

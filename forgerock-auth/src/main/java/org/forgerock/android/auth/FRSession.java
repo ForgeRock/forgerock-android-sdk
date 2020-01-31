@@ -59,17 +59,20 @@ public class FRSession {
         return sessionManager.getSingleSignOnManager().getToken();
     }
 
-    public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
-        createFRAuth(context, serviceName)
-                .next(context, listener);
+    public void authenticate(Context context, PolicyAdvice advice, final NodeListener<FRSession> listener) {
+        FRAuth.builder()
+                .advice(advice)
+                .context(context)
+                .interceptor(new FRSession.SessionInterceptor())
+                .build().next(context, listener);
     }
 
-    private static FRAuth createFRAuth(Context context, String serviceName) {
-        return FRAuth.builder()
+    public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
+        FRAuth.builder()
                 .serviceName(serviceName)
                 .context(context)
                 .interceptor(new FRSession.SessionInterceptor())
-                .build();
+                .build().next(context, listener);
     }
 
     @RequiredArgsConstructor
