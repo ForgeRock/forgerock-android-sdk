@@ -25,7 +25,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Domain object for advice
+ * Domain object for advice. The Advice is received from resource API for Step up authentication
  */
 @Builder
 @Getter

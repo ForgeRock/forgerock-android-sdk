@@ -21,6 +21,9 @@ import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * Content Provider to register Activity Lifecycle Callbacks and keep track of the last active activity.
+ */
 public class InitProvider extends ContentProvider {
 
     private static WeakReference<Activity> currentActivity = new WeakReference<>(null);
