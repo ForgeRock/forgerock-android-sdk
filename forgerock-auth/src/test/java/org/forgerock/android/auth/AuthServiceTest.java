@@ -7,8 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.callback.Callback;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -16,10 +14,22 @@ import org.robolectric.RobolectricTestRunner;
 @RunWith(RobolectricTestRunner.class)
 public class AuthServiceTest {
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testMissingTreeName() {
         AuthService.builder()
                 .build();
 
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithServiceNameAndAdvice() {
+        PolicyAdvice policyAdvice = PolicyAdvice.builder()
+                .type("test")
+                .value("test").build();
+
+        AuthService.builder()
+                .advice(policyAdvice)
+                .name("test")
+                .build();
     }
 }

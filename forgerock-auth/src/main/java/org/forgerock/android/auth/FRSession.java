@@ -55,21 +55,45 @@ public class FRSession {
     }
 
 
+    /**
+     * Retrieve the stored Session Token.
+     *
+     * @return The Session Token
+     */
     public SSOToken getSessionToken() {
         return sessionManager.getSingleSignOnManager().getToken();
     }
 
-    public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
-        createFRAuth(context, serviceName)
-                .next(context, listener);
+    /**
+     * Trigger the Authentication Tree flow process with the {@link PolicyAdvice}
+     *
+     * @param context  The Application Context
+     * @param advice   Policy Advice for Step up authentication.
+     * @param listener Listener to listen login event.
+     */
+
+    public void authenticate(Context context, PolicyAdvice advice, final NodeListener<FRSession> listener) {
+        FRAuth.builder()
+                .advice(advice)
+                .context(context)
+                .interceptor(new FRSession.SessionInterceptor())
+                .build().next(context, listener);
     }
 
-    private static FRAuth createFRAuth(Context context, String serviceName) {
-        return FRAuth.builder()
+    /**
+     * Trigger the Authentication Tree flow process with the {@link PolicyAdvice}
+     *
+     * @param context     The Application Context
+     * @param serviceName Authentication Tree name
+     * @param listener    Listener to listen login event.
+     */
+
+    public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
+        FRAuth.builder()
                 .serviceName(serviceName)
                 .context(context)
                 .interceptor(new FRSession.SessionInterceptor())
-                .build();
+                .build().next(context, listener);
     }
 
     @RequiredArgsConstructor

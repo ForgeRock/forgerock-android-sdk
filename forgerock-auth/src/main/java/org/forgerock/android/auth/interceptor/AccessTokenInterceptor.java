@@ -5,46 +5,42 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-package org.forgerock.android.auth;
+package org.forgerock.android.auth.interceptor;
 
 import lombok.RequiredArgsConstructor;
 import okhttp3.Interceptor;
-import okhttp3.Protocol;
-import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import org.forgerock.android.auth.AccessToken;
+import org.forgerock.android.auth.FRUser;
+import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 
 /**
  * Interceptor to inject access token to the API Request
  */
 @RequiredArgsConstructor
-class AccessTokenInterceptor implements Interceptor {
+public class AccessTokenInterceptor implements Interceptor {
 
-    private final String TAG = AccessTokenInterceptor.class.getSimpleName();
-    private final SessionManager sessionManager;
+    private static final String TAG = AccessTokenInterceptor.class.getSimpleName();
 
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
         AccessToken accessToken;
             try {
-                accessToken = sessionManager.getAccessToken();
-                return chain.proceed(chain.request().newBuilder()
-                        .header("Authorization", "Bearer " + accessToken.getValue())
-                        .build());
-
+                if (FRUser.getCurrentUser() != null) {
+                    accessToken = FRUser.getCurrentUser().getAccessToken();
+                    return chain.proceed(chain.request().newBuilder()
+                            .header("Authorization", "Bearer " + accessToken.getValue())
+                            .build());
+                }
             } catch (AuthenticationRequiredException e) {
                 Logger.warn(TAG, e, "Failed to inject a valid access token");
            }
         return chain.proceed(chain.request());
     }
-
-
-
-
-
 }

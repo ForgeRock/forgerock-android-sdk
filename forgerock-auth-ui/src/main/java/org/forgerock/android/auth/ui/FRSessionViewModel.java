@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
+import org.forgerock.android.auth.PolicyAdvice;
 
 /**
  * {@link ViewModel} Wrapper for {@link org.forgerock.android.auth.FRSession}
@@ -41,8 +42,13 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
         };
     }
 
-    public void login(Context context) {
+    public void authenticate(Context context) {
         FRSession.authenticate(context, context.getString(R.string.forgerock_auth_service), nodeListener);
+    }
+
+    @Override
+    public void authenticate(Context context, PolicyAdvice advice) {
+        FRSession.getCurrentSession().authenticate(context, advice, nodeListener);
     }
 
     public void register(Context context) {

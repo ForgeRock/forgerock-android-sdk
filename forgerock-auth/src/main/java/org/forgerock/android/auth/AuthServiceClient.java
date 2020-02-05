@@ -29,7 +29,6 @@ class AuthServiceClient {
             = MediaType.get("application/json; charset=utf-8");
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
-    private static final String SERVICE = "service";
 
     private ServerConfig serverConfig;
     private OkHttpClient okHttpClient;
@@ -48,7 +47,7 @@ class AuthServiceClient {
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
             Request request = new Request.Builder()
-                    .url(getUrl(authService.getName()))
+                    .url(getUrl(authService))
                     .post(RequestBody.create(new byte[0]))
                     .header(ACCEPT_API_VERSION, API_VERSION_2_1)
                     .build();
@@ -102,10 +101,10 @@ class AuthServiceClient {
         }
     }
 
-    private URL getUrl(String treeName) throws MalformedURLException {
+    private URL getUrl(AuthService authService) throws MalformedURLException {
         return new URL(getUriBuilder()
-                .appendQueryParameter(AUTH_INDEX_TYPE, SERVICE)
-                .appendQueryParameter(AUTH_INDEX_VALUE, treeName)
+                .appendQueryParameter(AUTH_INDEX_TYPE, authService.getAuthIndexType())
+                .appendQueryParameter(AUTH_INDEX_VALUE, authService.getAuthIndexValue())
                 .build().toString());
     }
 

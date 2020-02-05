@@ -13,13 +13,12 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.forgerock.android.auth.exception.ApiException;
-import org.forgerock.android.auth.exception.AuthenticationException;
+
+import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
@@ -35,7 +34,7 @@ class UserService implements ResponseHandler {
     @Builder
     public UserService(ServerConfig serverConfig, SessionManager sessionManager) {
         client = OkHttpClientProvider.getInstance().lookup(serverConfig).newBuilder()
-                .addInterceptor(new AccessTokenInterceptor(sessionManager))
+                .addInterceptor(new AccessTokenInterceptor())
                 .build();
 
         this.serverConfig = serverConfig;

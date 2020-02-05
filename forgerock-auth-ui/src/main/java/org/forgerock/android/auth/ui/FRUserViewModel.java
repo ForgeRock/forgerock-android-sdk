@@ -8,15 +8,21 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
-import androidx.lifecycle.*;
-import lombok.Getter;
+
+import androidx.lifecycle.ViewModel;
+
+import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
+import org.forgerock.android.auth.PolicyAdvice;
 
 /**
+ *
  * {@link ViewModel} Wrapper for {@link FRUser}
+ * @deprecated As of release 1.1, replaced by {@link FRSessionViewModel} ()}
  */
+@Deprecated
 public class FRUserViewModel extends FRViewModel<FRUser> {
 
     private NodeListener<FRUser> nodeListener;
@@ -40,8 +46,13 @@ public class FRUserViewModel extends FRViewModel<FRUser> {
         };
     }
 
-    public void login(Context context) {
+    public void authenticate(Context context) {
         FRUser.login(context, nodeListener);
+    }
+
+    @Override
+    public void authenticate(Context context, PolicyAdvice advice) {
+        throw new UnsupportedOperationException();
     }
 
     public void register(Context context) {

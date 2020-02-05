@@ -60,6 +60,7 @@ public class FRAuth {
     @Builder
     public FRAuth(@NonNull Context context,
                    String serviceName,
+                   PolicyAdvice advice,
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
                    @Singular List<Interceptor> interceptors) {
@@ -70,6 +71,7 @@ public class FRAuth {
 
         AuthService.AuthServiceBuilder builder = AuthService.builder()
                 .name(serviceName)
+                .advice(advice)
                 .serverConfig(config.applyDefaultIfNull(serverConfig))
                 .interceptor(new SingleSignOnInterceptor(this.sessionManager));
 
@@ -111,7 +113,7 @@ public class FRAuth {
                     interceptors = java.util.Collections.unmodifiableList(new ArrayList<Interceptor>(this.interceptors));
             }
 
-            return new FRAuth(context, serviceName, serverConfig, sessionManager, interceptors);
+            return new FRAuth(context, serviceName, advice, serverConfig, sessionManager, interceptors);
         }
     }
 }

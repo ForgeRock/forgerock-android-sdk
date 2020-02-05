@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModel;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
+import org.forgerock.android.auth.PolicyAdvice;
 
 import lombok.Getter;
 
@@ -51,7 +52,9 @@ public abstract class FRViewModel<T> extends ViewModel {
         };
     }
 
-    public abstract void login(Context context);
+    public abstract void authenticate(Context context);
+
+    public abstract void authenticate(Context context, PolicyAdvice advice);
 
     public abstract void register(Context context);
 
