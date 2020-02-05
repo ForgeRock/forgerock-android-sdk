@@ -52,12 +52,14 @@ public class SecureCookieJar implements CookieJar {
                 Iterator<String> iterator = updatedCookies.iterator();
                 while (iterator.hasNext()) {
                     Cookie cookie = Cookie.parse(httpUrl, iterator.next());
-                    if (cookie != null && !isExpired(cookie)) {
-                        cookies.add(cookie);
-                    } else {
-                        //Remove expired cookies
-                        iterator.remove();
-                    }
+                    if (cookie != null) {
+                        if (!isExpired(cookie)) {
+                            cookies.add(cookie);
+                        } else {
+                            //Remove expired cookies
+                            iterator.remove();
+                        }
+                   }
                 }
 
                 // Some cookies are expired, remove it
@@ -78,7 +80,7 @@ public class SecureCookieJar implements CookieJar {
         for (String c : singleSignOnManager.getCookies()) {
             Cookie cookie = Cookie.parse(httpUrl, c);
             //Remove the same stored cookies
-            if (!contains(cookie, list)) {
+            if (cookie != null && !contains(cookie, list)) {
                 cookies.add(cookie);
             }
         }
