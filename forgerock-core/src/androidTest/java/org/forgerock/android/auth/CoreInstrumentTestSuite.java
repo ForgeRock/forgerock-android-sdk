@@ -7,18 +7,14 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.collector.FRDeviceIdentifierTest;
 import org.junit.experimental.categories.Categories;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
-        DefaultTokenManagerTest.class,
-        DefaultSingleSignOnManagerTest.class,
-        FRDeviceIdentifierTest.class,
-        FRDeviceProfileTest.class,
+        SecuredSharedPreferencesTest.class,
 
 })
-public class AuthInstrumentTestSuite {
+public class CoreInstrumentTestSuite {
 }
