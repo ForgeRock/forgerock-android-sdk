@@ -43,12 +43,12 @@ public class BaseTest {
         MockitoAnnotations.initMocks(this);
         server = new MockWebServer();
         server.start();
-        serverConfig = getServerConfig();
 
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
-        oAuth2Client = getOAuth2Client();
 
+        serverConfig = getServerConfig();
+        oAuth2Client = getOAuth2Client();
     }
 
     @After
@@ -73,6 +73,7 @@ public class BaseTest {
     protected ServerConfig getServerConfig() {
         return ServerConfig.builder()
                 .context(context)
+                .cookieJar(SecureCookieJar.builder().build())
                 .url(getUrl())
                 .build();
     }

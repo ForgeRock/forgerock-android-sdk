@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -24,6 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class PersistentCookieTest extends BaseTest {
+
+    @Before
+    public void setUp() {
+        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
+    }
 
     @Test
     public void persistCookieHappyPathTest() throws InterruptedException, ExecutionException {
@@ -249,6 +255,7 @@ public class PersistentCookieTest extends BaseTest {
 
         OkHttpClientProvider.getInstance().clear();
         Config.getInstance(context).setCacheIntervalMillis(1000);
+        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
         server.enqueue(new MockResponse()
                 .setResponseCode(HTTP_OK)
                 .addHeader("Content-Type", "application/json")

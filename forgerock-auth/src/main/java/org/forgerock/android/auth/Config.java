@@ -12,9 +12,13 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
+import org.jetbrains.annotations.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
+import okhttp3.Cookie;
 import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +70,7 @@ public class Config {
         realm = context.getString(R.string.forgerock_realm);
         timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
         accountName = context.getString(R.string.forgerock_account_name);
-        cookieJar = SecureCookieJar.builder().build();
+        cookieJar = CookieJar.NO_COOKIES;
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
     }
 

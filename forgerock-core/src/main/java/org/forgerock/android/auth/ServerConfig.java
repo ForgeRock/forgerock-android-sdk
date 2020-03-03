@@ -14,8 +14,11 @@ import okhttp3.CookieJar;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Manages Server configuration information
@@ -58,10 +61,10 @@ public class ServerConfig {
             throw new RuntimeException(e);
         }
 
-        this.realm = realm;
-        this.timeout = timeout;
-        this.timeUnit = timeUnit;
-        this.pins = pins;
+        this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
+        this.timeout = timeout == null ? context.getResources().getInteger(R.integer.forgerock_timeout) : timeout;
+        this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
+        this.pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
         this.cookieJar = cookieJar;
     }
 
