@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PersistentCookieTest extends BaseTest {
 
     @Before
-    public void setUp() {
+    public void setUpCookieStore() {
         Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
     }
 

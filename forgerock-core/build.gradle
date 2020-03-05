@@ -36,14 +36,6 @@ android {
         }
     }
 
-    /* Comment this to debug instrument Test,
-    * There is an issue for AS to run NDK with intrument Test */
-    externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/Android.mk'
-        }
-    }
-
     testOptions {
         unitTests.includeAndroidResources = true
     }

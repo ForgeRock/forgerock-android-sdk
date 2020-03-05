@@ -73,7 +73,6 @@ public class BaseTest {
     protected ServerConfig getServerConfig() {
         return ServerConfig.builder()
                 .context(context)
-                .cookieJar(SecureCookieJar.builder().build())
                 .url(getUrl())
                 .build();
     }

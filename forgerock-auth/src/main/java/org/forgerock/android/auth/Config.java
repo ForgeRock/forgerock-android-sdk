@@ -12,16 +12,12 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Arrays;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
-import okhttp3.Cookie;
 import okhttp3.CookieJar;
-import okhttp3.HttpUrl;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Provide SDK Configuration, most components in the SDK has its default setting, this class allow developer to
@@ -157,15 +153,6 @@ public class Config {
         this.cookieJar = cookieJar;
     }
 
-
-    @VisibleForTesting
-    CookieJar getCookieJar() {
-        if (cookieJar == null) {
-            return SecureCookieJar.builder().build();
-        } else {
-            return cookieJar;
-        }
-    }
 
     List<String> applyDefaultIfNull(List<String> pins) {
         return applyIfNull(pins, null, (Function<Void, List<String>>) var -> getPins());
