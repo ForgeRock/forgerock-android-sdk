@@ -12,11 +12,12 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.Getter;
+import lombok.Setter;
+import okhttp3.CookieJar;
 
 /**
  * Provide SDK Configuration, most components in the SDK has its default setting, this class allow developer to
@@ -40,7 +41,7 @@ public class Config {
     private String realm;
     private int timeout;
     private List<String> pins;
-    private boolean enableCookie;
+    private CookieJar cookieJar;
 
     //SSO Token Manager
     private String accountName;
@@ -65,7 +66,7 @@ public class Config {
         realm = context.getString(R.string.forgerock_realm);
         timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
         accountName = context.getString(R.string.forgerock_account_name);
-        enableCookie = context.getResources().getBoolean(R.bool.forgerock_enable_cookie);
+        cookieJar = CookieJar.NO_COOKIES;
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
     }
 
@@ -93,6 +94,7 @@ public class Config {
                 .url(url)
                 .realm(realm)
                 .timeout(timeout)
+                .cookieJar(cookieJar)
                 .build();
     }
 
@@ -146,16 +148,18 @@ public class Config {
         }
     }
 
+    @VisibleForTesting
+    public void setCookieJar(CookieJar cookieJar) {
+        this.cookieJar = cookieJar;
+    }
+
+
     List<String> applyDefaultIfNull(List<String> pins) {
         return applyIfNull(pins, null, (Function<Void, List<String>>) var -> getPins());
     }
 
     String applyDefaultIfNull(String realm) {
         return applyIfNull(realm, null, (Function<Void, String>) var -> getRealm());
-    }
-
-    boolean applyDefaultIfNull(Boolean enableCookie) {
-        return applyIfNull(enableCookie, null, (Function<Void, Boolean>) var -> isEnableCookie());
     }
 
     Integer applyDefaultIfNull(Integer timeout) {

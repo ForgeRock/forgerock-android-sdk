@@ -8,10 +8,13 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import lombok.*;
+import okhttp3.CookieJar;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +43,7 @@ public class ServerConfig {
 
     private String host;
 
-    private boolean enableCookie;
+    private CookieJar cookieJar;
 
     @lombok.Builder
     public ServerConfig(@NonNull Context context,
@@ -48,10 +51,8 @@ public class ServerConfig {
                         String realm,
                         Integer timeout,
                         TimeUnit timeUnit,
-                        Boolean enableCookie,
+                        CookieJar cookieJar,
                         @Singular List<String> pins) {
-
-        Config config = Config.getInstance(context);
 
         this.url = url;
         try {
@@ -59,14 +60,12 @@ public class ServerConfig {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        this.realm = config.applyDefaultIfNull(realm);
-        this.timeout = config.applyDefaultIfNull(timeout);
+
+        this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
+        this.timeout = timeout == null ? context.getResources().getInteger(R.integer.forgerock_timeout) : timeout;
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
-        this.pins = config.applyDefaultIfNull(pins);
-        this.enableCookie = config.applyDefaultIfNull(enableCookie);
-
-
+        this.pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
+        this.cookieJar = cookieJar;
     }
-
 
 }

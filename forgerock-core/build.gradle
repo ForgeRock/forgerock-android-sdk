@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,9 +11,9 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-
 android {
     compileSdkVersion 29
+    buildToolsVersion "29.0.2"
 
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
@@ -22,24 +22,17 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 3
-        versionName "1.0.1"
+        versionCode 1
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    /* Comment this to debug instrument Test,
-    * There is an issue for AS to run NDK with intrument Test */
-    externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/Android.mk'
         }
     }
 
@@ -118,7 +111,7 @@ bintray {
 
     pkg {
         repo = 'maven'
-        name = 'forgerock-auth'
+        name = 'forgerock-core'
         userOrg = 'forgerock-sdk'
         desc = 'ForgeRock SDK is a toolkit that allows developers communicate efficiently with ForgeRock OpenAM and ForgeRock Identity Cloud.'
         licenses = ['MIT']
@@ -140,7 +133,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'Forgerock Auth SDK'
+                name 'Forgerock Core SDK'
                 url siteUrl
                 licenses {
                     license {
@@ -152,7 +145,6 @@ install {
                     connection gitUrl
                     developerConnection gitUrl
                     url siteUrl
-
                 }
             }
         }
@@ -163,16 +155,11 @@ install {
  * Dependencies
  */
 dependencies {
-    api project(':forgerock-core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'com.squareup.okhttp3:okhttp:4.2.2'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
     implementation 'androidx.annotation:annotation:1.1.0'
-
-    //Make it optional for developer
-    compileOnly 'com.google.android.gms:play-services-location:17.0.0'
-    compileOnly 'com.google.android.gms:play-services-safetynet:17.0.0'
 
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
@@ -197,12 +184,8 @@ dependencies {
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
 }
+
 repositories {
     mavenCentral()
 }
-
-

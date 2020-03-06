@@ -15,8 +15,6 @@ import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-import static okhttp3.logging.HttpLoggingInterceptor.Level.BODY;
-
 /**
  * Provider to Cache and provide OKHttpClient
  */
@@ -52,15 +50,15 @@ class OkHttpClientProvider {
                 .writeTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
                 .followRedirects(false);
 
-        if (serverConfig.isEnableCookie()) {
-            builder.cookieJar(SecureCookieJar.builder().build());
-        } else {
+        if(serverConfig.getCookieJar() == null){
             builder.cookieJar(CookieJar.NO_COOKIES);
+        } else {
+            builder.cookieJar(serverConfig.getCookieJar());
         }
 
         if (Logger.isDebugEnabled()) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.level(BODY);
+            interceptor.level(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(interceptor);
         }
 

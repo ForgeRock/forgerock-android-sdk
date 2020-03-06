@@ -29,7 +29,6 @@ import org.junit.runners.Suite;
         AuthServiceMockTest.class,
         AuthServiceTest.class,
         OAuth2MockTest.class,
-        ServerConfigTest.class,
         AccessTokenTest.class,
 
         FRAuthMockTest.class,
@@ -43,12 +42,8 @@ import org.junit.runners.Suite;
         RootDetectorTest.class,
         FRDeviceTest.class,
 
-        LoggerTest.class,
-
-        KeyStoreManagerTest.class,
         PersistentCookieTest.class,
         PolicyAdviceTest.class
-
 
 })
 public class AuthTestSuite {
