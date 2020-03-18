@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.authenticator;
 
 import org.junit.Test;
@@ -5,31 +12,17 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class OathTest {
-
-    private final String MECHANISM_UID = "b162b325-ebb1-48e0-8ab7-b38cf341da95";
-    private final String OTHER_MECHANISM_UID = "013be51a-8c14-356d-b0fc-b3660cc8a101";
-    private final String ISSUER = "test.issuer";
-    private final String OTHER_ISSUER = "test.issuer2";
-    private final String ACCOUNT_NAME = "test.user";
-    private final String OTHER_ACCOUNT_NAME = "test.user2";
-    private final String MECHANISM_TYPE = "OPT";
-    private final String OTHER_MECHANISM_TYPE = "PUSH";
-    private final String SECRET = "JMEZ2W7D462P3JYBDG2HV7PFBM";
-    private final String ALGORITHM = "SHA 256";
-    private final int DIGITS = 6;
-    private final int PERIOD = 30;
-    private final int COUNTER = 0;
+public class OathTest extends BaseTest {
 
     @Test
-    public void createOathMechanismSuccessfuly() {
-        Oath mechanism = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+    public void testCreateOathMechanism() {
+        Oath mechanism = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
         assertEquals(mechanism.getIssuer(), ISSUER);
         assertEquals(mechanism.getAccountName(), ACCOUNT_NAME);
-        assertEquals(mechanism.getType(), MECHANISM_TYPE);
+        assertEquals(mechanism.getType(), Mechanism.OATH);
         assertEquals(mechanism.getOathType(), Oath.TokenType.HOTP);
         assertEquals(mechanism.getAlgorithm(), ALGORITHM);
         assertEquals(mechanism.getSecret(), SECRET);
@@ -39,11 +32,11 @@ public class OathTest {
     }
 
     @Test
-    public void shouldEqualEquivalentOathMechanism() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+    public void testShouldBeEqualEquivalentOathMechanism() {
+        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
         Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         assertEquals(mechanism1, mechanism2);
@@ -53,11 +46,11 @@ public class OathTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentOathMechanismWithType() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+    public void testShouldNotBeEqualDifferentOathMechanismWithType() {
+        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
         Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, OTHER_MECHANISM_TYPE,
+                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         assertFalse(mechanism1.equals(mechanism2));
@@ -66,11 +59,11 @@ public class OathTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentOathMechanismWithAccountName() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+    public void testShouldNotBeEqualDifferentOathMechanismWithAccountName() {
+        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
         Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, OTHER_ACCOUNT_NAME, MECHANISM_TYPE,
+                = new Oath(MECHANISM_UID, ISSUER, OTHER_ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         assertFalse(mechanism1.equals(mechanism2));
@@ -79,11 +72,11 @@ public class OathTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentOathMechanismWithAccountIssuer() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+    public void testShouldNotBeEqualDifferentOathMechanismWithAccountIssuer() {
+        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
         Mechanism mechanism2
-                = new Oath(MECHANISM_UID, OTHER_ISSUER, ACCOUNT_NAME, MECHANISM_TYPE,
+                = new Oath(MECHANISM_UID, OTHER_ISSUER, ACCOUNT_NAME, Mechanism.OATH,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         assertFalse(mechanism1.equals(mechanism2));

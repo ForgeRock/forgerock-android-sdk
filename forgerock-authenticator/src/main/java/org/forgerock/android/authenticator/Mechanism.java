@@ -1,16 +1,11 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.authenticator;
-
-import androidx.annotation.VisibleForTesting;
-
-import org.forgerock.android.auth.Logger;
-import org.forgerock.android.authenticator.exception.InvalidNotificationException;
-import org.forgerock.android.authenticator.exception.MechanismCreationException;
-import org.forgerock.android.authenticator.util.SortedList;
-import org.forgerock.android.authenticator.util.TimeKeeper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The Mechanism model represents the two-factor way used for authentication.
@@ -31,6 +26,9 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     /** The shared secret of the Mechanism */
     private final String secret;
 
+    public static final String PUSH = "push";
+    public static final String OATH = "oath";
+
     private static final String TAG = Mechanism.class.getSimpleName();
 
     public Mechanism(String mechanismUID, String issuer, String accountName, String type) {
@@ -50,6 +48,14 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
         this.accountName = accountName;
         this.type = type;
         this.secret = secret;
+    }
+
+    /**
+     * Gets the unique identifier for the Mechanism.
+     * @return The unique identifier.
+     */
+    public String getId() {
+        return id;
     }
 
     /**

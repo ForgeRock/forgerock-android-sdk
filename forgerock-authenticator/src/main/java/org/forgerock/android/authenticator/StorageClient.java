@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.authenticator;
 
 import java.util.List;
@@ -38,10 +45,10 @@ public interface StorageClient {
 
     /**
      * Get the mechanisms associated with an account.
-     * @param accountId The account object
+     * @param account The Account object
      * @return The list of mechanisms for the account.
      */
-    List<Mechanism> getMechanismsForAccount(String accountId);
+    List<Mechanism> getMechanismsForAccount(Account account);
 
     /**
      * Delete the mechanism uniquely identified by an id.
@@ -60,10 +67,10 @@ public interface StorageClient {
 
     /**
      * Get all notifications for within the mechanism.
-     * @param mechanismId The mechanism object
+     * @param mechanism The mechanism object
      * @return The list of notifications for the mechanism.
      */
-    List<Notification> getAllNotificationsForMechanism(String mechanismId);
+    List<Notification> getAllNotificationsForMechanism(Mechanism mechanism);
 
     /**
      * Delete the notification uniquely identified by an id.

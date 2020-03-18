@@ -1,7 +1,5 @@
 package org.forgerock.android.authenticator;
 
-import android.net.Uri;
-
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -9,14 +7,14 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class NotificationTest {
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 
-    private final String MECHANISM_UID = "b162b325-ebb1-48e0-8ab7-b38cf341da95";
-    private final String OTHER_MECHANISM_UID = "013be51a-8c14-356d-b0fc-b3660cc8a101";
-    private final String MESSAGE_ID = "AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441";
-    private final String CHALLENGE = "fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=";
-    private final String AMLB_COOKIE = "ZnJfc3NvX2FtbGJfcHJvZD0wMQ==";
-    private final long TTL = 120;
+public class NotificationTest extends BaseTest {
 
     @Test
     public void createNotificationSuccessfuly() {

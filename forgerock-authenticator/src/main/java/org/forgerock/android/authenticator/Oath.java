@@ -1,22 +1,13 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.authenticator;
 
 import androidx.annotation.VisibleForTesting;
-
-import org.forgerock.android.auth.Logger;
-import org.forgerock.android.authenticator.exception.MechanismCreationException;
-import org.forgerock.android.authenticator.util.Base32String;
-import org.forgerock.android.authenticator.util.TimeKeeper;
-import org.forgerock.util.encode.Base64;
-
-import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Represents an instance of a OATH authentication mechanism. Associated with an Account.
@@ -38,8 +29,6 @@ public class Oath extends Mechanism {
     private TokenType oathType;
     /** Algorithm of HMAC-based OTP */
     private String algorithm;
-    /** Shared secret of OATH */
-    private String secret;
     /** Digits as in Int for length of OTP credentials */
     private int digits;
     /** Counter as in Int for number of OTP credentials generated */
@@ -54,7 +43,6 @@ public class Oath extends Mechanism {
         super(mechanismUID, issuer, accountName, type, secret);
         this.oathType = oathType;
         this.algorithm = algorithm;
-        this.secret = secret;
         this.digits = digits;
         this.counter = counter;
         this.period = period;

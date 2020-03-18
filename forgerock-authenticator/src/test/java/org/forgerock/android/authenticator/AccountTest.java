@@ -1,22 +1,21 @@
-package org.forgerock.android.authenticator;
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 
-import android.net.Uri;
+package org.forgerock.android.authenticator;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-import org.forgerock.android.authenticator.Account;
-
-public class AccountTest {
-
-    private final String ISSUER = "test.issuer";
-    private final String OTHER_ISSUER = "test.issuer2";
-    private final String ACCOUNT_NAME = "test.user";
-    private final String OTHER_ACCOUNT_NAME = "test.user2";
+public class AccountTest extends BaseTest {
 
     @Test
-    public void createAccountSuccessfuly() {
+    public void testCreateAccount() {
         Account account = new Account(ISSUER, ACCOUNT_NAME);
 
         assertEquals(account.getIssuer(), ISSUER);
@@ -24,7 +23,7 @@ public class AccountTest {
     }
 
     @Test
-    public void createAccountWithOptionalParametersSuccessfuly() {
+    public void testCreateAccountWithOptionalParameters() {
 
         String imageUrl = "http://forgerock.com";
         String backgroundColor = "032b75";
@@ -37,7 +36,7 @@ public class AccountTest {
     }
 
     @Test
-    public void shouldEqualEquivalentAccount() {
+    public void testShouldBeEqualEquivalentAccount() {
         Account account1 = new Account(ISSUER, ACCOUNT_NAME);
         Account account2 = new Account(ISSUER, ACCOUNT_NAME);
 
@@ -48,7 +47,7 @@ public class AccountTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentAccountWithIssuer() {
+    public void testShouldNotBeEqualDifferentAccountWithIssuer() {
         Account account1 = new Account(ISSUER, ACCOUNT_NAME);
         Account account2 = new Account(OTHER_ISSUER, ACCOUNT_NAME);
 
@@ -58,7 +57,7 @@ public class AccountTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentAccountWithAccountName() {
+    public void testShouldNotBeEqualDifferentAccountWithAccountName() {
         Account account1 = new Account(ISSUER, ACCOUNT_NAME);
         Account account2 = new Account(ISSUER, OTHER_ACCOUNT_NAME);
 
@@ -68,7 +67,7 @@ public class AccountTest {
     }
 
     @Test
-    public void shouldHandleNullEquals() {
+    public void testShouldHandleNullEquals() {
         Account account = new Account(ISSUER, ACCOUNT_NAME);
 
         assertFalse(account.equals(null));

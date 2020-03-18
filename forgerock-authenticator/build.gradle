@@ -176,6 +176,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
     implementation 'androidx.annotation:annotation:1.1.0'
 
+    implementation 'com.google.code.gson:gson:2.8.5'
+
     //Make it optional for developer
     compileOnly 'com.google.android.gms:play-services-location:17.0.0'
     compileOnly 'com.google.android.gms:play-services-safetynet:17.0.0'
@@ -205,7 +207,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
 }
 repositories {
     mavenCentral()
