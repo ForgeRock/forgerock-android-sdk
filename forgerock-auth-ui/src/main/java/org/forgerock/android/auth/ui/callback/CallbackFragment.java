@@ -70,4 +70,7 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
         callbackController.next();
     }
 
+    public void cancel(Exception e) {
+        callbackController.cancel(e);
+    }
 }

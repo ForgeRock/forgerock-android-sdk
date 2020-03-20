@@ -65,16 +65,11 @@ public class FRDeviceCollector implements DeviceCollector {
 
     @Override
     public void collect(Context context, FRListener<JSONObject> listener) {
-        InterceptorHandler interceptorHandler = InterceptorHandler.builder()
-                .context(context)
-                .interceptors(collectors)
-                .listener(listener)
-                .build();
+
         try {
-            interceptorHandler.proceed(collect(context));
+            collect(context, listener, collect(context), collectors);
         } catch (JSONException e) {
             Listener.onException(listener, e);
         }
-
     }
 }

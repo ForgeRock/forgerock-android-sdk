@@ -15,10 +15,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+
 import org.forgerock.android.auth.*;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
@@ -103,16 +105,23 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     @Override
     public void cancel(Exception e) {
-        Listener.onException(listener, e );
+        Listener.onException(listener, e);
     }
 
+    /**
+     * Handle Exception during Intelligent Tree Authentication
+     *
+     * @param e The Exception
+     * @return True if user can continue with the current Node (e.g Invalid password)
+     * , False if we cannot continue the flow.
+     */
     private boolean handleException(final Exception e) {
         if (e instanceof AuthenticationRequiredException || e instanceof AuthenticationTimeoutException) {
             viewModel.authenticate(getContext());
         } else if (e instanceof AuthenticationException) {
             Fragment fragment = getChildFragmentManager().findFragmentByTag(CURRENT_EMBEDDED_FRAGMENT);
             if (fragment instanceof AuthenticationExceptionListener) {
-                ((AuthenticationExceptionListener)fragment).onAuthenticationException((AuthenticationException) e);
+                ((AuthenticationExceptionListener) fragment).onAuthenticationException((AuthenticationException) e);
             } else {
                 cancel(e);
             }
@@ -126,7 +135,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
     public void onInflate(@NonNull Context context, @NonNull AttributeSet attrs, @Nullable Bundle savedInstanceState) {
         super.onInflate(context, attrs, savedInstanceState);
         //Retrieve fragment configuration from attr.xml
-        TypedArray a = context.obtainStyledAttributes(attrs,R.styleable.LoginFragment);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoginFragment);
         this.loadOnStartup = a.getBoolean(R.styleable.LoginFragment_loadOnStartup, true);
         a.recycle();
     }

@@ -36,6 +36,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
 
     private Node current;
     private LinearLayout errorLayout;
+    private LinearLayout callbackLayout;
     private AuthHandler authHandler;
 
     public AdaptiveCallbackFragment() {
@@ -69,6 +70,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_callbacks, container, false);
         errorLayout = view.findViewById(R.id.error);
+        callbackLayout = view.findViewById(R.id.callbacks);
         Button nextButton = view.findViewById(R.id.next);
         Button cancelButton = view.findViewById(R.id.cancel);
 
@@ -76,8 +78,10 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         if (savedInstanceState == null) {
             for (Callback callback : current.getCallbacks()) {
                 Fragment fragment = CallbackFragmentFactory.getInstance().getFragment(callback);
-                getChildFragmentManager().beginTransaction()
-                        .add(R.id.callbacks, fragment).commit();
+                if (fragment != null) {
+                    getChildFragmentManager().beginTransaction()
+                            .add(R.id.callbacks, fragment).commit();
+                }
             }
         }
 
@@ -109,7 +113,14 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     }
 
     @Override
+    public void cancel(Exception e) {
+        callbackLayout.setVisibility(View.GONE);
+        authHandler.cancel(e);
+    }
+
+    @Override
     public void next() {
+        callbackLayout.setVisibility(View.GONE);
         authHandler.next(current);
     }
 }

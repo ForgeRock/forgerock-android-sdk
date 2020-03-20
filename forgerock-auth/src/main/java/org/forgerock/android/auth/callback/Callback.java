@@ -28,7 +28,8 @@ public interface Callback extends Serializable {
     String getContent();
 
     /**
-     * Return the type of the Callback
+     * Return the type of the Callback, the type name should align with the Callback type returned
+     * from AM
      */
     String getType();
 

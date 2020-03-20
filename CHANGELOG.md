@@ -2,12 +2,14 @@
 
 ## [1.0.1]
 
+#### Added
+- Support Set Persistent Cookie Node [SDKS-182]
+- Support Device Profile Collector Node [SDKS-293]
+
 #### Fixed
 - Interface alignment with other platforms and introduce FRSession [SDKS-177]
 - FRAuth.next() is now deprecated, user FRSession.authenticate instead [SDKS-177] 
 - Fix Instrument Test. [SDKS-162]
-- Support Set Persistent Cookie Node [SDKS-182]
-
 
 ## [1.0.0]
 - General Availability release for SDKs

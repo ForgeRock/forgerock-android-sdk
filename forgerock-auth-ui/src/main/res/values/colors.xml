@@ -7,6 +7,9 @@
   -->
 
 <resources>
+    <color name="colorPrimary">#96A1AA</color>
+    <color name="colorPrimaryDark">#424F5A</color>
+    <color name="colorAccent">#49877A</color>
     <color name="White">#FFFFFFFF</color>
     <color name="Silver">#FFC0C0C0</color>
     <color name="Gray">#FF808080</color>

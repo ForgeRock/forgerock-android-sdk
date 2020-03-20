@@ -31,7 +31,6 @@ public class NameCallbackFragment extends CallbackFragment<NameCallback> {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_name_callback, container, false);
 
-
         EditText text = view.findViewById(R.id.username);
         TextInputLayout textInputLayout = view.findViewById(R.id.usernameInputLayout);
         textInputLayout.setHint(callback.getPrompt());

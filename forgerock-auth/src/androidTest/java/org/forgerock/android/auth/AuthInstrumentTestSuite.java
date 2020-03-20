@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.callback.DeviceProfileCollectorCallbackAndroidTest;
 import org.forgerock.android.auth.collector.FRDeviceIdentifierTest;
 import org.junit.experimental.categories.Categories;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import org.junit.runners.Suite;
         DefaultSingleSignOnManagerTest.class,
         FRDeviceIdentifierTest.class,
         FRDeviceProfileTest.class,
+        DeviceProfileCollectorCallbackAndroidTest.class,
 
 })
 public class AuthInstrumentTestSuite {

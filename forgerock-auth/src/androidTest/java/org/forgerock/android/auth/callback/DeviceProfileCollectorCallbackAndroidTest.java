@@ -21,10 +21,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
-public class DeviceAttributeCollectorCallbackAndroidTest {
+public class DeviceProfileCollectorCallbackAndroidTest {
 
     private Context context = ApplicationProvider.getApplicationContext();
 
@@ -35,67 +36,75 @@ public class DeviceAttributeCollectorCallbackAndroidTest {
     );
 
     @Test
-    public void testProfile() throws Exception {
-
+    public void testMetadata() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
-                "            \"type\": \"HiddenValueCallback\",\n" +
+                "            \"type\": \"DeviceProfileCallback\",\n" +
                 "            \"output\": [\n" +
                 "                {\n" +
-                "                    \"name\": \"value\",\n" +
-                "                    \"value\": \"\"\n" +
+                "                    \"name\": \"metadata\",\n" +
+                "                    \"value\": true\n" +
                 "                },\n" +
                 "                {\n" +
-                "                    \"name\": \"id\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile\"\n" +
+                "                    \"name\": \"location\",\n" +
+                "                    \"value\": false\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ],\n" +
                 "            \"input\": [\n" +
                 "                {\n" +
                 "                    \"name\": \"IDToken1\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile\"\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ]\n" +
                 "        }");
-        DeviceAttributeCallback callback = new DeviceAttributeCallback(raw, 0);
+        DeviceProfileCallback callback = new DeviceProfileCallback(raw, 0);
         FRListenerFuture<Void> result = new FRListenerFuture<>();
         callback.execute(context, result);
         result.get();
 
-        String content = ((JSONObject)callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
+        String content = ((JSONObject) callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
 
         assertTrue(content.contains("identifier"));
-        assertTrue(content.contains("profile"));
+        assertTrue(content.contains("metadata"));
+        assertFalse(content.contains("location"));
     }
 
     @Test
     public void testLocation() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
-                "            \"type\": \"HiddenValueCallback\",\n" +
+                "            \"type\": \"DeviceProfileCallback\",\n" +
                 "            \"output\": [\n" +
                 "                {\n" +
-                "                    \"name\": \"value\",\n" +
-                "                    \"value\": \"\"\n" +
+                "                    \"name\": \"metadata\",\n" +
+                "                    \"value\": false\n" +
                 "                },\n" +
                 "                {\n" +
-                "                    \"name\": \"id\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=location\"\n" +
+                "                    \"name\": \"location\",\n" +
+                "                    \"value\": true\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ],\n" +
                 "            \"input\": [\n" +
                 "                {\n" +
                 "                    \"name\": \"IDToken1\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=location\"\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ]\n" +
                 "        }");
-        DeviceAttributeCallback callback = new DeviceAttributeCallback(raw, 0);
+        DeviceProfileCallback callback = new DeviceProfileCallback(raw, 0);
         FRListenerFuture<Void> result = new FRListenerFuture<>();
         callback.execute(context, result);
         result.get();
 
-        String content = ((JSONObject)callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
+        String content = ((JSONObject) callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
 
         assertTrue(content.contains("identifier"));
 
@@ -107,6 +116,5 @@ public class DeviceAttributeCollectorCallbackAndroidTest {
     private boolean isEmulator() {
         return Build.PRODUCT.matches(".*_?sdk_?.*");
     }
-
 
 }

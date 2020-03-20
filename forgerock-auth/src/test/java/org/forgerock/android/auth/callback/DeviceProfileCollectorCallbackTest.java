@@ -11,7 +11,6 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.FRListenerFuture;
 import org.forgerock.android.auth.KeyStoreManager;
@@ -25,11 +24,12 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.security.PublicKey;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-public class DeviceAttributeCollectorCallbackTest {
+public class DeviceProfileCollectorCallbackTest {
 
     private Context context = ApplicationProvider.getApplicationContext();
 
@@ -42,117 +42,124 @@ public class DeviceAttributeCollectorCallbackTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void testProfile() throws Exception {
-
         byte[] encoded = "public key".getBytes();
         when(publicKey.getEncoded()).thenReturn(encoded);
         when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-
         Config.getInstance(context).setKeyStoreManager(keyStoreManager);
+    }
 
+    @Test
+    public void testMetadata() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
-                "            \"type\": \"HiddenValueCallback\",\n" +
+                "            \"type\": \"DeviceProfileCallback\",\n" +
                 "            \"output\": [\n" +
                 "                {\n" +
-                "                    \"name\": \"value\",\n" +
-                "                    \"value\": \"\"\n" +
+                "                    \"name\": \"metadata\",\n" +
+                "                    \"value\": true\n" +
                 "                },\n" +
                 "                {\n" +
-                "                    \"name\": \"id\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile\"\n" +
+                "                    \"name\": \"location\",\n" +
+                "                    \"value\": false\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ],\n" +
                 "            \"input\": [\n" +
                 "                {\n" +
                 "                    \"name\": \"IDToken1\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile\"\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ]\n" +
                 "        }");
-        DeviceAttributeCallback callback = new DeviceAttributeCallback(raw, 0);
+        DeviceProfileCallback callback = new DeviceProfileCallback(raw, 0);
         FRListenerFuture<Void> result = new FRListenerFuture<>();
         callback.execute(context, result);
         result.get();
 
-        String content = ((JSONObject)callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
+        String content = ((JSONObject) callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
 
-        Assertions.assertThat(content).contains("identifier").contains("profile");
+        JSONObject contentAsJson = new JSONObject(content);
+        assertThat(contentAsJson.get("identifier")).isNotNull();
+        assertThat(contentAsJson.get("metadata")).isNotNull();
     }
 
     @Test
     public void testNoAttributesToCollect() throws Exception {
 
-        byte[] encoded = "public key".getBytes();
-        when(publicKey.getEncoded()).thenReturn(encoded);
-        when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-
-        Config.getInstance(context).setKeyStoreManager(keyStoreManager);
-
-
         JSONObject raw = new JSONObject("{\n" +
-                "            \"type\": \"HiddenValueCallback\",\n" +
+                "            \"type\": \"DeviceProfileCallback\",\n" +
                 "            \"output\": [\n" +
                 "                {\n" +
-                "                    \"name\": \"value\",\n" +
-                "                    \"value\": \"\"\n" +
+                "                    \"name\": \"metadata\",\n" +
+                "                    \"value\": false\n" +
                 "                },\n" +
                 "                {\n" +
-                "                    \"name\": \"id\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock\"\n" +
+                "                    \"name\": \"location\",\n" +
+                "                    \"value\": false\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ],\n" +
                 "            \"input\": [\n" +
                 "                {\n" +
                 "                    \"name\": \"IDToken1\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock\"\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ]\n" +
                 "        }");
-        DeviceAttributeCallback callback = new DeviceAttributeCallback(raw, 0);
+        DeviceProfileCallback callback = new DeviceProfileCallback(raw, 0);
         FRListenerFuture<Void> result = new FRListenerFuture<>();
         callback.execute(context, result);
         result.get();
 
-        String content = ((JSONObject)callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
+        String content = ((JSONObject) callback.getContentAsJson().getJSONArray("input").get(0)).getString("value");
 
-        Assertions.assertThat(content).contains("identifier");
+        JSONObject contentAsJson = new JSONObject(content);
+        assertThat(contentAsJson.get("identifier")).isNotNull();
+        assertThat(contentAsJson.opt("metadata")).isNull();
+        assertThat(contentAsJson.opt("location")).isNull();
+
     }
+
 
     @Test
     public void testAttributesToCollect() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
-                "            \"type\": \"HiddenValueCallback\",\n" +
+                "            \"type\": \"DeviceProfileCallback\",\n" +
                 "            \"output\": [\n" +
                 "                {\n" +
-                "                    \"name\": \"value\",\n" +
-                "                    \"value\": \"\"\n" +
+                "                    \"name\": \"metadata\",\n" +
+                "                    \"value\": true\n" +
                 "                },\n" +
                 "                {\n" +
-                "                    \"name\": \"id\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile&attributes=publicKey&attributes=location\"\n" +
+                "                    \"name\": \"location\",\n" +
+                "                    \"value\": true\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"Test Message\"\n" +
                 "                }\n" +
                 "            ],\n" +
                 "            \"input\": [\n" +
                 "                {\n" +
                 "                    \"name\": \"IDToken1\",\n" +
-                "                    \"value\": \"DeviceAttributeCallback://forgerock?attributes=profile&attributes=publicKey&attributes=location\"\n" +
+                "                    \"value\": \"\"\n" +
                 "                }\n" +
                 "            ]\n" +
                 "        }");
 
-        DeviceAttributeCallback callback = new DeviceAttributeCallback(raw, 0);
-        Assertions.assertThat(callback.getAttributes())
-                .contains("profile")
-                .contains("publicKey")
-                .contains("location");
+        DeviceProfileCallback callback = new DeviceProfileCallback(raw, 0);
+        assertThat(callback.isMetadata()).isTrue();
+        assertThat(callback.isLocation()).isTrue();
+        assertThat(callback.getMessage()).isEqualTo("Test Message");
 
     }
-
 
 
 }

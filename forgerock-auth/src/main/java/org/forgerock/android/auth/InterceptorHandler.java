@@ -31,20 +31,20 @@ public class InterceptorHandler implements Interceptor.Chain {
     private int index;
 
     @Override
-    public void proceed(Object object) {
+    public void proceed(Object data) {
         if (index >= interceptors.size()) {
             //end of the Chain, execute the caller Listener
-            Listener.onSuccess(listener, object);
+            Listener.onSuccess(listener, data);
         } else {
             //process the next interceptor in the Chain
             try {
                 Interceptor interceptor = interceptors.get(index);
                 Logger.debug(TAG, "Processing interceptor: %s", interceptor.getClass().getSimpleName());
-                interceptor.intercept(new InterceptorHandler(context, interceptors, listener, index + 1), object);
-            } catch (ClassCastException e) {
+                interceptor.intercept(new InterceptorHandler(context, interceptors, listener, index + 1), data);
+            } catch (ClassCastException e) { // The Interceptor cannot handle the data
                 //skip the interceptor
                 index++;
-                proceed(object);
+                proceed(data);
             } catch (Exception e) {
                 listener.onException(e);
             }

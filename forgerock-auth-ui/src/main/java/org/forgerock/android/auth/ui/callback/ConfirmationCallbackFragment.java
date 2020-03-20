@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -45,4 +45,76 @@ public class ConfirmationCallbackFragment extends CallbackFragment<ConfirmationC
         return view;
     }
 
+/*
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ConfirmationCallbackDialogFragment fragment = ConfirmationCallbackDialogFragment.newInstance(callback);
+        fragment.show(getChildFragmentManager(), null);
+    }
+
+    public void onDismiss(ConfirmationCallback result) {
+        callback.setSelectedIndex(result.getSelectedIndex());
+        next();
+    }
+
+    public static class ConfirmationCallbackDialogFragment extends DialogFragment {
+
+        private ConfirmationCallback callback;
+        private ConfirmationCallbackFragment confirmationCallbackFragment;
+
+        public static ConfirmationCallbackDialogFragment newInstance(ConfirmationCallback callback) {
+            ConfirmationCallbackDialogFragment fragment = new ConfirmationCallbackDialogFragment();
+            Bundle args = new Bundle();
+            args.putSerializable("CALLBACK", callback);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if (getArguments() != null) {
+                callback = (ConfirmationCallback) getArguments().getSerializable("CALLBACK");
+            }
+            confirmationCallbackFragment = (ConfirmationCallbackFragment) getParentFragment();
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            final View view = inflater.inflate(R.layout.fragment_confirmation_callback, container, false);
+            TextView prompt = view.findViewById(R.id.prompt);
+            prompt.setText(callback.getPrompt());
+            LinearLayout confirmation = view.findViewById(R.id.confirmation);
+            for (int i = 0; i < callback.getOptions().size(); i++) {
+                Button button = new Button(getContext());
+                button.setText(callback.getOptions().get(i));
+                final int finalI = i;
+                button.setOnClickListener(v -> {
+                    callback.setSelectedIndex(finalI);
+                    dismiss();
+                });
+                confirmation.addView(button, i);
+            }
+            return view;
+        }
+
+        @Override
+        public void onDismiss(@NonNull DialogInterface dialog) {
+            super.onDismiss(dialog);
+            confirmationCallbackFragment.onDismiss(callback);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        }
+
+    }
+ */
 }
