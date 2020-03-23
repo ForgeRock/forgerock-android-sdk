@@ -74,6 +74,7 @@ public interface DeviceCollector extends Interceptor<JSONObject> {
 
             @Override
             public void onException(Exception e) {
+                //Continue to collect.
                 chain.proceed(data);
             }
         });
