@@ -45,6 +45,10 @@ public class ConfirmationCallbackFragment extends CallbackFragment<ConfirmationC
         return view;
     }
 
+    /*
+    Trying to use a Dialog to handle ConfirmationCallback, however, the confirmation message is defined
+    as OutputTextCallback instead with the Prompt attribute. Custom UI is require to show as Dialog.
+     */
 /*
     @Override
     public void onCreate(Bundle savedInstanceState) {

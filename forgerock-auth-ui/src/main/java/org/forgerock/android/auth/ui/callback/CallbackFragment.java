@@ -61,15 +61,26 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
         callbackController = null;
     }
 
+    /**
+     * Call when data is collected from the callback.
+     */
     public void onDataCollected() {
         callbackController.onDataCollected(callback);
     }
 
+    /**
+     * Proceed to next node from the intelligent tree.
+     */
     public void next() {
         onDataCollected();
         callbackController.next();
     }
 
+    /**
+     * Cancel the authentication and exist the intelligent tree
+     *
+     * @param e The exception cause to exist the intelligent tree.
+     */
     public void cancel(Exception e) {
         callbackController.cancel(e);
     }
