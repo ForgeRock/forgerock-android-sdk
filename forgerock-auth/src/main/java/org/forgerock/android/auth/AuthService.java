@@ -12,10 +12,7 @@ import android.util.LruCache;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
-
-import org.forgerock.android.auth.callback.*;
 
 import java.util.*;
 
@@ -29,8 +26,6 @@ public class AuthService {
     private static final String TAG = AuthService.class.getSimpleName();
     private static final String SERVICE = "service";
     private static final String COMPOSITE_ADVICE = "composite_advice";
-
-    private final Map<String, Class<? extends Callback>> callbacks = new HashMap<>();
 
     @Getter
     private String name;
@@ -58,8 +53,6 @@ public class AuthService {
         if (name != null && advice != null) {
             throw new IllegalArgumentException("Either provide Service name or Advice, but not both.");
         }
-
-        this.callbacks.putAll(CallbackFactory.getInstance().getCallbacks());
 
         authServiceId = UUID.randomUUID().toString();
         authServiceClient = new AuthServiceClient(serverConfig);
@@ -89,8 +82,7 @@ public class AuthService {
                         new NodeInterceptorHandler(
                                 context,
                                 authService.interceptors,
-                                listener, 0)
-                        , authService.callbacks));
+                                listener, 0)));
 
     }
 
@@ -103,7 +95,7 @@ public class AuthService {
     public void next(Context context, final NodeListener listener) {
         authServiceClient.authenticate(this,
                 new AuthServiceResponseHandler(this,
-                        new NodeInterceptorHandler(context, interceptors, listener, 0), callbacks));
+                        new NodeInterceptorHandler(context, interceptors, listener, 0)));
     }
 
     /**

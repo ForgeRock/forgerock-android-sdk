@@ -23,6 +23,9 @@ import java.util.List;
 @Getter
 public class Node implements Serializable {
 
+    public static final String AUTH_ID = "authId";
+    public static final String STAGE = "stage";
+
     private final String authId;
     private final String stage;
     private final String authServiceId;
@@ -36,9 +39,9 @@ public class Node implements Serializable {
      */
     JSONObject toJsonObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("authId", authId);
+        jsonObject.put(AUTH_ID, authId);
         if (stage != null) {
-            jsonObject.put("stage", stage);
+            jsonObject.put(STAGE, stage);
         }
         JSONArray array = new JSONArray();
         for (Callback cb : callbacks) {
