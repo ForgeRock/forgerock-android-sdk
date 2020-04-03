@@ -41,6 +41,7 @@ public class CallbackFactory {
         register(ConsentMappingCallback.class);
         register(HiddenValueCallback.class);
         register(DeviceProfileCallback.class);
+        register(MetadataCallback.class);
     }
 
     /**

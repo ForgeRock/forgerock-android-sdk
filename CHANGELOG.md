@@ -5,6 +5,7 @@
 #### Added
 - Support Set Persistent Cookie Node [SDKS-182]
 - Support Device Profile Collector Node [SDKS-293]
+- Support Metadata Callback & Stage Mapping for 6.5.2 [SDKS-305]
 
 #### Fixed
 - Interface alignment with other platforms and introduce FRSession [SDKS-177]

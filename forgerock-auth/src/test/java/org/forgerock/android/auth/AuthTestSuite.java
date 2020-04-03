@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
         ReCaptchaCallbackTest.class,
         ConsentMappingCallbackTest.class,
         DeviceProfileCollectorCallbackTest.class,
+        MetadataCallbackTest.class,
 
         AuthServiceMockTest.class,
         AuthServiceTest.class,
