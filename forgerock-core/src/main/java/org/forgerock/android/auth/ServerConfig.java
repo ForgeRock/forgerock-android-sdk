@@ -45,6 +45,16 @@ public class ServerConfig {
 
     private CookieJar cookieJar;
 
+    /**
+     * Server Endpoint setting, leave it empty to use default setting.
+     */
+    private String authenticateEndpoint;
+    private String authorizeEndpoint;
+    private String tokenEndpoint;
+    private String revokeEndpoint;
+    private String userInfoEndpoint;
+    private String logoutEndpoint;
+
     @lombok.Builder
     public ServerConfig(@NonNull Context context,
                         @NonNull String url,
@@ -52,7 +62,13 @@ public class ServerConfig {
                         Integer timeout,
                         TimeUnit timeUnit,
                         CookieJar cookieJar,
-                        @Singular List<String> pins) {
+                        @Singular List<String> pins,
+                        String authenticateEndpoint,
+                        String authorizeEndpoint,
+                        String tokenEndpoint,
+                        String revokeEndpoint,
+                        String userInfoEndpoint,
+                        String logoutEndpoint) {
 
         this.url = url;
         try {
@@ -66,6 +82,11 @@ public class ServerConfig {
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
         this.cookieJar = cookieJar;
+        this.authenticateEndpoint = authenticateEndpoint;
+        this.authorizeEndpoint = authorizeEndpoint;
+        this.tokenEndpoint = tokenEndpoint;
+        this.revokeEndpoint = revokeEndpoint;
+        this.userInfoEndpoint = userInfoEndpoint;
+        this.logoutEndpoint = logoutEndpoint;
     }
-
 }

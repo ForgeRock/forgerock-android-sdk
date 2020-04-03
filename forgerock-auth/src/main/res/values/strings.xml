@@ -23,6 +23,14 @@
     <string-array name="forgerock_pins">
     </string-array>
 
+    <!-- To override default path -->
+    <string name="forgerock_authenticate_endpoint" translatable="false"/>
+    <string name="forgerock_authorize_endpoint" translatable="false"/>
+    <string name="forgerock_token_endpoint" translatable="false"/>
+    <string name="forgerock_revoke_endpoint" translatable="false"/>
+    <string name="forgerock_userinfo_endpoint" translatable="false"/>
+    <string name="forgerock_logout_endpoint" translatable="false"/>
+
     <!-- SSO -->
     <string name="forgerock">ForgeRock</string> <!-- Account Label -->
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->

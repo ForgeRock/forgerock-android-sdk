@@ -42,6 +42,12 @@ public class Config {
     private int timeout;
     private List<String> pins;
     private CookieJar cookieJar;
+    private String authenticateEndpoint;
+    private String authorizeEndpoint;
+    private String tokenEndpoint;
+    private String revokeEndpoint;
+    private String userinfoEndpoint;
+    private String logoutEndpoint;
 
     //SSO Token Manager
     private String accountName;
@@ -68,6 +74,12 @@ public class Config {
         accountName = context.getString(R.string.forgerock_account_name);
         cookieJar = CookieJar.NO_COOKIES;
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
+        authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
+        authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
+        tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
+        revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
+        userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
+        logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
     }
 
     public static Config getInstance(Context context) {
@@ -95,6 +107,12 @@ public class Config {
                 .realm(realm)
                 .timeout(timeout)
                 .cookieJar(cookieJar)
+                .authenticateEndpoint(authenticateEndpoint)
+                .authorizeEndpoint(authorizeEndpoint)
+                .tokenEndpoint(tokenEndpoint)
+                .revokeEndpoint(revokeEndpoint)
+                .userInfoEndpoint(userinfoEndpoint)
+                .logoutEndpoint(logoutEndpoint)
                 .build();
     }
 

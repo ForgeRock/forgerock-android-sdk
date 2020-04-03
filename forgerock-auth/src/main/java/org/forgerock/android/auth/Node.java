@@ -8,9 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+
 import org.forgerock.android.auth.callback.Callback;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +17,10 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.List;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Getter
 public class Node implements Serializable {
 
