@@ -9,6 +9,7 @@
     <string name="app_name">A</string>
     <string name="logout">Logout</string>
     <string name="instanceId">Show InstanceId</string>
+    <string name="userinfo">UserInfo</string>
     <string name="invoke">Invoke</string>
     <string name="register">Register</string>
     <string name="login">Login</string>
