@@ -43,7 +43,7 @@ public class ServerConfig {
 
     private String host;
 
-    private CookieJar cookieJar;
+    private Supplier<CookieJar> cookieJarSupplier;
 
     /**
      * Server Endpoint setting, leave it empty to use default setting.
@@ -61,7 +61,7 @@ public class ServerConfig {
                         String realm,
                         Integer timeout,
                         TimeUnit timeUnit,
-                        CookieJar cookieJar,
+                        Supplier<CookieJar> cookieJarSupplier,
                         @Singular List<String> pins,
                         String authenticateEndpoint,
                         String authorizeEndpoint,
@@ -81,12 +81,20 @@ public class ServerConfig {
         this.timeout = timeout == null ? context.getResources().getInteger(R.integer.forgerock_timeout) : timeout;
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
-        this.cookieJar = cookieJar;
+        this.cookieJarSupplier = cookieJarSupplier;
         this.authenticateEndpoint = authenticateEndpoint;
         this.authorizeEndpoint = authorizeEndpoint;
         this.tokenEndpoint = tokenEndpoint;
         this.revokeEndpoint = revokeEndpoint;
         this.userInfoEndpoint = userInfoEndpoint;
         this.logoutEndpoint = logoutEndpoint;
+    }
+
+    CookieJar getCookieJar() {
+        if (cookieJarSupplier != null) {
+            return cookieJarSupplier.get();
+        } else {
+            return CookieJar.NO_COOKIES;
+        }
     }
 }

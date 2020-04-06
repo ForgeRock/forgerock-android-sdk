@@ -56,6 +56,7 @@ public class Config {
     //Token Manager
     private SharedPreferences sharedPreferences;
     private long cacheIntervalMillis = 0L;
+    private long cookieCacheIntervalMillis = 0L;
     private long threshold;
 
     //KeyStoreManager
@@ -67,12 +68,14 @@ public class Config {
         redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
         scope = context.getString(R.string.forgerock_oauth_scope);
         oAuthUrl = context.getString(R.string.forgerock_oauth_url);
+        cacheIntervalMillis = context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000;
         threshold = context.getResources().getInteger(R.integer.forgerock_oauth_threshold);
         url = context.getString(R.string.forgerock_url);
         realm = context.getString(R.string.forgerock_realm);
         timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
         accountName = context.getString(R.string.forgerock_account_name);
-        cookieJar = CookieJar.NO_COOKIES;
+        cookieJar = null; // We cannot initialize default cookie jar here
+        cookieCacheIntervalMillis = context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000;
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
         authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
         authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
@@ -106,7 +109,7 @@ public class Config {
                 .url(url)
                 .realm(realm)
                 .timeout(timeout)
-                .cookieJar(cookieJar)
+                .cookieJarSupplier(() -> getCookieJar())
                 .authenticateEndpoint(authenticateEndpoint)
                 .authorizeEndpoint(authorizeEndpoint)
                 .tokenEndpoint(tokenEndpoint)
@@ -149,6 +152,13 @@ public class Config {
                 .oAuth2Client(getOAuth2Client())
                 .build();
 
+    }
+
+    private CookieJar getCookieJar() {
+        if (cookieJar == null) {
+            cookieJar = SecureCookieJar.builder().build();
+        }
+        return cookieJar;
     }
 
     @VisibleForTesting
@@ -208,6 +218,10 @@ public class Config {
 
     Long applyDefaultIfNull(Long cacheIntervalMillis) {
         return applyIfNull(cacheIntervalMillis, null, (Function<Void, Long>) var -> getCacheIntervalMillis());
+    }
+
+    Long applyDefaultCookieCacheIfNull(Long cookieCache) {
+        return applyIfNull(cookieCache, null, (Function<Void, Long>) var -> getCookieCacheIntervalMillis());
     }
 
     Long applyDefaultThresholdIfNull(Long threshold) {
