@@ -39,16 +39,16 @@ public interface NodeListener<T> extends FRListener<T> {
      * {@link #onCallbackReceived(Node)} will be invoked with the returned {@link Node}.
      *
      * @param authServiceId Unique Auth Service Id
-     * @param jsonObject    The JSON Response from AM Intelligent Tree
+     * @param response      The JSON Response from AM Intelligent Tree
      * @return The Node Object
      * @throws Exception Any error during the transformation
      */
-    default Node onCallbackReceived(String authServiceId, JSONObject jsonObject) throws Exception {
+    default Node onCallbackReceived(String authServiceId, JSONObject response) throws Exception {
 
-        List<Callback> callbacks = parseCallback(jsonObject.getJSONArray("callbacks"));
+        List<Callback> callbacks = parseCallback(response.getJSONArray("callbacks"));
 
-        return new Node(jsonObject.getString(AUTH_ID)
-                , jsonObject.optString(STAGE, getStage(callbacks))
+        return new Node(response.getString(AUTH_ID)
+                , response.optString(STAGE, getStage(callbacks))
                 , authServiceId,
                 callbacks);
     }

@@ -172,6 +172,33 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 return true;
+            case R.id.userinfo:
+                if (FRUser.getCurrentUser() != null) {
+                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
+                        @Override
+                        public void onSuccess(final UserInfo result) {
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(INVISIBLE);
+                                try {
+                                    content.setText(result.getRaw().toString(2));
+                                } catch (JSONException e) {
+                                    onException(e);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onException(final Exception e) {
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(INVISIBLE);
+                                content.setText(e.getMessage());
+                            });
+                        }
+                    });
+                } else {
+                    content.setText("No User Session");
+                }
+                return true;
             case org.forgerock.auth.R.id.invoke:
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .followRedirects(false);
@@ -206,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                                 content.setText("Failed:" + response.message());
                             }
                         });
-                   }
+                    }
                 });
                 return true;
             default:

@@ -42,11 +42,16 @@ class UserService implements ResponseHandler {
     }
 
     void userinfo(final FRListener<UserInfo> listener) {
-        Request request = new Request.Builder()
-                .url(getUserInfoUrl())
-                .get()
-                .build();
-
+        Request request = null;
+        try {
+            request = new Request.Builder()
+                    .url(getUserInfoUrl())
+                    .get()
+                    .build();
+        } catch (MalformedURLException e) {
+            Listener.onException(listener, e);
+            return;
+        }
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
 
@@ -71,18 +76,18 @@ class UserService implements ResponseHandler {
         });
     }
 
-    private URL getUserInfoUrl() {
-        try {
-            return new URL(Uri.parse(serverConfig.getUrl())
-                    .buildUpon()
-                    .appendPath("oauth2")
+    private URL getUserInfoUrl() throws MalformedURLException {
+
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (StringUtils.isNotEmpty(serverConfig.getUserInfoEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getUserInfoEndpoint());
+        } else {
+            builder.appendPath("oauth2")
                     .appendPath("realms")
                     .appendPath(serverConfig.getRealm())
-                    .appendPath("userinfo")
-                    .build().toString());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+                    .appendPath("userinfo");
         }
+        return new URL(builder.build().toString());
     }
 
 }

@@ -36,7 +36,7 @@ public class SecureCookieJar implements CookieJar {
     @Builder
     public SecureCookieJar(SingleSignOnManager singleSignOnManager, Long cacheIntervalMillis) {
         this.singleSignOnManager = Config.getInstance().applyDefaultIfNull(singleSignOnManager);
-        this.cacheIntervalMillis = Config.getInstance().applyDefaultIfNull(cacheIntervalMillis);
+        this.cacheIntervalMillis = Config.getInstance().applyDefaultCookieCacheIfNull(cacheIntervalMillis);
     }
 
     @NotNull

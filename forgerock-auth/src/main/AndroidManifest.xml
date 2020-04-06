@@ -30,9 +30,9 @@
         -->
         <provider
             android:name=".InitProvider"
-            android:authorities="org.forgerock.provider"
+            android:authorities="${applicationId}.initprovider"
             android:enabled="true"
-            android:exported="false"></provider>
+            android:exported="false"/>
     </application>
 
 </manifest>
