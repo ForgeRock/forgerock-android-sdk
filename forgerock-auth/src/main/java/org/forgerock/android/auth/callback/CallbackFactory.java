@@ -40,9 +40,8 @@ public class CallbackFactory {
         register(ReCaptchaCallback.class);
         register(ConsentMappingCallback.class);
         register(HiddenValueCallback.class);
-
-        //Transformation from HiddenValueCallback
-        register(DeviceAttributeCallback.class);
+        register(DeviceProfileCallback.class);
+        register(MetadataCallback.class);
     }
 
     /**

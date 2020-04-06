@@ -9,9 +9,11 @@ package org.forgerock.android.auth;
 
 import android.net.Uri;
 import android.util.Base64;
+
 import lombok.Getter;
 import lombok.NonNull;
 import okhttp3.*;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 public class OAuth2Client {
 
@@ -196,10 +199,10 @@ public class OAuth2Client {
     /**
      * Sends an token request to the authorization service.
      *
-     * @param sessionToken    The Session Token
-     * @param code    The Authorization code.
-     * @param pkce    The Proof Key for Code Exchange
-     * @param handler Handle changes resulting from OAuth endpoints.
+     * @param sessionToken The Session Token
+     * @param code         The Authorization code.
+     * @param pkce         The Proof Key for Code Exchange
+     * @param handler      Handle changes resulting from OAuth endpoints.
      */
     private void token(@NonNull SSOToken sessionToken, @NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchange Access Token with Authorization Code");
@@ -239,15 +242,17 @@ public class OAuth2Client {
         }
     }
 
-
     private URL getAuthorizeUrl(Token token, PKCE pkce) throws MalformedURLException, UnsupportedEncodingException {
-
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("authorize")
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getAuthorizeEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getAuthorizeEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("authorize");
+        }
+        return new URL(builder
                 .appendQueryParameter(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
                 .appendQueryParameter(OAuth2.CLIENT_ID, clientId)
                 .appendQueryParameter(OAuth2.SCOPE, scope)
@@ -259,26 +264,32 @@ public class OAuth2Client {
     }
 
     private URL getTokenUrl() throws MalformedURLException {
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("access_token")
-                .build().toString());
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getTokenEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getTokenEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("access_token");
+        }
+        return new URL(builder.build().toString());
     }
 
     private URL getRevokeUrl() throws MalformedURLException {
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("token")
-                .appendPath("revoke")
-                .build().toString());
-    }
 
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getRevokeEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getRevokeEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("token")
+                    .appendPath("revoke");
+        }
+        return new URL(builder.build().toString());
+    }
 
     private PKCE generateCodeChallenge() throws UnsupportedEncodingException {
         int encodeFlags = Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE;

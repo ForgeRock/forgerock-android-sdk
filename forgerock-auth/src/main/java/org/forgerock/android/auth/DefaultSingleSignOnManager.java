@@ -29,6 +29,7 @@ import okhttp3.Response;
 import static org.forgerock.android.auth.SSOToken.IPLANET_DIRECTORY_PRO;
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_3_1;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 /**
  * Manage the Single Sign On Token, the token will be encrypted and store to {@link AccountManager}
@@ -99,14 +100,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
         URL logout = null;
         try {
-            logout = new URL(Uri.parse(serverConfig.getUrl())
-                    .buildUpon()
-                    .appendPath("json")
-                    .appendPath("realms")
-                    .appendPath(serverConfig.getRealm())
-                    .appendPath("sessions")
-                    .appendQueryParameter("_action", "logout")
-                    .build().toString());
+            logout = getLogoutUrl();
         } catch (MalformedURLException e) {
             Listener.onException(listener, e);
             return;
@@ -128,7 +122,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
             @Override
             public void onResponse(Call call, Response response) {
-               if (response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
                 } else {
                     handleError(response, listener);
@@ -140,5 +134,20 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
         OkHttpClientProvider.getInstance().clear();
 
     }
+
+    private URL getLogoutUrl() throws MalformedURLException {
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getLogoutEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getLogoutEndpoint());
+        } else {
+            builder.appendPath("json")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("sessions");
+        }
+        builder.appendQueryParameter("_action", "logout");
+        return new URL(builder.build().toString());
+    }
+
 
 }
