@@ -20,19 +20,13 @@ import org.forgerock.android.authenticator.network.NetworkClient;
  */
 public class FRAClient {
 
-    /**
-     * The network client.
-     */
+    /** The network client. */
     private NetworkClient networkClient;
 
-    /**
-     * The storage client.
-     */
+    /** The storage client. */
     private StorageClient storageClient;
 
-    /**
-     * The Context.
-     */
+    /** The Context. */
     private Context context;
 
     private FRAClient(Context context, StorageClient storageClient, NetworkClient networkClient) {
@@ -90,7 +84,7 @@ public class FRAClient {
         }
 
         /**
-         * Starts FRAClient.
+         * Builds FRAClient.
          *
          * @return the authenticator client {@link FRAClient}
          */

@@ -117,7 +117,7 @@ public class DefaultNetworkClient implements NetworkClient {
         return OkHttpClientProvider.getInstance().lookup(serverConfig);
     }
     /**
-     * Build a POST request.
+     * Build a request.
      *
      * @param url   the endpoint url
      * @param connectionProperties the connections properties
@@ -158,6 +158,9 @@ public class DefaultNetworkClient implements NetworkClient {
 
     @Override
     public void terminate() {
+        // Not applicable
+        throw new UnsupportedOperationException("Not Applicable. This implementation uses an " +
+                "OkHttpClient instance, which reuse it for all of your HTTP calls.");
     }
 
     @Override

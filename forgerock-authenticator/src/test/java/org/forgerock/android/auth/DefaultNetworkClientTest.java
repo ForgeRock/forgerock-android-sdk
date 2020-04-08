@@ -95,7 +95,22 @@ public class DefaultNetworkClientTest {
     }
 
     @Test
-    public void cancel() {
+    public void testTerminate() {
+        DefaultNetworkClient networkClient = new DefaultNetworkClient(context);
+        Exception exception = null;
+
+        try {
+            networkClient.terminate();
+        } catch (Exception e) {
+            exception = e;
+        }
+
+        assertNotNull(exception);
+        assertEquals(exception.getClass(), UnsupportedOperationException.class);
+    }
+
+    @Test
+    public void testCancel() {
         String sampleJson = "{\n" +
                 "    \"fruit\": \"Apple\",\n" +
                 "    \"size\": \"Large\",\n" +
