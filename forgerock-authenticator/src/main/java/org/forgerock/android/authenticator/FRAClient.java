@@ -61,7 +61,7 @@ public class FRAClient {
          * @return this builder
          */
         public FRAClientBuilder withContext(Context context) {
-            context = context;
+            this.context = context;
             return this;
         }
 
@@ -74,6 +74,18 @@ public class FRAClient {
          */
         public FRAClientBuilder withStorage(StorageClient storage) {
             this.storageClient = storage;
+            return this;
+        }
+
+        /**
+         * Set a network client implementation to use. You can define your own http client implementing
+         * {@link NetworkClient} or use the default implementation {@link DefaultNetworkClient}
+         *
+         * @param networkClient the network implementation
+         * @return this builder
+         */
+        public FRAClientBuilder withNetwork(NetworkClient networkClient) {
+            this.networkClient = networkClient;
             return this;
         }
 
