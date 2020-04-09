@@ -27,6 +27,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Getter
 public class ServerConfig {
 
+    public static final String API_VERSION_1_0 = "resource=1.0, protocol=1.0";
     public static final String API_VERSION_2_1 = "resource=2.1, protocol=1.0";
     public static final String API_VERSION_3_1 = "resource=3.1, protocol=1.0";
     public static final String ACCEPT_API_VERSION = "Accept-API-Version";
