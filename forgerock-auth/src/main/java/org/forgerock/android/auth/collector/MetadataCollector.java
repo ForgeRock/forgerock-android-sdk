@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Collector to collect Hardware information
  */
-public class ProfileCollector implements DeviceCollector {
+public class MetadataCollector implements DeviceCollector {
 
     private static final List<DeviceCollector> COLLECTORS = new ArrayList<>();
 
@@ -33,7 +33,7 @@ public class ProfileCollector implements DeviceCollector {
 
     @Override
     public String getName() {
-        return "profile";
+        return "metadata";
     }
 
     @Override

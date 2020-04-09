@@ -8,9 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+
 import org.forgerock.android.auth.callback.Callback;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,9 +17,15 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.List;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Getter
 public class Node implements Serializable {
+
+    public static final String AUTH_ID = "authId";
+    public static final String STAGE = "stage";
 
     private final String authId;
     private final String stage;
@@ -36,9 +40,9 @@ public class Node implements Serializable {
      */
     JSONObject toJsonObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("authId", authId);
+        jsonObject.put(AUTH_ID, authId);
         if (stage != null) {
-            jsonObject.put("stage", stage);
+            jsonObject.put(STAGE, stage);
         }
         JSONArray array = new JSONArray();
         for (Callback cb : callbacks) {

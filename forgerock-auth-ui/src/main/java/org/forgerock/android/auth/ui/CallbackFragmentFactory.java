@@ -55,7 +55,7 @@ public class CallbackFragmentFactory {
         register(TextOutputCallback.class, TextOutputCallbackFragment.class);
         register(ReCaptchaCallback.class, ReCaptchaCallbackFragment.class);
         register(ConsentMappingCallback.class, ConsentMappingCallbackFragment.class);
-        register(DeviceAttributeCallback.class, DeviceProfileCallbackFragment.class);
+        register(DeviceProfileCallback.class, DeviceProfileCallbackFragment.class);
     }
 
     public static CallbackFragmentFactory getInstance() {
@@ -94,7 +94,7 @@ public class CallbackFragmentFactory {
      * Retrieve the Fragment that represent the {@link Callback}
      *
      * @param callback The Callback
-     * @return The Fragment
+     * @return The Fragment or null if fragment is not defined.
      */
     public Fragment getFragment(Callback callback) {
 
@@ -106,7 +106,7 @@ public class CallbackFragmentFactory {
             fragment.setArguments(args);
             return fragment;
         }
-        throw new IllegalArgumentException("Callback Fragment not found.");
+        return null;
     }
 
 

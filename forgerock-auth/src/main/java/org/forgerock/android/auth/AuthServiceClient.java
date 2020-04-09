@@ -19,6 +19,7 @@ import java.net.URL;
 
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_2_1;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 /**
  * Client to interact with the auth tree APIs
@@ -42,7 +43,7 @@ class AuthServiceClient {
      * Start authentication with the auth tree
      *
      * @param authService The AuthService
-     * @param handler The response handler to handle the API result.
+     * @param handler     The response handler to handle the API result.
      */
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
@@ -73,7 +74,7 @@ class AuthServiceClient {
     /**
      * Go to next node from the auth tree
      *
-     * @param node The current node
+     * @param node    The current node
      * @param handler The response handler to handle the API result.
      */
     void authenticate(final Node node, final AuthServiceResponseHandler handler) {
@@ -115,11 +116,15 @@ class AuthServiceClient {
 
     private Uri.Builder getUriBuilder() {
 
-        return Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("json")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("authenticate");
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getAuthenticateEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getAuthenticateEndpoint());
+        } else {
+            builder.appendPath("json")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("authenticate");
+        }
+        return builder;
     }
 }

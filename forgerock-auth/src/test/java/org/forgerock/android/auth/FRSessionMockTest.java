@@ -11,7 +11,6 @@ import android.net.Uri;
 
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.junit.Assert;
@@ -59,7 +58,6 @@ public class FRSessionMockTest extends BaseTest {
         Assert.assertTrue(nodeListenerFuture.get() instanceof FRSession);
         Assert.assertNotNull(FRSession.getCurrentSession());
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
-
     }
 
     @Test
@@ -95,7 +93,7 @@ public class FRSessionMockTest extends BaseTest {
             }
         };
 
-        PolicyAdvice advice= PolicyAdvice.builder()
+        PolicyAdvice advice = PolicyAdvice.builder()
                 .type("TransactionConditionAdvice")
                 .value("3b8c1b2b-0aed-461a-a49b-f35da8276d12").build();
 

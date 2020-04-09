@@ -8,7 +8,6 @@
 package org.forgerock.android.auth.callback;
 
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.annotation.Keep;
 
@@ -17,47 +16,63 @@ import org.forgerock.android.auth.Listener;
 import org.forgerock.android.auth.collector.FRDeviceCollector;
 import org.forgerock.android.auth.collector.FRDeviceCollector.FRDeviceCollectorBuilder;
 import org.forgerock.android.auth.collector.LocationCollector;
-import org.forgerock.android.auth.collector.ProfileCollector;
+import org.forgerock.android.auth.collector.MetadataCollector;
 import org.json.JSONObject;
-
-import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-public class DeviceAttributeCallback extends HiddenValueCallback implements ActionCallback {
+public class DeviceProfileCallback extends AbstractCallback implements ActionCallback {
 
-    private static final String PROFILE = "profile";
-    private static final String LOCATION = "location";
     /**
-     * Attributes to collect
+     * Request the SDK to capture device metadata.
      */
-    private List<String> attributes;
+    private boolean metadata;
+
+    /**
+     * Request the SDK to capture device location.
+     */
+    private boolean location;
+
+    /**
+     * The message which should be displayed to the user
+     */
+    private String message;
 
     @Keep
-    public DeviceAttributeCallback(JSONObject jsonObject, int index) {
+    public DeviceProfileCallback(JSONObject jsonObject, int index) {
         super(jsonObject, index);
-        Uri uri = Uri.parse(getId());
-        attributes = uri.getQueryParameters("attributes");
+    }
+
+    @Override
+    protected void setAttribute(String name, Object value) {
+        switch (name) {
+            case "metadata":
+                this.metadata = (Boolean) value;
+                break;
+            case "location":
+                this.location = (Boolean) value;
+                break;
+            case "message":
+                this.message = (String) value;
+                break;
+            default:
+                //ignore
+        }
     }
 
     @Override
     public void execute(Context context, FRListener<Void> listener) {
 
         FRDeviceCollectorBuilder builder = FRDeviceCollector.builder();
-        for (String attribute: attributes) {
-            switch (attribute) {
-                case PROFILE:
-                    builder.collector(new ProfileCollector());
-                    break;
-                case LOCATION:
-                    builder.collector(new LocationCollector());
-                    break;
-            }
+        if (metadata) {
+            builder.collector(new MetadataCollector());
         }
-
+        if (location) {
+            builder.collector(new LocationCollector());
+        }
 
         builder.build().collect(context, new FRListener<JSONObject>() {
             @Override
@@ -75,7 +90,7 @@ public class DeviceAttributeCallback extends HiddenValueCallback implements Acti
 
     @Override
     public String getType() {
-        return "DeviceAttributeCallback";
+        return "DeviceProfileCallback";
     }
 
 }

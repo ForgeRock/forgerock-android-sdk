@@ -44,6 +44,9 @@
     <string name="accept">Accept</string>
     <string name="verify_recaptcha">Retry reCAPTCHA</string>
     <string name="privacy">Allow %1$s to access your %2$s</string>
+
+    <!-- Device Profile Callback Fragment -->
     <string name="fetching_device_profile">Fetching Device Profile</string>
+    <string name="request_location_rationale">Location is required for Authentication</string>
 
 </resources>

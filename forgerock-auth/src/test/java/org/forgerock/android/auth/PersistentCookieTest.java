@@ -254,7 +254,7 @@ public class PersistentCookieTest extends BaseTest {
     public void cookieCache() throws InterruptedException, ExecutionException {
 
         OkHttpClientProvider.getInstance().clear();
-        Config.getInstance(context).setCacheIntervalMillis(1000);
+        Config.getInstance(context).setCookieCacheIntervalMillis(1000);
         Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
         server.enqueue(new MockResponse()
                 .setResponseCode(HTTP_OK)

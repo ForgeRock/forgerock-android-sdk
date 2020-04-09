@@ -12,6 +12,7 @@ import android.content.Context;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
@@ -363,12 +364,18 @@ public class FRUserMockTest extends BaseTest {
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
 
-        RecordedRequest rr = server.takeRequest(); //Start the Auth Service
-        rr = server.takeRequest(); //Post Name Callback
-        rr = server.takeRequest(); //Post Password Callback
-        rr = server.takeRequest(); //Post to /authorize endpoint
-        rr = server.takeRequest(); //Post to /access-token endpoint
-        rr = server.takeRequest(); //Post to /user-info endpoint
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword");
+        rr = server.takeRequest(); //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate");
+        rr = server.takeRequest(); //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate");
+        rr = server.takeRequest(); //Post to /authorize endpoint GET /oauth2/realms/root/authorize?iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&client_id=andy_app&scope=openid&response_type=code&redirect_uri=https%3A%2F%2Fwww.example.com%3A8080%2Fcallback&code_challenge=PnQUh9V3GPr5qamcKZ39fcv4o81KJbhYls89L5rkVs8&code_challenge_method=S256 HTTP/1.1
+        Assertions.assertThat(rr.getPath()).startsWith("/oauth2/realms/root/authorize");
+        rr = server.takeRequest(); //Post to /access-token endpoint POST /oauth2/realms/root/access_token HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/oauth2/realms/root/access_token");
+        rr = server.takeRequest(); //Post to /user-info endpoint GET /oauth2/realms/root/userinfo HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/oauth2/realms/root/userinfo");
 
         AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
         assertNotNull(FRUser.getCurrentUser());
@@ -776,5 +783,68 @@ public class FRUserMockTest extends BaseTest {
 
         FRUser.getCurrentUser().getAccessToken();
 
+    }
+
+    @Test
+    public void testCustomEndpoint() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+        Config.getInstance(context).setAuthenticateEndpoint("dummy/authenticate");
+        Config.getInstance(context).setAuthorizeEndpoint("dummy/authorize");
+        Config.getInstance(context).setTokenEndpoint("dummy/token");
+        Config.getInstance(context).setUserinfoEndpoint("dummy/userinfo");
+        Config.getInstance(context).setRevokeEndpoint("dummy/revoke");
+        Config.getInstance(context).setLogoutEndpoint("dummy/logout");
+        frUserHappyPath();
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate?authIndexType=service&authIndexValue=UsernamePassword");
+        rr = server.takeRequest(); //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate");
+        rr = server.takeRequest(); //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate");
+        rr = server.takeRequest(); //Post to /authorize endpoint GET /oauth2/realms/root/authorize?iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&client_id=andy_app&scope=openid&response_type=code&redirect_uri=https%3A%2F%2Fwww.example.com%3A8080%2Fcallback&code_challenge=PnQUh9V3GPr5qamcKZ39fcv4o81KJbhYls89L5rkVs8&code_challenge_method=S256 HTTP/1.1
+        Assertions.assertThat(rr.getPath()).startsWith("/dummy/authorize");
+        rr = server.takeRequest(); //Post to /access-token endpoint POST /oauth2/realms/root/access_token HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/token");
+        rr = server.takeRequest(); //Post to /user-info endpoint GET /oauth2/realms/root/userinfo HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/userinfo");
+
+        AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
+        assertNotNull(FRUser.getCurrentUser());
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /sessions?_action=logout endpoint
+
+        //revoke Refresh Token and SSO Token are performed async
+        List<String> result = new ArrayList<>();
+        result.add("/dummy/logout?_action=logout");
+        result.add("/dummy/revoke");
+        assertThat(revoke1.getPath(), new IsIn(result));
+        assertThat(revoke2.getPath(), new IsIn(result));
+
+        RecordedRequest refreshTokenRevoke;
+        RecordedRequest ssoTokenRevoke;
+        if (revoke1.getPath().equals("/dummy/logout?_action=logout")) {
+            ssoTokenRevoke = revoke1;
+            refreshTokenRevoke = revoke2;
+        } else {
+            refreshTokenRevoke = revoke1;
+            ssoTokenRevoke = revoke2;
+        }
+        assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+        assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
+
+        String body = refreshTokenRevoke.getBody().readUtf8();
+        assertTrue(body.contains(OAuth2.TOKEN));
+        assertTrue(body.contains(OAuth2.CLIENT_ID));
+        assertTrue(body.contains(accessToken.getRefreshToken()));
     }
 }
