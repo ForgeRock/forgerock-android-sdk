@@ -9,9 +9,7 @@ package org.forgerock.android.authenticator;
 
 import android.content.Context;
 
-import org.forgerock.android.auth.DefaultNetworkClient;
 import org.forgerock.android.auth.DefaultStorageClient;
-import org.forgerock.android.authenticator.network.NetworkClient;
 
 /**
  * The top level FRAClient object represents the Authenticator module of the ForgeRock
@@ -20,20 +18,15 @@ import org.forgerock.android.authenticator.network.NetworkClient;
  */
 public class FRAClient {
 
-    /** The network client. */
-    private NetworkClient networkClient;
-
     /** The storage client. */
     private StorageClient storageClient;
 
     /** The Context. */
     private Context context;
 
-    private FRAClient(Context context, StorageClient storageClient, NetworkClient networkClient) {
+    private FRAClient(Context context, StorageClient storageClient) {
         this.context = context;
         this.storageClient = storageClient;
-        this.networkClient = networkClient;
-
     }
 
     static FRAClientBuilder builder() {
@@ -45,7 +38,6 @@ public class FRAClient {
      */
     public static class FRAClientBuilder {
         private StorageClient storageClient;
-        private NetworkClient networkClient;
         private Context context;
 
         /**
@@ -72,18 +64,6 @@ public class FRAClient {
         }
 
         /**
-         * Set a network client implementation to use. You can define your own http client implementing
-         * {@link NetworkClient} or use the default implementation {@link DefaultNetworkClient}
-         *
-         * @param networkClient the network implementation
-         * @return this builder
-         */
-        public FRAClientBuilder withNetwork(NetworkClient networkClient) {
-            this.networkClient = networkClient;
-            return this;
-        }
-
-        /**
          * Builds FRAClient.
          *
          * @return the authenticator client {@link FRAClient}
@@ -104,11 +84,7 @@ public class FRAClient {
                 storageClient = new DefaultStorageClient(context);
             }
 
-            if(networkClient == null) {
-                networkClient = new DefaultNetworkClient(context);
-            }
-
-            return new FRAClient(context, storageClient, networkClient);
+            return new FRAClient(context, storageClient);
         }
     }
 }
