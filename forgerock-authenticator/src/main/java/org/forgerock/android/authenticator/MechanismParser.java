@@ -7,7 +7,8 @@
 
 package org.forgerock.android.authenticator;
 
-import org.forgerock.android.authenticator.exception.URIMappingException;
+import org.forgerock.android.auth.Logger;
+import org.forgerock.android.authenticator.exception.MechanismParsingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,43 +24,41 @@ import java.util.Map;
  * Subclasses on this class must implement postProcess(), which verifies that all required information
  * is present, and transforms it as required.
  */
-public abstract class UriParser {
+public abstract class MechanismParser {
     /** The protocol of the URI */
     public static final String SCHEME = "scheme";
-
     /** The type of OTP (TOTP or HOTP) */
     public static final String TYPE = "authority"; // URI refers to this as the authority.
     /** The URI API Version */
     public static final String VERSION = "version";
-
     /** The IDP that issued the URI */
-    public static final String ISSUER_KEY = "issuer";
-
+    public static final String ISSUER = "issuer";
     /** The identity account name */
     public static final String ACCOUNT_NAME = "accountname";
-
     /** The identity image */
     public static final String IMAGE = "image";
-
+    /** The identity color */
     public static final String BG_COLOR = "b";
 
     private static final String SLASH = "/";
 
+    private static final String TAG = MechanismParser.class.getSimpleName();
+
     /**
-     * Call through to {@link UriParser#map(URI)}
+     * Call through to {@link MechanismParser#map(URI)}
      *
      * @param uriScheme Non null.
      * @return Non null, possibly empty Map.
-     * @throws URIMappingException If there was an unexpected error parsing.
+     * @throws MechanismParsingException If there was an unexpected error parsing.
      */
-    public final Map<String, String> map(String uriScheme) throws URIMappingException {
+    public final Map<String, String> map(String uriScheme) throws MechanismParsingException {
         try {
             return postProcess(map(new URI(uriScheme)));
         } catch (URISyntaxException e) {
-            throw new URIMappingException("Failed to parse URI", e);
+            Logger.warn(TAG, e,"Failed to parse URI: %s", uriScheme);
+            throw new MechanismParsingException("Failed to parse URI", e);
         }
     }
-
 
     /**
      * Parse the URI into a more useful Map format with known keys.
@@ -68,9 +67,9 @@ public abstract class UriParser {
      *
      * @param uri Non null URI to parse.
      * @return Non null possibly empty Map.
-     * @throws URIMappingException If there was an unexpected error parsing.
+     * @throws MechanismParsingException If there was an unexpected error parsing.
      */
-    private Map<String, String> map(URI uri) throws URIMappingException {
+    private Map<String, String> map(URI uri) throws MechanismParsingException {
         Map<String, String> r = new HashMap<String, String>();
         r.put(SCHEME, uri.getScheme());
         r.put(TYPE, uri.getAuthority());
@@ -81,7 +80,7 @@ public abstract class UriParser {
         if (pathParts == null) {
             r.put(ACCOUNT_NAME, path);
         } else {
-            r.put(ISSUER_KEY, pathParts[0]);
+            r.put(ISSUER, pathParts[0]);
             r.put(ACCOUNT_NAME, pathParts[1]);
         }
 
@@ -103,14 +102,13 @@ public abstract class UriParser {
     }
 
     /**
-     * Validates the parsed URI values based on the requirements of the current
-     * Google Authenticator specification.
+     * Validates the parsed URI values
      *
      * @param values The non null map of values stored in the parameters in the URI.
      * @return The same map of values, with a transform applied if required.
-     * @throws URIMappingException If there were any validation errors.
+     * @throws MechanismParsingException If there were any validation errors.
      */
-    protected abstract Map<String, String> postProcess(Map<String, String> values) throws URIMappingException;
+    protected abstract Map<String, String> postProcess(Map<String, String> values) throws MechanismParsingException;
 
     protected final boolean containsNonEmpty(Map<String, String> values, String key) {
         return values.containsKey(key) && !values.get(key).isEmpty();

@@ -16,7 +16,10 @@ public class AccountTest extends BaseTest {
 
     @Test
     public void testCreateAccount() {
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
 
         assertEquals(account.getIssuer(), ISSUER);
         assertEquals(account.getAccountName(), ACCOUNT_NAME);
@@ -28,7 +31,13 @@ public class AccountTest extends BaseTest {
         String imageUrl = "http://forgerock.com";
         String backgroundColor = "032b75";
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME, imageUrl, backgroundColor);
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setImageURL(imageUrl)
+                .setBackgroundColor(backgroundColor)
+                .build();
+
         assertEquals(account.getIssuer(), ISSUER);
         assertEquals(account.getAccountName(), ACCOUNT_NAME);
         assertEquals(account.getImageURL(), imageUrl);
@@ -37,8 +46,14 @@ public class AccountTest extends BaseTest {
 
     @Test
     public void testShouldBeEqualEquivalentAccount() {
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(ISSUER, ACCOUNT_NAME);
+        Account account1 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
+        Account account2 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
 
         assertEquals(account1, account2);
         assertEquals(account1.compareTo(account2), 0);
@@ -48,8 +63,14 @@ public class AccountTest extends BaseTest {
 
     @Test
     public void testShouldNotBeEqualDifferentAccountWithIssuer() {
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(OTHER_ISSUER, ACCOUNT_NAME);
+        Account account1 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
+        Account account2 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(OTHER_ISSUER)
+                .build();
 
         assertFalse(account1.equals(account2));
         assertEquals(account1.compareTo(account2), -1);
@@ -58,8 +79,14 @@ public class AccountTest extends BaseTest {
 
     @Test
     public void testShouldNotBeEqualDifferentAccountWithAccountName() {
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(ISSUER, OTHER_ACCOUNT_NAME);
+        Account account1 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
+        Account account2 = Account.builder()
+                .setAccountName(OTHER_ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
 
         assertFalse(account1.equals(account2));
         assertEquals(account1.compareTo(account2), -1);
@@ -68,7 +95,10 @@ public class AccountTest extends BaseTest {
 
     @Test
     public void testShouldHandleNullEquals() {
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
 
         assertFalse(account.equals(null));
         assertEquals(account.compareTo(null), -1);

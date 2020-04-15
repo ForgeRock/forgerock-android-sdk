@@ -11,7 +11,7 @@ package org.forgerock.android.authenticator;
  * The Mechanism model represents the two-factor way used for authentication.
  * Encapsulates the related settings, as well as an owning Account.
  */
-public abstract class Mechanism extends ModelObject<Mechanism> {
+public class Mechanism extends ModelObject<Mechanism> {
 
     /** Unique identifier of the Mechanism */
     private String id;
@@ -26,21 +26,18 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     /** The shared secret of the Mechanism */
     private final String secret;
 
-    public static final String PUSH = "push";
-    public static final String OATH = "oath";
+    public static final String PUSH = "pushauth";
+    public static final String OATH = "otpauth";
 
-    private static final String TAG = Mechanism.class.getSimpleName();
-
-    public Mechanism(String mechanismUID, String issuer, String accountName, String type) {
-        this.id = issuer + "-" + accountName + "-" + type;
-        this.mechanismUID = mechanismUID;
-        this.issuer = issuer;
-        this.accountName = accountName;
-        this.type = type;
-        this.secret = null;
-    }
-
-    public Mechanism(String mechanismUID, String issuer, String accountName, String type,
+    /**
+     * Base constructor which encapsulates common elements of all Mechanisms.
+     * @param mechanismUID The ID used to identify the Mechanism to external systems.
+     * @param issuer String value of issuer.
+     * @param accountName String value of accountName or username.
+     * @param type String value of the mechanism type.
+     * @param secret String value of the shared secret.
+     */
+    protected Mechanism(String mechanismUID, String issuer, String accountName, String type,
                      String secret) {
         this.id = issuer + "-" + accountName + "-" + type;
         this.mechanismUID = mechanismUID;
@@ -51,7 +48,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
-     * Gets the unique identifier for the Mechanism.
+     * Gets the storage id of the Mechanism.
      * @return The unique identifier.
      */
     public String getId() {
@@ -59,7 +56,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
-     * Get the mechanism unique Id that this notification was intended for.
+     * Get the mechanism unique Id.
      * @return The receiving Mechanism.
      */
     public String getMechanismUID() {
@@ -67,7 +64,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
-     * Gets the name of the IDP that issued this identity.
+     * Gets the name of the IDP that issued this account.
      * @return The name of the IDP.
      */
     public String getIssuer() {
@@ -75,7 +72,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
-     * Returns the name of this Identity.
+     * Returns the name of this Account.
      * @return The account name.
      */
     public String getAccountName() {
@@ -92,7 +89,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
 
     /**
      * Get the string used to represent the shared secret of the mechanism.
-     * @return The mechanism type as string.
+     * @return The shared secret as string.
      */
     public String getSecret() {
         return secret;
@@ -132,4 +129,5 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
         result = 31 * result + type.hashCode();
         return result;
     }
+
 }

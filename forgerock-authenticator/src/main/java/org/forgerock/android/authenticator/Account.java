@@ -7,10 +7,6 @@
 
 package org.forgerock.android.authenticator;
 
-import org.forgerock.android.authenticator.util.SortedList;
-
-import java.util.List;
-
 /**
  * Account model represents an identity for the user with an issuer. It is possible for a user to
  * have multiple accounts provided by a single issuer, however it is not possible to have multiple
@@ -28,10 +24,6 @@ public class Account extends ModelObject<Account> {
     private final String imageURL;
     /** HEX Color code in String for Account */
     private final String backgroundColor;
-    /** An array of Mechanism associated with current Account */
-    private final List<Mechanism> mechanisms;
-
-    private static final String TAG = Account.class.getSimpleName();
 
     /**
      * Creates Account object with given information
@@ -40,27 +32,20 @@ public class Account extends ModelObject<Account> {
      * @param imageURL URL of account's logo image (optional)
      * @param backgroundColor String HEX code of account's background color (optional)
      */
-    public Account(String issuer, String accountName, String imageURL, String backgroundColor) {
+    private Account(String issuer, String accountName, String imageURL, String backgroundColor) {
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
         this.accountName = accountName;
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
-        this.mechanisms = new SortedList<>();
     }
 
     /**
-     * Creates Account object with given information
-     * @param issuer String value of issuer
-     * @param accountName String value of accountName or username
+     * Returns a builder for creating an Identity.
+     * @return The Identity builder.
      */
-    public Account(String issuer, String accountName) {
-        this.id = issuer + "-" + accountName;
-        this.issuer = issuer;
-        this.accountName = accountName;
-        this.imageURL = null;
-        this.backgroundColor = null;
-        this.mechanisms = new SortedList<>();
+    public static AccountBuilder builder() {
+        return new AccountBuilder();
     }
 
     /**
@@ -72,7 +57,7 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Gets the name of the IDP that issued this identity.
+     * Gets the name of the IDP that issued this account.
      * @return The name of the IDP.
      */
     public String getIssuer() {
@@ -80,7 +65,7 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Returns the name of this Identity.
+     * Returns the name of this account.
      * @return The account name.
      */
     public String getAccountName() {
@@ -88,7 +73,7 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Gets the image URL for the IDP that issued this identity.
+     * Gets the image URL for the IDP that issued this account.
      * @return String representing the path to the image, or null if not assigned.
      */
     public String getImageURL() {
@@ -96,7 +81,7 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Gets the background color for the IDP that issued this identity.
+     * Gets the background color for the IDP that issued this account.
      * @return A hex string including a prepending # symbol, representing the color (e.g. #aabbcc)
      */
     public String getBackgroundColor() {
@@ -146,4 +131,57 @@ public class Account extends ModelObject<Account> {
         return result;
     }
 
+    /**
+     * Builder class responsible for producing Accounts.
+     */
+    public static class AccountBuilder {
+        private String issuer = "";
+        private String accountName = "";
+        private String imageURL;
+        private String backgroundColor;
+
+        /**
+         * Sets the name of the IDP that issued this account.
+         * @param issuer The IDP name.
+         */
+        public AccountBuilder setIssuer(String issuer) {
+            this.issuer = issuer != null ? issuer : "";
+            return this;
+        }
+
+        /**
+         * Sets the name of the account.
+         * @param accountName The account name.
+         */
+        public AccountBuilder setAccountName(String accountName) {
+            this.accountName = accountName != null ? accountName : "";
+            return this;
+        }
+
+        /**
+         * Sets the imageURL for the IDP that issued this account.
+         * @param imageURL A string that represents the image URI.
+         */
+        public AccountBuilder setImageURL(String imageURL) {
+            this.imageURL = imageURL != null ? imageURL : "";
+            return this;
+        }
+
+        /**
+         * Sets the background color for the IDP that issued this account.
+         * @param color A hex string including a prepending # symbol, representing the color (e.g. #aabbcc).
+         */
+        public AccountBuilder setBackgroundColor(String color) {
+            backgroundColor = color;
+            return this;
+        }
+
+        /**
+         * Produces the Account object that was being constructed.
+         * @return The account.
+         */
+        public Account build() {
+            return new Account(issuer, accountName, imageURL, backgroundColor);
+        }
+    }
 }
