@@ -41,8 +41,8 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Returns a builder for creating an Identity.
-     * @return The Identity builder.
+     * Returns a builder for creating an Account.
+     * @return The Account builder.
      */
     public static AccountBuilder builder() {
         return new AccountBuilder();

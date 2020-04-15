@@ -12,19 +12,6 @@ package org.forgerock.android.authenticator;
  */
 public class Push extends Mechanism {
 
-    /** The endpoint used for registration */
-    public static final String REG_ENDPOINT_KEY = "r";
-    /** The endpoint used for authentication */
-    public static final String AUTH_ENDPOINT_KEY = "a";
-    /** The message id to use for response */
-    public static final String MESSAGE_ID_KEY = "m";
-    /** The shared secret used for signing */
-    public static final String BASE_64_SHARED_SECRET_KEY = "s";
-    /** The challenge to use for the response */
-    public static final String BASE_64_CHALLENGE_KEY = "c";
-    /** The challenge to use for the response */
-    public static final String AM_LOAD_BALANCER_COOKIE_KEY = "l";
-
     /** The registration URL for Push mechanism */
     private String registrationEndpoint;
     /** The authentication URL for Push mechanism */
@@ -145,7 +132,6 @@ public class Push extends Mechanism {
          * @return The built Token.
          */
         protected Push build() {
-
             return new Push(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
                     registrationEndpoint, authenticationEndpoint);
         }

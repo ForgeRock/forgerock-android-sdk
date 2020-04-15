@@ -18,14 +18,6 @@ public class Oath extends Mechanism {
         HOTP, TOTP
     }
 
-    private static final String TOKEN_TYPE = "tokenType";
-    private static final String ALGO = "algorithm";
-    private static final String SECRET = "secret";
-    private static final String DIGITS = "digits";
-    private static final String COUNTER = "counter";
-    private static final String PERIOD = "period";
-    private static final int VERSION = 1;
-
     /** OATH type, must be either 'TOTP' or 'HOTP' */
     private TokenType oathType;
     /** Algorithm of HMAC-based OTP */

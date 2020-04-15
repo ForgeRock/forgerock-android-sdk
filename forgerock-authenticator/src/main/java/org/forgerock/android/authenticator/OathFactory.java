@@ -57,11 +57,8 @@ public class OathFactory extends MechanismFactory {
     }
 
     private Oath buildOathMechanism(String mechanismUID, Map<String, String> map) throws MechanismCreationException {
-        Oath oath = null;
-
         String issuer = map.get(MechanismParser.ISSUER);
         String accountName = map.get(MechanismParser.ACCOUNT_NAME);
-        String mechanismType = map.get(Mechanism.OATH);
 
         // Validate OTP type
         Oath.TokenType otpType = null;
@@ -122,7 +119,7 @@ public class OathFactory extends MechanismFactory {
             throw new MechanismCreationException("Failed to parse counter: " + counterStr, e);
         }
 
-        oath = Oath.builder()
+        Oath oath = Oath.builder()
                 .setMechanismUID(mechanismUID)
                 .setIssuer(issuer)
                 .setAccountName(accountName)
