@@ -180,7 +180,7 @@ public class Account extends ModelObject<Account> {
          * Produces the Account object that was being constructed.
          * @return The account.
          */
-        public Account build() {
+        protected Account build() {
             return new Account(issuer, accountName, imageURL, backgroundColor);
         }
     }

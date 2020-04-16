@@ -23,10 +23,12 @@ public class Notification extends ModelObject<Notification> {
     private String messageId;
     /** Base64 challenge that was sent with this notification */
     private String challenge;
-    /** Unique identifier of the Mechanism */
+    /** The AM load balance cookie */
     private String amlbCookie;
     /** Date that the notification was received */
     private final Calendar timeAdded;
+    /** Date that the notification has expired */
+    private final Calendar timeExpired;
     /** Time to live for the notification */
     private final long ttl;
     /** Determines if the Notification has been approved by the user. */
@@ -41,43 +43,24 @@ public class Notification extends ModelObject<Notification> {
      * @param challenge challenge from message payload
      * @param amlbCookie load balance cookie from OpenAM
      * @param timeAdded Date when the notification is delivered
+     * @param timeExpired Date when the notification was expired
      * @param ttl time-to-live value from message payload
      * @param approved boolean indicator of whether notification is still pending or not
      * @param pending boolean indicator of whether notification is approved or not
      */
-    public Notification(String mechanismUID, String messageId, String challenge, String amlbCookie,
-                        Calendar timeAdded, long ttl, boolean approved, boolean pending) {
+    private Notification(String mechanismUID, String messageId, String challenge, String amlbCookie,
+                        Calendar timeAdded, Calendar timeExpired, long ttl, boolean approved,
+                        boolean pending) {
         this.id = mechanismUID + "-" + timeAdded;
         this.mechanismUID = mechanismUID;
         this.messageId = messageId;
         this.challenge = challenge;
         this.amlbCookie = amlbCookie;
         this.timeAdded = timeAdded;
+        this.timeExpired = timeExpired;
         this.ttl = ttl;
         this.approved = approved;
         this.pending = pending;
-    }
-
-    /**
-     * Creates the Notification object with given data
-     * @param mechanismUID Mechanism UUID associated with the Notification
-     * @param messageId message identifier from the message payload
-     * @param challenge challenge from message payload
-     * @param amlbCookie load balance cookie from OpenAM
-     * @param timeAdded Date when the notification is delivered
-     * @param ttl time-to-live value from message payload
-     */
-    public Notification(String mechanismUID, String messageId, String challenge, String amlbCookie,
-                        Calendar timeAdded, long ttl) {
-        this.id = mechanismUID + "-" + timeAdded;
-        this.mechanismUID = mechanismUID;
-        this.messageId = messageId;
-        this.challenge = challenge;
-        this.amlbCookie = amlbCookie;
-        this.timeAdded = timeAdded;
-        this.ttl = ttl;
-        this.approved = false;
-        this.pending = true;
     }
 
     /**
@@ -137,6 +120,14 @@ public class Notification extends ModelObject<Notification> {
     }
 
     /**
+     * Get the time that the notification will or did expire.
+     * @return The expiry date.
+     */
+    public Calendar getTimeExpired() {
+        return timeExpired;
+    }
+
+    /**
      * Determine whether the authentication the notification is related to succeeded.
      * @return True if the authentication succeeded, false otherwise.
      */
@@ -192,4 +183,127 @@ public class Notification extends ModelObject<Notification> {
         result = 31 * result + timeAdded.hashCode();
         return result;
     }
+
+    /**
+     * Returns a builder for creating a Notification.
+     * @return The Notification builder.
+     */
+    public static NotificationBuilder builder() {
+        return new NotificationBuilder();
+    }
+
+    /**
+     * Builder class responsible for producing Notifications.
+     */
+    public static class NotificationBuilder {
+        private String mechanismUID;
+        private String messageId;
+        private String challenge;
+        private String amlbCookie;
+        private Calendar timeAdded;
+        private Calendar timeExpired;
+        private long ttl;
+        private boolean approved;
+        private boolean pending;
+
+        /**
+         * Sets the mechanism unique Id.
+         * @param mechanismUID the mechanism unique Id.
+         * @return The current builder.
+         */
+        public NotificationBuilder setMechanismUID(String mechanismUID) {
+            this.mechanismUID = mechanismUID;
+            return this;
+        }
+
+        /**
+         * Sets the message id that was received with this notification.
+         * @param messageId The messageId that was received.
+         * @return The current builder.
+         */
+        public NotificationBuilder setMessageId(String messageId) {
+            this.messageId = messageId;
+            return this;
+        }
+
+        /**
+         * Set the challenge that was sent with this notification.
+         * @param challenge The base64 encoded challenge.
+         * @return The current builder.
+         */
+        public NotificationBuilder setChallenge(String challenge) {
+            this.challenge = challenge;
+            return this;
+        }
+
+        /**
+         * Set the he AM load balance cookie with this notification.
+         * @param amlbCookie the load balance cookie.
+         * @return The current builder.
+         */
+        public NotificationBuilder setAmlbCookie(String amlbCookie) {
+            this.amlbCookie = amlbCookie;
+            return this;
+        }
+
+        /**
+         * Sets the date that the notification was received.
+         * @param timeAdded The date received in UTC.
+         * @return The current builder.
+         */
+        public NotificationBuilder setTimeAdded(Calendar timeAdded) {
+            this.timeAdded = timeAdded;
+            return this;
+        }
+
+        /**
+         * Sets the date that the notification will automatically fail.
+         * @param timeExpired The expiry date.
+         * @return The current builder.
+         */
+        public NotificationBuilder setTimeExpired(Calendar timeExpired) {
+            this.timeExpired = timeExpired;
+            return this;
+        }
+
+        /**
+         * Sets the time to live for the notification.
+         * @param ttl The expiry date.
+         * @return The current builder.
+         */
+        public NotificationBuilder setTtl(long ttl) {
+            this.ttl = ttl;
+            return this;
+        }
+
+        /**
+         * Sets whether the authentication the notification is related to was approved.
+         * @param approved True if the authentication was approved, false otherwise.
+         * @return The current builder.
+         */
+        public NotificationBuilder setApproved(boolean approved) {
+            this.approved = approved;
+            return this;
+        }
+
+        /**
+         * Sets whether the authentication the notification is related to has been handled.
+         * @param pending True if the authentication has not been handled, false otherwise.
+         * @return The current builder.
+         */
+        public NotificationBuilder setPending(boolean pending) {
+            this.pending = pending;
+            return this;
+        }
+
+        /**
+         * Build the notification.
+         * @return The final notification.
+         */
+        protected Notification build() {
+            return new Notification(mechanismUID, messageId, challenge, amlbCookie, timeAdded,
+                    timeExpired, ttl, approved, pending);
+        }
+    }
+
 }

@@ -24,7 +24,7 @@ import java.util.UUID;
  * Determines the type of mechanism which is being created, and routes the creation request to the
  * appropriate builder.
  */
-public abstract class MechanismFactory {
+abstract class MechanismFactory {
 
     private Context context;
     private StorageClient storageClient;

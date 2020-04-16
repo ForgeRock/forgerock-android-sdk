@@ -28,7 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Understands the concept of a version number associated with a Token
  * and will parse the URI according to this.
  */
-public class OathFactory extends MechanismFactory {
+class OathFactory extends MechanismFactory {
 
     private final OathParser parser = new OathParser();
 

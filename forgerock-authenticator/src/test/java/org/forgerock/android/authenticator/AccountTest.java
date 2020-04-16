@@ -28,8 +28,8 @@ public class AccountTest extends BaseTest {
     @Test
     public void testCreateAccountWithOptionalParameters() {
 
-        String imageUrl = "http://forgerock.com";
-        String backgroundColor = "032b75";
+        String imageUrl = IMAGE_URL;
+        String backgroundColor = BACKGROUND_COLOR;
 
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)

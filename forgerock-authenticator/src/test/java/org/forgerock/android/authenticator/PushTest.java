@@ -1,16 +1,16 @@
-package org.forgerock.android.authenticator;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 /*
  * Copyright (c) 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
+
+package org.forgerock.android.authenticator;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class PushTest extends BaseTest {
 
@@ -97,8 +97,8 @@ public class PushTest extends BaseTest {
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(OTHER_ISSUER)
                 .setAccountName(ACCOUNT_NAME)
-                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
-                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setAuthenticationEndpoint(OTHER_AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(OTHER_REGISTRATION_ENDPOINT)
                 .setSecret(SECRET)
                 .build();
 

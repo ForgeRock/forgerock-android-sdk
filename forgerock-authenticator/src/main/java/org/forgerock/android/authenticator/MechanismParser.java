@@ -24,7 +24,7 @@ import java.util.Map;
  * Subclasses on this class must implement postProcess(), which verifies that all required information
  * is present, and transforms it as required.
  */
-public abstract class MechanismParser {
+abstract class MechanismParser {
     /** The protocol of the URI */
     public static final String SCHEME = "scheme";
     /** The type of OTP (TOTP or HOTP) */

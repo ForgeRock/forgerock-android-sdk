@@ -12,7 +12,7 @@ import org.forgerock.android.authenticator.util.TimeKeeper;
 /**
  * Represents a currently active token.
  */
-class OathTokenCode {
+public class OathTokenCode {
     private final String code;
     private final long start;
     private final long until;
@@ -26,7 +26,7 @@ class OathTokenCode {
      * @param start start time
      * @param until end time
      */
-    public OathTokenCode(TimeKeeper timeKeeper, String code, long start, long until) {
+    protected OathTokenCode(TimeKeeper timeKeeper, String code, long start, long until) {
         this.timeKeeper = timeKeeper;
         this.code = code;
         this.start = start;

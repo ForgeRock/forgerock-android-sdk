@@ -7,7 +7,6 @@
 
 package org.forgerock.android.authenticator;
 
-import org.forgerock.android.auth.Logger;
 import org.forgerock.android.authenticator.exception.MechanismParsingException;
 
 import java.text.MessageFormat;
@@ -17,7 +16,7 @@ import java.util.Map;
  * Provides the ability to parse URI scheme into a convenient format
  * to use with configuring a {@link Oath} to generate OTP codes.
  */
-public class OathParser extends MechanismParser {
+class OathParser extends MechanismParser {
     /** The secret used for generating the OTP */
     public static final String SECRET = "secret";
 
