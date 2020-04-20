@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.forgerock.android.authenticator.Account;
+import org.forgerock.android.authenticator.ModelTest;
 import org.forgerock.android.authenticator.Mechanism;
 import org.forgerock.android.authenticator.Notification;
 import org.forgerock.android.authenticator.Oath;
@@ -39,6 +40,8 @@ public class DefaultStorageClientTest {
     private static final String OTHER_ISSUER = "issuer2";
     private static final String ACCOUNT_NAME = "user1";
     private static final String OTHER_ACCOUNT_NAME = "user2";
+    public static final String IMAGE_URL = "http://forgerock.com/logo.jpg";
+    public static final String BACKGROUND_COLOR = "032b75";
     private static final String MECHANISM_UID = "b162b325-ebb1-48e0-8ab7-b38cf341da95";
     private static final String OTHER_MECHANISM_UID = "013be51a-8c14-356d-b0fc-b3660cc8a101";
     private static final String SECRET = "JMEZ2W7D462P3JYBDG2HV7PFBM";
@@ -74,7 +77,7 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
 
         defaultStorage.setAccount(account);
 
@@ -88,8 +91,8 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreMultipleAccounts() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
 
         defaultStorage.setAccount(account1);
         defaultStorage.setAccount(account2);
@@ -108,8 +111,8 @@ public class DefaultStorageClientTest {
     @Test
     public void testNoAccountFound() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
 
         defaultStorage.setAccount(account1);
 
@@ -126,7 +129,7 @@ public class DefaultStorageClientTest {
     public void testUpdateExistingAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
         defaultStorage.setAccount(account);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
@@ -136,7 +139,7 @@ public class DefaultStorageClientTest {
         assertNull(accountFromStorage.getImageURL());
         assertNull(accountFromStorage.getBackgroundColor());
 
-        Account updatedAccount = new Account(ISSUER, ACCOUNT_NAME, "http://forgerock.com", "#032b75");
+        Account updatedAccount = ModelTest.createAccount(ISSUER, ACCOUNT_NAME, IMAGE_URL, BACKGROUND_COLOR);
         defaultStorage.setAccount(updatedAccount);
 
         Account updatedAccountFromStorage = defaultStorage.getAccount(updatedAccount.getId());
@@ -151,7 +154,7 @@ public class DefaultStorageClientTest {
     public void testRemoveExistingAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
         defaultStorage.setAccount(account);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
@@ -166,8 +169,8 @@ public class DefaultStorageClientTest {
     public void testStoreOathMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createOath(MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -186,8 +189,8 @@ public class DefaultStorageClientTest {
     public void testStorePushMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
 
         defaultStorage.setAccount(account);
@@ -205,10 +208,10 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreMultipleMechanismsForSameAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism1 = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2 = new Oath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
+        Mechanism mechanism2 = ModelTest.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -228,8 +231,8 @@ public class DefaultStorageClientTest {
     public void testUpdateExistingMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
 
         defaultStorage.setAccount(account);
@@ -244,7 +247,7 @@ public class DefaultStorageClientTest {
         assertEquals(pushMechanismFromStorage.getMechanismUID(), MECHANISM_UID);
         assertEquals(pushMechanismFromStorage.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
 
-        Mechanism updatedMechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Mechanism updatedMechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 OTHER_REGISTRATION_ENDPOINT, OTHER_AUTHENTICATION_ENDPOINT);
         defaultStorage.setMechanism(updatedMechanism);
 
@@ -260,8 +263,8 @@ public class DefaultStorageClientTest {
     public void testRemoveExistingMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Oath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -281,10 +284,10 @@ public class DefaultStorageClientTest {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
@@ -312,14 +315,14 @@ public class DefaultStorageClientTest {
         timeAdded2.setTimeInMillis(timeAdded2.getTimeInMillis()+100);
         timeAdded3.setTimeInMillis(timeAdded3.getTimeInMillis()+200);
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification1 = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = new Notification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification2 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = new Notification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification3 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded3, TTL);
 
         defaultStorage.setAccount(account);
@@ -347,17 +350,17 @@ public class DefaultStorageClientTest {
         Calendar timeAdded2 = Calendar.getInstance();
         timeAdded2.setTimeInMillis(timeAdded2.getTimeInMillis()+100);
 
-        Account account1 = new Account(ISSUER, ACCOUNT_NAME);
-        Account account2 = new Account(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Mechanism mechanism1 = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2 = new Push(OTHER_MECHANISM_UID, OTHER_ISSUER, OTHER_ACCOUNT_NAME, Mechanism.PUSH,
+        Mechanism mechanism2 = ModelTest.createPush(OTHER_MECHANISM_UID, OTHER_ISSUER, OTHER_ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification1 = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = new Notification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification2 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = new Notification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification3 = ModelTest.createNotification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
 
         defaultStorage.setAccount(account1);
@@ -392,10 +395,10 @@ public class DefaultStorageClientTest {
         boolean approved = false;
         boolean pending = true;
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
@@ -412,17 +415,17 @@ public class DefaultStorageClientTest {
         assertEquals(notificationFromStorage.getMechanismUID(), MECHANISM_UID);
         assertEquals(notificationFromStorage.getMessageId(), MESSAGE_ID);
 
-        Notification updatedNotification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL, approved, pending);
+        Notification updatedNotification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+                AMLB_COOKIE, timeAdded, timeAdded, TTL, approved, pending);
 
         defaultStorage.setNotification(updatedNotification);
 
         Notification updatedNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
 
-        assertNotNull(notificationFromStorage);
+        assertNotNull(updatedNotificationFromStorage);
         assertEquals(updatedNotificationFromStorage.getMessageId(), MESSAGE_ID);
-        assertEquals(notificationFromStorage.isApproved(), approved);
-        assertEquals(notificationFromStorage.isPending(), pending);
+        assertEquals(updatedNotificationFromStorage.isApproved(), approved);
+        assertEquals(updatedNotificationFromStorage.isPending(), pending);
     }
 
     @Test
@@ -430,10 +433,10 @@ public class DefaultStorageClientTest {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 
-        Account account = new Account(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
+        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);

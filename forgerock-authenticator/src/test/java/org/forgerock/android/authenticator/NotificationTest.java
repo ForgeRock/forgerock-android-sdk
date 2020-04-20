@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.authenticator;
 
 import org.junit.Test;
@@ -7,20 +14,22 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-/*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
- *
- * This software may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
-
 public class NotificationTest extends BaseTest {
 
     @Test
     public void createNotificationSuccessfuly() {
         Calendar timeAdded = Calendar.getInstance();
-        Notification notification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL);
+        Calendar timeExpired = Calendar.getInstance();
+
+        Notification notification = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTimeExpired(timeExpired)
+                .setTtl(TTL)
+                .build();
 
         assertEquals(notification.getMechanismUID(), MECHANISM_UID);
         assertEquals(notification.getMessageId(), MESSAGE_ID);
@@ -33,11 +42,21 @@ public class NotificationTest extends BaseTest {
     @Test
     public void createNotificationWithOptionalParametersSuccessfuly() {
         Calendar timeAdded = Calendar.getInstance();
+        Calendar timeExpired = Calendar.getInstance();
         boolean approved = false;
         boolean pending = true;
 
-        Notification notification = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL, approved, pending);
+        Notification notification = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTimeExpired(timeExpired)
+                .setTtl(TTL)
+                .setApproved(approved)
+                .setPending(pending)
+                .build();
 
         assertEquals(notification.getMechanismUID(), MECHANISM_UID);
         assertEquals(notification.getMessageId(), MESSAGE_ID);
@@ -50,12 +69,24 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldEqualEquivalentNotification() {
+    public void shouldBeEqualEquivalentNotification() {
         Calendar timeAdded = Calendar.getInstance();
-        Notification notification1 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL);
-        Notification notification2 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL);
+        Notification notification1 = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
+        Notification notification2 = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
 
         assertEquals(notification1, notification2);
         assertEquals(notification1.compareTo(notification2), 0);
@@ -64,12 +95,24 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentNotificationWithMechanismUID() {
+    public void shouldNotBeEqualNotificationWithDifferentMechanismUID() {
         Calendar timeAdded = Calendar.getInstance();
-        Notification notification1 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL);
-        Notification notification2 = new Notification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded, TTL);
+        Notification notification1 = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
+        Notification notification2 = Notification.builder()
+                .setMechanismUID(OTHER_MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
 
         assertFalse(notification1.equals(notification2));
         assertEquals(notification1.compareTo(notification2), 0);
@@ -77,17 +120,29 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentNotificationTimeAdded() {
+    public void shouldNotBeEqualNotificationWithDifferentTimeAdded() {
         Calendar timeAdded1 = Calendar.getInstance();
 
         long time = timeAdded1.getTimeInMillis();
         Calendar timeAdded2 = Calendar.getInstance();
         timeAdded2.setTimeInMillis(time+100);
 
-        Notification notification1 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = new Notification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
-                AMLB_COOKIE, timeAdded2, TTL);
+        Notification notification1 = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded1)
+                .setTtl(TTL)
+                .build();
+        Notification notification2 = Notification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded2)
+                .setTtl(TTL)
+                .build();
 
         assertFalse(notification1.equals(notification2));
         assertEquals(notification1.compareTo(notification2), 1);

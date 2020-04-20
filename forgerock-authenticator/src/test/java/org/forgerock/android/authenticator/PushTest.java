@@ -1,10 +1,3 @@
-package org.forgerock.android.authenticator;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 /*
  * Copyright (c) 2020 ForgeRock. All rights reserved.
  *
@@ -12,12 +5,25 @@ import static org.junit.Assert.assertFalse;
  * of the MIT license. See the LICENSE file for details.
  */
 
+package org.forgerock.android.authenticator;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 public class PushTest extends BaseTest {
 
     @Test
     public void createPushMechanismSuccessfuly() {
-        Push mechanism = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
+        Push mechanism = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
 
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
         assertEquals(mechanism.getIssuer(), ISSUER);
@@ -25,15 +31,27 @@ public class PushTest extends BaseTest {
         assertEquals(mechanism.getType(), Mechanism.PUSH);
         assertEquals(mechanism.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
         assertEquals(mechanism.getAuthenticationEndpoint(), AUTHENTICATION_ENDPOINT);
+        assertEquals(mechanism.getSecret(), SECRET);
     }
 
     @Test
     public void shouldEqualEquivalentPushMechanism() {
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2
-                = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
+        Mechanism mechanism1 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+        Mechanism mechanism2 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
 
         assertEquals(mechanism1, mechanism2);
         assertEquals(mechanism1.compareTo(mechanism2), 0);
@@ -42,25 +60,23 @@ public class PushTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentPushMechanismWithType() {
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2
-                = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-
-        assertFalse(mechanism1.equals(mechanism2));
-        assertEquals(mechanism1.compareTo(mechanism2), 1);
-        assertEquals(mechanism2.compareTo(mechanism1), -1);
-    }
-
-    @Test
     public void shouldNotEqualDifferentPushMechanismWithAccountName() {
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2
-                = new Push(MECHANISM_UID, ISSUER, OTHER_ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
+        Mechanism mechanism1 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+        Mechanism mechanism2 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(OTHER_ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
 
         assertFalse(mechanism1.equals(mechanism2));
         assertEquals(mechanism1.compareTo(mechanism2), 0);
@@ -69,11 +85,22 @@ public class PushTest extends BaseTest {
 
     @Test
     public void shouldNotEqualDifferentPushMechanismWithAccountIssuer() {
-        Mechanism mechanism1 = new Push(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2
-                = new Push(MECHANISM_UID, OTHER_ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
+        Mechanism mechanism1 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+        Mechanism mechanism2 = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(OTHER_ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(OTHER_AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(OTHER_REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
 
         assertFalse(mechanism1.equals(mechanism2));
         assertEquals(mechanism1.compareTo(mechanism2), 0);

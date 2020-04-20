@@ -7,7 +7,7 @@
 
 package org.forgerock.android.authenticator;
 
-import org.forgerock.android.authenticator.exception.URIMappingException;
+import org.forgerock.android.authenticator.exception.MechanismParsingException;
 
 import java.text.MessageFormat;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
  * Provides the ability to parse URI scheme into a convenient format
  * to use with configuring a {@link Oath} to generate OTP codes.
  */
-public class OathParser extends UriParser {
+class OathParser extends MechanismParser {
     /** The secret used for generating the OTP */
     public static final String SECRET = "secret";
 
@@ -34,9 +34,8 @@ public class OathParser extends UriParser {
 
     private static final String[] ALLOWED_TYPES = new String[]{"hotp", "totp"};
 
-
     @Override
-    protected Map<String, String> postProcess(Map<String, String> values) throws URIMappingException {
+    protected Map<String, String> postProcess(Map<String, String> values) throws MechanismParsingException {
         // Validate Type
         String type = values.get(TYPE);
         boolean validType = false;
@@ -47,17 +46,17 @@ public class OathParser extends UriParser {
             }
         }
         if (!validType) {
-            throw new URIMappingException(MessageFormat.format("Type {0} was not valid", type));
+            throw new MechanismParsingException(MessageFormat.format("Type {0} was not valid", type));
         }
 
         // Secret is REQUIRED
         if (!containsNonEmpty(values, SECRET)) {
-            throw new URIMappingException("Secret is required");
+            throw new MechanismParsingException("Secret is required");
         }
 
         // Counter is REQUIRED if the algorithm is HOTP
         if (type.equalsIgnoreCase("hotp") && !containsNonEmpty(values, COUNTER)) {
-            throw new URIMappingException("Counter is required when in hotp mode");
+            throw new MechanismParsingException("Counter is required when in hotp mode");
         }
 
         return values;

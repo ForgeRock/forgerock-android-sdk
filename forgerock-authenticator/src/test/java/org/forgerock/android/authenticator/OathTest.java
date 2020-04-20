@@ -16,8 +16,17 @@ public class OathTest extends BaseTest {
 
     @Test
     public void testCreateOathMechanism() {
-        Oath mechanism = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
+        Oath mechanism = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
 
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
         assertEquals(mechanism.getIssuer(), ISSUER);
@@ -33,11 +42,28 @@ public class OathTest extends BaseTest {
 
     @Test
     public void testShouldBeEqualEquivalentOathMechanism() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
-        Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
+        Mechanism mechanism1 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
+        Mechanism mechanism2 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
 
         assertEquals(mechanism1, mechanism2);
         assertEquals(mechanism1.compareTo(mechanism2), 0);
@@ -46,25 +72,29 @@ public class OathTest extends BaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualDifferentOathMechanismWithType() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
-        Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.PUSH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
-
-        assertFalse(mechanism1.equals(mechanism2));
-        assertEquals(mechanism1.compareTo(mechanism2), -1);
-        assertEquals(mechanism2.compareTo(mechanism1), 1);
-    }
-
-    @Test
     public void testShouldNotBeEqualDifferentOathMechanismWithAccountName() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
-        Mechanism mechanism2
-                = new Oath(MECHANISM_UID, ISSUER, OTHER_ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
+        Mechanism mechanism1 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
+        Mechanism mechanism2 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(OTHER_ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
 
         assertFalse(mechanism1.equals(mechanism2));
         assertEquals(mechanism1.compareTo(mechanism2), 0);
@@ -73,11 +103,28 @@ public class OathTest extends BaseTest {
 
     @Test
     public void testShouldNotBeEqualDifferentOathMechanismWithAccountIssuer() {
-        Mechanism mechanism1 = new Oath(MECHANISM_UID, ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
-        Mechanism mechanism2
-                = new Oath(MECHANISM_UID, OTHER_ISSUER, ACCOUNT_NAME, Mechanism.OATH,
-                Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
+        Mechanism mechanism1 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
+        Mechanism mechanism2 = Oath.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(OTHER_ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
 
         assertFalse(mechanism1.equals(mechanism2));
         assertEquals(mechanism1.compareTo(mechanism2), 0);

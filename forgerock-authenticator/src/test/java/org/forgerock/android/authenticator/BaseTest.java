@@ -13,10 +13,12 @@ public abstract class BaseTest {
     public static final String OTHER_ISSUER = "issuer2";
     public static final String ACCOUNT_NAME = "user1";
     public static final String OTHER_ACCOUNT_NAME = "user2";
+    public static final String IMAGE_URL = "http://forgerock.com/logo.jpg";
+    public static final String BACKGROUND_COLOR = "032b75";
     public static final String MECHANISM_UID = "b162b325-ebb1-48e0-8ab7-b38cf341da95";
     public static final String OTHER_MECHANISM_UID = "013be51a-8c14-356d-b0fc-b3660cc8a101";
     public static final String SECRET = "JMEZ2W7D462P3JYBDG2HV7PFBM";
-    public static final String ALGORITHM = "SHA 256";
+    public static final String ALGORITHM = "sha1";
     public static final int DIGITS = 6;
     public static final int PERIOD = 30;
     public static final int COUNTER = 0;
@@ -36,4 +38,5 @@ public abstract class BaseTest {
     public void cleanUp() {
 
     }
+
 }

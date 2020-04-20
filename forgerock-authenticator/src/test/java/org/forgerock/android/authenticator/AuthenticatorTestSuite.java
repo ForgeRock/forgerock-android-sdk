@@ -15,7 +15,10 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         AccountTest.class,
         NotificationTest.class,
+        OathCodeGeneratorTest.class,
+        OathParserTest.class,
         OathTest.class,
+        OathTokenCodeTest.class,
         PushTest.class,
         SortedListTest.class
 })
