@@ -19,7 +19,7 @@ public class SortedListTest {
     public final String[] elements = {"SECOND", "THIRD", "FIRST"};
 
     @Test
-    public void shouldSortElementsAddedOneByOne() {
+    public void testShouldSortElementsAddedOneByOne() {
         SortedList<String> sortedList = new SortedList<>();
 
         for (String element : elements) {
@@ -32,7 +32,7 @@ public class SortedListTest {
     }
 
     @Test
-    public void shouldSortElementsAddedTogether() {
+    public void testShouldSortElementsAddedTogether() {
         SortedList<String> sortedList = new SortedList<>();
 
         sortedList.addAll(Arrays.asList(elements));
@@ -41,5 +41,6 @@ public class SortedListTest {
         assertEquals(sortedList.get(1), "SECOND");
         assertEquals(sortedList.get(2), "THIRD");
     }
+
 }
 

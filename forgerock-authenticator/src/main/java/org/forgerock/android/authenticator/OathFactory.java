@@ -12,7 +12,6 @@ import android.content.Context;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.authenticator.exception.MechanismCreationException;
 import org.forgerock.android.authenticator.util.Base32String;
-import org.forgerock.android.authenticator.util.MapUtil;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -37,8 +36,8 @@ class OathFactory extends MechanismFactory {
     /**
      * Creates the MechanismFactory and loads the available mechanism information.
      *
-     * @param context
-     * @param storageClient
+     * @param context The application context
+     * @param storageClient The storage system
      */
     public OathFactory(Context context, StorageClient storageClient) {
         super(context, storageClient);
@@ -63,7 +62,7 @@ class OathFactory extends MechanismFactory {
         // Validate OTP type
         Oath.TokenType otpType = null;
         try {
-            otpType = Oath.TokenType.valueOf(map.get(OathParser.TYPE));
+            otpType = Oath.TokenType.valueOf(map.get(OathParser.TYPE).toUpperCase());
         } catch (IllegalArgumentException e) {
             Logger.warn(TAG, "Invalid type: %s", otpType);
             throw new MechanismCreationException("Invalid type: " + otpType);
@@ -71,8 +70,8 @@ class OathFactory extends MechanismFactory {
 
         // Validate algorithm and secret, algorithm name is valid if a corresponding algorithm
         // can be loaded
-        String algorithmStr = MapUtil.get(map, OathParser.ALGORITHM, "sha1");
-        String secretStr = MapUtil.get(map, OathParser.SECRET, "");
+        String algorithmStr = getFromMap(map, OathParser.ALGORITHM, "sha1");
+        String secretStr = getFromMap(map, OathParser.SECRET, "");
         String algorithm = null;
         byte[] secret = null;
         try {
@@ -89,14 +88,14 @@ class OathFactory extends MechanismFactory {
         }
 
         // Validates the length of the OTP to generate, either 6 or 8
-        String digitStr = MapUtil.get(map, OathParser.DIGITS, "6");
+        String digitStr = getFromMap(map, OathParser.DIGITS, "6");
         int digits = Integer.parseInt(digitStr);
         if (digits != 6 && digits != 8) {
             throw new MechanismCreationException("Digits must be 6 or 8: " + digitStr);
         }
 
         // Validates the period
-        String periodStr = MapUtil.get(map, OathParser.PERIOD, "30");
+        String periodStr = getFromMap(map, OathParser.PERIOD, "30");
         int period;
         try {
             period = Integer.parseInt(periodStr);
@@ -110,7 +109,7 @@ class OathFactory extends MechanismFactory {
         }
 
         // Validates the counter. Only useful for HOTP
-        String counterStr = MapUtil.get(map, OathParser.COUNTER, "0");
+        String counterStr = getFromMap(map, OathParser.COUNTER, "0");
         long counter;
         try {
             counter = Long.parseLong(counterStr);
@@ -152,7 +151,7 @@ class OathFactory extends MechanismFactory {
 
     @Override
     protected MechanismParser getParser() {
-        return parser;
+        return this.parser;
     }
 
 }

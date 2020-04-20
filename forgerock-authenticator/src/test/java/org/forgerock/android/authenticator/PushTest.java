@@ -15,7 +15,7 @@ import static org.junit.Assert.assertFalse;
 public class PushTest extends BaseTest {
 
     @Test
-    public void createPushMechanismSuccessfuly() {
+    public void testCreatePushMechanismSuccessfuly() {
         Push mechanism = Push.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -35,7 +35,7 @@ public class PushTest extends BaseTest {
     }
 
     @Test
-    public void shouldEqualEquivalentPushMechanism() {
+    public void testShouldEqualEquivalentPushMechanism() {
         Mechanism mechanism1 = Push.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -60,7 +60,7 @@ public class PushTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentPushMechanismWithAccountName() {
+    public void testShouldNotEqualDifferentPushMechanismWithAccountName() {
         Mechanism mechanism1 = Push.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -84,7 +84,7 @@ public class PushTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotEqualDifferentPushMechanismWithAccountIssuer() {
+    public void testShouldNotEqualDifferentPushMechanismWithAccountIssuer() {
         Mechanism mechanism1 = Push.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
