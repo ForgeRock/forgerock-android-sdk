@@ -12,7 +12,7 @@ import java.util.Calendar;
 /**
  * Base instrumented test, which will execute on an Android device.
  */
-public class ModelTest {
+public class MockModelBuilder {
 
     public static Account createAccount(String issuer, String accountName){
         Account account = Account.builder()

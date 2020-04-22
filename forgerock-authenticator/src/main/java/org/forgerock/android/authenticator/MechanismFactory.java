@@ -13,7 +13,6 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.authenticator.exception.DuplicateMechanismException;
 import org.forgerock.android.authenticator.exception.MechanismCreationException;
 import org.forgerock.android.authenticator.exception.MechanismParsingException;
-import org.forgerock.android.authenticator.util.MapUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,15 +66,15 @@ abstract class MechanismFactory {
     public final Mechanism createFromUri(String uri) throws MechanismParsingException, MechanismCreationException {
         MechanismParser parser = getParser();
         Map<String, String> values = parser.map(uri);
-        String mechanismType = MapUtil.get(values, MechanismParser.SCHEME, "");
-        String issuer = MapUtil.get(values, MechanismParser.ISSUER, "");
-        String accountName = MapUtil.get(values, MechanismParser.ACCOUNT_NAME, "");
-        String imageURL = MapUtil.get(values, MechanismParser.IMAGE, null);
-        String bgColor = MapUtil.get(values, MechanismParser.BG_COLOR, null);
+        String mechanismType = getFromMap(values, MechanismParser.SCHEME, "");
+        String issuer = getFromMap(values, MechanismParser.ISSUER, "");
+        String accountName = getFromMap(values, MechanismParser.ACCOUNT_NAME, "");
+        String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
+        String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
 
         int version;
         try {
-            version = Integer.parseInt(MapUtil.get(values, MechanismParser.VERSION, "1"));
+            version = Integer.parseInt(getFromMap(values, MechanismParser.VERSION, "1"));
         } catch (NumberFormatException e) {
             Logger.warn(TAG, e,"Expected valid integer, found: %s", values.get(MechanismParser.VERSION));
             throw new MechanismCreationException("Expected valid integer, found " +
@@ -84,7 +83,6 @@ abstract class MechanismFactory {
 
         Account account = storageClient.getAccount(issuer + "-" + accountName);
         try {
-
             if (account == null) {
                 account = Account.builder()
                         .setIssuer(issuer)
@@ -121,10 +119,30 @@ abstract class MechanismFactory {
     }
 
     /**
+     * Get a context that this factory was created from.
+     * @return The creating context.
+     */
+    protected Context getContext() {
+        return context;
+    }
+
+    /**
+     * Get a single value from the map.
+     * @param map Map containing key pair values
+     * @param name key to get stored value
+     * @param defaultValue a value in case no value found for the key
+     * @return The value for the name in the map or the default value
+     */
+    protected String getFromMap(Map<String, String> map, String name, String defaultValue) {
+        String value = map.get(name);
+        return value == null ? defaultValue : value;
+    }
+
+    /**
      * Generate a new, unique ID for a Mechanism.
      * @return The new mechanism UID.
      */
-    private String getNewMechanismUID() {
+    protected String getNewMechanismUID() {
         Logger.debug(TAG,"Creating new UID for the mechanism.");
         UUID uid = UUID.randomUUID();
         while (isExistingMechanismUID(uid.toString())) {

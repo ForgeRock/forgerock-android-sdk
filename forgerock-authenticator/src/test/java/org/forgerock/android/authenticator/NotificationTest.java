@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 public class NotificationTest extends BaseTest {
 
     @Test
-    public void createNotificationSuccessfuly() {
+    public void testCreateNotificationSuccessfuly() {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
 
@@ -40,7 +40,7 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void createNotificationWithOptionalParametersSuccessfuly() {
+    public void testCreateNotificationWithOptionalParametersSuccessfuly() {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
         boolean approved = false;
@@ -69,7 +69,7 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldBeEqualEquivalentNotification() {
+    public void testShouldBeEqualEquivalentNotification() {
         Calendar timeAdded = Calendar.getInstance();
         Notification notification1 = Notification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -95,7 +95,7 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotBeEqualNotificationWithDifferentMechanismUID() {
+    public void testShouldNotBeEqualNotificationWithDifferentMechanismUID() {
         Calendar timeAdded = Calendar.getInstance();
         Notification notification1 = Notification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -120,7 +120,7 @@ public class NotificationTest extends BaseTest {
     }
 
     @Test
-    public void shouldNotBeEqualNotificationWithDifferentTimeAdded() {
+    public void testShouldNotBeEqualNotificationWithDifferentTimeAdded() {
         Calendar timeAdded1 = Calendar.getInstance();
 
         long time = timeAdded1.getTimeInMillis();

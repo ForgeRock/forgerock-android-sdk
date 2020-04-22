@@ -19,6 +19,9 @@ import org.junit.runners.Suite;
         OathParserTest.class,
         OathTest.class,
         OathTokenCodeTest.class,
+        OathFactoryTest.class,
+        PushFactoryTest.class,
+        PushParserTest.class,
         PushTest.class,
         SortedListTest.class
 })

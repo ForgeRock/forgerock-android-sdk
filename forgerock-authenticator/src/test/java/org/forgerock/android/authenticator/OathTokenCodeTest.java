@@ -40,19 +40,19 @@ public class OathTokenCodeTest {
     }
 
     @Test
-    public void shouldContainCorrectCode() throws Exception {
+    public void testShouldContainCorrectCode() throws Exception {
         assertEquals(oathTokenCode.getCurrentCode(), CODE);
     }
 
     @Test
-    public void shouldReportCorrectValidityBeforeAndAfterExpiry() throws Exception {
+    public void testShouldReportCorrectValidityBeforeAndAfterExpiry() throws Exception {
         assertEquals(oathTokenCode.isValid(), true);
         timeKeeper.timeTravel(EXPIRY_DELAY);
         assertEquals(oathTokenCode.isValid(), false);
     }
 
     @Test
-    public void shouldReportProgressBeforeExpiry() throws Exception {
+    public void testShouldReportProgressBeforeExpiry() throws Exception {
         assertEquals(oathTokenCode.getCurrentProgress(), 0);
         timeKeeper.timeTravel(EXPIRY_DELAY / 4);
         assertEquals(oathTokenCode.getCurrentProgress(), 250);
@@ -65,9 +65,10 @@ public class OathTokenCodeTest {
     }
 
     @Test
-    public void shouldReportFullProgressAfterExpiry() throws Exception {
+    public void testShouldReportFullProgressAfterExpiry() throws Exception {
         timeKeeper.timeTravel(EXPIRY_DELAY * 2);
         assertEquals(oathTokenCode.getCurrentProgress(), 1000);
     }
+
 }
 

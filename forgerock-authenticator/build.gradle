@@ -37,6 +37,7 @@ android {
 
     testOptions {
         unitTests.includeAndroidResources = true
+        unitTests.returnDefaultValues = true
     }
 
     compileOptions {
@@ -172,36 +173,23 @@ dependencies {
     // JWT
     implementation 'org.forgerock.commons:json-web-token:3.0.3'
 
-    implementation 'com.squareup.okhttp3:okhttp:4.2.2'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
+    // Common
     implementation 'androidx.annotation:annotation:1.1.0'
-
     implementation 'com.google.code.gson:gson:2.8.5'
 
-    //Make it optional for developer
-    compileOnly 'com.google.android.gms:play-services-location:17.0.0'
-    compileOnly 'com.google.android.gms:play-services-safetynet:17.0.0'
+    // FCM Notifications, make it optional for developer
+    compileOnly "com.google.firebase:firebase-messaging:20.1.5"
 
+    // Testing
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.27.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
-    androidTestImplementation 'commons-io:commons-io:2.6'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    androidTestImplementation 'com.google.android.gms:play-services-location:17.0.0'
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
-    testImplementation 'commons-io:commons-io:2.6'
-    testImplementation 'org.assertj:assertj-core:3.14.0'
-
-    testImplementation 'org.mockito:mockito-core:2.27.0'
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
-
+    // JavaDoc ?
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
@@ -211,5 +199,3 @@ dependencies {
 repositories {
     mavenCentral()
 }
-
-

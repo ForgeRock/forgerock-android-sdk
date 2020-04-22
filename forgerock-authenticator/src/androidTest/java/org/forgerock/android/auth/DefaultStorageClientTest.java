@@ -13,7 +13,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.forgerock.android.authenticator.Account;
-import org.forgerock.android.authenticator.ModelTest;
+import org.forgerock.android.authenticator.MockModelBuilder;
 import org.forgerock.android.authenticator.Mechanism;
 import org.forgerock.android.authenticator.Notification;
 import org.forgerock.android.authenticator.Oath;
@@ -77,7 +77,7 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
 
         defaultStorage.setAccount(account);
 
@@ -91,8 +91,8 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreMultipleAccounts() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Account account1 = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = MockModelBuilder.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
 
         defaultStorage.setAccount(account1);
         defaultStorage.setAccount(account2);
@@ -111,8 +111,8 @@ public class DefaultStorageClientTest {
     @Test
     public void testNoAccountFound() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Account account1 = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = MockModelBuilder.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
 
         defaultStorage.setAccount(account1);
 
@@ -129,7 +129,7 @@ public class DefaultStorageClientTest {
     public void testUpdateExistingAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         defaultStorage.setAccount(account);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
@@ -139,7 +139,7 @@ public class DefaultStorageClientTest {
         assertNull(accountFromStorage.getImageURL());
         assertNull(accountFromStorage.getBackgroundColor());
 
-        Account updatedAccount = ModelTest.createAccount(ISSUER, ACCOUNT_NAME, IMAGE_URL, BACKGROUND_COLOR);
+        Account updatedAccount = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME, IMAGE_URL, BACKGROUND_COLOR);
         defaultStorage.setAccount(updatedAccount);
 
         Account updatedAccountFromStorage = defaultStorage.getAccount(updatedAccount.getId());
@@ -154,7 +154,7 @@ public class DefaultStorageClientTest {
     public void testRemoveExistingAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         defaultStorage.setAccount(account);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
@@ -169,8 +169,8 @@ public class DefaultStorageClientTest {
     public void testStoreOathMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createOath(MECHANISM_UID, ISSUER, ACCOUNT_NAME,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createOath(MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -189,8 +189,8 @@ public class DefaultStorageClientTest {
     public void testStorePushMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
 
         defaultStorage.setAccount(account);
@@ -208,10 +208,10 @@ public class DefaultStorageClientTest {
     @Test
     public void testStoreMultipleMechanismsForSameAccount() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism1 = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism1 = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2 = ModelTest.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
+        Mechanism mechanism2 = MockModelBuilder.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -231,8 +231,8 @@ public class DefaultStorageClientTest {
     public void testUpdateExistingMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
 
         defaultStorage.setAccount(account);
@@ -247,7 +247,7 @@ public class DefaultStorageClientTest {
         assertEquals(pushMechanismFromStorage.getMechanismUID(), MECHANISM_UID);
         assertEquals(pushMechanismFromStorage.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
 
-        Mechanism updatedMechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Mechanism updatedMechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 OTHER_REGISTRATION_ENDPOINT, OTHER_AUTHENTICATION_ENDPOINT);
         defaultStorage.setMechanism(updatedMechanism);
 
@@ -263,8 +263,8 @@ public class DefaultStorageClientTest {
     public void testRemoveExistingMechanism() {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createOath(OTHER_MECHANISM_UID, ISSUER, ACCOUNT_NAME,
                 Oath.TokenType.HOTP, ALGORITHM, SECRET, DIGITS, COUNTER, PERIOD);
 
         defaultStorage.setAccount(account);
@@ -284,10 +284,10 @@ public class DefaultStorageClientTest {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
@@ -315,14 +315,14 @@ public class DefaultStorageClientTest {
         timeAdded2.setTimeInMillis(timeAdded2.getTimeInMillis()+100);
         timeAdded3.setTimeInMillis(timeAdded3.getTimeInMillis()+200);
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification3 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded3, TTL);
 
         defaultStorage.setAccount(account);
@@ -350,17 +350,17 @@ public class DefaultStorageClientTest {
         Calendar timeAdded2 = Calendar.getInstance();
         timeAdded2.setTimeInMillis(timeAdded2.getTimeInMillis()+100);
 
-        Account account1 = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Account account2 = ModelTest.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
-        Mechanism mechanism1 = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account1 = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Account account2 = MockModelBuilder.createAccount(OTHER_ISSUER, OTHER_ACCOUNT_NAME);
+        Mechanism mechanism1 = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Mechanism mechanism2 = ModelTest.createPush(OTHER_MECHANISM_UID, OTHER_ISSUER, OTHER_ACCOUNT_NAME, SECRET,
+        Mechanism mechanism2 = MockModelBuilder.createPush(OTHER_MECHANISM_UID, OTHER_ISSUER, OTHER_ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = ModelTest.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        Notification notification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = ModelTest.createNotification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification3 = MockModelBuilder.createNotification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
 
         defaultStorage.setAccount(account1);
@@ -395,10 +395,10 @@ public class DefaultStorageClientTest {
         boolean approved = false;
         boolean pending = true;
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
@@ -415,7 +415,7 @@ public class DefaultStorageClientTest {
         assertEquals(notificationFromStorage.getMechanismUID(), MECHANISM_UID);
         assertEquals(notificationFromStorage.getMessageId(), MESSAGE_ID);
 
-        Notification updatedNotification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification updatedNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, timeAdded, TTL, approved, pending);
 
         defaultStorage.setNotification(updatedNotification);
@@ -433,10 +433,10 @@ public class DefaultStorageClientTest {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 
-        Account account = ModelTest.createAccount(ISSUER, ACCOUNT_NAME);
-        Mechanism mechanism = ModelTest.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+        Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = ModelTest.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);

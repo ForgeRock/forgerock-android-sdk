@@ -25,67 +25,67 @@ public class OathParserTest {
     }
 
     @Test
-    public void shouldParseType() throws MechanismParsingException {
-        Map<String, String> result = oathParser.map("otpauth://hotp/Example:alice@gmail.com?secret=ABC&counter=0");
+    public void testShouldParseType() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://hotp/Forgerock:user@forgerock.com?secret=ABC&counter=0");
         assertEquals(result.get(OathParser.TYPE), "hotp");
     }
 
     @Test
-    public void shouldParseAccountName() throws MechanismParsingException {
+    public void testShouldParseAccountName() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/example?secret=ABC");
         assertEquals(result.get(OathParser.ACCOUNT_NAME), "example");
     }
 
     @Test
-    public void shouldParseIssuerFromPath() throws MechanismParsingException {
+    public void testShouldParseIssuerFromPath() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/Badger:ferret?secret=ABC");
         assertEquals(result.get(OathParser.ISSUER), "Badger");
     }
 
     @Test
-    public void shouldOverwriteIssuerFromParamters() throws MechanismParsingException {
+    public void testShouldOverwriteIssuerFromParameters() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/Badger:ferret?issuer=Stoat&secret=ABC");
         assertEquals(result.get(OathParser.ISSUER), "Stoat");
     }
 
     @Test
-    public void shouldHandleMissingQueryParameters() throws MechanismParsingException {
-        Map<String, String> result = oathParser.map("otpauth://totp/Example:alice@google.com?secret=ABC");
+    public void testShouldHandleMissingQueryParameters() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Example:user@forgerock.com?secret=ABC");
         assertEquals(result.get("missing"), null);
     }
 
     @Test
-    public void shouldParseKnownQueryParameters() throws MechanismParsingException {
-        Map<String, String> result = oathParser.map("otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP");
+    public void testShouldParseKnownQueryParameters() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Example:user@forgerock.com?secret=JBSWY3DPEHPK3PXP");
         assertEquals(result.get(OathParser.SECRET), "JBSWY3DPEHPK3PXP");
     }
 
     @Test
-    public void shouldParseUnspecifiedQueryParameters() throws MechanismParsingException {
-        Map<String, String> result = oathParser.map("otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&badger=ferret");
+    public void testShouldParseUnspecifiedQueryParameters() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Example:user@forgerock.com?secret=JBSWY3DPEHPK3PXP&badger=ferret");
         assertEquals(result.get("badger"), "ferret");
     }
 
     @Test
-    public void shouldParseURLEncodedImagePathFromParameter() throws MechanismParsingException {
-        Map<String, String> result = oathParser.map("otpauth://totp/Example:alice@google.com?secret=ABC&image=" +
+    public void testShouldParseURLEncodedImagePathFromParameter() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Example:user@forgerock.com?secret=ABC&image=" +
                 "http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F1%2F10%2FBadger-badger.jpg");
         assertEquals(result.get("image"), "http://upload.wikimedia.org/wikipedia/commons/1/10/Badger-badger.jpg");
     }
 
     @Test (expected = MechanismParsingException.class)
-    public void shouldValidateMissingSecret() throws MechanismParsingException {
-        oathParser.map("otpauth://totp/Example:alice@google.com");
+    public void testShouldValidateMissingSecret() throws MechanismParsingException {
+        oathParser.map("otpauth://totp/Forgerock:user@forgerock.com");
     }
 
     @Test (expected = MechanismParsingException.class)
-    public void shouldValidateMissingCounterInHOTPMode() throws MechanismParsingException {
-        oathParser.map("otpauth://hotp/Example:alice@google.com?secret=ABC");
+    public void testShouldValidateMissingCounterInHOTPMode() throws MechanismParsingException {
+        oathParser.map("otpauth://hotp/Forgerock:user@forgerock.com?secret=ABC");
     }
 
     @Test (expected = MechanismParsingException.class)
-    public void shouldValidateIncorrectAuthorityType() throws MechanismParsingException {
-        oathParser.map("otpauth://badger/Example:alice@google.com?secret=ABC");
+    public void testShouldValidateIncorrectAuthorityType() throws MechanismParsingException {
+        oathParser.map("otpauth://badger/Forgerock:user@forgerock.com?secret=ABC");
     }
     
 }
