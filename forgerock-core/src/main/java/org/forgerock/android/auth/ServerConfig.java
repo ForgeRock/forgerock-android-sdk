@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 
+import org.forgerock.android.core.R;
+
 import lombok.*;
 import okhttp3.CookieJar;
 
