@@ -9,9 +9,10 @@ package org.forgerock.android.auth;
 
 import android.util.Log;
 import androidx.annotation.VisibleForTesting;
+import org.forgerock.android.core.BuildConfig;
 
 /**
- * Logger for Forgerock SDK
+ * Logger for ForgeRock SDK
  */
 public class Logger {
 
