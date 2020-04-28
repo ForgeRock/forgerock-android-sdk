@@ -7,9 +7,9 @@
 
 package org.forgerock.android.authenticator;
 
+import android.util.Base64;
+
 import org.forgerock.android.authenticator.exception.MechanismParsingException;
-import org.forgerock.util.encode.Base64;
-import org.forgerock.util.encode.Base64url;
 
 import java.util.Map;
 
@@ -47,7 +47,7 @@ class PushParser extends MechanismParser {
         }
 
         if (containsNonEmpty(values, BASE_64_URL_IMAGE)) {
-            byte[] imageBytes = Base64url.decode(values.get(BASE_64_URL_IMAGE));
+            byte[] imageBytes = Base64.decode(values.get(BASE_64_URL_IMAGE), Base64.NO_WRAP);
             if (imageBytes != null) {
                 values.put(IMAGE, new String(imageBytes));
             }
@@ -71,7 +71,7 @@ class PushParser extends MechanismParser {
         if (!containsNonEmpty(data, key)) {
             throw new MechanismParsingException(key + " must not be empty");
         }
-        byte[] bytes = Base64url.decode(data.get(key));
+        byte[] bytes = Base64.decode(data.get(key), Base64.NO_WRAP);
 
         if (bytes == null) {
             throw new MechanismParsingException("Failed to decode value in " + key);
@@ -80,7 +80,7 @@ class PushParser extends MechanismParser {
     }
 
     String recodeBase64UrlValueToBase64WithValidation(Map<String, String> data, String key) throws MechanismParsingException{
-        return Base64.encode(decodeValueWithValidation(data, key));
+        return Base64.encodeToString(decodeValueWithValidation(data, key), Base64.NO_WRAP);
     }
 
     String recodeBase64UrlValueToStringWithValidation(Map<String, String> data, String key) throws MechanismParsingException{

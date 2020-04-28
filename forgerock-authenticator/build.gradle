@@ -153,13 +153,7 @@ install {
 }
 
 repositories {
-    maven {
-        credentials {
-            username "$forgerockUser"
-            password "$forgerockPassword"
-        }
-        url 'https://maven.forgerock.org/repo/releases/'
-    }
+    mavenCentral()
     google()
 }
 
@@ -171,31 +165,30 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // JWT
-    implementation 'org.forgerock.commons:json-web-token:3.0.3'
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.14'
 
     // Common
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // FCM Notifications, make it optional for developer
-    compileOnly "com.google.firebase:firebase-messaging:20.1.5"
+    compileOnly "com.google.firebase:firebase-messaging:20.1.6"
 
     // Testing
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.mockito:mockito-core:2.27.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.1'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // JavaDoc ?
-    compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
-repositories {
-    mavenCentral()
-}
+

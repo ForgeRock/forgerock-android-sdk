@@ -10,12 +10,15 @@ package org.forgerock.android.authenticator;
 import org.forgerock.android.authenticator.exception.MechanismParsingException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+@RunWith(RobolectricTestRunner.class)
 public class PushParserTest {
 
     private PushParser pushParser;
@@ -58,7 +61,7 @@ public class PushParserTest {
     @Test
     public void testShouldParseSecret() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
-        assertEquals(result.get(PushParser.SHARED_SECRET), "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=");
+        assertEquals(result.get(PushParser.SHARED_SECRET), "b3uYLkQ7dRPjBaIzV0taijoXRgMqNP5AwVAvRfaE");
     }
 
     @Test

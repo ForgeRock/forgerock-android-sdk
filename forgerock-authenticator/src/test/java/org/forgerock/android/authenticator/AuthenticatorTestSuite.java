@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
         OathFactoryTest.class,
         PushFactoryTest.class,
         PushParserTest.class,
+        PushResponderTest.class,
         PushTest.class,
         SortedListTest.class
 })
