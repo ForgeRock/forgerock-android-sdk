@@ -14,7 +14,7 @@ import org.json.JSONObject;
  * The Mechanism model represents the two-factor way used for authentication.
  * Encapsulates the related settings, as well as an owning Account.
  */
-public class Mechanism extends ModelObject<Mechanism> {
+public abstract class Mechanism extends ModelObject<Mechanism> {
 
     /** Unique identifier of the Mechanism */
     private String id;
@@ -99,9 +99,7 @@ public class Mechanism extends ModelObject<Mechanism> {
     }
 
     @Override
-    public String toJson() {
-        return this.toJson();
-    }
+    public abstract String toJson();
 
     /**
      * Deserializes the specified Json into an object of the {@link Mechanism} object.
