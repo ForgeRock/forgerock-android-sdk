@@ -109,14 +109,13 @@ public class Account extends ModelObject<Account> {
     /**
      * Deserializes the specified Json into an object of the {@link Account} object.
      * @param jsonString the json string representing the object to be deserialized
-     * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
-     * or if {@code jsonString} is empty.
+     * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * if {@code jsonString} is empty or not able to parse it.
      */
     public static Account fromJson(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
-
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             return Account.builder()

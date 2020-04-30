@@ -106,8 +106,8 @@ public class Oath extends Mechanism {
     /**
      * Deserializes the specified Json into an object of the {@link Oath} object.
      * @param jsonString the json string representing the object to be deserialized
-     * @return an {@link Oath} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
-     * or if {@code jsonString} is empty.
+     * @return an {@link Oath} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * if {@code jsonString} is empty or not able to parse it.
      */
     public static Oath fromJson(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {

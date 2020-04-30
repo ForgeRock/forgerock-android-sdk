@@ -104,8 +104,8 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     /**
      * Deserializes the specified Json into an object of the {@link Mechanism} object.
      * @param jsonString the json string representing the object to be deserialized
-     * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
-     * or if {@code jsonString} is empty.
+     * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * if {@code jsonString} is empty or not able to parse it.
      */
     public static Mechanism fromJson(String jsonString) {
         Mechanism mechanism = null;
