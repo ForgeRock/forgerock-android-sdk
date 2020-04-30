@@ -18,4 +18,11 @@ abstract class ModelObject<T> implements Comparable<T> {
      * @return True if key traits of the objects match, false otherwise.
      */
     public abstract boolean matches(T object);
+
+    /**
+     * Serializes the {@link T} object into its equivalent Json representation.
+     * @return a JSON string representation of {@link T}
+     */
+    public abstract String toJson();
+
 }

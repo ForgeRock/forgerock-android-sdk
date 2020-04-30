@@ -7,6 +7,9 @@
 
 package org.forgerock.android.authenticator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * The Mechanism model represents the two-factor way used for authentication.
  * Encapsulates the related settings, as well as an owning Account.
@@ -93,6 +96,36 @@ public class Mechanism extends ModelObject<Mechanism> {
      */
     public String getSecret() {
         return secret;
+    }
+
+    @Override
+    public String toJson() {
+        return this.toJson();
+    }
+
+    /**
+     * Deserializes the specified Json into an object of the {@link Mechanism} object.
+     * @param jsonString the json string representing the object to be deserialized
+     * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
+     * or if {@code jsonString} is empty.
+     */
+    public static Mechanism fromJson(String jsonString) {
+        Mechanism mechanism = null;
+        if (jsonString == null || jsonString.length() == 0) {
+            return null;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            String type = jsonObject.getString("type");
+            if(type.equals(PUSH)) {
+                mechanism = Push.fromJson(jsonString);
+            } else if(type.equals(OATH)) {
+                mechanism = Oath.fromJson(jsonString);
+            }
+        } catch (JSONException e) {
+            return null;
+        }
+        return mechanism;
     }
 
     @Override

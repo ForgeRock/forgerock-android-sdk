@@ -11,9 +11,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.forgerock.android.authenticator.Account;
 import org.forgerock.android.authenticator.Mechanism;
 import org.forgerock.android.authenticator.Notification;
@@ -62,20 +59,18 @@ public class DefaultStorageClient implements StorageClient {
 
     @Override
     public Account getAccount(String accountId) {
-        Gson gson = new Gson();
         String json = accountData.getString(accountId, "");
-        return gson.fromJson(json, Account.class);
+        return Account.fromJson(json);
     }
 
     @Override
     public List<Account> getAllAccounts() {
         List<Account> accountList = new ArrayList<>();
-        Gson gson = new Gson();
 
         Map<String,?> keys = accountData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
             Logger.debug(TAG, "Account map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            Account account = gson.fromJson(entry.getValue().toString(), Account.class);
+            Account account = Account.fromJson(entry.getValue().toString());
             if(account != null)
                 accountList.add(account);
         }
@@ -92,8 +87,7 @@ public class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setAccount(Account account) {
-        Gson gson = new Gson();
-        String accountJson = gson.toJson(account);
+        String accountJson = account.toJson();
 
         return accountData.edit()
                 .putString(account.getId(), accountJson)
@@ -107,14 +101,13 @@ public class DefaultStorageClient implements StorageClient {
      */
     private List<Mechanism> getAllMechanisms() {
         List<Mechanism> mechanismList = new ArrayList<>();
-        Gson gson = getMechanismSerializer();
 
         Map<String,?> keys = mechanismData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
             Logger.debug(TAG, "Mechanism map values: ",entry.getKey() + ": " + entry.getValue().toString());
             String jsonData = entry.getValue().toString();
 
-            Mechanism mechanism = gson.fromJson(jsonData, Mechanism.class);
+            Mechanism mechanism = Mechanism.fromJson(jsonData);
             if(mechanism != null)
                 mechanismList.add(mechanism);
         }
@@ -145,8 +138,7 @@ public class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setMechanism(Mechanism mechanism) {
-        Gson gson = getMechanismSerializer();
-        String mechanismJson = gson.toJson(mechanism, Mechanism.class);
+        String mechanismJson = mechanism.toJson();
 
         return mechanismData.edit()
                 .putString(mechanism.getId(), mechanismJson)
@@ -160,12 +152,11 @@ public class DefaultStorageClient implements StorageClient {
      */
     private List<Notification> getAllNotifications() {
         List<Notification> notificationList = new ArrayList<>();
-        Gson gson = new Gson();
 
         Map<String,?> keys = notificationData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
             Logger.debug(TAG, "Notification map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            Notification notification = gson.fromJson(entry.getValue().toString(), Notification.class);
+            Notification notification = Notification.fromJson(entry.getValue().toString());
             if(notification != null)
                 notificationList.add(notification);
         }
@@ -196,8 +187,7 @@ public class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setNotification(Notification notification) {
-        Gson gson = new Gson();
-        String notificationJson = gson.toJson(notification);
+        String notificationJson = notification.toJson();
 
         return notificationData.edit()
                 .putString(notification.getId(), notificationJson)
@@ -227,10 +217,4 @@ public class DefaultStorageClient implements StorageClient {
                 .commit();
     }
 
-    private Gson getMechanismSerializer() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Mechanism.class, new SerializerInterfaceAdapter<Mechanism>());
-
-        return gsonBuilder.create();
-    }
 }

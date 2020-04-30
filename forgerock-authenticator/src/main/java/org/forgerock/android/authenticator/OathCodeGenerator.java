@@ -34,7 +34,7 @@ class OathCodeGenerator {
 
         switch (oath.getOathType()) {
             case HOTP:
-                oath.incremetCounter();
+                oath.incrementCounter();
                 otp = getOTP(oath.getCounter(), oath.getDigits(), oath.getSecret(), oath.getAlgorithm());
                 return new OathTokenCode(timeKeeper, otp, currentTime, currentTime + (oath.getPeriod() * 1000));
 
