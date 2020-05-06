@@ -7,6 +7,9 @@
 
 package org.forgerock.android.authenticator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Calendar;
 
 /**
@@ -141,6 +144,68 @@ public class Notification extends ModelObject<Notification> {
      */
     public final boolean isPending() {
         return pending;
+    }
+
+    @Override
+    public String toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", getId());
+            jsonObject.put("mechanismUID", getMechanismUID());
+            jsonObject.put("messageId", getMessageId());
+            jsonObject.put("challenge", getChallenge());
+            jsonObject.put("amlbCookie", getAmlbCookie());
+            jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
+            jsonObject.put("timeExpired", getTimeExpired() != null ? getTimeExpired().getTimeInMillis() : null);
+            jsonObject.put("ttl", getTtl());
+            jsonObject.put("approved", isApproved());
+            jsonObject.put("pending", isPending());
+        } catch (JSONException e) {
+            throw new RuntimeException("Error parsing Notification object to JSON string representation.", e);
+        }
+        return jsonObject.toString();
+    }
+
+    /**
+     * Deserializes the specified Json into an object of the {@link Notification} object.
+     * @param jsonString the json string representing the object to be deserialized
+     * @return a {@link Notification} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
+     * or if {@code jsonString} is empty.
+     */
+    public static Notification fromJson(String jsonString) {
+        if (jsonString == null || jsonString.length() == 0) {
+            return null;
+        }
+
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return Notification.builder()
+                    .setMechanismUID(jsonObject.getString("mechanismUID"))
+                    .setMessageId(jsonObject.getString("messageId"))
+                    .setChallenge(jsonObject.getString("challenge"))
+                    .setAmlbCookie(jsonObject.has("amlbCookie") ? jsonObject.getString("amlbCookie"): null)
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
+                    .setTimeExpired(jsonObject.has("timeExpired") ? getDate(jsonObject.optLong("timeExpired")) : null)
+                    .setTtl(jsonObject.optLong("ttl", -1))
+                    .setApproved(jsonObject.getBoolean("approved"))
+                    .setPending(jsonObject.getBoolean("pending"))
+                    .build();
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Return date from milliseconds.
+     * @param milliSeconds Date in milliseconds
+     * @return Calendar representing date
+     */
+    private static Calendar getDate(long milliSeconds)
+    {
+        // Create a calendar object that will convert the date and time value in milliseconds to date.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milliSeconds);
+        return calendar;
     }
 
     @Override

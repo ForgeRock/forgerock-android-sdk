@@ -7,6 +7,9 @@
 
 package org.forgerock.android.authenticator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Represents an instance of a Push authentication mechanism. Associated with an Account.
  */
@@ -48,6 +51,49 @@ public class Push extends Mechanism {
      */
     public String getAuthenticationEndpoint() {
         return authenticationEndpoint;
+    }
+
+    @Override
+    public String toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", getId());
+            jsonObject.put("issuer", getIssuer());
+            jsonObject.put("accountName", getAccountName());
+            jsonObject.put("mechanismUID", getMechanismUID());
+            jsonObject.put("secret", getSecret());
+            jsonObject.put("type", getType());
+            jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
+            jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
+        } catch (JSONException e) {
+            throw new RuntimeException("Error parsing Push object to JSON string representation.", e);
+        }
+        return jsonObject.toString();
+    }
+
+    /**
+     * Deserializes the specified Json into an object of the {@link Push} object.
+     * @param jsonString the json string representing the object to be deserialized
+     * @return an {@link Push} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * if {@code jsonString} is empty or not able to parse it.
+     */
+    public static Push fromJson(String jsonString) {
+        if (jsonString == null || jsonString.length() == 0) {
+            return null;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return Push.builder()
+                    .setIssuer(jsonObject.getString("issuer"))
+                    .setAccountName(jsonObject.getString("accountName"))
+                    .setMechanismUID(jsonObject.getString("mechanismUID"))
+                    .setSecret(jsonObject.getString("secret"))
+                    .setRegistrationEndpoint(jsonObject.getString("registrationEndpoint"))
+                    .setAuthenticationEndpoint(jsonObject.getString("authenticationEndpoint"))
+                    .build();
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     /**

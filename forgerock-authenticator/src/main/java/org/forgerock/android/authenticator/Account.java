@@ -7,6 +7,9 @@
 
 package org.forgerock.android.authenticator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Account model represents an identity for the user with an issuer. It is possible for a user to
  * have multiple accounts provided by a single issuer, however it is not possible to have multiple
@@ -89,6 +92,44 @@ public class Account extends ModelObject<Account> {
     }
 
     @Override
+    public String toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", getId());
+            jsonObject.put("issuer", getIssuer());
+            jsonObject.put("accountName", getAccountName());
+            jsonObject.put("imageURL", getImageURL());
+            jsonObject.put("backgroundColor", getBackgroundColor());
+        } catch (JSONException e) {
+            throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
+        }
+        return jsonObject.toString();
+    }
+
+    /**
+     * Deserializes the specified Json into an object of the {@link Account} object.
+     * @param jsonString the json string representing the object to be deserialized
+     * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * if {@code jsonString} is empty or not able to parse it.
+     */
+    public static Account fromJson(String jsonString) {
+        if (jsonString == null || jsonString.length() == 0) {
+            return null;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return Account.builder()
+                    .setIssuer(jsonObject.getString("issuer"))
+                    .setAccountName(jsonObject.getString("accountName"))
+                    .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL"): null)
+                    .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor"): null)
+                    .build();
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    @Override
     public boolean matches(Account other) {
         if (other == null) {
             return false;
@@ -163,7 +204,7 @@ public class Account extends ModelObject<Account> {
          * @param imageURL A string that represents the image URI.
          */
         public AccountBuilder setImageURL(String imageURL) {
-            this.imageURL = imageURL != null ? imageURL : "";
+            this.imageURL = imageURL;
             return this;
         }
 
