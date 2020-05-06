@@ -9,12 +9,16 @@ package org.forgerock.android.authenticator;
 
 import android.content.Context;
 
+import com.nimbusds.jose.JOSEException;
+
 import org.forgerock.android.auth.DefaultStorageClient;
 import org.forgerock.android.authenticator.exception.MechanismCreationException;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 
@@ -28,6 +32,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+@RunWith(RobolectricTestRunner.class)
 public class PushFactoryTest {
 
     private DefaultStorageClient storageClient;
@@ -35,7 +40,7 @@ public class PushFactoryTest {
     private Context context;
 
     @Before
-    public void setUp() throws IOException, JSONException {
+    public void setUp() throws IOException, JSONException, JOSEException {
         context = mock(Context.class);
 
         storageClient = mock(DefaultStorageClient.class);

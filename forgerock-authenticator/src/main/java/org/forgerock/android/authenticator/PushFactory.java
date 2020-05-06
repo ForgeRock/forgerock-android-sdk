@@ -13,6 +13,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.nimbusds.jose.JOSEException;
 
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.authenticator.exception.MechanismCreationException;
@@ -102,7 +103,7 @@ class PushFactory extends MechanismFactory {
                 throw new MechanismCreationException("Communication with server returned " +
                         returnCode + " code.");
             }
-        } catch (IOException | JSONException e) {
+        } catch (IOException | JSONException | JOSEException e) {
             throw new MechanismCreationException("Failed to register with server. " + e.getLocalizedMessage(), e);
         }
 
@@ -136,7 +137,7 @@ class PushFactory extends MechanismFactory {
 
     @VisibleForTesting
     int performPushRegistration(String registrationEndpoint, String amlbCookie, String base64Secret,
-                                    String messageId, Map<String, Object> payload) throws IOException, JSONException {
+                                    String messageId, Map<String, Object> payload) throws IOException, JSONException, JOSEException {
         return PushResponder.respond(registrationEndpoint, amlbCookie, base64Secret, messageId, payload);
     }
 
