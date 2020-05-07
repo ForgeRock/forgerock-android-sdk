@@ -12,12 +12,6 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.forgerock.android.authenticator.Account;
-import org.forgerock.android.authenticator.MockModelBuilder;
-import org.forgerock.android.authenticator.Mechanism;
-import org.forgerock.android.authenticator.Notification;
-import org.forgerock.android.authenticator.Oath;
-import org.forgerock.android.authenticator.Push;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -287,22 +281,22 @@ public class DefaultStorageClientTest {
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
         defaultStorage.setMechanism(mechanism);
-        defaultStorage.setNotification(notification);
+        defaultStorage.setNotification(pushNotification);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
         Push pushMechanismFromStorage = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
-        Notification notificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
+        PushNotification pushNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
 
         assertNotNull(accountFromStorage);
         assertNotNull(pushMechanismFromStorage);
-        assertNotNull(notificationFromStorage);
-        assertEquals(notificationFromStorage.getMechanismUID(), MECHANISM_UID);
-        assertEquals(notificationFromStorage.getMessageId(), MESSAGE_ID);
+        assertNotNull(pushNotificationFromStorage);
+        assertEquals(pushNotificationFromStorage.getMechanismUID(), MECHANISM_UID);
+        assertEquals(pushNotificationFromStorage.getMessageId(), MESSAGE_ID);
     }
 
     @Test
@@ -318,22 +312,22 @@ public class DefaultStorageClientTest {
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification3 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded3, TTL);
 
         defaultStorage.setAccount(account);
         defaultStorage.setMechanism(mechanism);
-        defaultStorage.setNotification(notification1);
-        defaultStorage.setNotification(notification2);
-        defaultStorage.setNotification(notification3);
+        defaultStorage.setNotification(pushNotification1);
+        defaultStorage.setNotification(pushNotification2);
+        defaultStorage.setNotification(pushNotification3);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
         Push pushMechanismFromStorage = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
-        List<Notification> notificationsFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage);
+        List<PushNotification> notificationsFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage);
 
         assertNotNull(accountFromStorage);
         assertNotNull(pushMechanismFromStorage);
@@ -356,27 +350,27 @@ public class DefaultStorageClientTest {
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
         Mechanism mechanism2 = MockModelBuilder.createPush(OTHER_MECHANISM_UID, OTHER_ISSUER, OTHER_ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification1 = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded1, TTL);
-        Notification notification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification2 = MockModelBuilder.createNotification(MECHANISM_UID, OTHER_MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
-        Notification notification3 = MockModelBuilder.createNotification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification3 = MockModelBuilder.createNotification(OTHER_MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded2, TTL);
 
         defaultStorage.setAccount(account1);
         defaultStorage.setAccount(account2);
         defaultStorage.setMechanism(mechanism1);
         defaultStorage.setMechanism(mechanism2);
-        defaultStorage.setNotification(notification1);
-        defaultStorage.setNotification(notification2);
-        defaultStorage.setNotification(notification3);
+        defaultStorage.setNotification(pushNotification1);
+        defaultStorage.setNotification(pushNotification2);
+        defaultStorage.setNotification(pushNotification3);
 
         Account accountFromStorage1 = defaultStorage.getAccount(account1.getId());
         Account accountFromStorage2 = defaultStorage.getAccount(account2.getId());
         Push pushMechanismFromStorage1 = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage1).get(0);
         Push pushMechanismFromStorage2 = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage2).get(0);
-        List<Notification> notificationsFromStorage1 = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage1);
-        List<Notification> notificationsFromStorage2 = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage2);
+        List<PushNotification> notificationsFromStorage1 = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage1);
+        List<PushNotification> notificationsFromStorage2 = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage2);
 
         assertNotNull(accountFromStorage1);
         assertNotNull(pushMechanismFromStorage1);
@@ -398,34 +392,34 @@ public class DefaultStorageClientTest {
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
         defaultStorage.setMechanism(mechanism);
-        defaultStorage.setNotification(notification);
+        defaultStorage.setNotification(pushNotification);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
         Push pushMechanismFromStorage = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
-        Notification notificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
+        PushNotification pushNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
 
         assertNotNull(accountFromStorage);
         assertNotNull(pushMechanismFromStorage);
-        assertNotNull(notificationFromStorage);
-        assertEquals(notificationFromStorage.getMechanismUID(), MECHANISM_UID);
-        assertEquals(notificationFromStorage.getMessageId(), MESSAGE_ID);
+        assertNotNull(pushNotificationFromStorage);
+        assertEquals(pushNotificationFromStorage.getMechanismUID(), MECHANISM_UID);
+        assertEquals(pushNotificationFromStorage.getMessageId(), MESSAGE_ID);
 
-        Notification updatedNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification updatedPushNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, timeAdded, TTL, approved, pending);
 
-        defaultStorage.setNotification(updatedNotification);
+        defaultStorage.setNotification(updatedPushNotification);
 
-        Notification updatedNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
+        PushNotification updatedPushNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
 
-        assertNotNull(updatedNotificationFromStorage);
-        assertEquals(updatedNotificationFromStorage.getMessageId(), MESSAGE_ID);
-        assertEquals(updatedNotificationFromStorage.isApproved(), approved);
-        assertEquals(updatedNotificationFromStorage.isPending(), pending);
+        assertNotNull(updatedPushNotificationFromStorage);
+        assertEquals(updatedPushNotificationFromStorage.getMessageId(), MESSAGE_ID);
+        assertEquals(updatedPushNotificationFromStorage.isApproved(), approved);
+        assertEquals(updatedPushNotificationFromStorage.isPending(), pending);
     }
 
     @Test
@@ -436,22 +430,22 @@ public class DefaultStorageClientTest {
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         Mechanism mechanism = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
-        Notification notification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+        PushNotification pushNotification = MockModelBuilder.createNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
 
         defaultStorage.setAccount(account);
         defaultStorage.setMechanism(mechanism);
-        defaultStorage.setNotification(notification);
+        defaultStorage.setNotification(pushNotification);
 
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
         Push pushMechanismFromStorage = (Push) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
-        Notification notificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
+        PushNotification pushNotificationFromStorage = defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).get(0);
 
         assertNotNull(accountFromStorage);
         assertNotNull(pushMechanismFromStorage);
-        assertNotNull(notificationFromStorage);
-        assertEquals(notificationFromStorage.getMessageId(), MESSAGE_ID);
-        assertTrue(defaultStorage.removeNotification(notificationFromStorage));
+        assertNotNull(pushNotificationFromStorage);
+        assertEquals(pushNotificationFromStorage.getMessageId(), MESSAGE_ID);
+        assertTrue(defaultStorage.removeNotification(pushNotificationFromStorage));
         assertEquals(defaultStorage.getAllNotificationsForMechanism(pushMechanismFromStorage).size(), 0);
     }
 
