@@ -10,8 +10,17 @@ package org.forgerock.android.auth;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+
 import androidx.test.core.app.ApplicationProvider;
-import org.forgerock.android.auth.collector.*;
+
+import org.forgerock.android.auth.collector.BluetoothCollector;
+import org.forgerock.android.auth.collector.BrowserCollector;
+import org.forgerock.android.auth.collector.CameraCollector;
+import org.forgerock.android.auth.collector.DeviceCollector;
+import org.forgerock.android.auth.collector.HardwareCollector;
+import org.forgerock.android.auth.collector.NetworkCollector;
+import org.forgerock.android.auth.collector.PlatformCollector;
+import org.forgerock.android.auth.collector.TelephonyCollector;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -24,7 +33,9 @@ import org.robolectric.shadows.ShadowApplication;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRDeviceTest {
@@ -54,7 +65,7 @@ public class FRDeviceTest {
         System.setProperty("http.agent", "test");
         DeviceCollector collector = new BrowserCollector();
         collector.collect(context, listener);
-        Assert.assertEquals("test", listener.get().getString("agent"));
+        Assert.assertEquals("test", listener.get().getString("userAgent"));
     }
 
     @Test

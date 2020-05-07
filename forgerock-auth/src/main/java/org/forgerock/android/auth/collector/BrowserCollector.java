@@ -8,6 +8,8 @@
 package org.forgerock.android.auth.collector;
 
 import android.content.Context;
+import android.webkit.WebSettings;
+
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Listener;
 import org.json.JSONException;
@@ -17,6 +19,8 @@ import org.json.JSONObject;
  * Collector to collect device Browser information
  */
 public class BrowserCollector implements DeviceCollector {
+
+    private static final String USER_AGENT = "userAgent";
 
     @Override
     public String getName() {
@@ -34,7 +38,13 @@ public class BrowserCollector implements DeviceCollector {
 
     public JSONObject collect(Context context) throws JSONException {
         JSONObject o = new JSONObject();
-        o.put("agent", System.getProperty("http.agent"));
+        try {
+
+            o.put(USER_AGENT, WebSettings.getDefaultUserAgent(context));
+        } catch (Exception e) {
+            //fallback to http agent
+            o.put(USER_AGENT, System.getProperty("http.agent"));
+        }
         return o;
     }
 }
