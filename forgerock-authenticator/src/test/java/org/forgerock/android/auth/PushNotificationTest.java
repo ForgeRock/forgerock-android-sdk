@@ -188,7 +188,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
@@ -216,7 +216,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
@@ -243,7 +243,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
@@ -275,7 +275,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
@@ -303,7 +303,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
@@ -330,7 +330,7 @@ public class PushNotificationTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
 
         HttpUrl baseUrl = server.url("/");
-        Push push = generateMockMechanism(MECHANISM_UID, baseUrl.toString());
+        Push push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);

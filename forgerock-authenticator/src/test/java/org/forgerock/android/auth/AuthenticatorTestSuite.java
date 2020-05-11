@@ -14,6 +14,8 @@ import org.junit.runners.Suite;
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
         AccountTest.class,
+        AuthenticatorManagerTest.class,
+        FRAClientTest.class,
         PushNotificationTest.class,
         OathCodeGeneratorTest.class,
         OathParserTest.class,

@@ -10,6 +10,8 @@ package org.forgerock.android.auth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Account model represents an identity for the user with an issuer. It is possible for a user to
  * have multiple accounts provided by a single issuer, however it is not possible to have multiple
@@ -27,6 +29,8 @@ public class Account extends ModelObject<Account> {
     private final String imageURL;
     /** HEX Color code in String for Account */
     private final String backgroundColor;
+    /** List of Mechanism objects associated with this account **/
+    private List<Mechanism> mechanismList;
 
     /**
      * Creates Account object with given information
@@ -89,6 +93,18 @@ public class Account extends ModelObject<Account> {
      */
     public String getBackgroundColor() {
         return backgroundColor;
+    }
+
+    /**
+     * Get the list of mechanisms associates with this account.
+     * @return List<Mechanism> list of mechanisms
+     */
+    public List<Mechanism> getMechanisms() {
+        return mechanismList;
+    }
+
+    void setMechanismList(List<Mechanism> mechanismList) {
+        this.mechanismList = mechanismList;
     }
 
     @Override

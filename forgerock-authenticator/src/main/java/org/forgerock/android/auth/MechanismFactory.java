@@ -60,27 +60,37 @@ abstract class MechanismFactory {
      * Also adds it to the model.
      * @param uri The URI to process.
      * @param listener Listener for receiving the mechanism registration result
-     * @throws MechanismParsingException If the URL was not parsed correctly.
-     * @throws MechanismCreationException If the data was not valid to create a Mechanism.
      */
-    final void createFromUri(String uri, FRAListener<Mechanism> listener) throws MechanismParsingException, MechanismCreationException {
+    final void createFromUri(String uri, FRAListener<Mechanism> listener) {
+        // Parse uri
         MechanismParser parser = getParser();
-        Map<String, String> values = parser.map(uri);
+        Map<String, String> values = null;
+        try {
+            values = parser.map(uri);
+        } catch (MechanismParsingException e) {
+            listener.onException(e);
+            return;
+        }
+
+        // Extract data and set default values accordingly
         String mechanismType = getFromMap(values, MechanismParser.SCHEME, "");
         String issuer = getFromMap(values, MechanismParser.ISSUER, "");
         String accountName = getFromMap(values, MechanismParser.ACCOUNT_NAME, "");
         String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
         String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
 
-        int version;
+        // Check version
+        int version = 0;
         try {
             version = Integer.parseInt(getFromMap(values, MechanismParser.VERSION, "1"));
         } catch (NumberFormatException e) {
             Logger.warn(TAG, e,"Expected valid integer, found: %s", values.get(MechanismParser.VERSION));
-            throw new MechanismCreationException("Expected valid integer, found " +
-                    values.get(MechanismParser.VERSION), e);
+            listener.onException(new MechanismCreationException("Expected valid integer, found " +
+                    values.get(MechanismParser.VERSION), e));
+            return;
         }
 
+        // Lookup the account and persist mechanism
         Logger.debug(TAG, "Lookup account for the new mechanism.");
         Account account = storageClient.getAccount(issuer + "-" + accountName);
         try {
@@ -97,12 +107,14 @@ abstract class MechanismFactory {
                 } else {
                     Logger.debug(TAG,"Failed to create an Account for the mechanism .");
                     listener.onException(new MechanismCreationException("Error while creating an Account for the new mechanism."));
+                    return;
                 }
             } else {
                 final List<Mechanism> mechanisms = storageClient.getMechanismsForAccount(account);
                 for (Mechanism mechanism : mechanisms) {
                     if (mechanism.getType().equals(mechanismType)) {
-                        throw new DuplicateMechanismException("Matching mechanism already exists", mechanism);
+                        listener.onException(new DuplicateMechanismException("Matching mechanism already exists", mechanism));
+                        return;
                     }
                 }
             }
@@ -131,7 +143,7 @@ abstract class MechanismFactory {
                 Logger.warn(TAG, e,"Removing temporally created account.");
                 storageClient.removeAccount(account);
             }
-            throw e;
+            listener.onException(e);
         }
     }
 
