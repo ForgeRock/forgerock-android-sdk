@@ -46,12 +46,19 @@ public class DeviceIdentifier {
      */
     public String getIdentifier() {
         try {
-            return keyAlias + "-" + Base64.encodeToString(
-                    MessageDigest.getInstance("SHA1").digest(keyStoreManager.getIdentifierKey(keyAlias).getEncoded())
-                    , Base64.DEFAULT);
+            return keyAlias + "-" + toHexString(
+                    MessageDigest.getInstance("SHA1").digest(keyStoreManager.getIdentifierKey(keyAlias).getEncoded()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private String toHexString(byte[] byteArray) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : byteArray) {
+            int theByte = ((0x000000ff & b) | 0xffffff00);
+            result.append(Integer.toHexString(theByte).substring(6));
+        }
+        return result.toString();
+    }
 }
