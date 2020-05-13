@@ -11,11 +11,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.forgerock.android.authenticator.Account;
-import org.forgerock.android.authenticator.Mechanism;
-import org.forgerock.android.authenticator.Notification;
-import org.forgerock.android.authenticator.StorageClient;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +19,7 @@ import java.util.Map;
  * Data Access Object which implements StorageClient interface and uses SecureSharedPreferences from
  * forgerock-core SDK to store and load Accounts, Mechanisms and Notifications.
  */
-public class DefaultStorageClient implements StorageClient {
+class DefaultStorageClient implements StorageClient {
 
     //Alias to store keys
     private static final String ORG_FORGEROCK_SHARED_PREFERENCES_KEYS = "org.forgerock.android.authenticator.KEYS";
@@ -130,6 +125,21 @@ public class DefaultStorageClient implements StorageClient {
     }
 
     @Override
+    public Mechanism getMechanismByUUID(String mechanismUID) {
+        Mechanism mechanism = null;
+
+        List<Mechanism> allMechanisms = this.getAllMechanisms();
+        for(Mechanism mechanismEntry : allMechanisms){
+            if (mechanismEntry.getMechanismUID().equals(mechanismUID)) {
+                mechanism = mechanismEntry;
+                break;
+            }
+        }
+
+        return mechanism;
+    }
+
+    @Override
     public boolean removeMechanism(Mechanism mechanism) {
         return mechanismData.edit()
                 .remove(mechanism.getId())
@@ -150,47 +160,47 @@ public class DefaultStorageClient implements StorageClient {
      *
      * @return The complete list of notifications.
      */
-    private List<Notification> getAllNotifications() {
-        List<Notification> notificationList = new ArrayList<>();
+    private List<PushNotification> getAllNotifications() {
+        List<PushNotification> pushNotificationList = new ArrayList<>();
 
         Map<String,?> keys = notificationData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
-            Logger.debug(TAG, "Notification map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            Notification notification = Notification.fromJson(entry.getValue().toString());
-            if(notification != null)
-                notificationList.add(notification);
+            Logger.debug(TAG, "PushNotification map values: ",entry.getKey() + ": " + entry.getValue().toString());
+            PushNotification pushNotification = PushNotification.fromJson(entry.getValue().toString());
+            if(pushNotification != null)
+                pushNotificationList.add(pushNotification);
         }
 
-        return notificationList;
+        return pushNotificationList;
     }
 
     @Override
-    public List<Notification> getAllNotificationsForMechanism(Mechanism mechanism) {
-        List<Notification> notificationList = new ArrayList<>();
+    public List<PushNotification> getAllNotificationsForMechanism(Mechanism mechanism) {
+        List<PushNotification> pushNotificationList = new ArrayList<>();
 
-        List<Notification> allNotifications = this.getAllNotifications();
-        for(Notification notification : allNotifications){
-            if(notification.getMechanismUID().equals(mechanism.getMechanismUID())){
-                notificationList.add(notification);
+        List<PushNotification> allPushNotifications = this.getAllNotifications();
+        for(PushNotification pushNotification : allPushNotifications){
+            if(pushNotification.getMechanismUID().equals(mechanism.getMechanismUID())){
+                pushNotificationList.add(pushNotification);
             }
         }
 
-        return notificationList;
+        return pushNotificationList;
     }
 
     @Override
-    public boolean removeNotification(Notification notification) {
+    public boolean removeNotification(PushNotification pushNotification) {
         return notificationData.edit()
-                .remove(notification.getId())
+                .remove(pushNotification.getId())
                 .commit();
     }
 
     @Override
-    public boolean setNotification(Notification notification) {
-        String notificationJson = notification.toJson();
+    public boolean setNotification(PushNotification pushNotification) {
+        String notificationJson = pushNotification.toJson();
 
         return notificationData.edit()
-                .putString(notification.getId(), notificationJson)
+                .putString(pushNotification.getId(), notificationJson)
                 .commit();
     }
 
@@ -202,7 +212,7 @@ public class DefaultStorageClient implements StorageClient {
     }
 
     /**
-     * Remove all the stored {@link Account}, {@link Mechanism} and {@link Notification}
+     * Remove all the stored {@link Account}, {@link Mechanism} and {@link PushNotification}
      */
     @SuppressLint("ApplySharedPref")
     public void removeAll() {

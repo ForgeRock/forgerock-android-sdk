@@ -173,6 +173,10 @@ dependencies {
     // FCM Notifications, make it optional for developer
     compileOnly "com.google.firebase:firebase-messaging:20.1.6"
 
+    // Networking
+    implementation 'com.squareup.okhttp3:okhttp:4.2.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
+
     // Testing
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
@@ -180,6 +184,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.27.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.1'
     testImplementation 'org.robolectric:robolectric:4.3.1'
+    testCompileOnly "com.google.firebase:firebase-messaging:20.1.6"
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
