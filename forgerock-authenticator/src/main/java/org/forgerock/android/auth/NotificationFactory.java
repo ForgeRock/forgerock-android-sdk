@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.messaging.RemoteMessage;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -31,8 +33,8 @@ import static org.forgerock.android.auth.PushParser.TTL;
  **/
 class NotificationFactory {
 
-    private static final String MESSAGE = "message";
-    private static final String MESSAGE_ID = "messageId";
+    static final String MESSAGE = "message";
+    static final String MESSAGE_ID = "messageId";
 
     private static final int DEFAULT_TTL_SECONDS = 120;
 
@@ -48,26 +50,17 @@ class NotificationFactory {
     }
 
     /**
-     * Process a FCM remote message into a {@link PushNotification} object,
-     * which allows accept or deny Push Authentication requests
-     * @param message FCM remote message
-     * @return PushNotification The notification configured with the information extracted the remote message
-     * @throws InvalidNotificationException if the remote message does not contain required information
+     * Process a FCM remote message into a {@link PushNotification} object
      */
-    PushNotification handleMessage(RemoteMessage message)
+    PushNotification handleMessage(@NonNull RemoteMessage message)
             throws InvalidNotificationException {
         return this.handleMessage(message.getData().get(MESSAGE_ID), message.getData().get(MESSAGE));
     }
 
     /**
-     * Process a FCM remote message into a {@link PushNotification} object,
-     * which allows accept or deny Push Authentication requests
-     * @param messageId the 'messageId' attribute obtained from the {@link RemoteMessage} object
-     * @param message the 'message' attribute obtained from the {@link RemoteMessage} object
-     * @return PushNotification The notification configured with the information extracted the remote message
-     * @throws InvalidNotificationException if the remote message does not contain required information
+     * Process the parameters from a FCM remote message into a {@link PushNotification} object
      */
-    PushNotification handleMessage(String messageId, String message)
+    PushNotification handleMessage(@NonNull String messageId, @NonNull String message)
             throws InvalidNotificationException {
         Logger.debug(TAG, "Processing FCM remote message with messageId: %s.", messageId);
 

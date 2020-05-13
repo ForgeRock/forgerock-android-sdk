@@ -36,7 +36,7 @@ public class NotificationFactoryTest extends FRABaseTest {
 
     @Before
     public void setUp() throws InvalidNotificationException {
-        push = generateMockMechanism(MECHANISM_UID);
+        push = mockPushMechanism(MECHANISM_UID);
 
         storageClient = mock(DefaultStorageClient.class);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);

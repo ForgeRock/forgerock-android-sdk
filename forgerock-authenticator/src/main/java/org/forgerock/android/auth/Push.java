@@ -10,6 +10,9 @@ package org.forgerock.android.auth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents an instance of a Push authentication mechanism. Associated with an Account.
  */
@@ -19,6 +22,8 @@ public class Push extends Mechanism {
     private String registrationEndpoint;
     /** The authentication URL for Push mechanism */
     private String authenticationEndpoint;
+    /** List of PushNotification objects associated with this mechanism **/
+    private List<PushNotification> pushNotificationList;
 
     /**
      * Creates a Push mechanism with given data
@@ -51,6 +56,32 @@ public class Push extends Mechanism {
      */
     public String getAuthenticationEndpoint() {
         return authenticationEndpoint;
+    }
+
+    /**
+     * Get all of the notifications that belong to this Push mechanism.
+     * @return The list of notifications.
+     */
+    public List<PushNotification> getAllNotifications() {
+        return pushNotificationList;
+    }
+
+    /**
+     * Get pending notifications that belong to this Push mechanism.
+     * @return The list of notifications.
+     */
+    public List<PushNotification> getPendingNotifications() {
+        List<PushNotification> pendingList = new ArrayList<>(pushNotificationList);
+        for (PushNotification notification : pushNotificationList) {
+            if (!notification.isPending()){
+                pendingList.remove(notification);
+            }
+        }
+        return pendingList;
+    }
+
+    void setPushNotificationList(List<PushNotification> pushNotificationList) {
+        this.pushNotificationList = pushNotificationList;
     }
 
     @Override

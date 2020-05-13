@@ -45,7 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 @RunWith(RobolectricTestRunner.class)
-public class PushFactoryTest {
+public class PushFactoryTest extends FRABaseTest {
 
     private DefaultStorageClient storageClient;
     private PushFactory factory;
@@ -80,10 +80,10 @@ public class PushFactoryTest {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
         String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -103,10 +103,10 @@ public class PushFactoryTest {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
         String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -125,10 +125,10 @@ public class PushFactoryTest {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
         String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -148,10 +148,10 @@ public class PushFactoryTest {
     @Test
     public void testShouldReflectDifferences() throws Exception {
         String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -159,10 +159,10 @@ public class PushFactoryTest {
                 "issuer=Rm9yZ2Vyb2Nr";
 
         String secondUri = "pushauth://push/forgerock:user?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -188,10 +188,10 @@ public class PushFactoryTest {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_GATEWAY));
 
         String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl("authenticate") + "&" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl("register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
                 "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
@@ -204,12 +204,6 @@ public class PushFactoryTest {
         } catch (Exception e) {
             assertTrue(e.getLocalizedMessage().contains("Communication with server returned 502 code."));
         }
-    }
-
-    private String getBase64PushActionUrl(String actionType) {
-        String baseUrl = server.url("/").toString() + "openam/json/push/sns/message?_action=" + actionType;
-        String base64Url = Base64.encodeToString(baseUrl.getBytes(), Base64.NO_WRAP);
-        return base64Url;
     }
 
 }

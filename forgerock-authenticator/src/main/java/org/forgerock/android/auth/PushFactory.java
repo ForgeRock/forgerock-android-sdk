@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -51,17 +52,19 @@ class PushFactory extends MechanismFactory {
     }
 
     @Override
-    protected void createFromUriParameters(int version, String mechanismUID, Map<String,
-            String> map, FRAListener<Mechanism> listener) {
+    protected void createFromUriParameters(int version, @NonNull String mechanismUID, @NonNull Map<String,
+            String> map, @NonNull FRAListener<Mechanism> listener) {
 
         // Check FCM device token
         if(this.fcmToken == null) {
             listener.onException(new MechanismCreationException("Invalid FCM token."));
+            return;
         }
 
         // Check if Google Play Services is enabled
         if (!checkGooglePlayServices()) {
             listener.onException(new MechanismCreationException("Google Play Services not enabled."));
+            return;
         }
 
         if (version == 1) {

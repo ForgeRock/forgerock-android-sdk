@@ -7,8 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import com.nimbusds.jose.JOSEException;
-
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -21,7 +19,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -89,7 +86,7 @@ public class PushResponderTest extends FRABaseTest {
     public void testShouldReplyAuthenticationMessageCorrectly() throws Exception {
         server.enqueue(new MockResponse());
 
-        pushResponder.authentication(createPushNotification(), true, pushListenerFuture);
+        pushResponder.authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -102,7 +99,7 @@ public class PushResponderTest extends FRABaseTest {
     public void testReplyAuthenticationMessageFailure() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
-        pushResponder.authentication(createPushNotification(), true, pushListenerFuture);
+        pushResponder.authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -176,7 +173,7 @@ public class PushResponderTest extends FRABaseTest {
         assertThat(body, Matchers.containsString("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkZXZpY2VUeXBlIjoiYW5kcm9pZCIsIm1lY2hhbmlzbVVpZCI6InRlc3RNZWNoYW5pc21VaWQiLCJyZXNwb25zZSI6IkRmMDJBd0EzUmErc1RHa0w1K1F2a0V0TjNlTGRaaUZtTDVueEFWMW0wazg9IiwiY29tbXVuaWNhdGlvblR5cGUiOiJnY20iLCJkZXZpY2VJZCI6InRlc3RGY21Ub2tlbiJ9.UimglbtcwK6vD0mYZW_B3Yge6chPR--5mPmyHB0maas"));
     }
 
-    private PushNotification createPushNotification() {
+    private PushNotification newPushNotification() {
         Calendar time = Calendar.getInstance();
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -190,12 +187,12 @@ public class PushResponderTest extends FRABaseTest {
                 .setTtl(TTL)
                 .build();
 
-        pushNotification.setPushMechanism(createPushMechanism());
+        pushNotification.setPushMechanism(newPushMechanism());
 
         return pushNotification;
     }
 
-    private Push createPushMechanism() {
+    private Push newPushMechanism() {
         HttpUrl baseUrl = server.url("/");
         Push push = Push.builder()
                 .setMechanismUID(MECHANISM_UID)

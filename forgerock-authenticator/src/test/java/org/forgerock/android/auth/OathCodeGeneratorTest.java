@@ -38,7 +38,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testHandleHOTPCorrectlyWith8Digits() throws Exception {
+    public void testHandleHOTPCorrectlyWith8Digits() {
         Oath oath = Oath.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -61,7 +61,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testHandleTOTPCorrectly() throws Exception {
+    public void testHandleTOTPCorrectly() {
 
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;

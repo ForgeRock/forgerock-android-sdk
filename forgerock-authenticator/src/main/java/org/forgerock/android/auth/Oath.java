@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import androidx.annotation.VisibleForTesting;
+
+import org.forgerock.android.auth.util.TimeKeeper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +32,8 @@ public class Oath extends Mechanism {
     private long counter;
     /** Unique identifier of the Mechanism */
     private int period;
+    /** The TimeKeeper **/
+    private TimeKeeper timeKeeper = new TimeKeeper();
 
     private Oath(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
                 String algorithm, String secret, int digits, long counter, int period) {
@@ -80,6 +85,23 @@ public class Oath extends Mechanism {
 
     void incrementCounter() {
         counter++;
+    }
+
+    /**
+     * Generates a new set of codes for this Oath Token.
+     * @return OathTokenCode object that contains the currently active token code
+     */
+    public OathTokenCode getOathTokenCode() {
+        return OathCodeGenerator.generateNextCode(this, timeKeeper);
+    }
+
+    /**
+     * Used for Time Travel during testing.
+     * @param timeKeeper The TimeKeeper implementation this Mechanism should use.
+     */
+    @VisibleForTesting
+    public void setTimeKeeper(TimeKeeper timeKeeper) {
+        this.timeKeeper = timeKeeper;
     }
 
     @Override

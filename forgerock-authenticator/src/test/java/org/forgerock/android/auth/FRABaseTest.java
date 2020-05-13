@@ -23,10 +23,15 @@ import com.nimbusds.jwt.SignedJWT;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+
+import okhttp3.mockwebserver.MockWebServer;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -53,6 +58,7 @@ public abstract class FRABaseTest {
     public static final String AUTHENTICATION_ENDPOINT = "http://openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
     public static final String OTHER_AUTHENTICATION_ENDPOINT = "http://develop.openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
     public static final String MESSAGE_ID = "AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441";
+    public static final String OTHER_MESSAGE_ID = "AUTHENTICATE:10ce6f20-1bfb-4198-eed1-aa5041fbbea0158123456789";
     public static final String CHALLENGE = "fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=";
     public static final String AMLB_COOKIE = "ZnJfc3NvX2FtbGJfcHJvZD0wMQ==";
     public static final long TTL = 120;
@@ -69,7 +75,31 @@ public abstract class FRABaseTest {
         return baseMessage;
     }
 
-    public static Push generateMockMechanism(String mechanismUid) {
+    public static Account mockAccount() {
+        final Account account = mock(Account.class);
+        given(account.getAccountName()).willReturn(ACCOUNT_NAME);
+        given(account.getIssuer()).willReturn(ISSUER);
+        given(account.getBackgroundColor()).willReturn(BACKGROUND_COLOR);
+        given(account.getImageURL()).willReturn(IMAGE_URL);
+        return account;
+    }
+
+    public static Oath mockOathMechanism(String mechanismUid) {
+        final Oath oath = mock(Oath.class);
+        given(oath.getAccountName()).willReturn(ACCOUNT_NAME);
+        given(oath.getIssuer()).willReturn(ISSUER);
+        given(oath.getType()).willReturn(Mechanism.PUSH);
+        given(oath.getMechanismUID()).willReturn(mechanismUid);
+        given(oath.getSecret()).willReturn(CORRECT_SECRET);
+        given(oath.getAlgorithm()).willReturn(ALGORITHM);
+        given(oath.getCounter()).willReturn((long) COUNTER);
+        given(oath.getDigits()).willReturn(DIGITS);
+        given(oath.getPeriod()).willReturn((long) PERIOD);
+        given(oath.getOathType()).willReturn(Oath.TokenType.TOTP);
+        return oath;
+    }
+
+    public static Push mockPushMechanism(String mechanismUid) {
         final Push push = mock(Push.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
@@ -81,7 +111,7 @@ public abstract class FRABaseTest {
         return push;
     }
 
-    public static Push generateMockMechanism(String mechanismUid, String serverUrl) {
+    public static Push mockPushMechanism(String mechanismUid, String serverUrl) {
         final Push push = mock(Push.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
@@ -91,6 +121,71 @@ public abstract class FRABaseTest {
         given(push.getAuthenticationEndpoint()).willReturn(serverUrl+"authenticate");
         given(push.getRegistrationEndpoint()).willReturn(serverUrl+"register");
         return push;
+    }
+
+    public static PushNotification mockPushNotification(String messageId, Push push) {
+        final PushNotification notification = mock(PushNotification.class);
+        given(notification.getMechanismUID()).willReturn(MECHANISM_UID);
+        given(notification.getAmlbCookie()).willReturn(AMLB_COOKIE);
+        given(notification.getChallenge()).willReturn(CHALLENGE);
+        given(notification.getMessageId()).willReturn(messageId);
+        given(notification.getTimeAdded()).willReturn(Calendar.getInstance());
+        given(notification.getTimeExpired()).willReturn(Calendar.getInstance());
+        given(notification.getTtl()).willReturn(TTL);
+        given(notification.getPushMechanism()).willReturn(push);
+        return notification;
+    }
+
+    public static Account createAccount(String accountName, String issuer) {
+        Account account = Account.builder()
+                .setAccountName(accountName)
+                .setIssuer(issuer)
+                .setImageURL(IMAGE_URL)
+                .setBackgroundColor(BACKGROUND_COLOR)
+                .build();
+
+        return account;
+    }
+
+    public static Mechanism createOathMechanism(String accountName, String issuer, String mechanismUid) {
+        Oath mechanism = Oath.builder()
+                .setMechanismUID(mechanismUid)
+                .setIssuer(issuer)
+                .setAccountName(accountName)
+                .setType(Oath.TokenType.HOTP)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .setPeriod(PERIOD)
+                .build();
+        return mechanism;
+    }
+
+    public static Mechanism createPushMechanism(String accountName, String issuer, String mechanismUid) {
+        Push mechanism = Push.builder()
+                .setMechanismUID(mechanismUid)
+                .setIssuer(issuer)
+                .setAccountName(accountName)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+        return mechanism;
+    }
+
+    public static PushNotification createPushNotification(String messageId, Mechanism push) {
+        Calendar timeAdded = Calendar.getInstance();
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(messageId)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
+        pushNotification.setPushMechanism(push);
+        return pushNotification;
     }
 
     public static RemoteMessage generateMockRemoteMessage(String messageId, String base64Secret, Map<String, String> map) throws JSONException {
@@ -130,6 +225,12 @@ public abstract class FRABaseTest {
             e.printStackTrace();
         }
         return signedJWT.serialize();
+    }
+
+    public String getBase64PushActionUrl(MockWebServer server, String actionType) {
+        String baseUrl = server.url("/").toString() + "openam/json/push/sns/message?_action=" + actionType;
+        String base64Url = Base64.encodeToString(baseUrl.getBytes(), Base64.NO_WRAP);
+        return base64Url;
     }
 
 }

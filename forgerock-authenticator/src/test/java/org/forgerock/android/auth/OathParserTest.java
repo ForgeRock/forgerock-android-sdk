@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.OathParser;
+import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,9 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class OathParserTest {
 
@@ -26,15 +30,31 @@ public class OathParserTest {
     }
 
     @Test
-    public void testShouldParseType() throws MechanismParsingException {
+    public void testShouldParseHOTPType() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://hotp/Forgerock:user@forgerock.com?secret=ABC&counter=0");
         assertEquals(result.get(OathParser.TYPE), "hotp");
+    }
+
+    @Test
+    public void testShouldParseTOTPType() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Forgerock:user@forgerock.com?secret=ABC&counter=0");
+        assertEquals(result.get(OathParser.TYPE), "totp");
+    }
+
+    @Test (expected = MechanismParsingException.class)
+    public void testShouldFailWrongType() throws MechanismParsingException {
+        oathParser.map("pushauth://hotp/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr\"");
     }
 
     @Test
     public void testShouldParseAccountName() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/example?secret=ABC");
         assertEquals(result.get(OathParser.ACCOUNT_NAME), "example");
+    }
+
+    @Test
+    public void testShouldFailMissingAccountName() throws MechanismParsingException {
+        oathParser.map("otpauth://totp/?secret=ABC");
     }
 
     @Test

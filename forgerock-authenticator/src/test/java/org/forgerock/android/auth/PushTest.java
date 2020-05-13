@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -105,6 +108,60 @@ public class PushTest extends FRABaseTest {
         assertFalse(mechanism1.equals(mechanism2));
         assertEquals(mechanism1.compareTo(mechanism2), 0);
         assertEquals(mechanism2.compareTo(mechanism1), 0);
+    }
+
+    @Test
+    public void testShouldReturnAllNotifications() {
+        Push mechanism = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+
+        PushNotification pushNotification1 = createPushNotification(MESSAGE_ID, mechanism);
+        PushNotification pushNotification2 = createPushNotification(OTHER_MESSAGE_ID, mechanism);
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(pushNotification1);
+        notificationList.add(pushNotification2);
+        mechanism.setPushNotificationList(notificationList);
+
+        assertEquals(2, mechanism.getAllNotifications().size());
+    }
+
+    @Test
+    public void testShouldReturnOnlyPendingNotifications() {
+        Push mechanism = Push.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+
+        PushNotification pushNotification1 = createPushNotification(MESSAGE_ID, mechanism);
+        PushNotification pushNotification2 = createPushNotification(OTHER_MESSAGE_ID, mechanism);
+        PushNotification pushNotification3 = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId("s-o-m-e-i-d")
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setPending(false)
+                .setApproved(true)
+                .setTtl(TTL)
+                .build();
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(pushNotification1);
+        notificationList.add(pushNotification2);
+        notificationList.add(pushNotification3);
+        mechanism.setPushNotificationList(notificationList);
+
+        assertEquals(2, mechanism.getPendingNotifications().size());
     }
 
 }
