@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.messaging.RemoteMessage;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -50,7 +52,7 @@ class NotificationFactory {
     /**
      * Process a FCM remote message into a {@link PushNotification} object
      */
-    PushNotification handleMessage(RemoteMessage message)
+    PushNotification handleMessage(@NonNull RemoteMessage message)
             throws InvalidNotificationException {
         return this.handleMessage(message.getData().get(MESSAGE_ID), message.getData().get(MESSAGE));
     }
@@ -58,7 +60,7 @@ class NotificationFactory {
     /**
      * Process the parameters from a FCM remote message into a {@link PushNotification} object
      */
-    PushNotification handleMessage(String messageId, String message)
+    PushNotification handleMessage(@NonNull String messageId, @NonNull String message)
             throws InvalidNotificationException {
         Logger.debug(TAG, "Processing FCM remote message with messageId: %s.", messageId);
 

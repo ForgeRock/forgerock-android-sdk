@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.util.Base32String;
 
@@ -43,8 +45,8 @@ class OathFactory extends MechanismFactory {
     }
 
     @Override
-    protected void createFromUriParameters(int version, String mechanismUID, Map<String, String> map,
-                                           FRAListener<Mechanism> listener) {
+    protected void createFromUriParameters(int version, @NonNull String mechanismUID, @NonNull Map<String, String> map,
+                                           @NonNull FRAListener<Mechanism> listener) {
         if (version == 1) {
             this.buildOathMechanism(mechanismUID, map, listener);
         } else {
