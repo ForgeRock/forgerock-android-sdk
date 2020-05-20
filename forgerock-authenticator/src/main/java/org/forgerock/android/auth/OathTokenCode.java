@@ -52,7 +52,7 @@ public class OathTokenCode {
 
     /**
      * Get the expiration timestamp for TOTP tokens.
-     * For HOTP, it returns {@code null} as it does not expires.
+     * For HOTP, it returns {@code 0} as it does not expires.
      * @return The expiration time in milliseconds.
      */
     public long getUntil() {

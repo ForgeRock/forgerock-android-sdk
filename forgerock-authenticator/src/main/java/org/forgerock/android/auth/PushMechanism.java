@@ -26,14 +26,14 @@ public class PushMechanism extends Mechanism {
     private List<PushNotification> pushNotificationList;
 
     /**
-     * Creates a PushMechanism mechanism with given data
+     * Creates a Push mechanism with given data
      * @param mechanismUID Mechanism UUID
      * @param issuer issuer of the Mechanism
      * @param accountName accountName of the Mechanism
      * @param type Type of Mechanism
      * @param secret String value of the shared secret
-     * @param registrationEndpoint registration URL for PushMechanism
-     * @param authenticationEndpoint authentication URL for PushMechanism
+     * @param registrationEndpoint registration URL for Push
+     * @param authenticationEndpoint authentication URL for Push
      */
     private PushMechanism(String mechanismUID, String issuer, String accountName, String type, String secret,
                           String registrationEndpoint, String authenticationEndpoint) {
@@ -176,7 +176,7 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Set the endpoint that will be used for Push registration
-         * @param endpoint The endpoint to register the device for PushMechanism.
+         * @param endpoint The endpoint to register the device for Push.
          * @return This builder.
          */
         public PushBuilder setRegistrationEndpoint(String endpoint) {
@@ -186,7 +186,7 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Set the endpoint that will be used for Push authentication
-         * @param endpoint The endpoint to respond PushMechanism messages to.
+         * @param endpoint The endpoint to respond Push messages to.
          * @return This builder.
          */
         public PushBuilder setAuthenticationEndpoint(String endpoint) {

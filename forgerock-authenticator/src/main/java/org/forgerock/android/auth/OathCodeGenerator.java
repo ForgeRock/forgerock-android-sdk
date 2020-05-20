@@ -87,7 +87,7 @@ class OathCodeGenerator {
                     ((HOTPMechanism) oath).incrementCounter();
                     storageClient.setMechanism(oath);
                     otp = getOTP(((HOTPMechanism) oath).getCounter(), oath.getDigits(), oath.getSecret(), oath.getAlgorithm());
-                    return new OathTokenCode(timeKeeper, otp, 0, 0, HOTP);
+                    return new OathTokenCode(timeKeeper, otp, currentTime, 0, HOTP);
                 case TOTP:
                     long counter = currentTime / 1000 / ((TOTPMechanism) oath).getPeriod();
                     otp = getOTP(counter + 0, oath.getDigits(), oath.getSecret(), oath.getAlgorithm());

@@ -27,9 +27,9 @@ class AuthenticatorManager {
     private String deviceToken;
     /** The Application Context. */
     private Context context;
-    /** The OathMechanism Factory responsible to build OathMechanism mechanisms. */
+    /** The Oath Factory responsible to build Oath mechanisms. */
     private MechanismFactory oathFactory;
-    /** The PushMechanism Factory responsible to build PushMechanism mechanisms. */
+    /** The Push Factory responsible to build Push mechanisms. */
     private MechanismFactory pushFactory;
     /** The Notification Factory responsible to handle remote messages. */
     private NotificationFactory notificationFactory;
@@ -49,7 +49,7 @@ class AuthenticatorManager {
             this.notificationFactory = new NotificationFactory(storageClient);
             PushResponder.init(storageClient);
         } else {
-            Logger.debug(TAG, "No FCM device token provided. SDK will not be able to register PushMechanism mechanisms.");
+            Logger.debug(TAG, "No FCM device token provided. SDK will not be able to register Push mechanisms.");
         }
     }
 
@@ -61,8 +61,8 @@ class AuthenticatorManager {
             } else {
                 Logger.warn(TAG, "Attempt to add a Push mechanism has failed. " +
                         "FCM token was not provided during SDK initialization.");
-                listener.onException(new MechanismCreationException("Cannot add PushMechanism mechanisms. " +
-                        "FCM token not provided during SDK initialization to handle PushMechanism Notifications."));
+                listener.onException(new MechanismCreationException("Cannot add Push mechanisms. " +
+                        "FCM token not provided during SDK initialization to handle Push Notifications."));
             }
         }
         else if(uri.startsWith(Mechanism.OATH)) {
@@ -117,7 +117,7 @@ class AuthenticatorManager {
         if(mechanism.getType().equals(Mechanism.PUSH)) {
             List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
             if(!notificationList.isEmpty()) {
-                Logger.debug(TAG, "Removing PushMechanism Notifications for Mechanism with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+                Logger.debug(TAG, "Removing Push Notifications for Mechanism with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
                 for (PushNotification notification : notificationList) {
                     storageClient.removeNotification(notification);
                 }
@@ -157,9 +157,9 @@ class AuthenticatorManager {
         if(notificationFactory != null) {
             return notificationFactory.handleMessage(message);
         } else {
-            Logger.warn(TAG, "Attempt to process PushMechanism Notification has failed. " +
+            Logger.warn(TAG, "Attempt to process Push Notification has failed. " +
                     "FCM token was not provided during SDK initialization.");
-            throw new InvalidNotificationException("Cannot process PushMechanism notification. " +
+            throw new InvalidNotificationException("Cannot process Push notification. " +
                     "FCM token was not provided during SDK initialization.");
         }
     }
@@ -170,9 +170,9 @@ class AuthenticatorManager {
         if(notificationFactory != null) {
             return notificationFactory.handleMessage(messageId, message);
         } else {
-            Logger.warn(TAG, "Attempt to process PushMechanism Notification has failed. " +
+            Logger.warn(TAG, "Attempt to process Push Notification has failed. " +
                     "FCM token was not provided during SDK initialization.");
-            throw new InvalidNotificationException("Cannot process PushMechanism notification. " +
+            throw new InvalidNotificationException("Cannot process Push notification. " +
                     "FCM token was not provided during SDK initialization.");
         }
     }

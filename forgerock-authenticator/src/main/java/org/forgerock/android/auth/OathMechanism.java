@@ -23,7 +23,7 @@ public abstract class OathMechanism extends Mechanism {
         HOTP, TOTP
     }
 
-    /** OATH type, must be either 'TOTPMechanism' or 'HOTPMechanism' */
+    /** OATH type, must be either 'TOTP' or 'HOTP' */
     private TokenType oathType;
 
     /** The TimeKeeper **/
