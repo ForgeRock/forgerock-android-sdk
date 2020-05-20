@@ -24,8 +24,7 @@ public class FRUser {
     private SessionManager sessionManager;
 
     private FRUser() {
-        sessionManager = SessionManager.builder()
-                .build();
+        sessionManager = Config.getInstance().getSessionManager();
     }
 
     /**
@@ -109,8 +108,7 @@ public class FRUser {
      * <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
      */
     public static void login(Context context, final NodeListener<FRUser> listener) {
-        SessionManager sessionManager = SessionManager.builder()
-                .build();
+        SessionManager sessionManager = Config.getInstance().getSessionManager();
 
         if (sessionManager.hasSession() ) {
             Listener.onException(listener, new AlreadyAuthenticatedException("User is already authenticated"));
@@ -126,7 +124,9 @@ public class FRUser {
         return FRAuth.builder()
                 .serviceName(serviceName)
                 .context(context)
-                .interceptor(new OAuthInterceptor(sessionManager.getOAuth2Client()))
+                .serverConfig(Config.getInstance().getServerConfig())
+                .sessionManager(sessionManager)
+                .interceptor(new OAuthInterceptor(sessionManager.getTokenManager()))
                 .interceptor(new AccessTokenStoreInterceptor(sessionManager.getTokenManager()))
                 .interceptor(new UserInterceptor())
                 .build();
@@ -141,8 +141,7 @@ public class FRUser {
      * <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
      */
     public static void register(Context context, NodeListener<FRUser> listener) {
-        SessionManager sessionManager = SessionManager.builder()
-                .build();
+        SessionManager sessionManager = Config.getInstance().getSessionManager();
 
         if (sessionManager.hasSession() ) {
             Listener.onException(listener, new AlreadyAuthenticatedException("User is already authenticated"));

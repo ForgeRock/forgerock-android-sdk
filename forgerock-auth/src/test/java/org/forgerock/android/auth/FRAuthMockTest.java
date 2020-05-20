@@ -44,6 +44,7 @@ public class FRAuthMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
         final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
+                .serverConfig(serverConfig)
                 .context(context)
                 .encryptor(new MockEncryptor())
                 .build();
@@ -52,6 +53,7 @@ public class FRAuthMockTest extends BaseTest {
                 .serviceName("Example")
                 .context(context)
                 .sessionManager(SessionManager.builder()
+                        .tokenManager(Config.getInstance().getTokenManager())
                         .singleSignOnManager(singleSignOnManager)
                         .build())
                 .serverConfig(serverConfig)
@@ -111,6 +113,7 @@ public class FRAuthMockTest extends BaseTest {
                 .serviceName("Example")
                 .context(mockContext)
                 .sessionManager(SessionManager.builder()
+                        .tokenManager(Config.getInstance(context).getTokenManager())
                         .singleSignOnManager(singleSignOnManager)
                         .build())
                 .serverConfig(serverConfig)
@@ -164,6 +167,7 @@ public class FRAuthMockTest extends BaseTest {
                 .serviceName("Example")
                 .context(context)
                 .sessionManager(SessionManager.builder()
+                        .tokenManager(Config.getInstance().getTokenManager())
                         .singleSignOnManager(singleSignOnManager)
                         .build())
                 .serverConfig(serverConfig)

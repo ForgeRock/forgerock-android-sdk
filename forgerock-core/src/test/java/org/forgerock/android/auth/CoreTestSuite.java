@@ -14,7 +14,6 @@ import org.junit.runners.Suite;
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
 
-        ServerConfigTest.class,
         LoggerTest.class,
         KeyStoreManagerTest.class,
 

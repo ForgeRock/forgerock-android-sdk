@@ -74,16 +74,17 @@ class DefaultTokenManager implements TokenManager {
                                Long cacheIntervalMillis,
                                Long threshold) {
 
-        Config config = Config.getInstance(context);
-        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, var -> new SecuredSharedPreferences(var
-                , ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS));
+        this.sharedPreferences = sharedPreferences == null ? new SecuredSharedPreferences(context,
+                ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
 
         Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());
 
-        this.oAuth2Client = config.applyDefaultIfNull(oAuth2Client);
+        this.oAuth2Client = oAuth2Client;
         this.accessTokenRef = new AtomicReference<>();
-        this.cacheIntervalMillis = config.applyDefaultIfNull(cacheIntervalMillis);
-        this.threshold = config.applyDefaultThresholdIfNull(threshold);
+        this.cacheIntervalMillis = cacheIntervalMillis == null
+                ? context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000 : cacheIntervalMillis;
+        this.threshold = threshold == null
+                ? context.getResources().getInteger(R.integer.forgerock_oauth_threshold) : threshold;
     }
 
     @SuppressLint("ApplySharedPref")
@@ -93,6 +94,11 @@ class DefaultTokenManager implements TokenManager {
         sharedPreferences.edit()
                 .putString(ACCESS_TOKEN, accessToken.toJson())
                 .commit();
+    }
+
+    @Override
+    public void exchangeToken(@NonNull SSOToken token, FRListener<AccessToken> listener) {
+        oAuth2Client.exchangeToken(token, listener);
     }
 
     @Override
@@ -116,7 +122,7 @@ class DefaultTokenManager implements TokenManager {
                                 new AuthenticationRequiredException("Access Token is not valid, authentication is required."));
                     }
                 });
-               return;
+                return;
             }
 
             if (accessToken.isExpired(threshold)) {

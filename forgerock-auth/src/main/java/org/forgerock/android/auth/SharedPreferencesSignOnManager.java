@@ -38,14 +38,13 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
 
     @Builder
     public SharedPreferencesSignOnManager(@NonNull Context context, SharedPreferences sharedPreferences) {
-        Config config = Config.getInstance(context);
-        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, var -> new SecuredSharedPreferences(var
-                , ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS));
+        this.sharedPreferences = sharedPreferences == null ?
+                new SecuredSharedPreferences(context, ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
     }
 
     @Override
     public void persist(SSOToken token) {
-        sharedPreferences.edit()
+       sharedPreferences.edit()
                 .putString(SSO_TOKEN, token.getValue())
                 .commit();
     }

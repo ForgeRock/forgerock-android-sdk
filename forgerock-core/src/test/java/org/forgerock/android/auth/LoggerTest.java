@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import android.util.Log;
+
+import org.forgerock.android.core.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

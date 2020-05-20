@@ -22,8 +22,7 @@ public class FRSession {
     private SessionManager sessionManager;
 
     private FRSession() {
-        sessionManager = SessionManager.builder()
-                .build();
+        sessionManager = Config.getInstance().getSessionManager();
     }
 
     /**
@@ -74,8 +73,10 @@ public class FRSession {
 
     public void authenticate(Context context, PolicyAdvice advice, final NodeListener<FRSession> listener) {
         FRAuth.builder()
-                .advice(advice)
                 .context(context)
+                .advice(advice)
+                .serverConfig(Config.getInstance().getServerConfig())
+                .sessionManager(Config.getInstance().getSessionManager())
                 .interceptor(new FRSession.SessionInterceptor())
                 .build().next(context, listener);
     }
@@ -90,8 +91,10 @@ public class FRSession {
 
     public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
         FRAuth.builder()
-                .serviceName(serviceName)
                 .context(context)
+                .serviceName(serviceName)
+                .serverConfig(Config.getInstance().getServerConfig())
+                .sessionManager(Config.getInstance().getSessionManager())
                 .interceptor(new FRSession.SessionInterceptor())
                 .build().next(context, listener);
     }

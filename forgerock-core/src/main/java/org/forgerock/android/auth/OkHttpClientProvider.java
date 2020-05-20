@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.CertificatePinner;
 import okhttp3.CookieJar;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -22,7 +23,7 @@ class OkHttpClientProvider {
 
     private static final OkHttpClientProvider INSTANCE = new OkHttpClientProvider();
 
-    private Map<ServerConfig, OkHttpClient> cache = new ConcurrentHashMap<>();
+    private Map<String, OkHttpClient> cache = new ConcurrentHashMap<>();
 
     private OkHttpClientProvider() {
     }
@@ -34,26 +35,26 @@ class OkHttpClientProvider {
     /**
      * Create or lookup a cached OKHttpClient
      *
-     * @param serverConfig The Server configuration
+     * @param networkConfig The Server configuration
      * @return The OkHttpClient
      */
-    OkHttpClient lookup(ServerConfig serverConfig) {
-        OkHttpClient client = cache.get(serverConfig);
+    OkHttpClient lookup(NetworkConfig networkConfig) {
+        OkHttpClient client = cache.get(networkConfig);
 
         if (client != null) {
             return client;
         }
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
-                .readTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
-                .writeTimeout(serverConfig.getTimeout(), serverConfig.getTimeUnit())
+                .connectTimeout(networkConfig.getTimeout(), networkConfig.getTimeUnit())
+                .readTimeout(networkConfig.getTimeout(), networkConfig.getTimeUnit())
+                .writeTimeout(networkConfig.getTimeout(), networkConfig.getTimeUnit())
                 .followRedirects(false);
 
-        if(serverConfig.getCookieJar() == null){
+        if(networkConfig.getCookieJar() == null){
             builder.cookieJar(CookieJar.NO_COOKIES);
         } else {
-            builder.cookieJar(serverConfig.getCookieJar());
+            builder.cookieJar(networkConfig.getCookieJar());
         }
 
         if (Logger.isDebugEnabled()) {
@@ -62,16 +63,22 @@ class OkHttpClientProvider {
             builder.addInterceptor(interceptor);
         }
 
-        if (!serverConfig.getPins().isEmpty()) {
+        if (networkConfig.getInterceptors() != null) {
+            for (Interceptor i : networkConfig.getInterceptors()) {
+                builder.addInterceptor(i);
+            }
+        }
+
+        if (!networkConfig.getPins().isEmpty()) {
             CertificatePinner.Builder cpBuilder = new CertificatePinner.Builder();
-            for (String s : serverConfig.getPins()) {
-                cpBuilder.add(serverConfig.getHost(), s);
+            for (String s : networkConfig.getPins()) {
+                cpBuilder.add(networkConfig.getHost(), s);
             }
             builder.certificatePinner(cpBuilder.build());
         }
 
         client = builder.build();
-        cache.put(serverConfig, client);
+        cache.put(networkConfig.getUrl(), client);
         return client;
 
     }

@@ -24,7 +24,6 @@ import okhttp3.CookieJar;
  * override the default configuration.
  */
 @Getter
-@Setter
 public class Config {
 
     private static Config mInstance;
@@ -36,12 +35,13 @@ public class Config {
     private String scope;
     private String oAuthUrl;
 
-    //Server
+   //Server
     private String url;
     private String realm;
     private int timeout;
     private List<String> pins;
     private CookieJar cookieJar;
+
     private String authenticateEndpoint;
     private String authorizeEndpoint;
     private String tokenEndpoint;
@@ -50,14 +50,34 @@ public class Config {
     private String logoutEndpoint;
 
     //SSO Token Manager
-    private String accountName;
     private Encryptor encryptor;
+
+    @VisibleForTesting
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    @VisibleForTesting
+    public void setEncryptor(Encryptor encryptor) {
+        this.encryptor = encryptor;
+    }
+
+    //For testing to avoid using Android KeyStore Encryption
+    @VisibleForTesting
+    public void setSsoSharedPreferences(SharedPreferences ssoSharedPreferences) {
+        this.ssoSharedPreferences = ssoSharedPreferences;
+    }
+
+    //For testing to avoid using Android KeyStore Encryption
+    @VisibleForTesting
+    public void setSharedPreferences(SharedPreferences sharedPreferences) {
+        this.sharedPreferences = sharedPreferences;
+    }
+
+    private SharedPreferences ssoSharedPreferences;
 
     //Token Manager
     private SharedPreferences sharedPreferences;
-    private long cacheIntervalMillis = 0L;
-    private long cookieCacheIntervalMillis = 0L;
-    private long threshold;
 
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
@@ -68,14 +88,10 @@ public class Config {
         redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
         scope = context.getString(R.string.forgerock_oauth_scope);
         oAuthUrl = context.getString(R.string.forgerock_oauth_url);
-        cacheIntervalMillis = context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000;
-        threshold = context.getResources().getInteger(R.integer.forgerock_oauth_threshold);
         url = context.getString(R.string.forgerock_url);
         realm = context.getString(R.string.forgerock_realm);
         timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
-        accountName = context.getString(R.string.forgerock_account_name);
         cookieJar = null; // We cannot initialize default cookie jar here
-        cookieCacheIntervalMillis = context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000;
         pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
         authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
         authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
@@ -119,7 +135,7 @@ public class Config {
                 .build();
     }
 
-    OAuth2Client getOAuth2Client() {
+    private OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
                 .clientId(clientId)
                 .scope(scope)
@@ -128,18 +144,20 @@ public class Config {
                 .build();
     }
 
+    @VisibleForTesting
     TokenManager getTokenManager() {
         return DefaultTokenManager.builder()
                 .context(context)
                 .sharedPreferences(sharedPreferences)
-                .cacheIntervalMillis(cacheIntervalMillis)
                 .oAuth2Client(getOAuth2Client())
-                .threshold(threshold)
                 .build();
     }
 
+    @VisibleForTesting
     SingleSignOnManager getSingleSignOnManager() {
         return DefaultSingleSignOnManager.builder()
+                .sharedPreferences(ssoSharedPreferences)
+                .serverConfig(getServerConfig())
                 .context(context)
                 .encryptor(encryptor)
                 .build();
@@ -149,14 +167,14 @@ public class Config {
         return SessionManager.builder()
                 .tokenManager(getTokenManager())
                 .singleSignOnManager(getSingleSignOnManager())
-                .oAuth2Client(getOAuth2Client())
                 .build();
 
     }
 
     private CookieJar getCookieJar() {
         if (cookieJar == null) {
-            cookieJar = SecureCookieJar.builder().build();
+            cookieJar = SecureCookieJar.builder()
+                    .context(context).build();
         }
         return cookieJar;
     }
@@ -167,8 +185,7 @@ public class Config {
     }
 
 
-    @VisibleForTesting
-    KeyStoreManager getKeyStoreManager() {
+    public KeyStoreManager getKeyStoreManager() {
         if (keyStoreManager == null) {
             return KeyStoreManager.builder().context(context).build();
         } else {
@@ -177,88 +194,8 @@ public class Config {
     }
 
     @VisibleForTesting
-    public void setCookieJar(CookieJar cookieJar) {
+    void setCookieJar(CookieJar cookieJar) {
         this.cookieJar = cookieJar;
-    }
-
-
-    List<String> applyDefaultIfNull(List<String> pins) {
-        return applyIfNull(pins, null, (Function<Void, List<String>>) var -> getPins());
-    }
-
-    String applyDefaultIfNull(String realm) {
-        return applyIfNull(realm, null, (Function<Void, String>) var -> getRealm());
-    }
-
-    Integer applyDefaultIfNull(Integer timeout) {
-        return applyIfNull(timeout, null, (Function<Void, Integer>) var -> getTimeout());
-    }
-
-    Encryptor applyDefaultIfNull(Encryptor encryptor, final Context context, final Function<Context, Encryptor> function) {
-        return applyIfNull(encryptor, null, (Function<Void, Encryptor>) var -> {
-            Encryptor enc = getEncryptor();
-            if (enc == null) {
-                return function.apply(context);
-            } else {
-                return enc;
-            }
-        });
-    }
-
-    SharedPreferences applyDefaultIfNull(SharedPreferences sharedPreferences, final Context context, final Function<Context, SharedPreferences> function) {
-        return applyIfNull(sharedPreferences, null, (Function<Void, SharedPreferences>) var -> {
-            SharedPreferences s = getSharedPreferences();// Override testing
-            if (s == null) {
-                return function.apply(context);
-            } else {
-                return s;
-            }
-        });
-    }
-
-    Long applyDefaultIfNull(Long cacheIntervalMillis) {
-        return applyIfNull(cacheIntervalMillis, null, (Function<Void, Long>) var -> getCacheIntervalMillis());
-    }
-
-    Long applyDefaultCookieCacheIfNull(Long cookieCache) {
-        return applyIfNull(cookieCache, null, (Function<Void, Long>) var -> getCookieCacheIntervalMillis());
-    }
-
-    Long applyDefaultThresholdIfNull(Long threshold) {
-        return applyIfNull(threshold, null, (Function<Void, Long>) var -> getThreshold());
-    }
-
-    ServerConfig applyDefaultIfNull(ServerConfig serverConfig) {
-        return applyIfNull(serverConfig, null, (Function<Void, ServerConfig>) var -> getServerConfig());
-    }
-
-    OAuth2Client applyDefaultIfNull(OAuth2Client oAuth2Client) {
-        return applyIfNull(oAuth2Client, null, (Function<Void, OAuth2Client>) var -> getOAuth2Client());
-    }
-
-    TokenManager applyDefaultIfNull(TokenManager tokenManager) {
-        return applyIfNull(tokenManager, null, (Function<Void, TokenManager>) var -> getTokenManager());
-    }
-
-    SingleSignOnManager applyDefaultIfNull(SingleSignOnManager singleSignOnManager) {
-        return applyIfNull(singleSignOnManager, null, (Function<Void, SingleSignOnManager>) var -> getSingleSignOnManager());
-    }
-
-    SessionManager applyDefaultIfNull(SessionManager sessionManager) {
-        return applyIfNull(sessionManager, null, (Function<Void, SessionManager>) var -> getSessionManager());
-    }
-
-    KeyStoreManager applyDefaultIfNull(KeyStoreManager keyStoreManager) {
-        return applyIfNull(keyStoreManager, null, (Function<Void, KeyStoreManager>) var -> getKeyStoreManager());
-    }
-
-
-    private <T, R> R applyIfNull(R obj, T val, Function<T, R> func) {
-        if (obj == null) {
-            return func.apply(val);
-        } else {
-            return obj;
-        }
     }
 
     public static void reset() {

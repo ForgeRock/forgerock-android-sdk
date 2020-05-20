@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import android.content.Context;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -34,9 +36,11 @@ public class SecureCookieJar implements CookieJar {
             Executors.newSingleThreadScheduledExecutor();
 
     @Builder
-    public SecureCookieJar(SingleSignOnManager singleSignOnManager, Long cacheIntervalMillis) {
-        this.singleSignOnManager = Config.getInstance().applyDefaultIfNull(singleSignOnManager);
-        this.cacheIntervalMillis = Config.getInstance().applyDefaultCookieCacheIfNull(cacheIntervalMillis);
+    public SecureCookieJar(Context context, SingleSignOnManager singleSignOnManager, Long cacheIntervalMillis) {
+        this.singleSignOnManager = singleSignOnManager == null ?
+                Config.getInstance(context).getSingleSignOnManager() : singleSignOnManager;
+        this.cacheIntervalMillis = cacheIntervalMillis == null ?
+                context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000 : cacheIntervalMillis;
     }
 
     @NotNull
@@ -59,7 +63,7 @@ public class SecureCookieJar implements CookieJar {
                             //Remove expired cookies
                             iterator.remove();
                         }
-                   }
+                    }
                 }
 
                 // Some cookies are expired, remove it
@@ -85,7 +89,7 @@ public class SecureCookieJar implements CookieJar {
             }
         }
 
-        for (Cookie cookie: list) {
+        for (Cookie cookie : list) {
             if (!isExpired(cookie)) {
                 cookies.add(cookie);
             }
