@@ -14,18 +14,17 @@ import androidx.annotation.VisibleForTesting;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.nimbusds.jose.JOSEException;
 
+import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
- * Responsible for generating instances of {@link Push}.
+ * Responsible for generating instances of {@link PushMechanism}.
  *
  * Understands the concept of a version number associated with a Push mechanism
  * and will parse the URI according to this.
@@ -56,14 +55,19 @@ class PushFactory extends MechanismFactory {
             String> map, @NonNull FRAListener<Mechanism> listener) {
 
         // Check FCM device token
-        if(this.fcmToken == null) {
+        if(this.fcmToken == null || this.fcmToken.length() == 0) {
             listener.onException(new MechanismCreationException("Invalid FCM token."));
             return;
         }
 
         // Check if Google Play Services is enabled
-        if (!checkGooglePlayServices()) {
-            listener.onException(new MechanismCreationException("Google Play Services not enabled."));
+        try {
+            if (!checkGooglePlayServices()) {
+                listener.onException(new MechanismCreationException("Google Play Services not enabled."));
+                return;
+            }
+        } catch (IllegalStateException e) {
+            listener.onException(new MechanismCreationException("Missing configuration for Google Play Services."));
             return;
         }
 
@@ -91,12 +95,21 @@ class PushFactory extends MechanismFactory {
         String amlbCookie = map.get(PushParser.AM_LOAD_BALANCER_COOKIE);
         String messageId = getFromMap(map, PushParser.MESSAGE_ID, null);
 
+        String challengeResponse;
+        try {
+            challengeResponse = PushResponder.getInstance().generateChallengeResponse(base64Secret, base64Challenge);
+        } catch (ChallengeResponseException e) {
+            listener.onException(new MechanismCreationException("Error processing Push mechanism data. "
+                    + e.getLocalizedMessage(), e));
+            return;
+        }
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("deviceId", this.fcmToken);
         payload.put("deviceType", "android");
         payload.put("communicationType", "gcm");
         payload.put("mechanismUid", mechanismUID);
-        payload.put("response", PushResponder.generateChallengeResponse(base64Secret, base64Challenge));
+        payload.put("response", challengeResponse);
 
         PushResponder.getInstance().registration(registrationEndpoint, amlbCookie, base64Secret,
                 messageId, payload, new FRAListener<Integer>() {
@@ -106,7 +119,7 @@ class PushFactory extends MechanismFactory {
                     listener.onException(new MechanismCreationException("Communication with " +
                             "server returned " + returnCode + " code."));
                 } else {
-                    Mechanism push = Push.builder()
+                    Mechanism push = PushMechanism.builder()
                             .setMechanismUID(mechanismUID)
                             .setIssuer(issuer)
                             .setAccountName(accountName)
@@ -128,7 +141,7 @@ class PushFactory extends MechanismFactory {
     }
 
     @VisibleForTesting
-    boolean checkGooglePlayServices() {
+    boolean checkGooglePlayServices() throws IllegalStateException {
         Context context = getContext();
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(context);

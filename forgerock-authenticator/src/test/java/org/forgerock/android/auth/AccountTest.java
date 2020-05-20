@@ -8,10 +8,15 @@
 package org.forgerock.android.auth;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(RobolectricTestRunner.class)
 public class AccountTest extends FRABaseTest {
 
     @Test
@@ -56,8 +61,7 @@ public class AccountTest extends FRABaseTest {
                 .build();
 
         assertEquals(account1, account2);
-        assertEquals(account1.compareTo(account2), 0);
-        assertEquals(account2.compareTo(account1), 0);
+        assertTrue(account1.matches(account2));
         assertEquals(account1.hashCode(), account2.hashCode());
     }
 
@@ -73,8 +77,7 @@ public class AccountTest extends FRABaseTest {
                 .build();
 
         assertFalse(account1.equals(account2));
-        assertEquals(account1.compareTo(account2), -1);
-        assertEquals(account2.compareTo(account1), 1);
+        assertFalse(account1.matches(account2));
     }
 
     @Test
@@ -89,8 +92,7 @@ public class AccountTest extends FRABaseTest {
                 .build();
 
         assertFalse(account1.equals(account2));
-        assertEquals(account1.compareTo(account2), -1);
-        assertEquals(account2.compareTo(account1), 1);
+        assertFalse(account1.matches(account2));
     }
 
     @Test
@@ -101,7 +103,49 @@ public class AccountTest extends FRABaseTest {
                 .build();
 
         assertFalse(account.equals(null));
-        assertEquals(account.compareTo(null), -1);
+        assertFalse(account.matches(null));
+    }
+
+    @Test
+    public void testShouldParseToJsonSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
+                "\"backgroundColor\":\"032b75\"" +
+                "}";
+
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setImageURL(IMAGE_URL)
+                .setBackgroundColor(BACKGROUND_COLOR)
+                .build();
+
+        String accountAsJson = account.toJson();
+
+        assertNotNull(accountAsJson);
+        assertEquals(json, accountAsJson);
+    }
+
+    @Test
+    public void testShouldParseFromJsonSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
+                "\"backgroundColor\":\"032b75\"" +
+                "}";
+
+        Account account = Account.fromJson(json);
+
+        assertNotNull(account);
+        assertEquals(account.getIssuer(), ISSUER);
+        assertEquals(account.getAccountName(), ACCOUNT_NAME);
+        assertEquals(account.getImageURL(), IMAGE_URL);
+        assertEquals(account.getBackgroundColor(), BACKGROUND_COLOR);
     }
 
 }

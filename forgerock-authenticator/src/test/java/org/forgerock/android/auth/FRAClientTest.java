@@ -16,6 +16,8 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class FRAClientTest extends FRABaseTest {
     private DefaultStorageClient storageClient;
     private PushFactory pushFactory;
     private NotificationFactory notificationFactory;
-    private Push push;
+    private PushMechanism push;
     private MockWebServer server;
 
     @Before
@@ -59,8 +61,8 @@ public class FRAClientTest extends FRABaseTest {
 
         storageClient = mock(DefaultStorageClient.class);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Push.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Oath.class))).willReturn(true);
+        given(storageClient.setMechanism(any(PushMechanism.class))).willReturn(true);
+        given(storageClient.setMechanism(any(OathMechanism.class))).willReturn(true);
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
@@ -141,6 +143,7 @@ public class FRAClientTest extends FRABaseTest {
             mechanismListenerFuture.get();
             fail("Should trow MechanismParsingException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismParsingException);
             assertTrue(e.getLocalizedMessage().contains("Failed to parse URI"));
         }
     }
@@ -158,8 +161,8 @@ public class FRAClientTest extends FRABaseTest {
         String uri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
         FRAListenerFuture oathListenerFuture = new FRAListenerFuture<Mechanism>();
         fraClient.createMechanismFromUri(uri, oathListenerFuture);
-        Oath oath = (Oath) oathListenerFuture.get();
-        assertEquals(oath.getOathType(), Oath.TokenType.TOTP);
+        OathMechanism oath = (OathMechanism) oathListenerFuture.get();
+        assertEquals(oath.getOathType(), OathMechanism.TokenType.TOTP);
         assertEquals(oath.getAccountName(), "user1");
     }
 
@@ -180,6 +183,7 @@ public class FRAClientTest extends FRABaseTest {
             oathListenerFuture.get();
             fail("Should trow MechanismParsingException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismParsingException);
             assertTrue(e.getLocalizedMessage().contains("Failed to parse URI"));
         }
     }
@@ -213,7 +217,7 @@ public class FRAClientTest extends FRABaseTest {
 
         FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Mechanism>();
         fraClient.createMechanismFromUri(uri, pushListenerFuture);
-        Push push = (Push) pushListenerFuture.get();
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
@@ -248,6 +252,7 @@ public class FRAClientTest extends FRABaseTest {
             pushListenerFuture.get();
             fail("Should throw MechanismCreationException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("FCM token not provided during SDK initialization"));
         }
     }
@@ -378,9 +383,9 @@ public class FRAClientTest extends FRABaseTest {
                     .start();
 
             fraClient.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
-        } catch (AuthenticatorException e) {
-            assertNotNull(e);
-            assertTrue(e.getLocalizedMessage().contains("The SDK was already initialized with this device token"));
+        } catch (Exception e) {
+            assertTrue(e instanceof AuthenticatorException);
+            assertTrue(e.getLocalizedMessage().contains("The SDK was already initialized with the FCM device token"));
         }
     }
 
@@ -394,8 +399,8 @@ public class FRAClientTest extends FRABaseTest {
                     .start();
 
             fraClient.registerForRemoteNotifications("a-n-o-t-h-e-r-t-o-k-e-n");
-        } catch (AuthenticatorException e) {
-            assertNotNull(e);
+        } catch (Exception e) {
+            assertTrue(e instanceof AuthenticatorException);
             assertTrue(e.getLocalizedMessage().contains("The SDK was initialized with a different deviceToken"));
         }
     }

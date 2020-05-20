@@ -204,7 +204,7 @@ public class FRAClient {
      * SDK initialization.
      * Note: This method cannot be used to handle FCM device token updates received on
      * {@link FirebaseMessagingService#onNewToken}. Currently, AM does not accept deviceToken updates
-     * from the SDK. If any {@link Push} mechanism was registered with the previous token, this
+     * from the SDK. If any {@link PushMechanism} mechanism was registered with the previous token, this
      * mechanism needs to be removed and registered again using this new deviceToken.
      * @param deviceToken the FCM device token
      * @throws AuthenticatorException if the SDK was already initialized with a device token

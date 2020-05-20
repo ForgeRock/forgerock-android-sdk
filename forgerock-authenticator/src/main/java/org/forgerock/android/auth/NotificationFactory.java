@@ -106,7 +106,7 @@ class NotificationFactory {
 
         // Check push mechanism associated with the message
         Logger.debug(TAG, "Lookup Push mechanism associated with the message (%s).", messageId);
-        Push push = (Push) storageClient.getMechanismByUUID(mechanismUid);
+        PushMechanism push = (PushMechanism) storageClient.getMechanismByUUID(mechanismUid);
         if (push == null) {
             Logger.warn(TAG, "Could not retrieve the PUSH mechanism associated with the notification.");
             throw new InvalidNotificationException("Could not retrieve the PUSH mechanism associated with this remote message.");

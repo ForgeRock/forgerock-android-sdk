@@ -13,17 +13,8 @@ import org.forgerock.android.auth.Mechanism;
  * Represents an error in setting up a mechanism, caused by a matching mechanism already existing.
  */
 public class DuplicateMechanismException extends MechanismCreationException {
-    private Mechanism cause;
 
-    /**
-     * Create a new exception containing a message.
-     * @param detailMessage The message cause of the exception.
-     * @param throwable The throwable cause of the exception.
-     */
-    public DuplicateMechanismException(String detailMessage, Mechanism cause, Throwable throwable) {
-        super(detailMessage, throwable);
-        this.cause = cause;
-    }
+    private Mechanism cause;
 
     /**
      * Create a new exception containing a message.
@@ -37,4 +28,5 @@ public class DuplicateMechanismException extends MechanismCreationException {
     public Mechanism getCausingMechanism() {
         return cause;
     }
+
 }

@@ -8,9 +8,9 @@
 package org.forgerock.android.auth;
 
 /**
- * Base class for objects which are a part of the Account Model.
+ * Base class for objects which are a part of the Authenticator Model.
  */
-abstract class ModelObject<T> implements Comparable<T> {
+abstract class ModelObject<T> {
 
     /**
      * Returns true if the two objects would conflict if added to a storage system.

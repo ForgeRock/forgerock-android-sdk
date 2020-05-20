@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.ChallengeResponseException;
+import org.forgerock.android.auth.exception.PushMechanismException;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,25 +26,32 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 public class PushResponderTest extends FRABaseTest {
     private MockWebServer server;
-    private PushResponder pushResponder;
     private FRAListenerFuture pushListenerFuture;
+    private DefaultStorageClient storageClient;
 
     @Before
     public void setUp() throws IOException {
         server = new MockWebServer();
         server.start();
 
-        pushResponder = PushResponder.getInstance();
+        storageClient = mock(DefaultStorageClient.class);
+        given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
 
         pushListenerFuture = new FRAListenerFuture<Integer>();
     }
@@ -50,6 +59,20 @@ public class PushResponderTest extends FRABaseTest {
     @After
     public void cleanUp() throws Exception {
         server.shutdown();
+        PushResponder.reset();
+    }
+
+    @Test
+    public void testShouldFailToGetInstanceNotInitialized() {
+        PushResponder pushResponder = null;
+
+        try {
+            pushResponder = PushResponder.getInstance();
+            fail("Should throw IllegalStateException");
+        } catch (Exception e) {
+            assertNull(pushResponder);
+            assertTrue(e instanceof IllegalStateException);
+        }
     }
 
     @Test
@@ -57,7 +80,7 @@ public class PushResponderTest extends FRABaseTest {
         server.enqueue(new MockResponse());
         HttpUrl baseUrl = server.url("/");
 
-        pushResponder.registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
@@ -68,11 +91,11 @@ public class PushResponderTest extends FRABaseTest {
     }
 
     @Test
-    public void testReplyRegistrationMessageFailure() throws Exception {
+    public void testReplyRegistrationMessageServerConnectionFailure() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
         HttpUrl baseUrl = server.url("/");
 
-        pushResponder.registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
@@ -80,13 +103,31 @@ public class PushResponderTest extends FRABaseTest {
         assertEquals(responseCode, HTTP_NOT_FOUND);
         assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
         assertEquals("testCookie", request.getHeader("Cookie"));
+    }
+
+    @Test
+    public void testReplyRegistrationMessageNetworkFailure() {
+        MockResponse response = new MockResponse()
+                .setSocketPolicy(SocketPolicy.DISCONNECT_AT_START);
+        server.enqueue(response);
+        HttpUrl baseUrl = server.url("/");
+
+        try {
+            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+                    "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Network error while processing the Push Registration request"));
+        }
     }
 
     @Test
     public void testShouldReplyAuthenticationMessageCorrectly() throws Exception {
         server.enqueue(new MockResponse());
 
-        pushResponder.authentication(newPushNotification(), true, pushListenerFuture);
+        PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -96,10 +137,10 @@ public class PushResponderTest extends FRABaseTest {
     }
 
     @Test
-    public void testReplyAuthenticationMessageFailure() throws Exception {
+    public void testReplyAuthenticationMessageServerConnectionFailure() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
-        pushResponder.authentication(newPushNotification(), true, pushListenerFuture);
+        PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -108,18 +149,34 @@ public class PushResponderTest extends FRABaseTest {
         assertEquals(AMLB_COOKIE, request.getHeader("Cookie"));
     }
 
+    @Test
+    public void testReplyAuthenticationMessageNetworkFailure() {
+        MockResponse response = new MockResponse()
+                .setSocketPolicy(SocketPolicy.DISCONNECT_AT_START);
+        server.enqueue(response);
+
+        try {
+            PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Network error while processing the Push Authentication request"));
+        }
+    }
 
     @Test
-    public void testShouldRejectEmptySecret() throws Exception {
+    public void testShouldRejectEmptySecret() {
         server.enqueue(new MockResponse());
         HttpUrl baseUrl = server.url("/");
 
         try {
-            pushResponder.registration(baseUrl.toString(), "testCookie", "",
+            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
             pushListenerFuture.get();
-            Assert.fail("Should throw IOException");
+            Assert.fail("Should throw PushMechanismException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
             assertTrue(e.getLocalizedMessage().contains("Passed empty secret"));
         }
     }
@@ -130,23 +187,40 @@ public class PushResponderTest extends FRABaseTest {
         HttpUrl baseUrl = server.url("/");
 
         try {
-            pushResponder.registration(baseUrl.toString(), "testCookie", "dGVzdHNlY3JldA==",
+            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "dGVzdHNlY3JldA==",
                     "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
             pushListenerFuture.get();
-            Assert.fail("Should throw IOException");
+            Assert.fail("Should throw PushMechanismException");
         } catch (Exception e) {
-            assertTrue(e.getLocalizedMessage().contains("Invalid secret!"));
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Error signing JWT data. Secret malformed or invalid"));
         }
     }
 
     @Test
-    public void testShouldGenerateChallengeResponseCorrectly() {
+    public void testShouldGenerateChallengeResponseCorrectly() throws ChallengeResponseException {
         String base64Secret = "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=";
         String base64Challenge = "9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg=";
 
-        String response = pushResponder.generateChallengeResponse(base64Secret, base64Challenge);
+        String response = PushResponder.init(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
 
         assertEquals(response, "Df02AwA3Ra+sTGkL5+QvkEtN3eLdZiFmL5nxAV1m0k8=");
+    }
+
+    @Test
+    public void testShouldFailTOGenerateChallengeResponse() {
+        String base64Secret = "";
+        String base64Challenge = "9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg=";
+
+        String response = null;
+
+        try {
+            response = PushResponder.init(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
+            fail("Should throw ChallengeResponseException");
+        } catch (Exception e) {
+            assertNull(response);
+            assertTrue(e instanceof ChallengeResponseException);
+        }
     }
 
     @Test
@@ -161,7 +235,7 @@ public class PushResponderTest extends FRABaseTest {
         payload.put("mechanismUid", "testMechanismUid");
         payload.put("response", "Df02AwA3Ra+sTGkL5+QvkEtN3eLdZiFmL5nxAV1m0k8=");
 
-        pushResponder.registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", payload, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         String body = request.getBody().readUtf8();
@@ -192,9 +266,9 @@ public class PushResponderTest extends FRABaseTest {
         return pushNotification;
     }
 
-    private Push newPushMechanism() {
+    private PushMechanism newPushMechanism() {
         HttpUrl baseUrl = server.url("/");
-        Push push = Push.builder()
+        PushMechanism push = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)

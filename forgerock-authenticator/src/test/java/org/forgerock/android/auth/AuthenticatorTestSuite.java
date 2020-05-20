@@ -15,19 +15,21 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         AccountTest.class,
         AuthenticatorManagerTest.class,
+        DefaultStorageClientTest.class,
         FRAClientTest.class,
+        HOTPMechanismTest.class,
         PushNotificationTest.class,
         OathCodeGeneratorTest.class,
         OathParserTest.class,
-        OathTest.class,
+        OathMechanismTest.class,
         OathTokenCodeTest.class,
         OathFactoryTest.class,
         PushFactoryTest.class,
         NotificationFactoryTest.class,
         PushParserTest.class,
         PushResponderTest.class,
-        PushTest.class,
-        SortedListTest.class
+        PushMechanismTest.class,
+        TOTPMechanismTest.class
 })
 public class AuthenticatorTestSuite {
 }

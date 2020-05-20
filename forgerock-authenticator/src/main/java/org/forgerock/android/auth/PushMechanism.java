@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Represents an instance of a Push authentication mechanism. Associated with an Account.
  */
-public class Push extends Mechanism {
+public class PushMechanism extends Mechanism {
 
     /** The registration URL for Push mechanism */
     private String registrationEndpoint;
@@ -26,17 +26,17 @@ public class Push extends Mechanism {
     private List<PushNotification> pushNotificationList;
 
     /**
-     * Creates a Push mechanism with given data
+     * Creates a PushMechanism mechanism with given data
      * @param mechanismUID Mechanism UUID
      * @param issuer issuer of the Mechanism
      * @param accountName accountName of the Mechanism
      * @param type Type of Mechanism
      * @param secret String value of the shared secret
-     * @param registrationEndpoint registration URL for Push
-     * @param authenticationEndpoint authentication URL for Push
+     * @param registrationEndpoint registration URL for PushMechanism
+     * @param authenticationEndpoint authentication URL for PushMechanism
      */
-    private Push(String mechanismUID, String issuer, String accountName, String type, String secret,
-                String registrationEndpoint, String authenticationEndpoint) {
+    private PushMechanism(String mechanismUID, String issuer, String accountName, String type, String secret,
+                          String registrationEndpoint, String authenticationEndpoint) {
         super(mechanismUID, issuer, accountName, type, secret);
         this.registrationEndpoint = registrationEndpoint;
         this.authenticationEndpoint = authenticationEndpoint;
@@ -46,7 +46,7 @@ public class Push extends Mechanism {
      * The registration URL for Push mechanism
      * @return String representing the registration URL
      */
-    public String getRegistrationEndpoint() {
+    String getRegistrationEndpoint() {
         return registrationEndpoint;
     }
 
@@ -54,7 +54,7 @@ public class Push extends Mechanism {
      * The authentication URL for Push mechanism
      * @return String representing the authentication URL
      */
-    public String getAuthenticationEndpoint() {
+    String getAuthenticationEndpoint() {
         return authenticationEndpoint;
     }
 
@@ -97,24 +97,24 @@ public class Push extends Mechanism {
             jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
             jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
         } catch (JSONException e) {
-            throw new RuntimeException("Error parsing Push object to JSON string representation.", e);
+            throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
         return jsonObject.toString();
     }
 
     /**
-     * Deserializes the specified Json into an object of the {@link Push} object.
+     * Deserializes the specified Json into an object of the {@link PushMechanism} object.
      * @param jsonString the json string representing the object to be deserialized
-     * @return an {@link Push} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
+     * @return an {@link PushMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    public static Push fromJson(String jsonString) {
+    static PushMechanism fromJson(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
-            return Push.builder()
+            return PushMechanism.builder()
                     .setIssuer(jsonObject.getString("issuer"))
                     .setAccountName(jsonObject.getString("accountName"))
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
@@ -129,7 +129,7 @@ public class Push extends Mechanism {
 
     /**
      * Returns a builder for creating the Push Mechanism.
-     * @return The Push builder.
+     * @return The PushMechanism builder.
      */
     public static PushBuilder builder() {
         return new PushBuilder();
@@ -176,7 +176,7 @@ public class Push extends Mechanism {
 
         /**
          * Set the endpoint that will be used for Push registration
-         * @param endpoint The endpoint to register the device for Push.
+         * @param endpoint The endpoint to register the device for PushMechanism.
          * @return This builder.
          */
         public PushBuilder setRegistrationEndpoint(String endpoint) {
@@ -186,7 +186,7 @@ public class Push extends Mechanism {
 
         /**
          * Set the endpoint that will be used for Push authentication
-         * @param endpoint The endpoint to respond Push messages to.
+         * @param endpoint The endpoint to respond PushMechanism messages to.
          * @return This builder.
          */
         public PushBuilder setAuthenticationEndpoint(String endpoint) {
@@ -208,8 +208,8 @@ public class Push extends Mechanism {
          * Produce the described Mechanism.
          * @return The built Token.
          */
-        protected Push build() {
-            return new Push(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
+        protected PushMechanism build() {
+            return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
                     registrationEndpoint, authenticationEndpoint);
         }
 

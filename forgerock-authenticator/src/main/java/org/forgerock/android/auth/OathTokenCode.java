@@ -10,27 +10,28 @@ package org.forgerock.android.auth;
 import org.forgerock.android.auth.util.TimeKeeper;
 
 /**
- * Represents a currently active token.
+ * Represents a currently active OTP token.
  */
 public class OathTokenCode {
     private final String code;
     private final long start;
     private final long until;
     private TimeKeeper timeKeeper;
-    private final int MAX_VALUE = 1000;
+    private OathMechanism.TokenType oathType;
 
     /**
      * Creates a OathTokenCode wrap with given data
      * @param timeKeeper class containing timekeeping functionality
-     * @param code OTP code
-     * @param start start time
-     * @param until end time
+     * @param code OTP code with 6 or 8 digits
+     * @param start start timestamp for current Oath code
+     * @param until expiration timestamp for current Oath code
      */
-    protected OathTokenCode(TimeKeeper timeKeeper, String code, long start, long until) {
+    protected OathTokenCode(TimeKeeper timeKeeper, String code, long start, long until, OathMechanism.TokenType tokenType) {
         this.timeKeeper = timeKeeper;
         this.code = code;
         this.start = start;
         this.until = until;
+        this.oathType = tokenType;
     }
 
     /**
@@ -42,8 +43,28 @@ public class OathTokenCode {
     }
 
     /**
-     * Returns true if the OathTokenCode has not yet expired.
-     * @return True if the OathTokenCode is still valid, false otherwise.
+     * Get the started timestamp of current Oath token.
+     * @return The start time in milliseconds.
+     */
+    public long getStart() {
+        return start;
+    }
+
+    /**
+     * Get the expiration timestamp for TOTP tokens.
+     * For HOTP, it returns {@code null} as it does not expires.
+     * @return The expiration time in milliseconds.
+     */
+    public long getUntil() {
+        return until;
+    }
+
+    /**
+     * Indicates whether the current OathTokenCode is valid or not.
+     * For HOTP, isValid always returns 'true'.
+     * For TOTP, this property computes, start and end timestamp of OathTokenCode and determines
+     * its validity.
+     * @return {@code true} if the OathTokenCode is still valid, {@code false} otherwise.
      */
     public boolean isValid() {
         long cur = timeKeeper.getCurrentTimeMillis();
@@ -52,16 +73,11 @@ public class OathTokenCode {
     }
 
     /**
-     * Get the current progress of the OathTokenCode. This is a number between 0 and 1000, and represents
-     * the amount of time that has passed between the start and end times of the code.
-     * @return The total progress, a number between 0 and 1000.
+     * Returns the token type (HOTP, TOTP)
+     * @return The token type.
      */
-    public int getCurrentProgress() {
-        long cur = timeKeeper.getCurrentTimeMillis();
-        long total = until - start;
-        long state = cur - start;
-        int progress = (int) (state * MAX_VALUE / total);
-        return progress < MAX_VALUE ? progress : MAX_VALUE;
+    public OathMechanism.TokenType getOathType() {
+        return oathType;
     }
 
 }

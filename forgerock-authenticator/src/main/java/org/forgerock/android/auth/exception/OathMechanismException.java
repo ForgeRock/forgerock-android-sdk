@@ -8,16 +8,16 @@
 package org.forgerock.android.auth.exception;
 
 /**
- * Represents an error in process a Push registration request.
+ * Represents an error on generating OTP codes.
  */
-public class PushRegistrationException extends MechanismCreationException {
+public class OathMechanismException extends Exception {
 
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      * @param throwable The throwable cause of the exception.
      */
-    public PushRegistrationException(String detailMessage, Throwable throwable) {
+    public OathMechanismException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
 
@@ -25,7 +25,8 @@ public class PushRegistrationException extends MechanismCreationException {
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      */
-    public PushRegistrationException(String detailMessage) {
+    public OathMechanismException(String detailMessage) {
         super(detailMessage);
     }
+
 }

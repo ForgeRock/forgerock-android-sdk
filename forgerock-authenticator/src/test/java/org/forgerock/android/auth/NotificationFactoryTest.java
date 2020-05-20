@@ -32,7 +32,7 @@ public class NotificationFactoryTest extends FRABaseTest {
 
     private StorageClient storageClient;
     private NotificationFactory notificationFactory;
-    private Push push;
+    private PushMechanism push;
 
     @Before
     public void setUp() throws InvalidNotificationException {
@@ -40,7 +40,7 @@ public class NotificationFactoryTest extends FRABaseTest {
 
         storageClient = mock(DefaultStorageClient.class);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Push.class))).willReturn(true);
+        given(storageClient.setMechanism(any(PushMechanism.class))).willReturn(true);
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 

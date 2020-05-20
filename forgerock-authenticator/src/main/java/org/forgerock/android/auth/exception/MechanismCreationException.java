@@ -11,6 +11,7 @@ package org.forgerock.android.auth.exception;
  * Represents an error in setting up a mechanism.
  */
 public class MechanismCreationException extends Exception {
+
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
@@ -27,4 +28,5 @@ public class MechanismCreationException extends Exception {
     public MechanismCreationException(String detailMessage) {
         super(detailMessage);
     }
+
 }

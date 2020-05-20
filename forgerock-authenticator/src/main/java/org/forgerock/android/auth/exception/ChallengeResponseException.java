@@ -8,16 +8,16 @@
 package org.forgerock.android.auth.exception;
 
 /**
- * Represents an error on the Authenticator SDK.
+ * Represents an error in generate a challenge response.
  */
-public class AuthenticatorException extends Exception {
+public class ChallengeResponseException extends Exception {
 
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      * @param throwable The throwable cause of the exception.
      */
-    public AuthenticatorException(String detailMessage, Throwable throwable) {
+    public ChallengeResponseException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
 
@@ -25,7 +25,7 @@ public class AuthenticatorException extends Exception {
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      */
-    public AuthenticatorException(String detailMessage) {
+    public ChallengeResponseException(String detailMessage) {
         super(detailMessage);
     }
 

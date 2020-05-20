@@ -107,7 +107,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    public static Mechanism fromJson(String jsonString) {
+    static Mechanism fromJson(String jsonString) {
         Mechanism mechanism = null;
         if (jsonString == null || jsonString.length() == 0) {
             return null;
@@ -116,9 +116,9 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
             JSONObject jsonObject = new JSONObject(jsonString);
             String type = jsonObject.getString("type");
             if(type.equals(PUSH)) {
-                mechanism = Push.fromJson(jsonString);
+                mechanism = PushMechanism.fromJson(jsonString);
             } else if(type.equals(OATH)) {
-                mechanism = Oath.fromJson(jsonString);
+                mechanism = OathMechanism.fromJson(jsonString);
             }
         } catch (JSONException e) {
             return null;
@@ -132,11 +132,6 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
             return false;
         }
         return other.issuer.equals(issuer) && other.accountName.equals(accountName) && other.type.equals(type);
-    }
-
-    @Override
-    public int compareTo(Mechanism other) {
-        return type.compareTo(other.type);
     }
 
     @Override

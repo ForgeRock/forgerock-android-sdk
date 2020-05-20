@@ -11,6 +11,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +45,6 @@ class DefaultStorageClient implements StorageClient {
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.notificationData = new SecuredSharedPreferences(context,
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
-
-//        this.accountData = context.getApplicationContext()
-//                .getSharedPreferences(ORG_FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT, Context.MODE_PRIVATE);
-//        this.mechanismData = context.getApplicationContext()
-//                .getSharedPreferences(ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE);
-//        this.notificationData = context.getApplicationContext()
-//                .getSharedPreferences(ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -227,4 +222,19 @@ class DefaultStorageClient implements StorageClient {
                 .commit();
     }
 
+    @VisibleForTesting
+    void setAccountData(SharedPreferences sharedPreferences) {
+        this.accountData = sharedPreferences;
+    }
+
+    @VisibleForTesting
+    void setMechanismData(SharedPreferences sharedPreferences) {
+        this.mechanismData = sharedPreferences;
+    }
+
+    @VisibleForTesting
+    void setNotificationData(SharedPreferences sharedPreferences) {
+        this.notificationData = sharedPreferences;
+    }
+    
 }

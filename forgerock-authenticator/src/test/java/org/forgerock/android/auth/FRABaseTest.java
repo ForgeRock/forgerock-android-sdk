@@ -23,12 +23,10 @@ import com.nimbusds.jwt.SignedJWT;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.mockwebserver.MockWebServer;
@@ -62,7 +60,9 @@ public abstract class FRABaseTest {
     public static final String CHALLENGE = "fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=";
     public static final String AMLB_COOKIE = "ZnJfc3NvX2FtbGJfcHJvZD0wMQ==";
     public static final long TTL = 120;
-
+    public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
+    public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
+    public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
 
     public static Map<String, String> generateBaseMessage() {
         Map<String, String> baseMessage;
@@ -75,32 +75,8 @@ public abstract class FRABaseTest {
         return baseMessage;
     }
 
-    public static Account mockAccount() {
-        final Account account = mock(Account.class);
-        given(account.getAccountName()).willReturn(ACCOUNT_NAME);
-        given(account.getIssuer()).willReturn(ISSUER);
-        given(account.getBackgroundColor()).willReturn(BACKGROUND_COLOR);
-        given(account.getImageURL()).willReturn(IMAGE_URL);
-        return account;
-    }
-
-    public static Oath mockOathMechanism(String mechanismUid) {
-        final Oath oath = mock(Oath.class);
-        given(oath.getAccountName()).willReturn(ACCOUNT_NAME);
-        given(oath.getIssuer()).willReturn(ISSUER);
-        given(oath.getType()).willReturn(Mechanism.PUSH);
-        given(oath.getMechanismUID()).willReturn(mechanismUid);
-        given(oath.getSecret()).willReturn(CORRECT_SECRET);
-        given(oath.getAlgorithm()).willReturn(ALGORITHM);
-        given(oath.getCounter()).willReturn((long) COUNTER);
-        given(oath.getDigits()).willReturn(DIGITS);
-        given(oath.getPeriod()).willReturn((long) PERIOD);
-        given(oath.getOathType()).willReturn(Oath.TokenType.TOTP);
-        return oath;
-    }
-
-    public static Push mockPushMechanism(String mechanismUid) {
-        final Push push = mock(Push.class);
+    public static PushMechanism mockPushMechanism(String mechanismUid) {
+        final PushMechanism push = mock(PushMechanism.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);
@@ -111,8 +87,8 @@ public abstract class FRABaseTest {
         return push;
     }
 
-    public static Push mockPushMechanism(String mechanismUid, String serverUrl) {
-        final Push push = mock(Push.class);
+    public static PushMechanism mockPushMechanism(String mechanismUid, String serverUrl) {
+        final PushMechanism push = mock(PushMechanism.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);
@@ -123,17 +99,13 @@ public abstract class FRABaseTest {
         return push;
     }
 
-    public static PushNotification mockPushNotification(String messageId, Push push) {
-        final PushNotification notification = mock(PushNotification.class);
-        given(notification.getMechanismUID()).willReturn(MECHANISM_UID);
-        given(notification.getAmlbCookie()).willReturn(AMLB_COOKIE);
-        given(notification.getChallenge()).willReturn(CHALLENGE);
-        given(notification.getMessageId()).willReturn(messageId);
-        given(notification.getTimeAdded()).willReturn(Calendar.getInstance());
-        given(notification.getTimeExpired()).willReturn(Calendar.getInstance());
-        given(notification.getTtl()).willReturn(TTL);
-        given(notification.getPushMechanism()).willReturn(push);
-        return notification;
+    public static Account createAccountWithoutAdditionalData(String issuer, String accountName){
+        Account account = Account.builder()
+                .setAccountName(accountName)
+                .setIssuer(issuer)
+                .build();
+
+        return account;
     }
 
     public static Account createAccount(String accountName, String issuer) {
@@ -147,23 +119,62 @@ public abstract class FRABaseTest {
         return account;
     }
 
+    public static Account createAccount(String issuer, String accountName, String imageUrl,
+                                        String backgroundColor){
+        Account account = Account.builder()
+                .setAccountName(accountName)
+                .setIssuer(issuer)
+                .setImageURL(imageUrl)
+                .setBackgroundColor(backgroundColor)
+                .build();
+
+        return account;
+    }
+
     public static Mechanism createOathMechanism(String accountName, String issuer, String mechanismUid) {
-        Oath mechanism = Oath.builder()
+        OathMechanism mechanism = HOTPMechanism.builder()
                 .setMechanismUID(mechanismUid)
                 .setIssuer(issuer)
                 .setAccountName(accountName)
-                .setType(Oath.TokenType.HOTP)
                 .setAlgorithm(ALGORITHM)
                 .setSecret(SECRET)
                 .setDigits(DIGITS)
                 .setCounter(COUNTER)
-                .setPeriod(PERIOD)
                 .build();
         return mechanism;
     }
 
+    public static OathMechanism createOathMechanism(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
+                                                    String algorithm, String secret, int digits, long counter, int period) {
+        OathMechanism oath = HOTPMechanism.builder()
+                .setMechanismUID(mechanismUID)
+                .setIssuer(issuer)
+                .setAccountName(accountName)
+                .setAlgorithm(algorithm)
+                .setSecret(secret)
+                .setDigits(digits)
+                .setCounter(counter)
+                .build();
+
+        return oath;
+    }
+
+    public static PushMechanism createPushMechanism(String mechanismUID, String issuer, String accountName, String secret,
+                                                    String registrationEndpoint, String authenticationEndpoint) {
+        PushMechanism push = PushMechanism.builder()
+                .setMechanismUID(mechanismUID)
+                .setIssuer(issuer)
+                .setAccountName(accountName)
+                .setAuthenticationEndpoint(authenticationEndpoint)
+                .setRegistrationEndpoint(registrationEndpoint)
+                .setSecret(secret)
+                .build();
+
+        return push;
+    }
+
     public static Mechanism createPushMechanism(String accountName, String issuer, String mechanismUid) {
-        Push mechanism = Push.builder()
+        PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(mechanismUid)
                 .setIssuer(issuer)
                 .setAccountName(accountName)
@@ -185,6 +196,43 @@ public abstract class FRABaseTest {
                 .setTtl(TTL)
                 .build();
         pushNotification.setPushMechanism(push);
+        return pushNotification;
+    }
+
+    public static PushNotification createPushNotification(String mechanismUID, String messageId,
+                                                      String challenge, String amlbCookie,
+                                                      Calendar timeAdded, Calendar timeExpired,
+                                                      long ttl, boolean approved,
+                                                      boolean pending) {
+
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(mechanismUID)
+                .setMessageId(messageId)
+                .setChallenge(challenge)
+                .setAmlbCookie(amlbCookie)
+                .setTimeAdded(timeAdded)
+                .setTimeExpired(timeExpired)
+                .setTtl(ttl)
+                .setApproved(approved)
+                .setPending(pending)
+                .build();
+
+        return pushNotification;
+    }
+
+    public static PushNotification createPushNotification(String mechanismUID, String messageId,
+                                                      String challenge, String amlbCookie,
+                                                      Calendar timeAdded, long ttl) {
+
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(mechanismUID)
+                .setMessageId(messageId)
+                .setChallenge(challenge)
+                .setAmlbCookie(amlbCookie)
+                .setTimeAdded(timeAdded)
+                .setTtl(ttl)
+                .build();
+
         return pushNotification;
     }
 

@@ -8,16 +8,16 @@
 package org.forgerock.android.auth.exception;
 
 /**
- * Represents an error in process a Push authentication request.
+ * Represents an error in process a PushMechanism registration or PushMechanism authentication request.
  */
-public class PushAuthenticationException extends Exception {
+public class PushMechanismException extends Exception {
 
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      * @param throwable The throwable cause of the exception.
      */
-    public PushAuthenticationException(String detailMessage, Throwable throwable) {
+    public PushMechanismException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
 
@@ -25,7 +25,8 @@ public class PushAuthenticationException extends Exception {
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      */
-    public PushAuthenticationException(String detailMessage) {
+    public PushMechanismException(String detailMessage) {
         super(detailMessage);
     }
+
 }
