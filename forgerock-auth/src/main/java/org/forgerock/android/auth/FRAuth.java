@@ -57,7 +57,7 @@ public class FRAuth {
      */
     @Deprecated
     @Builder
-    public FRAuth(@NonNull Context context,
+    private FRAuth(@NonNull Context context,
                    String serviceName,
                    PolicyAdvice advice,
                    ServerConfig serverConfig,

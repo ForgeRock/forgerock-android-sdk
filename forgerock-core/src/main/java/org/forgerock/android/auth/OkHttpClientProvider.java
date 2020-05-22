@@ -78,7 +78,7 @@ class OkHttpClientProvider {
         }
 
         client = builder.build();
-        cache.put(networkConfig.getUrl(), client);
+        cache.put(networkConfig.getHost(), client);
         return client;
 
     }

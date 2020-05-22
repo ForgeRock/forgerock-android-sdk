@@ -84,7 +84,6 @@ public class FRUser {
 
         UserService.builder()
                 .serverConfig(Config.getInstance().getServerConfig())
-                .sessionManager(sessionManager)
                 .build()
                 .userinfo(new FRListener<UserInfo>() {
                     @Override

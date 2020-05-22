@@ -43,7 +43,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     private ServerConfig serverConfig;
 
     @Builder
-    DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
+    private DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
         try {
             singleSignOnManager = AccountSingleSignOnManager.builder()
                     .context(context)
