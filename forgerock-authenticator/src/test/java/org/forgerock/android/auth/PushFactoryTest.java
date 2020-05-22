@@ -8,37 +8,29 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.util.Base64;
 
-import com.nimbusds.jose.JOSEException;
+import androidx.test.core.app.ApplicationProvider;
 
-import org.forgerock.android.auth.Account;
-import org.forgerock.android.auth.DefaultStorageClient;
-import org.forgerock.android.auth.Mechanism;
-import org.forgerock.android.auth.Push;
-import org.forgerock.android.auth.PushFactory;
+import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -53,18 +45,33 @@ public class PushFactoryTest extends FRABaseTest {
     private FRAListenerFuture pushListenerFuture;
     private MockWebServer server;
 
+    private static final boolean CLEAN_UP_DATA = false;
+
+    @After
+    public void cleanUp() {
+        if(CLEAN_UP_DATA) {
+            storageClient.removeAll();
+        }
+    }
+
     @Before
     public void setUp() throws IOException {
-        context = mock(Context.class);
+        context = ApplicationProvider.getApplicationContext();
 
         server = new MockWebServer();
         server.start();
 
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
 
-        storageClient = mock(DefaultStorageClient.class);
-        given(storageClient.setAccount(any(Account.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Push.class))).willReturn(true);
+        storageClient = new DefaultStorageClient(context);
+        storageClient.setAccountData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_ACCOUNT, Context.MODE_PRIVATE));
+        storageClient.setMechanismData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE));
+        storageClient.setNotificationData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE));
+
+        PushResponder.init(storageClient);
 
         factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
         doReturn(true).when(factory).checkGooglePlayServices();
@@ -92,7 +99,7 @@ public class PushFactoryTest extends FRABaseTest {
                 "version=1";
 
         factory.createFromUri(uri, pushListenerFuture);
-        Push push = (Push) pushListenerFuture.get();
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
@@ -114,14 +121,14 @@ public class PushFactoryTest extends FRABaseTest {
                 "issuer=Rm9yZ2Vyb2Nr";
 
         factory.createFromUri(uri, pushListenerFuture);
-        Push push = (Push) pushListenerFuture.get();
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
     }
 
     @Test
-    public void testShouldRejectInvalidVersion() throws Exception {
+    public void testShouldRejectInvalidVersion() {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
         String uri = "pushauth://push/forgerock:demo?" +
@@ -138,10 +145,211 @@ public class PushFactoryTest extends FRABaseTest {
 
         try {
             factory.createFromUri(uri, pushListenerFuture);
-            Push push = (Push) pushListenerFuture.get();
+            pushListenerFuture.get();
             Assert.fail("Should throw MechanismCreationException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("Unknown version:"));
+        }
+    }
+
+    @Test
+    public void testShouldRejectInvalidVersionNotANumber() {
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr&" +
+                "version=a";
+
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            PushMechanism push = (PushMechanism) pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Expected valid integer"));
+        }
+    }
+
+    @Test
+    public void testFailToSaveAccount() {
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr";
+
+        StorageClient storageClient = mock(DefaultStorageClient.class);
+        given(storageClient.getAccount(any(String.class))).willReturn( null);
+        given(storageClient.setAccount(any(Account.class))).willReturn(false);
+        factory = new PushFactory(context, storageClient, "s-o-m-e-i-d");
+
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Error while storing a new Account"));
+        }
+    }
+
+    @Test
+    public void testFailToSaveMechanism() {
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr";
+
+        StorageClient storageClient = mock(DefaultStorageClient.class);
+        given(storageClient.getAccount(any(String.class))).willReturn(null);
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.setMechanism(any(Mechanism.class))).willReturn(false);
+        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        doReturn(true).when(factory).checkGooglePlayServices();
+
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Error storing the mechanism"));
+        }
+    }
+
+    @Test
+    public void testShouldFailDuplicatedMechanism() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr";
+
+        factory.createFromUri(uri, pushListenerFuture);
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
+        assertEquals(push.getType(), Mechanism.PUSH);
+        assertEquals(push.getAccountName(), "demo");
+        assertEquals(push.getIssuer(), "Forgerock");
+
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+        FRAListenerFuture pushListenerFuture2 = new FRAListenerFuture<Mechanism>();
+        try {
+            factory.createFromUri(uri, pushListenerFuture2);
+            pushListenerFuture2.get();
+            Assert.fail("Should throw DuplicateMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DuplicateMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Matching mechanism already exists"));
+            assertTrue(((DuplicateMechanismException) e.getCause()).getCausingMechanism() instanceof PushMechanism);
+        }
+    }
+
+    @Test
+    public void testShouldFailNoFCMToken() {
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr&" +
+                "version=1";
+
+        factory = spy(new PushFactory(context, storageClient, ""));
+        doReturn(true).when(factory).checkGooglePlayServices();
+
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Invalid FCM token"));
+        }
+    }
+
+    @Test
+    public void testShouldFailGoogleServicesInvalidState() {
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr&" +
+                "version=1";
+
+        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Missing configuration for Google Play Services"));
+        }
+    }
+
+    @Test
+    public void testShouldFailGoogleServicesNotEnabled() {
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr&" +
+                "version=1";
+
+        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        doReturn(false).when(factory).checkGooglePlayServices();
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Google Play Services not enabled"));
         }
     }
 
@@ -169,22 +377,20 @@ public class PushFactoryTest extends FRABaseTest {
                 "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
                 "issuer=RXhhbXBsZQ";
 
-
-       // String secondUri = "pushauth://push/forgerock:user?a=aHR0cDovL2FtcWEtY2xvbmU2OS50ZXN0LmZvcmdlcm9jay5jb206ODA4MC9vcGVuYW0vanNvbi9wdXNoL3Nucy9tZXNzYWdlP19hY3Rpb249YXV0aGVudGljYXRl&image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&b=ff00ff&r=aHR0cDovL2FtcWEtY2xvbmU2OS50ZXN0LmZvcmdlcm9jay5jb206ODA4MC9vcGVuYW0vanNvbi9wdXNoL3Nucy9tZXNzYWdlP19hY3Rpb249cmVnaXN0ZXI=&s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&l=YW1sYmNvb2tpZT0wMQ==&m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&issuer=RXhhbXBsZQ";
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
         factory.createFromUri(uri, pushListenerFuture);
-        Push push = (Push) pushListenerFuture.get();
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
         factory.createFromUri(secondUri, pushListenerFuture);
-        Push secondPush = (Push) pushListenerFuture.get();
+        PushMechanism secondPush = (PushMechanism) pushListenerFuture.get();
 
         assertNotEquals(secondPush, push);
     }
 
     @Test
-    public void testCannotConnectToServer() throws Exception {
+    public void testCannotConnectToServer() {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_GATEWAY));
 
         String uri = "pushauth://push/forgerock:demo?" +
@@ -202,7 +408,34 @@ public class PushFactoryTest extends FRABaseTest {
             pushListenerFuture.get();
             Assert.fail("Should throw MechanismCreationException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("Communication with server returned 502 code."));
+        }
+    }
+
+    @Test
+    public void testNetworkIssue() {
+        MockResponse response = new MockResponse()
+                .setSocketPolicy(SocketPolicy.DISCONNECT_AT_START);
+        server.enqueue(response);
+
+        String uri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
+                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr";
+        try {
+            factory.createFromUri(uri, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Failed to register with server"));
         }
     }
 

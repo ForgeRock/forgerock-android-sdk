@@ -23,7 +23,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Responsible for generating instances of {@link Oath}.
+ * Responsible for generating instances of {@link OathMechanism}.
  *
  * Understands the concept of a version number associated with a Token
  * and will parse the URI according to this.
@@ -61,9 +61,9 @@ class OathFactory extends MechanismFactory {
         String accountName = map.get(MechanismParser.ACCOUNT_NAME);
 
         // Validate OTP type
-        Oath.TokenType otpType = null;
+        OathMechanism.TokenType otpType = null;
         try {
-            otpType = Oath.TokenType.valueOf(map.get(OathParser.TYPE).toUpperCase());
+            otpType = OathMechanism.TokenType.valueOf(map.get(OathParser.TYPE).toUpperCase());
         } catch (IllegalArgumentException e) {
             Logger.warn(TAG, "Invalid type: %s", otpType);
             listener.onException(new MechanismCreationException("Invalid type: " + otpType));
@@ -117,17 +117,17 @@ class OathFactory extends MechanismFactory {
         try {
             period = Integer.parseInt(periodStr);
             if (period <= 0) {
-                Logger.warn(TAG, "Oath refresh period (%s) was not a positive integer", periodStr);
-                listener.onException(new MechanismCreationException("Oath refresh period was not a positive integer"));
+                Logger.warn(TAG, "OathMechanism refresh period (%s) was not a positive integer", periodStr);
+                listener.onException(new MechanismCreationException("OathMechanism refresh period was not a positive integer"));
                 return;
             }
         } catch (NumberFormatException e) {
-            Logger.warn(TAG, e, "Oath refresh period (%s) was not a number", periodStr);
-            listener.onException(new MechanismCreationException("Oath refresh period was not a number: " + periodStr));
+            Logger.warn(TAG, e, "OathMechanism refresh period (%s) was not a number", periodStr);
+            listener.onException(new MechanismCreationException("OathMechanism refresh period was not a number: " + periodStr));
             return;
         }
 
-        // Validates the counter. Only useful for HOTP
+        // Validates the counter. Only useful for HOTPMechanism
         String counterStr = getFromMap(map, OathParser.COUNTER, "0");
         long counter = 0;
         try {
@@ -138,17 +138,33 @@ class OathFactory extends MechanismFactory {
             return;
         }
 
-        Mechanism oath = Oath.builder()
-                .setMechanismUID(mechanismUID)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setType(otpType)
-                .setAlgorithm(algorithm)
-                .setSecret(secretStr)
-                .setDigits(digits)
-                .setCounter(counter)
-                .setPeriod(period)
-                .build();
+        Mechanism oath;
+        switch (otpType) {
+            case HOTP:
+                oath = HOTPMechanism.builder()
+                        .setMechanismUID(mechanismUID)
+                        .setIssuer(issuer)
+                        .setAccountName(accountName)
+                        .setAlgorithm(algorithm)
+                        .setSecret(secretStr)
+                        .setDigits(digits)
+                        .setCounter(counter)
+                        .build();
+                break;
+            case TOTP:
+                oath = TOTPMechanism.builder()
+                        .setMechanismUID(mechanismUID)
+                        .setIssuer(issuer)
+                        .setAccountName(accountName)
+                        .setAlgorithm(algorithm)
+                        .setSecret(secretStr)
+                        .setDigits(digits)
+                        .setPeriod(period)
+                        .build();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + otpType);
+        }
 
         listener.onSuccess(oath);
     }

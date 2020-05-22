@@ -7,8 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.OathParser;
-import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +14,6 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class OathParserTest {
 
@@ -97,11 +92,6 @@ public class OathParserTest {
     @Test (expected = MechanismParsingException.class)
     public void testShouldValidateMissingSecret() throws MechanismParsingException {
         oathParser.map("otpauth://totp/Forgerock:user@forgerock.com");
-    }
-
-    @Test (expected = MechanismParsingException.class)
-    public void testShouldValidateMissingCounterInHOTPMode() throws MechanismParsingException {
-        oathParser.map("otpauth://hotp/Forgerock:user@forgerock.com?secret=ABC");
     }
 
     @Test (expected = MechanismParsingException.class)

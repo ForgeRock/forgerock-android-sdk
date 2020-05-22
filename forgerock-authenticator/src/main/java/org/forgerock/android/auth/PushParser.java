@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Provides the ability to parse URI scheme into a convenient format
- * to use with configuring a {@link Push} to receive push notifications.
+ * to use with configuring a {@link PushMechanism} to receive push notifications.
  */
 class PushParser extends MechanismParser {
 

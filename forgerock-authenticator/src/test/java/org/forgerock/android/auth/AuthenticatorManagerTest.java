@@ -15,6 +15,9 @@ import androidx.test.core.app.ApplicationProvider;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AuthenticatorException;
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +52,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     private FRAListenerFuture pushListenerFuture;
     private FRAListenerFuture oathListenerFuture;
     private AuthenticatorManager authenticatorManager;
-    private Push push;
+    private PushMechanism push;
     private MockWebServer server;
 
     @Before
@@ -60,8 +63,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         storageClient = mock(DefaultStorageClient.class);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Push.class))).willReturn(true);
-        given(storageClient.setMechanism(any(Oath.class))).willReturn(true);
+        given(storageClient.setMechanism(any(PushMechanism.class))).willReturn(true);
+        given(storageClient.setMechanism(any(OathMechanism.class))).willReturn(true);
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
@@ -87,9 +90,25 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         String uri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
         authenticatorManager.createMechanismFromUri(uri, oathListenerFuture);
-        Oath oath = (Oath) oathListenerFuture.get();
-        assertEquals(oath.getOathType(), Oath.TokenType.TOTP);
+        OathMechanism oath = (OathMechanism) oathListenerFuture.get();
+        assertEquals(oath.getOathType(), OathMechanism.TokenType.TOTP);
         assertEquals(oath.getAccountName(), "user1");
+    }
+
+    @Test
+    public void testFailToCreateMechanismInvalidQRCode() {
+        try {
+            authenticatorManager = new AuthenticatorManager(context, storageClient, null);
+
+            String uri = "http://unkown/Forgerock:user1?secret=ONSWG4TFOQ=====";
+
+            authenticatorManager.createMechanismFromUri(uri, oathListenerFuture);
+            oathListenerFuture.get();
+            fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Invalid QR Code given for Mechanism initialization"));
+        }
     }
 
     @Test
@@ -113,6 +132,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
             pushListenerFuture.get();
             fail("Should throw MechanismCreationException");
         } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("FCM token not provided during SDK initialization"));
         }
     }
@@ -135,7 +155,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                 "issuer=Rm9yZ2Vyb2Nr";
 
         authenticatorManager.createMechanismFromUri(uri, pushListenerFuture);
-        Push push = (Push) pushListenerFuture.get();
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
@@ -171,32 +191,48 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldRegisterDeviceTokenForRemoteNotifications() {
+    public void testShouldRegisterDeviceTokenForRemoteNotifications() throws JSONException {
+        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
+        PushNotification pushNotification = null;
 
         authenticatorManager = new AuthenticatorManager(context, storageClient, null);
         try {
-            authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
-        } catch (AuthenticatorException e) {
-            assertNull(e);
+            pushNotification = authenticatorManager.handleMessage(remoteMessage);
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidNotificationException);
+            assertTrue(e.getLocalizedMessage().contains("Cannot process PushMechanism notification"));
         }
+        assertNull(pushNotification);
+
+        try {
+            authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
+            pushNotification = authenticatorManager.handleMessage(remoteMessage);
+        } catch (AuthenticatorException | InvalidNotificationException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(pushNotification);
     }
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredSameToken() {
+        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n");
         try {
             authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
-        } catch (AuthenticatorException e) {
-            assertNotNull(e);
-            assertTrue(e.getLocalizedMessage().contains("The SDK was already initialized with this device token"));
+            fail("Should throw AuthenticatorException");
+        } catch (Exception e) {
+            assertTrue(e instanceof AuthenticatorException);
+            assertTrue(e.getLocalizedMessage().contains("The SDK was already initialized with the FCM device token"));
         }
     }
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredDifferentToken() {
+        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n");
         try {
             authenticatorManager.registerForRemoteNotifications("a-n-o-t-h-e-r-t-o-k-e-n");
-        } catch (AuthenticatorException e) {
-            assertNotNull(e);
+            fail("Should throw AuthenticatorException");
+        } catch (Exception e) {
+            assertTrue(e instanceof AuthenticatorException);
             assertTrue(e.getLocalizedMessage().contains("The SDK was initialized with a different deviceToken"));
         }
     }

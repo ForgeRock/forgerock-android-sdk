@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -19,8 +22,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import org.forgerock.android.auth.exception.PushAuthenticationException;
-import org.forgerock.android.auth.exception.PushRegistrationException;
+import org.forgerock.android.auth.exception.ChallengeResponseException;
+import org.forgerock.android.auth.exception.PushMechanismException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -48,10 +51,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 class PushResponder {
 
-    private static final PushResponder INSTANCE = new PushResponder();
+    private static PushResponder INSTANCE = null;
 
-    /** OkHttp client **/
+    /** OkHttp client to handle network requests **/
     private OkHttpClient httpClient;
+
+    /** StorageClient to persist operation result **/
+    private StorageClient storageClient;
 
     private static final String JWT_ALGORITHM = "HmacSHA256";
     private static final String RESPONSE_KEY = "response";
@@ -66,14 +72,35 @@ class PushResponder {
      *
      * @return PushResponder instance
      */
-    public static PushResponder getInstance() {
+    static PushResponder getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException("PushResponder is not initialized. " +
+                    "Please make sure to call PushResponder#init first.");
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Initialize the PushResponder instance
+     *
+     * @return PushResponder instance
+     */
+    static synchronized PushResponder init(@NonNull StorageClient storageClient) {
+        if (INSTANCE == null) {
+            synchronized (PushResponder.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new PushResponder(storageClient);
+                }
+            }
+        }
         return INSTANCE;
     }
 
     /**
      * Private constructor restricted to this class itself
      */
-    private PushResponder() {
+    private PushResponder(StorageClient storageClient) {
+        this.storageClient = storageClient;
     }
 
     /**
@@ -83,19 +110,21 @@ class PushResponder {
      * @param base64Challenge The challenge.
      * @return The challenge response of the request.
      */
-    static String generateChallengeResponse(String base64Secret, String base64Challenge) {
+    String generateChallengeResponse(String base64Secret, String base64Challenge) throws ChallengeResponseException {
         byte[] secret = Base64.decode(base64Secret, Base64.NO_WRAP);
         byte[] challenge;
 
         challenge = Base64.decode(base64Challenge, Base64.NO_WRAP);
 
         Mac hmac = null;
-        SecretKey key = new SecretKeySpec(secret, 0, secret.length, JWT_ALGORITHM);
         try {
+            SecretKey key = new SecretKeySpec(secret, 0, secret.length, JWT_ALGORITHM);
             hmac = Mac.getInstance(JWT_ALGORITHM);
             hmac.init(key);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            Logger.warn(TAG, e, "Failed to generate challenge-response.");
+        } catch (NoSuchAlgorithmException | IllegalArgumentException | InvalidKeyException e) {
+            Logger.warn(TAG, e, "Failed to generate challenge-response for the secret" +
+                    " %s using algorithm %s.", base64Secret, JWT_ALGORITHM);
+            throw new ChallengeResponseException("Failed to generate challenge-response.", e);
         }
         byte[] output = hmac.doFinal(challenge);
         return Base64.encodeToString(output, Base64.NO_WRAP);
@@ -108,12 +137,12 @@ class PushResponder {
      * @param approved The approval response
      * @param listener Listener for receiving the HTTP call response code.
      */
-    void authentication(PushNotification pushNotification, boolean approved,
-                        final FRAListener<Integer> listener) {
+    void authentication(@NonNull PushNotification pushNotification, boolean approved,
+                        final @NonNull FRAListener<Integer> listener) {
         try {
             // Check if notification has been approved
             if(!pushNotification.isPending()) {
-                listener.onException(new PushAuthenticationException("PushNotification is not in a" +
+                listener.onException(new PushMechanismException("PushNotification is not in a" +
                         " valid status to authenticate; either PushNotification has already been" +
                         " authenticated or expired."));
                 return;
@@ -145,25 +174,28 @@ class PushResponder {
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
                     // Check if operation succeed
                     if(response.code() == 200) {
+                        // Update notification status
                         pushNotification.setPending(false);
                         if(approved)
                             pushNotification.setApproved(true);
                         else
                             pushNotification.setApproved(false);
+                        // Persist status
+                        if(!storageClient.setNotification(pushNotification))
+                            listener.onException(new PushMechanismException("Push Authentication " +
+                                    "request was successfully processed, however it could not be persisted."));
                     }
-                    if (listener != null) {
-                        listener.onSuccess(response.code());
-                    }
+                    listener.onSuccess(response.code());
                 }
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    listener.onException(new PushAuthenticationException("Network error while processing the Push " +
+                    listener.onException(new PushMechanismException("Network error while processing the Push " +
                             "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
                 }
             });
-        } catch (JOSEException | IOException e) {
-            listener.onException(new PushAuthenticationException("Error processing the Push " +
+        } catch (JOSEException | IllegalArgumentException | IOException | ChallengeResponseException e) {
+            listener.onException(new PushMechanismException("Error processing the Push " +
                     "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
         }
     }
@@ -201,12 +233,12 @@ class PushResponder {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    listener.onException(new PushRegistrationException("Network error while processing the Push " +
+                    listener.onException(new PushMechanismException("Network error while processing the Push " +
                             "Registration request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
                 }
             });
-        } catch (JOSEException | IOException e) {
-            listener.onException(new PushRegistrationException("Error processing the Push " +
+        } catch (JOSEException | IllegalArgumentException | IOException e) {
+            listener.onException(new PushMechanismException("Error processing the Push " +
                     "Registration request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
         }
     }
@@ -240,7 +272,7 @@ class PushResponder {
      */
     private Request buildRequest(URL url, String amlbCookie, String base64Secret,
                                  String messageId, Map<String, Object> data)
-            throws IOException, JOSEException {
+            throws IllegalArgumentException, JOSEException {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(url);
 
@@ -265,11 +297,11 @@ class PushResponder {
      * Sign the payload with JWT
      */
     private static String generateJwt(String base64Secret, Map<String, Object> data)
-            throws IOException, JOSEException {
+            throws IllegalArgumentException, JOSEException {
         // Check shared secret
         if(base64Secret == null || base64Secret.length() == 0) {
             Logger.debug(TAG, "Error generating JWT data. Secret is empty or null.");
-            throw new IOException("Passed empty secret");
+            throw new IllegalArgumentException("Passed empty secret");
         }
 
         // Prepare JWT with claims
@@ -293,13 +325,15 @@ class PushResponder {
             // Sign JWT
             signedJWT.sign(signer);
             return signedJWT.serialize();
-        } catch (IllegalArgumentException | KeyLengthException e) {
-            Logger.debug(TAG, "Error generating JWT data. Secret malformed or invalid.");
-            throw new IOException("Invalid secret!", e);
         } catch (JOSEException e) {
             Logger.warn(TAG, e, "Failed to sign the data.");
-            throw new JOSEException("Failed to sign JWT", e);
+            throw new JOSEException("Error signing JWT data. Secret malformed or invalid.", e);
         }
+    }
+
+    @VisibleForTesting
+    static void reset() {
+        INSTANCE = null;
     }
 
 }

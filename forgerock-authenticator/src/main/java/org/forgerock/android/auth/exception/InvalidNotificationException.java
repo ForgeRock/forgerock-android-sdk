@@ -15,8 +15,18 @@ public class InvalidNotificationException extends Exception {
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
+     * @param throwable The throwable cause of the exception.
+     */
+    public InvalidNotificationException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
+
+    /**
+     * Create a new exception containing a message.
+     * @param detailMessage The message cause of the exception.
      */
     public InvalidNotificationException(String detailMessage) {
         super(detailMessage);
     }
+
 }

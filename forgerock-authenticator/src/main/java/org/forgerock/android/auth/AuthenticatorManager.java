@@ -39,24 +39,27 @@ class AuthenticatorManager {
     AuthenticatorManager(Context context, StorageClient storageClient, String deviceToken) {
         this.context = context;
         this.storageClient = storageClient;
+        this.deviceToken = deviceToken;
 
         this.oathFactory = new OathFactory(context, storageClient);
+        OathCodeGenerator.init(storageClient);
 
         if(deviceToken != null) {
             this.pushFactory = new PushFactory(context, storageClient, deviceToken);
             this.notificationFactory = new NotificationFactory(storageClient);
+            PushResponder.init(storageClient);
         } else {
             Logger.debug(TAG, "No FCM device token provided. SDK will not be able to register Push mechanisms.");
         }
     }
 
     void createMechanismFromUri(String uri, FRAListener<Mechanism> listener) {
-        Logger.debug(TAG, "Creating new mechanism from URI.");
+        Logger.debug(TAG, "Creating new mechanism from URI: %s", uri);
         if(uri.startsWith(Mechanism.PUSH)) {
             if(pushFactory != null) {
                 pushFactory.createFromUri(uri, listener);
             } else {
-                Logger.warn(TAG, "Attempt to add a Push mechanisms has failed. " +
+                Logger.warn(TAG, "Attempt to add a Push mechanism has failed. " +
                         "FCM token was not provided during SDK initialization.");
                 listener.onException(new MechanismCreationException("Cannot add Push mechanisms. " +
                         "FCM token not provided during SDK initialization to handle Push Notifications."));
@@ -110,7 +113,7 @@ class AuthenticatorManager {
     boolean removeMechanism(Mechanism mechanism) {
         Logger.debug(TAG, "Removing Mechanim with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
 
-        // If Push mechanism, remove any notifications associated with it
+        // If PushMechanism mechanism, remove any notifications associated with it
         if(mechanism.getType().equals(Mechanism.PUSH)) {
             List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
             if(!notificationList.isEmpty()) {
@@ -134,6 +137,7 @@ class AuthenticatorManager {
             this.deviceToken = newDeviceToken;
             this.pushFactory = new PushFactory(context, storageClient, newDeviceToken);
             this.notificationFactory = new NotificationFactory(storageClient);
+            PushResponder.init(storageClient);
         } else {
             if(this.deviceToken.equals(newDeviceToken)) {
                 Logger.warn(TAG, "The SDK was already initialized with this device token: %s",
@@ -181,7 +185,7 @@ class AuthenticatorManager {
             for (Mechanism mechanism : mechanismList) {
                 if(mechanism.getType().equals(Mechanism.PUSH)) {
                     List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
-                    ((Push) mechanism).setPushNotificationList(notificationList);
+                    ((PushMechanism) mechanism).setPushNotificationList(notificationList);
                 }
             }
         }

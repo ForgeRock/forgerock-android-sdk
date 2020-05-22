@@ -7,11 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.Account;
-import org.forgerock.android.auth.Oath;
-import org.forgerock.android.auth.Push;
-import org.forgerock.android.auth.PushNotification;
-
 import java.util.Calendar;
 
 /**
@@ -40,9 +35,9 @@ public class MockModelBuilder {
         return account;
     }
 
-    public static Oath createOath(String mechanismUID, String issuer, String accountName, Oath.TokenType oathType,
-                                  String algorithm, String secret, int digits, long counter, int period) {
-        Oath oath = Oath.builder()
+    public static OathMechanism createOath(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
+                                           String algorithm, String secret, int digits, long counter, int period) {
+        OathMechanism oath = OathMechanism.builder()
                 .setMechanismUID(mechanismUID)
                 .setIssuer(issuer)
                 .setAccountName(accountName)
@@ -57,9 +52,9 @@ public class MockModelBuilder {
         return oath;
     }
 
-    public static Push createPush(String mechanismUID, String issuer, String accountName, String secret,
-                                  String registrationEndpoint, String authenticationEndpoint) {
-        Push push = Push.builder()
+    public static PushMechanism createPush(String mechanismUID, String issuer, String accountName, String secret,
+                                           String registrationEndpoint, String authenticationEndpoint) {
+        PushMechanism push = PushMechanism.builder()
                 .setMechanismUID(mechanismUID)
                 .setIssuer(issuer)
                 .setAccountName(accountName)

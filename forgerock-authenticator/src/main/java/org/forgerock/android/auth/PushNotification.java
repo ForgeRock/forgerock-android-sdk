@@ -8,15 +8,10 @@
 package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
-import com.nimbusds.jose.JOSEException;
-
-import org.forgerock.android.auth.exception.PushAuthenticationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Calendar;
 
 /**
@@ -47,7 +42,7 @@ public class PushNotification extends ModelObject<PushNotification> {
     /** Determines if the PushNotification has been interacted with the user. */
     private boolean pending;
     /** The mechanism associated with this notification **/
-    private Push pushMechanism;
+    private PushMechanism pushMechanism;
 
     private static final String TAG = PushNotification.class.getSimpleName();
 
@@ -176,7 +171,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * Gets the mechanism object associated with the notification.
      * @return the push mechanism object.
      */
-    Push getPushMechanism() {
+    PushMechanism getPushMechanism() {
         return this.pushMechanism ;
     }
 
@@ -185,7 +180,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @param mechanism the mechanism object.
      */
     void setPushMechanism(Mechanism mechanism) {
-        this.pushMechanism = (Push) mechanism;
+        this.pushMechanism = (PushMechanism) mechanism;
     }
 
     @Override
@@ -280,19 +275,6 @@ public class PushNotification extends ModelObject<PushNotification> {
             return false;
         }
         return mechanismUID.equals(other.getMechanismUID()) && timeAdded.getTimeInMillis() == other.timeAdded.getTimeInMillis();
-    }
-
-    @Override
-    public int compareTo(PushNotification another) {
-        long thisTime = timeAdded.getTimeInMillis();
-        long otherTime = another.timeAdded.getTimeInMillis();
-        if (otherTime < thisTime) {
-            return -1;
-        }
-        if (otherTime == thisTime) {
-            return 0;
-        }
-        return 1;
     }
 
     @Override

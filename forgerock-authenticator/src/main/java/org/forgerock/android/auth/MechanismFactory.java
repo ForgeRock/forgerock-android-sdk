@@ -106,10 +106,12 @@ abstract class MechanismFactory {
                     Logger.debug(TAG, "New account stored successfully.");
                 } else {
                     Logger.debug(TAG,"Failed to create an Account for the mechanism .");
-                    listener.onException(new MechanismCreationException("Error while creating an Account for the new mechanism."));
+                    listener.onException(new MechanismCreationException("Error while storing a new " +
+                            "Account (" + account.getId() + ") for the new mechanism into the storage system."));
                     return;
                 }
             } else {
+                Logger.debug(TAG, "Account with id '%s' already exists.", account.getId());
                 final List<Mechanism> mechanisms = storageClient.getMechanismsForAccount(account);
                 for (Mechanism mechanism : mechanisms) {
                     if (mechanism.getType().equals(mechanismType)) {
@@ -127,8 +129,8 @@ abstract class MechanismFactory {
                         Logger.debug(TAG, "New mechanism with UID %s stored successfully.", mechanismUID);
                         listener.onSuccess(newMechanism);
                     } else {
-                        Logger.debug(TAG,"Error setting the mechanism (%s) to the Account.", mechanismUID);
-                        listener.onException(new MechanismCreationException("Error setting the mechanism to the Account."));
+                        Logger.debug(TAG,"Error storing the mechanism (%s) for the Account.", mechanismUID);
+                        listener.onException(new MechanismCreationException("Error storing the mechanism for the Account."));
                     }
                 }
 

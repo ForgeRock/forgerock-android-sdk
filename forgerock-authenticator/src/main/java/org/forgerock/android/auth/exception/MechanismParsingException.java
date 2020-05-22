@@ -12,11 +12,22 @@ package org.forgerock.android.auth.exception;
  * URI from a set of attributes.
  */
 public class MechanismParsingException extends Exception {
+
+    /**
+     * Create a new exception containing a message.
+     * @param detailMessage The message cause of the exception.
+     * @param throwable The throwable cause of the exception.
+     */
     public MechanismParsingException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
 
+    /**
+     * Create a new exception containing a message.
+     * @param detailMessage The message cause of the exception.
+     */
     public MechanismParsingException(String detailMessage) {
         super(detailMessage);
     }
+
 }

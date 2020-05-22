@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * Provides the ability to parse URI scheme into a convenient format
- * to use with configuring a {@link Oath} to generate OTP codes.
+ * to use with configuring a {@link OathMechanism} to generate OTP codes.
  */
 class OathParser extends MechanismParser {
     /** The secret used for generating the OTP */
@@ -52,11 +52,6 @@ class OathParser extends MechanismParser {
         // Secret is REQUIRED
         if (!containsNonEmpty(values, SECRET)) {
             throw new MechanismParsingException("Secret is required");
-        }
-
-        // Counter is REQUIRED if the algorithm is HOTP
-        if (type.equalsIgnoreCase("hotp") && !containsNonEmpty(values, COUNTER)) {
-            throw new MechanismParsingException("Counter is required when in hotp mode");
         }
 
         return values;

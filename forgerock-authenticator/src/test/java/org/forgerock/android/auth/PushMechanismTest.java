@@ -8,18 +8,24 @@
 package org.forgerock.android.auth;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-public class PushTest extends FRABaseTest {
+@RunWith(RobolectricTestRunner.class)
+public class PushMechanismTest extends FRABaseTest {
 
     @Test
     public void testCreatePushMechanismSuccessfuly() {
-        Push mechanism = Push.builder()
+        PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -39,7 +45,7 @@ public class PushTest extends FRABaseTest {
 
     @Test
     public void testShouldEqualEquivalentPushMechanism() {
-        Mechanism mechanism1 = Push.builder()
+        Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -47,7 +53,7 @@ public class PushTest extends FRABaseTest {
                 .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
                 .setSecret(SECRET)
                 .build();
-        Mechanism mechanism2 = Push.builder()
+        Mechanism mechanism2 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -57,14 +63,13 @@ public class PushTest extends FRABaseTest {
                 .build();
 
         assertEquals(mechanism1, mechanism2);
-        assertEquals(mechanism1.compareTo(mechanism2), 0);
-        assertEquals(mechanism2.compareTo(mechanism1), 0);
+        assertTrue(mechanism1.matches(mechanism2));
         assertEquals(mechanism1.hashCode(), mechanism2.hashCode());
     }
 
     @Test
     public void testShouldNotEqualDifferentPushMechanismWithAccountName() {
-        Mechanism mechanism1 = Push.builder()
+        Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -72,7 +77,7 @@ public class PushTest extends FRABaseTest {
                 .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
                 .setSecret(SECRET)
                 .build();
-        Mechanism mechanism2 = Push.builder()
+        Mechanism mechanism2 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(OTHER_ACCOUNT_NAME)
@@ -82,13 +87,12 @@ public class PushTest extends FRABaseTest {
                 .build();
 
         assertFalse(mechanism1.equals(mechanism2));
-        assertEquals(mechanism1.compareTo(mechanism2), 0);
-        assertEquals(mechanism2.compareTo(mechanism1), 0);
+        assertFalse(mechanism1.matches(mechanism2));
     }
 
     @Test
     public void testShouldNotEqualDifferentPushMechanismWithAccountIssuer() {
-        Mechanism mechanism1 = Push.builder()
+        Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -96,7 +100,7 @@ public class PushTest extends FRABaseTest {
                 .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
                 .setSecret(SECRET)
                 .build();
-        Mechanism mechanism2 = Push.builder()
+        Mechanism mechanism2 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(OTHER_ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -106,13 +110,12 @@ public class PushTest extends FRABaseTest {
                 .build();
 
         assertFalse(mechanism1.equals(mechanism2));
-        assertEquals(mechanism1.compareTo(mechanism2), 0);
-        assertEquals(mechanism2.compareTo(mechanism1), 0);
+        assertFalse(mechanism1.matches(mechanism2));
     }
 
     @Test
     public void testShouldReturnAllNotifications() {
-        Push mechanism = Push.builder()
+        PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -134,7 +137,7 @@ public class PushTest extends FRABaseTest {
 
     @Test
     public void testShouldReturnOnlyPendingNotifications() {
-        Push mechanism = Push.builder()
+        PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
                 .setAccountName(ACCOUNT_NAME)
@@ -162,6 +165,59 @@ public class PushTest extends FRABaseTest {
         mechanism.setPushNotificationList(notificationList);
 
         assertEquals(2, mechanism.getPendingNotifications().size());
+    }
+
+    @Test
+    public void testShouldParseToJsonSuccessfully() {
+        String json = "{" +
+                            "\"id\":\"issuer1-user1-pushauth\"," +
+                            "\"issuer\":\"issuer1\"," +
+                            "\"accountName\":\"user1\"," +
+                            "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                            "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                            "\"type\":\"pushauth\"," +
+                            "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                            "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
+                        "}";
+
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+
+        String mechanismAsJson = mechanism.toJson();
+
+        assertNotNull(mechanismAsJson);
+        assertEquals(json, mechanismAsJson);
+    }
+
+    @Test
+    public void testShouldParseFromJsonSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-pushauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"pushauth\"," +
+                "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
+                "}";
+
+        PushMechanism mechanism = PushMechanism.fromJson(json);
+
+        assertNotNull(mechanism);
+        assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
+        assertEquals(mechanism.getIssuer(), ISSUER);
+        assertEquals(mechanism.getAccountName(), ACCOUNT_NAME);
+        assertEquals(mechanism.getType(), Mechanism.PUSH);
+        assertEquals(mechanism.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
+        assertEquals(mechanism.getAuthenticationEndpoint(), AUTHENTICATION_ENDPOINT);
+        assertEquals(mechanism.getSecret(), SECRET);
     }
 
 }
