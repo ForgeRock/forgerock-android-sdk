@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.DeviceIdentifier;
+import org.forgerock.android.auth.KeyStoreManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,7 +34,10 @@ public class FRDeviceIdentifierTest {
     public void testDeviceId() {
 
         Config.getInstance(context);
-        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder().context(context).build();
+        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
+                .context(context)
+                .keyStoreManager(KeyStoreManager.builder().context(context).build())
+                .build();
 
         String instanceId = deviceIdentifier.getIdentifier();
         //Just make sure it generate the same value every it calls getInstanceId()
@@ -46,7 +50,10 @@ public class FRDeviceIdentifierTest {
     public void testRegenerateDeviceId() throws GeneralSecurityException, IOException {
 
         Config.getInstance(context);
-        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder().context(context).build();
+        DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
+                .context(context)
+                .keyStoreManager(KeyStoreManager.builder().context(context).build())
+                .build();
         String instanceId = deviceIdentifier.getIdentifier();
 
         getKeyStore().deleteEntry(Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));

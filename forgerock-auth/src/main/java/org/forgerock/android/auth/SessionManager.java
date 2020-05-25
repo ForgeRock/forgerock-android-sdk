@@ -26,22 +26,18 @@ class SessionManager {
     private TokenManager tokenManager;
     @Getter
     private SingleSignOnManager singleSignOnManager;
-    @Getter
-    private OAuth2Client oAuth2Client;
     private List<Interceptor> interceptors;
 
     @Builder
-    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager, OAuth2Client oAuth2Client) {
-        Config config = Config.getInstance();
+    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager)  {
 
-        this.tokenManager = config.applyDefaultIfNull(tokenManager);
-        this.singleSignOnManager = config.applyDefaultIfNull(singleSignOnManager);
-        this.oAuth2Client = config.applyDefaultIfNull(oAuth2Client);
+        this.tokenManager = tokenManager;
+        this.singleSignOnManager = singleSignOnManager;
 
         this.interceptors = Arrays.asList(
                 new RetrieveSSOTokenInterceptor(this.singleSignOnManager),
                 new RetrieveAccessTokenInterceptor(this.tokenManager),
-                new OAuthInterceptor(this.oAuth2Client),
+                new OAuthInterceptor(this.tokenManager),
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }
 

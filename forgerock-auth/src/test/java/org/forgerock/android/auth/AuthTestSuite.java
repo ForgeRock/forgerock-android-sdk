@@ -15,6 +15,7 @@ import org.junit.runners.Suite;
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
 
+        ServerConfigTest.class,
         ChoiceCallbackTest.class,
         ConfirmationCallbackTest.class,
         LocationCallbackTest.class,

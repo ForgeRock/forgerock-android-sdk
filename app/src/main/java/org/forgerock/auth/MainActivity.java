@@ -210,7 +210,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.addInterceptor(new AccessTokenInterceptor());
-                builder.cookieJar(SecureCookieJar.builder().build());
+                builder.cookieJar(SecureCookieJar.builder()
+                        .context(this.getApplicationContext())
+                        .build());
 
                 OkHttpClient client = builder.build();
                 Request request = new Request.Builder().url("http://openig.example.com:8080/products").build();

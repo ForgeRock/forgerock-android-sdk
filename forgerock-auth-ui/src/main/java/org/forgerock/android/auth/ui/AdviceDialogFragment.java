@@ -101,7 +101,10 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
         viewModel.getExceptionLiveData().observe(getViewLifecycleOwner(), e -> {
             isCancel = false;
             dismiss();
-            Listener.onException(listener, e);
+            Exception exception = e.getValue();
+            if (exception != null) {
+                Listener.onException(listener, exception);
+            }
         });
 
         viewModel.authenticate(getContext(), advice);

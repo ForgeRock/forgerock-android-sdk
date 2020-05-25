@@ -19,6 +19,7 @@
     <string name="forgerock_url" translatable="false">https://openam.example.com:8081/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
+    <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
     <bool name="forgerock_enable_cookie" translatable="false">true</bool>
 
     <!-- SSO -->

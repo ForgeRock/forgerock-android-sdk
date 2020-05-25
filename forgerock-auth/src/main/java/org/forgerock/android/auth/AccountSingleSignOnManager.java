@@ -56,7 +56,6 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
 
     @Builder
     public AccountSingleSignOnManager(@NonNull Context context, Encryptor encryptor) throws Exception {
-        Config config = Config.getInstance(context);
         try {
             this.accountType = getAccountType(context);
         } catch (Exception e) {
@@ -65,8 +64,8 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             throw e;
         }
         this.accountManager = AccountManager.get(context);
-        this.account = new Account(config.getAccountName(), accountType);
-        this.encryptor = config.applyDefaultIfNull(encryptor, context, this::getEncryptor);
+        this.account = new Account(context.getString(R.string.forgerock_account_name), accountType);
+        this.encryptor = encryptor == null ? getEncryptor(context): encryptor;
         Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
     }
 
@@ -140,6 +139,7 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                 return null;
             }
         } catch (Exception e) {
+            Logger.warn(TAG, e, "Failed to decrypt data");
             return null;
         }
     }

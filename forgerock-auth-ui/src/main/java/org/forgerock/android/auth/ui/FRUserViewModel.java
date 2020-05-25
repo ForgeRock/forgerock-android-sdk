@@ -41,7 +41,7 @@ public class FRUserViewModel extends FRViewModel<FRUser> {
 
             @Override
             public void onException(Exception e) {
-                getExceptionLiveData().postValue(e);
+                getExceptionLiveData().postValue(new SingleLiveEvent<>(e));
             }
         };
     }

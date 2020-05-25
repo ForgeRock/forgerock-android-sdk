@@ -19,9 +19,14 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
-import org.forgerock.android.auth.*;
+import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FRSession;
+import org.forgerock.android.auth.Listener;
+import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.AuthenticationTimeoutException;
@@ -46,7 +51,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
         progressBar = view.findViewById(R.id.progress);
         setListener(getParentFragment());
 
-        viewModel = ViewModelProviders.of(this).get(FRSessionViewModel.class);
+        viewModel = new ViewModelProvider(this).get(FRSessionViewModel.class);
 
         if (savedInstanceState == null) {
             if (loadOnStartup) {
@@ -72,8 +77,9 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
         viewModel.getExceptionLiveData().observe(getViewLifecycleOwner(), e -> {
             progressBar.setVisibility(INVISIBLE);
-            if (!handleException(e)) {
-                cancel(e);
+            Exception exception = e.getValue();
+            if (exception != null && !handleException(exception)) {
+                cancel(exception);
             }
         });
 
@@ -105,6 +111,14 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     @Override
     public void cancel(Exception e) {
+
+        //We clean up the child fragment(s), so it won't be recreated with lifecycle method
+        FragmentManager fm = getChildFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        for (Fragment fragment: fm.getFragments()) {
+            ft.remove(fragment);
+        }
+        ft.commit();
         Listener.onException(listener, e);
     }
 

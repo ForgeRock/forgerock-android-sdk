@@ -8,9 +8,12 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import androidx.test.core.app.ApplicationProvider;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -25,7 +28,6 @@ public class BaseTest {
 
     protected MockWebServer server;
 
-    private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
     public Context context = ApplicationProvider.getApplicationContext();
     public ServerConfig serverConfig;
     public OAuth2Client oAuth2Client;

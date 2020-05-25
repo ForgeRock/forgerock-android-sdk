@@ -22,6 +22,14 @@ public interface TokenManager {
     void persist(AccessToken token);
 
     /**
+     * Sends an authorization request to the authorization service.
+     *
+     * @param token    The SSO Token received with the result of {@link AuthService}
+     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     */
+    void exchangeToken(SSOToken token, final FRListener<AccessToken> listener);
+
+    /**
      * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not
      * refresh the token and persist it.
      *

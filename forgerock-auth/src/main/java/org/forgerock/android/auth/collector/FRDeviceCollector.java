@@ -8,19 +8,20 @@
 package org.forgerock.android.auth.collector;
 
 import android.content.Context;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
 
+import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.DeviceIdentifier;
 import org.forgerock.android.auth.FRListener;
-import org.forgerock.android.auth.InterceptorHandler;
 import org.forgerock.android.auth.Listener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Singular;
 
 /**
  * Collector to collect Device information
@@ -58,7 +59,9 @@ public class FRDeviceCollector implements DeviceCollector {
 
     private JSONObject collect(Context context) throws JSONException {
         JSONObject result = new JSONObject();
-        result.put("identifier", DeviceIdentifier.builder().context(context).build().getIdentifier());
+        result.put("identifier", DeviceIdentifier.builder().context(context)
+                .keyStoreManager(Config.getInstance().getKeyStoreManager())
+                .build().getIdentifier());
         result.put("version", "1.0");
         return result;
     }
