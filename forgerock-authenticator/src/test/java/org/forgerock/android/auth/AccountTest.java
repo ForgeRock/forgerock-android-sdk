@@ -130,7 +130,7 @@ public class AccountTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseFromJsonSuccessfully() {
+    public void testShouldSerializeSuccessfully() {
         String json = "{" +
                 "\"id\":\"issuer1-user1\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -139,7 +139,30 @@ public class AccountTest extends FRABaseTest {
                 "\"backgroundColor\":\"032b75\"" +
                 "}";
 
-        Account account = Account.fromJson(json);
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setImageURL(IMAGE_URL)
+                .setBackgroundColor(BACKGROUND_COLOR)
+                .build();
+
+        String accountAsJson = account.serialize();
+
+        assertNotNull(accountAsJson);
+        assertEquals(json, accountAsJson);
+    }
+
+    @Test
+    public void testShouldDeserializeSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
+                "\"backgroundColor\":\"032b75\"" +
+                "}";
+
+        Account account = Account.deserialize(json);
 
         assertNotNull(account);
         assertEquals(account.getIssuer(), ISSUER);

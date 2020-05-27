@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -75,12 +76,18 @@ class AuthenticatorManager {
     }
 
     List<Account> getAllAccounts() {
+        return this.getAllAccounts(true);
+    }
+
+    List<Account> getAllAccounts(boolean initializeObjects) {
         Logger.debug(TAG, "Retrieving all accounts from StorageClient.");
         List<Account> accountList = storageClient.getAllAccounts();
 
         // Sets mechanisms and/or notifications for each account
-        for (Account account : accountList) {
-            initializeAccount(account);
+        if(initializeObjects) {
+            for (Account account : accountList) {
+                initializeAccount(account);
+            }
         }
 
         return accountList;
@@ -96,6 +103,34 @@ class AuthenticatorManager {
         initializeAccount(account);
 
         return account;
+    }
+
+    Account getAccount(Mechanism mechanism) {
+        Logger.debug(TAG, "Retrieving Account with Mechanism ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+
+        // Retrieve account from StorageClient
+        Account account;
+        if(mechanism.getAccount() != null) {
+            account = mechanism.getAccount();
+        } else {
+            account = storageClient.getAccount(mechanism.getIssuer() + "-" + mechanism.getAccountName());
+        }
+
+        return account;
+    }
+
+    Mechanism getMechanism(PushNotification notification) {
+        Logger.debug(TAG, "Retrieving Mechanism with ID '%s' from the StorageClient.", notification.getMechanismUID());
+
+        // Retrieve mechanism from StorageClient
+        Mechanism mechanism;
+        if(notification.getPushMechanism() != null) {
+            mechanism = notification.getPushMechanism();
+        } else {
+            mechanism = storageClient.getMechanismByUUID(notification.getMechanismUID());
+        }
+
+        return mechanism;
     }
 
     boolean removeAccount(Account account) {
@@ -177,26 +212,31 @@ class AuthenticatorManager {
         }
     }
 
+    List<PushNotification> getAllNotifications(@NonNull Mechanism mechanism) {
+        if(mechanism.getType().equals(Mechanism.PUSH)) {
+            List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
+            ((PushMechanism) mechanism).setPushNotificationList(notificationList);
+            return notificationList;
+        } else {
+            return null;
+        }
+    }
+
     private void initializeAccount(Account account) {
         if(account != null) {
             Logger.debug(TAG, "Loading associated data for the Account with ID: %s", account.getId());
             List<Mechanism> mechanismList = storageClient.getMechanismsForAccount(account);
             account.setMechanismList(mechanismList);
             for (Mechanism mechanism : mechanismList) {
+                mechanism.setAccount(account);
                 if(mechanism.getType().equals(Mechanism.PUSH)) {
                     List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
+                    for (PushNotification notification : notificationList) {
+                        notification.setPushMechanism(mechanism);
+                    }
                     ((PushMechanism) mechanism).setPushNotificationList(notificationList);
                 }
             }
-        }
-    }
-
-    private void initializeMechanism(Mechanism mechanism) {
-        if(mechanism != null && mechanism.getType().equals(Mechanism.PUSH)) {
-            Logger.debug(TAG, "Loading associated notifications for the mechanism with ID: %s", mechanism.getId());
-
-            List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
-            ((PushMechanism) mechanism).setPushNotificationList(notificationList);
         }
     }
 

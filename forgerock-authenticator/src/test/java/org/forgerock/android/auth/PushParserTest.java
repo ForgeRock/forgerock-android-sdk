@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import android.util.Base64;
+
 import org.forgerock.android.auth.MechanismParser;
 import org.forgerock.android.auth.PushParser;
 import org.forgerock.android.auth.exception.MechanismParsingException;
@@ -44,8 +46,8 @@ public class PushParserTest {
 
     @Test
     public void testTEMP() throws MechanismParsingException {
-        Map<String, String> result = pushParser.map("pushauth://push/forgerock:rodrigo.reis?a=aHR0cHM6Ly9zc28uZm9yZ2Vyb2NrLmNvbS9qc29uL2NvbW11bml0eS9wdXNoL3Nucy9tZXNzYWdlP19hY3Rpb249YXV0aGVudGljYXRl&b=519387&r=aHR0cHM6Ly9zc28uZm9yZ2Vyb2NrLmNvbS9qc29uL2NvbW11bml0eS9wdXNoL3Nucy9tZXNzYWdlP19hY3Rpb249YXV0aGVudGljYXRl&s=uEUxXh7Qr0B2De3q0SdQRvzQj8dA2Ly3IICJFz2uyJk&c=64gmqFLXo3U2dH_PWlXMokP6R-EgM5XS9rsQoCusdTQ&l=ZnJfc3NvX2FtbGJfcHJvZD0wMQ&m=REGISTER:dfd5b03c-b2b9-4ef9-ab34-afc1762f75171590370179615&issuer=Rm9yZ2VSb2Nr");
-        assertEquals(result.get(PushParser.ACCOUNT_NAME), "rodrigo.reis");
+        Map<String, String> result = pushParser.map("pushauth://push/forgerock:test?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:c41aa93e-3197-4493-9a8d-b621dcacebfa1590379586344&issuer=Rm9yZ2VSb2Nr");
+        assertEquals(result.get(PushParser.ACCOUNT_NAME), "test");
     }
 
     @Test
@@ -69,7 +71,7 @@ public class PushParserTest {
     @Test
     public void testShouldParseSecret() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
-        assertEquals(result.get(PushParser.SHARED_SECRET), "b3uYLkQ7dRPjBaIzV0taijoXRgMqNP5AwVAvRfaE");
+        assertEquals(result.get(PushParser.SHARED_SECRET), "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=");
     }
 
     @Test

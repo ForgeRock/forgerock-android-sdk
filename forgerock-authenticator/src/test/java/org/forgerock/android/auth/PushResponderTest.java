@@ -193,7 +193,7 @@ public class PushResponderTest extends FRABaseTest {
             Assert.fail("Should throw PushMechanismException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof PushMechanismException);
-            assertTrue(e.getLocalizedMessage().contains("Error signing JWT data. Secret malformed or invalid"));
+            assertTrue(e.getLocalizedMessage().contains("The secret length must be at least 256 bits"));
         }
     }
 

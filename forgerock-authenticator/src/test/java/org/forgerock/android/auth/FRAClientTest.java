@@ -204,13 +204,13 @@ public class FRAClientTest extends FRABaseTest {
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String uri = "pushauth://push/forgerock:demo?" +
+        String uri = "pushauth://push/forgerock:test?" +
                 "a=" + getBase64PushActionUrl(server,"authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
-                "b=ff00ff&" +
+                "b=519387&" +
                 "r=" + getBase64PushActionUrl(server,"register") + "&" +
-                "s=dA18Iph3slIUDVuRc5+3y7nv9NLGnPksH66d3jIF6uE=&" +
-                "c=Yf66ojm3Pm80PVvNpljTB6X9CUhgSJ0WZUzB4su3vCY=&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
                 "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
                 "issuer=Rm9yZ2Vyb2Nr";
@@ -219,7 +219,7 @@ public class FRAClientTest extends FRABaseTest {
         fraClient.createMechanismFromUri(uri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
-        assertEquals(push.getAccountName(), "demo");
+        assertEquals(push.getAccountName(), "test");
         assertEquals(push.getIssuer(), "Forgerock");
     }
 
@@ -479,6 +479,97 @@ public class FRAClientTest extends FRABaseTest {
         assertNotNull(accountFromStorage);
         assertEquals(account, accountFromStorage);
         assertEquals(2, accountFromStorage.getMechanisms().size());
+    }
+
+    @Test
+    public void testShouldGetStoredAccountByMechanism() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(oath);
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismByUUID(any(String.class))).willReturn(push);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        Account accountFromStorage = fraClient.getAccount(oath);
+
+        assertNotNull(accountFromStorage);
+        assertEquals(account, accountFromStorage);
+    }
+
+    @Test
+    public void testShouldGetStoredMechanismByPushNotification() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+
+        PushNotification pushNotification = createPushNotification(MESSAGE_ID, push);
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(pushNotification);
+        notificationList.add(createPushNotification(OTHER_MESSAGE_ID, push));
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+        given(storageClient.getAllNotificationsForMechanism(any(Mechanism.class))).willReturn(notificationList);
+        given(storageClient.getMechanismByUUID(any(String.class))).willReturn(push);
+
+        Mechanism mechanismFromStorage = fraClient.getMechanism(pushNotification);
+
+        assertNotNull(mechanismFromStorage);
+        assertEquals(push, mechanismFromStorage);
+    }
+
+    @Test
+    public void testShouldGetAllNotificationsByMechanism() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(createPushNotification(MESSAGE_ID, push));
+        notificationList.add(createPushNotification(OTHER_MESSAGE_ID, push));
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+        given(storageClient.getAllNotificationsForMechanism(any(Mechanism.class))).willReturn(notificationList);
+
+        List<PushNotification> notificationListFromStorage = fraClient.getAllNotifications(push);
+
+        assertNotNull(notificationListFromStorage);
+        assertEquals(notificationList.size(), notificationListFromStorage.size());
     }
 
     @Test

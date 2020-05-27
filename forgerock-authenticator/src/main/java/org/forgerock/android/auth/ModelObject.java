@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import java.util.Calendar;
+
 /**
  * Base class for objects which are a part of the Authenticator Model.
  */
@@ -20,9 +22,29 @@ abstract class ModelObject<T> {
     public abstract boolean matches(T object);
 
     /**
+     * Creates a JSON string representation of {@link T} object. Sensitive information are not
+     * exposed.
+     * @return a JSON string object
+     */
+    public abstract String toJson();
+
+    /**
      * Serializes the {@link T} object into its equivalent Json representation.
      * @return a JSON string representation of {@link T}
      */
-    public abstract String toJson();
+    abstract String serialize();
+
+    /**
+     * Return date from milliseconds.
+     * @param milliSeconds Date in milliseconds
+     * @return Calendar representing date
+     */
+    static Calendar getDate(long milliSeconds)
+    {
+        // Create a calendar object that will convert the date and time value in milliseconds to date.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milliSeconds);
+        return calendar;
+    }
 
 }

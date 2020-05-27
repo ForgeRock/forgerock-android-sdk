@@ -18,8 +18,10 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
@@ -126,6 +128,7 @@ class PushFactory extends MechanismFactory {
                             .setAuthenticationEndpoint(authenticationEndpoint)
                             .setRegistrationEndpoint(registrationEndpoint)
                             .setSecret(base64Secret)
+                            .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                             .build();
                     listener.onSuccess(push);
                 }

@@ -174,12 +174,12 @@ public class HOTPMechanismTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"secret\":\"REMOVED\"," +
                 "\"type\":\"otpauth\"," +
                 "\"oathType\":\"HOTP\"," +
                 "\"algorithm\":\"sha1\"," +
                 "\"digits\":6," +
-                "\"counter\":0" +
+                "\"counter\":\"REMOVED\"" +
                 "}";
 
         HOTPMechanism mechanism = (HOTPMechanism) HOTPMechanism.builder()
@@ -199,7 +199,38 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseFromJsonSuccessfully() {
+    public void testShouldSerializeSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-otpauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"otpauth\"," +
+                "\"oathType\":\"HOTP\"," +
+                "\"algorithm\":\"sha1\"," +
+                "\"digits\":6," +
+                "\"counter\":0" +
+                "}";
+
+        HOTPMechanism mechanism = (HOTPMechanism) HOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .build();
+
+        String mechanismAsJson = mechanism.serialize();
+
+        assertNotNull(mechanismAsJson);
+        assertEquals(json, mechanismAsJson);
+    }
+
+    @Test
+    public void testShouldDeserializeSuccessfully() {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -213,7 +244,7 @@ public class HOTPMechanismTest extends FRABaseTest {
                 "\"counter\":0" +
                 "}";
 
-        HOTPMechanism mechanism = HOTPMechanism.fromJson(json);
+        HOTPMechanism mechanism = HOTPMechanism.deserialize(json);
 
         assertNotNull(mechanism);
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);

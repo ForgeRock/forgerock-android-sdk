@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -29,22 +30,27 @@ public class Account extends ModelObject<Account> {
     private final String imageURL;
     /** HEX Color code in String for Account */
     private final String backgroundColor;
+    /** Date this object was stored */
+    private final Calendar timeCreated;
     /** List of Mechanism objects associated with this account **/
     private List<Mechanism> mechanismList;
 
     /**
-     * Creates Account object with given information
+     * Creates Account object with given information.
      * @param issuer String value of issuer
      * @param accountName String value of accountName or username
      * @param imageURL URL of account's logo image (optional)
      * @param backgroundColor String HEX code of account's background color (optional)
+     * @param timeCreated Date and Time this Account was stored
      */
-    private Account(String issuer, String accountName, String imageURL, String backgroundColor) {
+    private Account(String issuer, String accountName, String imageURL, String backgroundColor,
+                    Calendar timeCreated) {
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
         this.accountName = accountName;
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
+        this.timeCreated = timeCreated;
     }
 
     /**
@@ -96,6 +102,14 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
+     * Get the Date and Time this Account was stored.
+     * @return when this account was stored.
+     */
+    public Calendar getTimeCreated() {
+        return timeCreated;
+    }
+
+    /**
      * Get the list of mechanisms associates with this account.
      * @return List<Mechanism> list of mechanisms
      */
@@ -108,6 +122,11 @@ public class Account extends ModelObject<Account> {
     }
 
     @Override
+    String serialize() {
+        return this.toJson();
+    }
+
+    @Override
     public String toJson() {
         JSONObject jsonObject = new JSONObject();
         try {
@@ -116,6 +135,7 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("imageURL", getImageURL());
             jsonObject.put("backgroundColor", getBackgroundColor());
+            jsonObject.put("timeCreated", getTimeCreated());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }
@@ -128,7 +148,7 @@ public class Account extends ModelObject<Account> {
      * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    public static Account fromJson(String jsonString) {
+    public static Account deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -139,6 +159,7 @@ public class Account extends ModelObject<Account> {
                     .setAccountName(jsonObject.getString("accountName"))
                     .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL"): null)
                     .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor"): null)
+                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
                     .build();
         } catch (JSONException e) {
             return null;
@@ -184,6 +205,7 @@ public class Account extends ModelObject<Account> {
         private String accountName = "";
         private String imageURL;
         private String backgroundColor;
+        private Calendar timeCreated;
 
         /**
          * Sets the name of the IDP that issued this account.
@@ -222,11 +244,20 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
+         * Sets the Date and Time this Account was stored.
+         * @param timeCreated when this account was stored.
+         */
+        public AccountBuilder setTimeCreated(Calendar timeCreated) {
+            this.timeCreated = timeCreated;
+            return this;
+        }
+
+        /**
          * Produces the Account object that was being constructed.
          * @return The account.
          */
         protected Account build() {
-            return new Account(issuer, accountName, imageURL, backgroundColor);
+            return new Account(issuer, accountName, imageURL, backgroundColor, timeCreated);
         }
     }
 }

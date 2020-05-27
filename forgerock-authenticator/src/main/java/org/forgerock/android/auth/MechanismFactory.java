@@ -90,7 +90,7 @@ abstract class MechanismFactory {
             return;
         }
 
-        // Lookup the account and persist mechanism
+        // Lookup the an existent account or create a new one
         Logger.debug(TAG, "Lookup account for the new mechanism.");
         Account account = storageClient.getAccount(issuer + "-" + accountName);
         try {
@@ -121,6 +121,7 @@ abstract class MechanismFactory {
                 }
             }
 
+            // Persist the new mechanism and return it on the callback
             String mechanismUID = getNewMechanismUID();
             final Account finalAccount = account;
             createFromUriParameters(version, mechanismUID, values, new FRAListener<Mechanism>() {
@@ -128,6 +129,7 @@ abstract class MechanismFactory {
                 public void onSuccess(Mechanism newMechanism) {
                     if(storageClient.setMechanism(newMechanism)) {
                         Logger.debug(TAG, "New mechanism with UID %s stored successfully.", mechanismUID);
+                        newMechanism.setAccount(finalAccount);
                         listener.onSuccess(newMechanism);
                     } else {
                         Logger.debug(TAG,"Error storing the mechanism (%s) for the Account.", mechanismUID);

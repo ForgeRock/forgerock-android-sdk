@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * PushNotification is a model class which represents a message that was received from an external
@@ -36,7 +37,6 @@ public class PushNotification extends ModelObject<PushNotification> {
     private final Calendar timeExpired;
     /** Time to live for the notification */
     private final long ttl;
-
     /** Determines if the PushNotification has been approved by the user. */
     private boolean approved;
     /** Determines if the PushNotification has been interacted with the user. */
@@ -161,6 +161,15 @@ public class PushNotification extends ModelObject<PushNotification> {
     }
 
     /**
+     * Determine if the notification has expired.
+     * @return True if the notification has expired, false otherwise.
+     */
+    public final boolean isExpired() {
+        return timeExpired.getTimeInMillis() < Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                .getTimeInMillis();
+    }
+
+    /**
      * Set if the authentication is pending.
      */
     void setPending(boolean pending) {
@@ -185,13 +194,22 @@ public class PushNotification extends ModelObject<PushNotification> {
 
     @Override
     public String toJson() {
+        return convertToJson(true);
+    }
+
+    @Override
+    String serialize() {
+        return convertToJson(false);
+    }
+
+    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("messageId", getMessageId());
-            jsonObject.put("challenge", getChallenge());
-            jsonObject.put("amlbCookie", getAmlbCookie());
+            jsonObject.put("challenge", excludeSensitiveData ? "REMOVED" : getChallenge());
+            jsonObject.put("amlbCookie", excludeSensitiveData ? "REMOVED" : getAmlbCookie());
             jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
             jsonObject.put("timeExpired", getTimeExpired() != null ? getTimeExpired().getTimeInMillis() : null);
             jsonObject.put("ttl", getTtl());
@@ -233,7 +251,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @return a {@link PushNotification} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
      * or if {@code jsonString} is empty.
      */
-    public static PushNotification fromJson(String jsonString) {
+    public static PushNotification deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -254,19 +272,6 @@ public class PushNotification extends ModelObject<PushNotification> {
         } catch (JSONException e) {
             return null;
         }
-    }
-
-    /**
-     * Return date from milliseconds.
-     * @param milliSeconds Date in milliseconds
-     * @return Calendar representing date
-     */
-    private static Calendar getDate(long milliSeconds)
-    {
-        // Create a calendar object that will convert the date and time value in milliseconds to date.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milliSeconds);
-        return calendar;
     }
 
     @Override

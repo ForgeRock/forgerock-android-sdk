@@ -10,6 +10,8 @@ package org.forgerock.android.auth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
+
 /**
  * The Mechanism model represents the two-factor way used for authentication.
  * Encapsulates the related settings, as well as an owning Account.
@@ -28,26 +30,33 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     private final String type;
     /** The shared secret of the Mechanism */
     private final String secret;
+    /** Date this object was stored */
+    private final Calendar timeCreated;
+    /** The Account associated with this mechanism **/
+    private Account account;
+
 
     public static final String PUSH = "pushauth";
     public static final String OATH = "otpauth";
 
     /**
      * Base constructor which encapsulates common elements of all Mechanisms.
-     * @param mechanismUID The ID used to identify the Mechanism to external systems.
-     * @param issuer String value of issuer.
-     * @param accountName String value of accountName or username.
-     * @param type String value of the mechanism type.
-     * @param secret String value of the shared secret.
+     * @param mechanismUID The ID used to identify the Mechanism to external systems
+     * @param issuer String value of issuer
+     * @param accountName String value of accountName or username
+     * @param type String value of the mechanism type
+     * @param secret String value of the shared secret
+     * @param timeCreated Date and Time this Mechanism was stored
      */
     protected Mechanism(String mechanismUID, String issuer, String accountName, String type,
-                     String secret) {
+                     String secret, Calendar timeCreated) {
         this.id = issuer + "-" + accountName + "-" + type;
         this.mechanismUID = mechanismUID;
         this.issuer = issuer;
         this.accountName = accountName;
         this.type = type;
         this.secret = secret;
+        this.timeCreated = timeCreated;
     }
 
     /**
@@ -91,6 +100,14 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
+     * Get the Date and Time this mechanism was stored.
+     * @return when this mechanism was stored.
+     */
+    public Calendar getTimeCreated() {
+        return timeCreated;
+    }
+
+    /**
      * Get the string used to represent the shared secret of the mechanism.
      * @return The shared secret as string.
      */
@@ -98,8 +115,27 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
         return secret;
     }
 
+    /**
+     * Gets the account object associated with the mechanism.
+     * @return the Account object.
+     */
+    Account getAccount() {
+        return account;
+    }
+
+    /**
+     * Sets the account object associated with the mechanism.
+     * @param account the Account object.
+     */
+    void setAccount(Account account) {
+        this.account = account;
+    }
+
     @Override
     public abstract String toJson();
+
+    @Override
+    abstract String serialize();
 
     /**
      * Deserializes the specified Json into an object of the {@link Mechanism} object.
@@ -107,7 +143,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static Mechanism fromJson(String jsonString) {
+    static Mechanism deserialize(String jsonString) {
         Mechanism mechanism = null;
         if (jsonString == null || jsonString.length() == 0) {
             return null;
@@ -116,9 +152,9 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
             JSONObject jsonObject = new JSONObject(jsonString);
             String type = jsonObject.getString("type");
             if(type.equals(PUSH)) {
-                mechanism = PushMechanism.fromJson(jsonString);
+                mechanism = PushMechanism.deserialize(jsonString);
             } else if(type.equals(OATH)) {
-                mechanism = OathMechanism.fromJson(jsonString);
+                mechanism = OathMechanism.deserialize(jsonString);
             }
         } catch (JSONException e) {
             return null;

@@ -16,8 +16,10 @@ import org.forgerock.android.auth.util.Base32String;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -149,6 +151,7 @@ class OathFactory extends MechanismFactory {
                         .setSecret(secretStr)
                         .setDigits(digits)
                         .setCounter(counter)
+                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                         .build();
                 break;
             case TOTP:
@@ -160,6 +163,7 @@ class OathFactory extends MechanismFactory {
                         .setSecret(secretStr)
                         .setDigits(digits)
                         .setPeriod(period)
+                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                         .build();
                 break;
             default:

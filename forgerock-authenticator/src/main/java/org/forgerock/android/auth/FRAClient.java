@@ -48,7 +48,7 @@ public class FRAClient {
     }
 
     /**
-     * The asynchronous Authenticator client builder
+     * The asynchronous Authenticator client builder.
      */
     public static class FRAClientBuilder {
         private StorageClient storageClient;
@@ -68,7 +68,7 @@ public class FRAClient {
         /**
          * Initialize the FRAClient instance with a custom storage implementation. You can define
          * your own storage implementing {@link StorageClient} or use the default implementation
-         * {@link DefaultStorageClient}
+         * {@link DefaultStorageClient}.
          * @param storage the storage implementation
          * @return this builder
          */
@@ -79,7 +79,7 @@ public class FRAClient {
 
         /**
          * Initialize the FRAClient instance with the FCM device token obtained from FCM service
-         * {@link FirebaseMessagingService}
+         * {@link FirebaseMessagingService}.
          * @param deviceToken the FCM device token
          * @return this builder
          */
@@ -89,7 +89,7 @@ public class FRAClient {
         }
 
         /**
-         * Initialize the authenticator client {@link FRAClient}
+         * Initialize the authenticator client {@link FRAClient}.
          * @throws AuthenticatorException If {@link Context} was not provided
          */
         public FRAClient start() throws AuthenticatorException {
@@ -116,8 +116,8 @@ public class FRAClient {
     /**
      * Create a Mechanism using the URL extracted from the QRCode. This URL contains information about
      * the mechanism itself, as the account. After validation the mechanism will be persisted and returned
-     * via the callback {@FRAListener<Mechanism>}
-     * @param uri The URI extracted from the QRCode.
+     * via the callback {@FRAListener<Mechanism>}.
+     * @param uri The URI extracted from the QRCode
      * @param listener Callback for receiving the mechanism registration result
      */
     public void createMechanismFromUri(@NonNull String uri, @NonNull FRAListener<Mechanism> listener) {
@@ -127,8 +127,8 @@ public class FRAClient {
     /**
      * Get all accounts stored in the system. Returns {@code null} if no Account could be found.
      * This method full initialize the {@link Mechanism} and/or {@link PushNotification} objects
-     * associated with the accounts
-     * @return List<Account> The complete list of accounts stored on the system.
+     * associated with the accounts.
+     * @return List<Account> The complete list of accounts stored on the system
      */
     public List<Account> getAllAccounts() {
         return this.authenticatorManager.getAllAccounts();
@@ -137,18 +137,42 @@ public class FRAClient {
     /**
      * Get the Account object with its id.  Returns {@code null} if Account could not be found.
      * This method full initialize the {@link Mechanism} and/or {@link PushNotification} objects
-     * associated with the account
+     * associated with the account.
      * @param accountId The account unique ID
-     * @return The account object.
+     * @return The account object
      */
     public Account getAccount(@NonNull String accountId) {
         return this.authenticatorManager.getAccount(accountId);
     }
 
     /**
+     * Get the Account object with its associated Mechanism.  Returns {@code null} if Account could
+     * not be found.
+     * This method does not initialize the {@link Mechanism} and/or {@link PushNotification} objects
+     * associated with the account.
+     * @param mechanism The Mechanism object
+     * @return The account object
+     */
+    public Account getAccount(@NonNull Mechanism mechanism) {
+        return this.authenticatorManager.getAccount(mechanism);
+    }
+
+    /**
+     * Get the Mechanism object associated with the PushNotification object.  Returns {@code null}
+     * if Mechanism could not be found.
+     * This method full initialize the {@link PushNotification} objects associated with.
+     * {@link PushMechanism} type
+     * @param notification The uniquely identifiable UUID for the mechanism
+     * @return The Mechanism object
+     */
+    public Mechanism getMechanism(@NonNull PushNotification notification) {
+        return this.authenticatorManager.getMechanism(notification);
+    }
+
+    /**
      * Remove from the storage the {@link Account} that was passed in, all {@link Mechanism} objects
-     * and any {@link PushNotification} objects associated with it
-     * @param account The account object to delete.
+     * and any {@link PushNotification} objects associated with it.
+     * @param account The account object to delete
      * @return boolean as result of the operation
      */
     public boolean removeAccount(@NonNull Account account) {
@@ -157,8 +181,8 @@ public class FRAClient {
 
     /**
      * Remove from the storage the {@link Mechanism} that was passed in and any notifications
-     * associated with it
-     * @param mechanism The mechanism object to delete.
+     * associated with it.
+     * @param mechanism The mechanism object to delete
      * @return boolean as result of the operation
      */
     public boolean removeMechanism(@NonNull Mechanism mechanism) {
@@ -166,8 +190,21 @@ public class FRAClient {
     }
 
     /**
-     * Remove from the storage the {@link PushNotification} that was passed in
-     * @param notification The PushNotification object to delete.
+     * Get all of the notifications that belong to a {@link PushMechanism} object.
+     * Returns {@code null} if no {@link PushNotification} could be found or the Mechanism type
+     * is invalid.
+     * This also updates the passed {@link PushMechanism} object with the list of
+     * {@link PushNotification} objects associated with it.
+     * @param mechanism The Mechanism object
+     * @return The list of notifications
+     */
+    public List<PushNotification> getAllNotifications(@NonNull Mechanism mechanism) {
+        return this.authenticatorManager.getAllNotifications(mechanism);
+    }
+
+    /**
+     * Remove from the storage the {@link PushNotification} that was passed in.
+     * @param notification The PushNotification object to delete
      * @return boolean as result of the operation
      */
     public boolean removeNotification(@NonNull PushNotification notification) {
@@ -176,7 +213,7 @@ public class FRAClient {
 
     /**
      * Receives a FCM remote message and covert into a {@link PushNotification} object,
-     * which allows accept or deny Push Authentication requests
+     * which allows accept or deny Push Authentication requests.
      * @param message FCM remote message
      * @return PushNotification The notification configured with the information extracted the remote message
      * @throws InvalidNotificationException if the remote message does not contain required information
@@ -188,7 +225,7 @@ public class FRAClient {
 
     /**
      * Receives the parameters from a FCM remote message and covert into a {@link PushNotification}
-     * object, which allows accept or deny Push Authentication requests
+     * object, which allows accept or deny Push Authentication requests.
      * @param messageId the 'messageId' attribute obtained from the {@link RemoteMessage} object
      * @param message the 'message' attribute obtained from the {@link RemoteMessage} object
      * @return PushNotification The notification configured with the information extracted the remote message

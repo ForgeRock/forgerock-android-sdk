@@ -353,8 +353,8 @@ public class PushNotificationTest extends FRABaseTest {
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
-                "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
-                "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"challenge\":\"REMOVED\"," +
+                "\"amlbCookie\":\"REMOVED\"," +
                 "\"ttl\":120," +
                 "\"approved\":false," +
                 "\"pending\":true}";
@@ -374,7 +374,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseFromJsonSuccessfully() {
+    public void testShouldSerializeSuccessfully() {
         String json = "{" +
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
@@ -385,7 +385,33 @@ public class PushNotificationTest extends FRABaseTest {
                 "\"approved\":false," +
                 "\"pending\":true}";
 
-        PushNotification pushNotification = PushNotification.fromJson(json);
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTtl(TTL)
+                .build();
+
+        String pusNotificationAsJson = pushNotification.serialize();
+
+        assertNotNull(pusNotificationAsJson);
+        assertEquals(json, pusNotificationAsJson);
+    }
+
+    @Test
+    public void testShouldDeserializeSuccessfully() {
+        String json = "{" +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
+                "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
+                "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"ttl\":120," +
+                "\"approved\":false," +
+                "\"pending\":true}";
+
+        PushNotification pushNotification = PushNotification.deserialize(json);
 
         assertNotNull(pushNotification);
         assertEquals(pushNotification.getMechanismUID(), MECHANISM_UID);

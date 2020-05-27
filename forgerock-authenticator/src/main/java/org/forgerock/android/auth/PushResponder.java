@@ -58,7 +58,6 @@ class PushResponder {
 
     /** OkHttp client to handle network requests **/
     private OkHttpClient httpClient;
-
     /** StorageClient to persist operation result **/
     private StorageClient storageClient;
 
@@ -324,18 +323,13 @@ class PushResponder {
 
         SignedJWT signedJWT = new SignedJWT(header, claimBuilder.build());
 
-        try {
-            // Create HMAC signer
-            byte[] secret = Base64.decode(base64Secret, Base64.NO_WRAP);
-            JWSSigner signer = new MACSigner(secret);
+        // Create HMAC signer
+        byte[] secret = Base64.decode(base64Secret, Base64.NO_WRAP);
+        JWSSigner signer = new MACSigner(secret);
 
-            // Sign JWT
-            signedJWT.sign(signer);
-            return signedJWT.serialize();
-        } catch (JOSEException e) {
-            Logger.warn(TAG, e, "Failed to sign the data.");
-            throw new JOSEException("Error signing JWT data. Secret malformed or invalid.", e);
-        }
+        // Sign JWT
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
     }
 
     @VisibleForTesting

@@ -50,7 +50,7 @@ class DefaultStorageClient implements StorageClient {
     @Override
     public Account getAccount(String accountId) {
         String json = accountData.getString(accountId, "");
-        return Account.fromJson(json);
+        return Account.deserialize(json);
     }
 
     @Override
@@ -60,7 +60,7 @@ class DefaultStorageClient implements StorageClient {
         Map<String,?> keys = accountData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
             Logger.debug(TAG, "Account map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            Account account = Account.fromJson(entry.getValue().toString());
+            Account account = Account.deserialize(entry.getValue().toString());
             if(account != null)
                 accountList.add(account);
         }
@@ -77,7 +77,7 @@ class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setAccount(Account account) {
-        String accountJson = account.toJson();
+        String accountJson = account.serialize();
 
         return accountData.edit()
                 .putString(account.getId(), accountJson)
@@ -97,7 +97,7 @@ class DefaultStorageClient implements StorageClient {
             Logger.debug(TAG, "Mechanism map values: ",entry.getKey() + ": " + entry.getValue().toString());
             String jsonData = entry.getValue().toString();
 
-            Mechanism mechanism = Mechanism.fromJson(jsonData);
+            Mechanism mechanism = Mechanism.deserialize(jsonData);
             if(mechanism != null)
                 mechanismList.add(mechanism);
         }
@@ -143,7 +143,7 @@ class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setMechanism(Mechanism mechanism) {
-        String mechanismJson = mechanism.toJson();
+        String mechanismJson = mechanism.serialize();
 
         return mechanismData.edit()
                 .putString(mechanism.getId(), mechanismJson)
@@ -161,7 +161,7 @@ class DefaultStorageClient implements StorageClient {
         Map<String,?> keys = notificationData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
             Logger.debug(TAG, "PushNotification map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            PushNotification pushNotification = PushNotification.fromJson(entry.getValue().toString());
+            PushNotification pushNotification = PushNotification.deserialize(entry.getValue().toString());
             if(pushNotification != null)
                 pushNotificationList.add(pushNotification);
         }
@@ -192,7 +192,7 @@ class DefaultStorageClient implements StorageClient {
 
     @Override
     public boolean setNotification(PushNotification pushNotification) {
-        String notificationJson = pushNotification.toJson();
+        String notificationJson = pushNotification.serialize();
 
         return notificationData.edit()
                 .putString(pushNotification.getId(), notificationJson)

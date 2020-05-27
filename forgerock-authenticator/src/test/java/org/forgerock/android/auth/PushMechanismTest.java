@@ -170,15 +170,15 @@ public class PushMechanismTest extends FRABaseTest {
     @Test
     public void testShouldParseToJsonSuccessfully() {
         String json = "{" +
-                            "\"id\":\"issuer1-user1-pushauth\"," +
-                            "\"issuer\":\"issuer1\"," +
-                            "\"accountName\":\"user1\"," +
-                            "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                            "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
-                            "\"type\":\"pushauth\"," +
-                            "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
-                            "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
-                        "}";
+                "\"id\":\"issuer1-user1-pushauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"REMOVED\"," +
+                "\"type\":\"pushauth\"," +
+                "\"registrationEndpoint\":\"REMOVED\"," +
+                "\"authenticationEndpoint\":\"REMOVED\"" +
+                "}";
 
         PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -196,7 +196,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseFromJsonSuccessfully() {
+    public void testShouldSerializeSuccessfully() {
         String json = "{" +
                 "\"id\":\"issuer1-user1-pushauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -208,7 +208,35 @@ public class PushMechanismTest extends FRABaseTest {
                 "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
                 "}";
 
-        PushMechanism mechanism = PushMechanism.fromJson(json);
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+
+        String mechanismAsJson = mechanism.serialize();
+
+        assertNotNull(mechanismAsJson);
+        assertEquals(json, mechanismAsJson);
+    }
+
+    @Test
+    public void testShouldDeserializeSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-pushauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"pushauth\"," +
+                "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
+                "}";
+
+        PushMechanism mechanism = PushMechanism.deserialize(json);
 
         assertNotNull(mechanism);
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);

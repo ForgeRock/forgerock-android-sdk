@@ -11,6 +11,8 @@ import org.forgerock.android.auth.exception.OathMechanismException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
+
 /**
  * Represents HMAC-based OTP authentication mechanism and is responsible for its related operation.
  */
@@ -20,9 +22,9 @@ public class HOTPMechanism extends OathMechanism {
     protected long counter;
 
     private HOTPMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                          String algorithm, String secret, int digits, long counter) {
-        super(mechanismUID, issuer, accountName, Mechanism.OATH, oathType, algorithm,
-                secret, digits);
+                          String algorithm, String secret, int digits, long counter, Calendar timeCreated) {
+        super(mechanismUID, issuer, accountName, type, oathType, algorithm,
+                secret, digits, timeCreated);
         this.counter = counter;
     }
 
@@ -45,18 +47,28 @@ public class HOTPMechanism extends OathMechanism {
 
     @Override
     public String toJson() {
+        return convertToJson(true);
+    }
+
+    @Override
+    String serialize() {
+        return convertToJson(false);
+    }
+
+    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", getSecret());
+            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
             jsonObject.put("type", getType());
             jsonObject.put("oathType", getOathType());
             jsonObject.put("algorithm", getAlgorithm());
             jsonObject.put("digits", getDigits());
-            jsonObject.put("counter", getCounter());
+            jsonObject.put("counter", excludeSensitiveData ? "REMOVED" : getCounter());
+            jsonObject.put("timeCreated", getTimeCreated());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
@@ -69,7 +81,7 @@ public class HOTPMechanism extends OathMechanism {
      * @return an {@link HOTPMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static HOTPMechanism fromJson(String jsonString) {
+    static HOTPMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -83,11 +95,14 @@ public class HOTPMechanism extends OathMechanism {
                     .setAlgorithm(jsonObject.getString("algorithm"))
                     .setDigits(jsonObject.getInt("digits"))
                     .setCounter(jsonObject.getLong("counter"))
+                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
                     .build();
         } catch (JSONException e) {
             return null;
         }
     }
+
+
 
     /**
      * Returns a builder for creating a HOTPMechanism Mechanism.
@@ -125,7 +140,7 @@ public class HOTPMechanism extends OathMechanism {
         @Override
         HOTPMechanism buildOath() {
             return new HOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH, TokenType.HOTP, algorithm,
-                    secret, digits, counter);
+                    secret, digits, counter, timeCreated);
         }
 
     }

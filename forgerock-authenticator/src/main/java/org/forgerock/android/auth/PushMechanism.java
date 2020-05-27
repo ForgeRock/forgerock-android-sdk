@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ public class PushMechanism extends Mechanism {
     private List<PushNotification> pushNotificationList;
 
     /**
-     * Creates a Push mechanism with given data
+     * Creates a Push mechanism with given data.
      * @param mechanismUID Mechanism UUID
      * @param issuer issuer of the Mechanism
      * @param accountName accountName of the Mechanism
@@ -34,16 +35,17 @@ public class PushMechanism extends Mechanism {
      * @param secret String value of the shared secret
      * @param registrationEndpoint registration URL for Push
      * @param authenticationEndpoint authentication URL for Push
+     * @param timeCreated Date and Time this Mechanism was stored
      */
     private PushMechanism(String mechanismUID, String issuer, String accountName, String type, String secret,
-                          String registrationEndpoint, String authenticationEndpoint) {
-        super(mechanismUID, issuer, accountName, type, secret);
+                          String registrationEndpoint, String authenticationEndpoint, Calendar timeCreated) {
+        super(mechanismUID, issuer, accountName, type, secret, timeCreated);
         this.registrationEndpoint = registrationEndpoint;
         this.authenticationEndpoint = authenticationEndpoint;
     }
 
     /**
-     * The registration URL for Push mechanism
+     * The registration URL for Push mechanism.
      * @return String representing the registration URL
      */
     String getRegistrationEndpoint() {
@@ -51,7 +53,7 @@ public class PushMechanism extends Mechanism {
     }
 
     /**
-     * The authentication URL for Push mechanism
+     * The authentication URL for Push mechanism.
      * @return String representing the authentication URL
      */
     String getAuthenticationEndpoint() {
@@ -86,16 +88,26 @@ public class PushMechanism extends Mechanism {
 
     @Override
     public String toJson() {
+        return convertToJson(true);
+    }
+
+    @Override
+    String serialize() {
+        return convertToJson(false);
+    }
+
+    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", getSecret());
+            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
             jsonObject.put("type", getType());
-            jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
-            jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
+            jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
+            jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
+            jsonObject.put("timeCreated", getTimeCreated());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
@@ -108,7 +120,7 @@ public class PushMechanism extends Mechanism {
      * @return an {@link PushMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static PushMechanism fromJson(String jsonString) {
+    static PushMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -145,10 +157,11 @@ public class PushMechanism extends Mechanism {
         private String registrationEndpoint;
         private String authenticationEndpoint;
         private String secret;
+        private Calendar timeCreated;
 
         /**
          * Sets the mechanism unique Id.
-         * @param mechanismUID the mechanism unique Id.
+         * @param mechanismUID the mechanism unique Id
          * @return The receiving Mechanism.
          */
         public PushBuilder setMechanismUID(String mechanismUID) {
@@ -158,7 +171,7 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Sets the name of the IDP that issued this account.
-         * @param issuer The IDP name.
+         * @param issuer The IDP name
          */
         public PushBuilder setIssuer(String issuer) {
             this.issuer = issuer;
@@ -167,7 +180,7 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Sets the name of the account.
-         * @param accountName The account name.
+         * @param accountName The account name
          */
         public PushBuilder setAccountName(String accountName) {
             this.accountName = accountName;
@@ -175,9 +188,9 @@ public class PushMechanism extends Mechanism {
         }
 
         /**
-         * Set the endpoint that will be used for Push registration
-         * @param endpoint The endpoint to register the device for Push.
-         * @return This builder.
+         * Set the endpoint that will be used for Push registration.
+         * @param endpoint The endpoint to register the device for Push
+         * @return This builder
          */
         public PushBuilder setRegistrationEndpoint(String endpoint) {
             this.registrationEndpoint = endpoint;
@@ -187,7 +200,7 @@ public class PushMechanism extends Mechanism {
         /**
          * Set the endpoint that will be used for Push authentication
          * @param endpoint The endpoint to respond Push messages to.
-         * @return This builder.
+         * @return This builder
          */
         public PushBuilder setAuthenticationEndpoint(String endpoint) {
             this.authenticationEndpoint = endpoint;
@@ -196,8 +209,8 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Set the secret that this mechanism shares with the server.
-         * @param secret The shared secret.
-         * @return This builder.
+         * @param secret The shared secret
+         * @return This builder
          */
         public PushBuilder setSecret(String secret) {
             this.secret = secret;
@@ -205,12 +218,21 @@ public class PushMechanism extends Mechanism {
         }
 
         /**
+         * Sets the Date and Time this mechanism was stored.
+         * @param timeCreated when this mechanism was stored.
+         */
+        public PushBuilder setTimeCreated(Calendar timeCreated) {
+            this.timeCreated = timeCreated;
+            return this;
+        }
+
+        /**
          * Produce the described Mechanism.
-         * @return The built Token.
+         * @return The built Token
          */
         protected PushMechanism build() {
             return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
-                    registrationEndpoint, authenticationEndpoint);
+                    registrationEndpoint, authenticationEndpoint, timeCreated);
         }
 
     }

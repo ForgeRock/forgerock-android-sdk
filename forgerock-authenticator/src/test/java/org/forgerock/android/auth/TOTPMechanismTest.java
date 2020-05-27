@@ -170,7 +170,7 @@ public class TOTPMechanismTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"secret\":\"REMOVED\"," +
                 "\"type\":\"otpauth\"," +
                 "\"oathType\":\"TOTP\"," +
                 "\"algorithm\":\"sha1\"," +
@@ -195,7 +195,38 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseFromJsonSuccessfully() {
+    public void testShouldSerializeSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-otpauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"otpauth\"," +
+                "\"oathType\":\"TOTP\"," +
+                "\"algorithm\":\"sha1\"," +
+                "\"digits\":6," +
+                "\"period\":30" +
+                "}";
+
+        TOTPMechanism mechanism = (TOTPMechanism) TOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setPeriod(PERIOD)
+                .build();
+
+        String mechanismAsJson = mechanism.serialize();
+
+        assertNotNull(mechanismAsJson);
+        assertEquals(json, mechanismAsJson);
+    }
+
+    @Test
+    public void testShouldDeserializeSuccessfully() {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -209,7 +240,7 @@ public class TOTPMechanismTest extends FRABaseTest {
                 "\"period\":30" +
                 "}";
 
-        TOTPMechanism mechanism = TOTPMechanism.fromJson(json);
+        TOTPMechanism mechanism = TOTPMechanism.deserialize(json);
 
         assertNotNull(mechanism);
         assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
