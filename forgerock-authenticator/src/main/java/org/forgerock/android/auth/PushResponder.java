@@ -163,7 +163,7 @@ class PushResponder {
                 payload.put(DENY_KEY, true);
 
             // Build request
-            OkHttpClient okHttpClient = getOkHttpClient();
+            OkHttpClient okHttpClient = getOkHttpClient(url);
             Request request = buildRequest(url,
                     pushNotification.getAmlbCookie(),
                     pushNotification.getPushMechanism().getSecret(),
@@ -221,7 +221,7 @@ class PushResponder {
             URL url = new URL(endpoint);
 
             // Build request
-            OkHttpClient okHttpClient = getOkHttpClient();
+            OkHttpClient okHttpClient = getOkHttpClient(url);
             Request request = buildRequest(url,
                     amlbCookie,
                     base64Secret,
@@ -254,17 +254,25 @@ class PushResponder {
      *
      * @return OkHttpClient http client
      * */
-    private OkHttpClient getOkHttpClient() {
+    private OkHttpClient getOkHttpClient(URL url) {
         if (httpClient != null) {
             return httpClient;
         }
 
-        httpClient = new OkHttpClient.Builder()
-                .connectTimeout(TIMEOUT, SECONDS)
-                .readTimeout(TIMEOUT, SECONDS)
-                .writeTimeout(TIMEOUT, SECONDS)
-                .followRedirects(false)
+        // Extract host from the URL, it's required to build the NetworkConfig and used by
+        // OkHttpClientProvider. There is no need to monitor the the change of hosts considering
+        // the usage of this SDK.
+        String host = url.getProtocol() + "://" + url.getAuthority();
+
+        // Build network config
+        NetworkConfig networkConfig = NetworkConfig.networkBuilder()
+                .timeout(TIMEOUT)
+                .timeUnit(SECONDS)
+                .host(host)
                 .build();
+
+        // Obtain instance of OkHttp client
+        httpClient = OkHttpClientProvider.getInstance().lookup(networkConfig);
 
         return httpClient;
     }
