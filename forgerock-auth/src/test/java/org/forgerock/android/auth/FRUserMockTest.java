@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 
+import androidx.annotation.NonNull;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
@@ -40,6 +42,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -922,5 +925,56 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.TOKEN));
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
+    }
+
+    @Test
+    public void testRequestInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
+
+        final HashMap<String, Integer> result = new HashMap<>();
+        RequestInterceptorFactory.getInstance().register(new RequestInterceptor() {
+            @NonNull
+            @Override
+            public Request intercept(@NonNull Request request) {
+                String action = ((Action)request.tag()).getType();
+                Integer count = result.get(action);
+                if ( count == null) {
+                    result.put(action, 1);
+                } else {
+                    result.put(action, count++);
+                }
+                return request;
+            }
+        });
+
+        frUserHappyPath();
+
+        //Logout
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        FRUser.getCurrentUser().logout();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+
+        Assertions.assertThat(result.get("START_AUTHENTICATE")).isEqualTo(1);
+        Assertions.assertThat(result.get("AUTHENTICATE")).isEqualTo(1);
+        Assertions.assertThat(result.get("AUTHORIZE")).isEqualTo(1);
+        Assertions.assertThat(result.get("EXCHANGE_TOKEN")).isEqualTo(1);
+        Assertions.assertThat(result.get("REVOKE_TOKEN")).isEqualTo(1);
+        Assertions.assertThat(result.get("LOGOUT")).isEqualTo(1);
+        Assertions.assertThat(result.get("USER_INFO")).isEqualTo(1);
+
+
+
     }
 }

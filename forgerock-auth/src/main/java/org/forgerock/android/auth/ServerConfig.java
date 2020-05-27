@@ -11,8 +11,8 @@ import android.content.Context;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import okhttp3.CookieJar;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Manages Server configuration information
@@ -58,11 +60,14 @@ public class ServerConfig extends NetworkConfig {
                         String revokeEndpoint,
                         String userInfoEndpoint,
                         String logoutEndpoint) {
-        //TODO Inject Interceptor
         super(getHost(context, url),
                 getTimeOut(context, timeout),
                 timeUnit, cookieJarSupplier,
-                getPins(context, pins), new ArrayList<>());
+                getPins(context, pins),
+                singletonList(
+                        new OkHttpRequestInterceptor(
+                                RequestInterceptorFactory.getInstance().getRequestInterceptors()))
+        );
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
         this.authenticateEndpoint = authenticateEndpoint;

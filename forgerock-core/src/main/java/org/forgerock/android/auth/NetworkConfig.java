@@ -47,7 +47,7 @@ class NetworkConfig {
 
         this.host = host;
 
-        this.timeout = timeout;
+        this.timeout = timeout == null ? 30 : timeout;
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = pins;
         this.cookieJarSupplier = cookieJarSupplier;

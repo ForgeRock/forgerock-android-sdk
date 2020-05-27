@@ -30,6 +30,9 @@ class AuthServiceClient {
             = MediaType.get("application/json; charset=utf-8");
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
+    private static final Action START_AUTHENTICATE = new Action("START_AUTHENTICATE");
+    private static final Action AUTHENTICATE = new Action("AUTHENTICATE");
+
 
     private ServerConfig serverConfig;
     private OkHttpClient okHttpClient;
@@ -47,10 +50,11 @@ class AuthServiceClient {
      */
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl(authService))
                     .post(RequestBody.create(new byte[0]))
                     .header(ACCEPT_API_VERSION, API_VERSION_2_1)
+                    .tag(START_AUTHENTICATE)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -79,10 +83,11 @@ class AuthServiceClient {
      */
     void authenticate(final Node node, final AuthServiceResponseHandler handler) {
         try {
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl())
                     .post(RequestBody.create(node.toJsonObject().toString(), JSON))
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(AUTHENTICATE)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
