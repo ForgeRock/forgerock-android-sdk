@@ -122,6 +122,7 @@ abstract class MechanismFactory {
             }
 
             String mechanismUID = getNewMechanismUID();
+            final Account finalAccount = account;
             createFromUriParameters(version, mechanismUID, values, new FRAListener<Mechanism>() {
                 @Override
                 public void onSuccess(Mechanism newMechanism) {
@@ -137,14 +138,11 @@ abstract class MechanismFactory {
                 @Override
                 public void onException(Exception e) {
                     listener.onException(e);
+                    checkOrphanAccount(finalAccount);
                 }
             });
-
         } catch (MechanismCreationException e) {
-            if (storageClient.getMechanismsForAccount(account).isEmpty()) {
-                Logger.warn(TAG, e,"Removing temporally created account.");
-                storageClient.removeAccount(account);
-            }
+            checkOrphanAccount(account);
             listener.onException(e);
         }
     }
@@ -205,6 +203,13 @@ abstract class MechanismFactory {
             result.addAll(storageClient.getMechanismsForAccount(account));
         }
         return result;
+    }
+
+    private void checkOrphanAccount(Account account) {
+        if (storageClient.getMechanismsForAccount(account).isEmpty()) {
+            Logger.debug(TAG,"Removing temporally created account.");
+            storageClient.removeAccount(account);
+        }
     }
 
 }

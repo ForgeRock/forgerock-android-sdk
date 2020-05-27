@@ -75,7 +75,7 @@ class PushParser extends MechanismParser {
         if (!containsNonEmpty(data, key)) {
             throw new MechanismParsingException(key + " must not be empty");
         }
-        byte[] bytes = Base64.decode(data.get(key), Base64.NO_WRAP);
+        byte[] bytes = Base64.decode(data.get(key), Base64.NO_WRAP + Base64.URL_SAFE);
 
         if (bytes == null) {
             throw new MechanismParsingException("Failed to decode value in " + key);

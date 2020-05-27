@@ -94,7 +94,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * Get the string used to represent the shared secret of the mechanism.
      * @return The shared secret as string.
      */
-    public String getSecret() {
+    String getSecret() {
         return secret;
     }
 

@@ -25,6 +25,8 @@ import com.nimbusds.jwt.SignedJWT;
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,6 +41,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -172,6 +175,7 @@ class PushResponder {
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
+                    Logger.warn(TAG, "Response from server: \n" + response.toString());
                     // Check if operation succeed
                     if(response.code() == 200) {
                         // Update notification status
@@ -190,11 +194,12 @@ class PushResponder {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Logger.warn(TAG, "Failure on connecting to the server: \n" + call.request().toString());
                     listener.onException(new PushMechanismException("Network error while processing the Push " +
                             "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
                 }
             });
-        } catch (JOSEException | IllegalArgumentException | IOException | ChallengeResponseException e) {
+        } catch (JOSEException | IllegalArgumentException | IOException | ChallengeResponseException | JSONException e) {
             listener.onException(new PushMechanismException("Error processing the Push " +
                     "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
         }
@@ -228,16 +233,18 @@ class PushResponder {
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
+                    Logger.warn(TAG, "Response from server: \n" + response.toString());
                     listener.onSuccess(response.code());
                 }
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Logger.warn(TAG, "Failure on connecting to the server: \n" + call.request().toString());
                     listener.onException(new PushMechanismException("Network error while processing the Push " +
                             "Registration request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
                 }
             });
-        } catch (JOSEException | IllegalArgumentException | IOException e) {
+        } catch (JOSEException | IllegalArgumentException | IOException | JSONException e) {
             listener.onException(new PushMechanismException("Error processing the Push " +
                     "Registration request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
         }
@@ -272,9 +279,9 @@ class PushResponder {
      */
     private Request buildRequest(URL url, String amlbCookie, String base64Secret,
                                  String messageId, Map<String, Object> data)
-            throws IllegalArgumentException, JOSEException {
+            throws IllegalArgumentException, JOSEException, JSONException {
         Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(url);
+        requestBuilder.url(url.toString());
 
         // Add header properties to the request
         requestBuilder.addHeader("Content-Type", "application/json");
@@ -284,10 +291,10 @@ class PushResponder {
         }
 
         // Add body parameters to the request
-        RequestBody body = new FormBody.Builder()
-                .add("messageId", messageId)
-                .add("jwt", generateJwt(base64Secret, data))
-                .build();
+        JSONObject message = new JSONObject();
+        message.put("messageId", messageId);
+        message.put("jwt", generateJwt(base64Secret, data));
+        RequestBody body = RequestBody.create(message.toString(), MediaType.parse("application/json; charset=utf-8"));
         requestBuilder.post(body);
 
         return requestBuilder.build();

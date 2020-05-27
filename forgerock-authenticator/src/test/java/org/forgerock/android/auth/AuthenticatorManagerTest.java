@@ -200,7 +200,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
             pushNotification = authenticatorManager.handleMessage(remoteMessage);
         } catch (Exception e) {
             assertTrue(e instanceof InvalidNotificationException);
-            assertTrue(e.getLocalizedMessage().contains("Cannot process PushMechanism notification"));
+            assertTrue(e.getLocalizedMessage().contains("Cannot process Push notification"));
         }
         assertNull(pushNotification);
 
@@ -268,6 +268,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         assertNotNull(accountsFromStorageList);
         assertEquals(2, accountsFromStorageList.size());
+        assertEquals(accountsFromStorageList.get(0).getMechanisms().size(), 1);
+        assertEquals(accountsFromStorageList.get(1).getMechanisms().size(), 1);
     }
 
     @Test

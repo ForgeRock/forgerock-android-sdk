@@ -83,7 +83,7 @@ class AuthenticatorManager {
             initializeAccount(account);
         }
 
-        return storageClient.getAllAccounts();
+        return accountList;
     }
 
     Account getAccount(String accountId) {
@@ -188,6 +188,15 @@ class AuthenticatorManager {
                     ((PushMechanism) mechanism).setPushNotificationList(notificationList);
                 }
             }
+        }
+    }
+
+    private void initializeMechanism(Mechanism mechanism) {
+        if(mechanism != null && mechanism.getType().equals(Mechanism.PUSH)) {
+            Logger.debug(TAG, "Loading associated notifications for the mechanism with ID: %s", mechanism.getId());
+
+            List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
+            ((PushMechanism) mechanism).setPushNotificationList(notificationList);
         }
     }
 
