@@ -32,7 +32,7 @@ class UserService implements ResponseHandler {
     private ServerConfig serverConfig;
 
     @Builder
-    public UserService(ServerConfig serverConfig, SessionManager sessionManager) {
+    private UserService(ServerConfig serverConfig) {
         client = OkHttpClientProvider.getInstance().lookup(serverConfig).newBuilder()
                 .addInterceptor(new AccessTokenInterceptor())
                 .build();

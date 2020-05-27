@@ -28,7 +28,8 @@ public class PersistentCookieTest extends BaseTest {
 
     @Before
     public void setUpCookieStore() {
-        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
+        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().context(context)
+                .build());
     }
 
     @Test
@@ -254,8 +255,10 @@ public class PersistentCookieTest extends BaseTest {
     public void cookieCache() throws InterruptedException, ExecutionException {
 
         OkHttpClientProvider.getInstance().clear();
-        Config.getInstance(context).setCookieCacheIntervalMillis(1000);
-        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().build());
+        Config.getInstance(context).setCookieJar(SecureCookieJar.builder()
+                .context(context)
+                .cacheIntervalMillis(1000L)
+                .build());
         server.enqueue(new MockResponse()
                 .setResponseCode(HTTP_OK)
                 .addHeader("Content-Type", "application/json")
@@ -293,7 +296,6 @@ public class PersistentCookieTest extends BaseTest {
     public void cookieCacheRemovedWithLogout() throws InterruptedException, ExecutionException {
 
         OkHttpClientProvider.getInstance().clear();
-        Config.getInstance(context).setCacheIntervalMillis(1000);
         server.enqueue(new MockResponse()
                 .setResponseCode(HTTP_OK)
                 .addHeader("Content-Type", "application/json")

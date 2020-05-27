@@ -31,7 +31,6 @@ import static android.content.Context.MODE_PRIVATE;
 public class FRAuth {
 
     private AuthService authService;
-    private SessionManager sessionManager;
 
     //Alias to store Previous Configure Host
     public static final String ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS";
@@ -46,7 +45,7 @@ public class FRAuth {
             String previousHost = sharedPreferences.getString("url", null);
             if (previousHost != null) {
                 if (!config.getUrl().equals(previousHost)) {
-                    SessionManager.builder().build().close();
+                    Config.getInstance().getSessionManager().close();
                 }
             }
             sharedPreferences.edit().putString("url", config.getUrl()).apply();
@@ -58,22 +57,18 @@ public class FRAuth {
      */
     @Deprecated
     @Builder
-    public FRAuth(@NonNull Context context,
+    private FRAuth(@NonNull Context context,
                    String serviceName,
                    PolicyAdvice advice,
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
                    @Singular List<Interceptor> interceptors) {
 
-        Config config = Config.getInstance(context);
-
-        this.sessionManager = config.applyDefaultIfNull(sessionManager);
-
         AuthService.AuthServiceBuilder builder = AuthService.builder()
                 .name(serviceName)
                 .advice(advice)
-                .serverConfig(config.applyDefaultIfNull(serverConfig))
-                .interceptor(new SingleSignOnInterceptor(this.sessionManager));
+                .serverConfig(serverConfig)
+                .interceptor(new SingleSignOnInterceptor(sessionManager));
 
         for (Interceptor interceptor : interceptors) {
             builder.interceptor(interceptor);

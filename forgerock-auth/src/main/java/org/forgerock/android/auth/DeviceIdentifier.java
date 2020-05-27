@@ -29,7 +29,7 @@ public class DeviceIdentifier {
     DeviceIdentifier(@NotNull Context context, KeyStoreManager keyStoreManager) {
 
         this.keyAlias = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        this.keyStoreManager = Config.getInstance(context).applyDefaultIfNull(keyStoreManager);
+        this.keyStoreManager = keyStoreManager;
 
     }
 

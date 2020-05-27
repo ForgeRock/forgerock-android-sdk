@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
@@ -28,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
@@ -47,11 +50,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRUserMockTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
+    private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
 
     @Test
     public void frUserHappyPath() throws InterruptedException, ExecutionException, MalformedURLException, ParseException, JSONException {
@@ -66,6 +71,7 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -153,6 +159,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -217,6 +225,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -270,6 +280,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -319,6 +331,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -471,6 +485,7 @@ public class FRUserMockTest extends BaseTest {
 
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -531,7 +546,11 @@ public class FRUserMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        SharedPreferences tokenManagerSharedPreferences = context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE);
+        SharedPreferences ssoManagerSharedPreferences = context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE);
+        Config.getInstance().setSharedPreferences(tokenManagerSharedPreferences);
+        Config.getInstance().setSsoSharedPreferences(ssoManagerSharedPreferences);
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -557,6 +576,7 @@ public class FRUserMockTest extends BaseTest {
         Assert.assertTrue(nodeListenerFuture.get() instanceof FRSession);
 
         final TokenManager tokenManager = DefaultTokenManager.builder()
+                .sharedPreferences(tokenManagerSharedPreferences)
                 .context(context)
                 .build();
 
@@ -566,9 +586,7 @@ public class FRUserMockTest extends BaseTest {
         assertNotNull(accessToken.getValue());
 
         //Check SSOToken Storage
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .build();
+        final SingleSignOnManager singleSignOnManager = Config.getInstance().getSingleSignOnManager();
         Token token = singleSignOnManager.getToken();
         assertNotNull(token);
         assertNotNull(token.getValue());
@@ -600,6 +618,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance(context).setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
         Config.getInstance(context).setUrl(getUrl());
         Config.getInstance(context).setEncryptor(new MockEncryptor());
 
@@ -632,6 +652,7 @@ public class FRUserMockTest extends BaseTest {
 
         //Switch to another App with Access Token does not exists
         final TokenManager tokenManager = DefaultTokenManager.builder()
+                .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
                 .context(context)
                 .build();
         tokenManager.clear();
@@ -787,13 +808,67 @@ public class FRUserMockTest extends BaseTest {
 
     @Test
     public void testCustomEndpoint() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
-        Config.getInstance(context).setAuthenticateEndpoint("dummy/authenticate");
-        Config.getInstance(context).setAuthorizeEndpoint("dummy/authorize");
-        Config.getInstance(context).setTokenEndpoint("dummy/token");
-        Config.getInstance(context).setUserinfoEndpoint("dummy/userinfo");
-        Config.getInstance(context).setRevokeEndpoint("dummy/revoke");
-        Config.getInstance(context).setLogoutEndpoint("dummy/logout");
-        frUserHappyPath();
+
+        when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn(context.getString(R.string.forgerock_oauth_client_id));
+        when(mockContext.getString(R.string.forgerock_oauth_redirect_uri)).thenReturn(context.getString(R.string.forgerock_oauth_redirect_uri));
+        when(mockContext.getString(R.string.forgerock_oauth_scope)).thenReturn(context.getString(R.string.forgerock_oauth_scope));
+        when(mockContext.getString(R.string.forgerock_oauth_url)).thenReturn(context.getString(R.string.forgerock_oauth_url));
+        when(mockContext.getString(R.string.forgerock_realm)).thenReturn(context.getString(R.string.forgerock_realm));
+        Resources resources = Mockito.mock(Resources.class);
+        when(mockContext.getResources()).thenReturn(resources);
+        when(mockContext.getApplicationContext()).thenReturn(context);
+        when(resources.getInteger(R.integer.forgerock_timeout)).thenReturn(30);
+        when(resources.getStringArray(R.array.forgerock_pins)).thenReturn(context.getResources().getStringArray(R.array.forgerock_pins));
+        when(mockContext.getString(R.string.forgerock_authenticate_endpoint)).thenReturn("dummy/authenticate");
+        when(mockContext.getString(R.string.forgerock_authorize_endpoint)).thenReturn("dummy/authorize");
+        when(mockContext.getString(R.string.forgerock_token_endpoint)).thenReturn("dummy/token");
+        when(mockContext.getString(R.string.forgerock_userinfo_endpoint)).thenReturn("dummy/userinfo");
+        when(mockContext.getString(R.string.forgerock_revoke_endpoint)).thenReturn("dummy/revoke");
+        when(mockContext.getString(R.string.forgerock_logout_endpoint)).thenReturn("dummy/logout");
+        when(mockContext.getString(R.string.forgerock_auth_service)).thenReturn("UsernamePassword");
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
+
+        Config.reset();
+        Config.getInstance(mockContext);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(mockContext, nodeListenerFuture);
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        FRListenerFuture<UserInfo> future = new FRListenerFuture<>();
+        FRUser.getCurrentUser().getUserInfo(future);
+        future.get();
+
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .addHeader("Content-Type", "application/json")
@@ -815,6 +890,7 @@ public class FRUserMockTest extends BaseTest {
 
         AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
         assertNotNull(FRUser.getCurrentUser());
+
         FRUser.getCurrentUser().logout();
         assertNull(FRUser.getCurrentUser());
 

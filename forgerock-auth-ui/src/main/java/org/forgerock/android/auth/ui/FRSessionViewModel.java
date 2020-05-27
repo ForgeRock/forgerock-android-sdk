@@ -37,7 +37,7 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
 
             @Override
             public void onException(Exception e) {
-                getExceptionLiveData().postValue(e);
+                getExceptionLiveData().postValue(new SingleLiveEvent<>(e));
             }
         };
     }

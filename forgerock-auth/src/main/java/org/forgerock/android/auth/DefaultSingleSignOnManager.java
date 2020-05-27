@@ -43,17 +43,19 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     private ServerConfig serverConfig;
 
     @Builder
-    DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
-
+    private DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
         try {
-            singleSignOnManager = AccountSingleSignOnManager.builder().context(context).encryptor(encryptor).build();
+            singleSignOnManager = AccountSingleSignOnManager.builder()
+                    .context(context)
+                    .encryptor(encryptor).build();
         } catch (Exception e) {
             Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
-            singleSignOnManager = SharedPreferencesSignOnManager.builder().context(context).sharedPreferences(sharedPreferences).build();
+            singleSignOnManager = SharedPreferencesSignOnManager.builder()
+                    .context(context)
+                    .sharedPreferences(sharedPreferences).build();
         }
 
-        Config config = Config.getInstance(context);
-        this.serverConfig = config.applyDefaultIfNull(serverConfig);
+        this.serverConfig = serverConfig;
     }
 
     @Override

@@ -29,7 +29,7 @@ public abstract class FRViewModel<T> extends ViewModel {
     @Getter
     private MutableLiveData<T> resultLiveData = new MutableLiveData<>();
     @Getter
-    private MutableLiveData<Exception> exceptionLiveData = new MutableLiveData<>();
+    private MutableLiveData<SingleLiveEvent<Exception>> exceptionLiveData = new MutableLiveData<>();
 
     private NodeListener nodeListener;
 
@@ -47,7 +47,7 @@ public abstract class FRViewModel<T> extends ViewModel {
 
             @Override
             public void onException(Exception e) {
-                exceptionLiveData.postValue(e);
+                exceptionLiveData.postValue(new SingleLiveEvent<>(e));
             }
         };
     }

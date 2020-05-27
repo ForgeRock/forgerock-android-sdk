@@ -3,21 +3,28 @@
 ## [2.0.0]
 
 #### Added
-- Support Set Persistent Cookie Node [SDKS-182]
-- Support Device Profile Collector Node [SDKS-293]
-- Support Metadata Callback & Stage Mapping for 6.5.2 [SDKS-305]
-- Allow server paths to be configurable [SDKS-307]
-- Rename device browser agent attribute to userAgent [SDKS-371]
+- `Set Persistent Cookie Node` is now supported to persist and manage Cookie [SDKS-182]
+- `Device Profile Collector Node` is now supported [SDKS-293]
+- `MetadataCallback` is now supported. For AM 6.5.2, when `MetadataCallback` is returned with stage value, SDK automatically parses `MetadataCallback` into Node's stage property. Please refer [this blog post](https://forum.forgerock.com/2020/02/using-an-authentication-tree-stage-to-build-a-custom-ui-with-the-forgerock-javascript-sdk/) for more details. [SDKS-305]
+- Allow server url paths to be configurable, Custom URL paths can be configured through `String.xml` or `ServerConfig` [SDKS-307]
+- Support `Authentication by Server` and `Transaction Authenticate to Tree` in Policy Environment. [SDKS-88]
+- Interface alignment with other platforms and introduce FRSession to authenticate against Authentication Tree in AM, persist and manage Session Token [SDKS-177]
+
+#### Changed
+- `FRUser.login` & `FRUser.register` now throws `AlreadyAuthenticatedException` when there is already authenticated user sessions [SDKS-177] 
+- When Session Token is updated through `FRSession.authenticate` or `FRUser.login`, previously granted OAuth2 token set will automatically be revoked. [SDKS-177]
+- Rename device browser `agent` attribute to `userAgent` for `FRDevice` [SDKS-371]
 
 #### Fixed
-- Interface alignment with other platforms and introduce FRSession [SDKS-177]
-- FRAuth.next() is now deprecated, user FRSession.authenticate instead [SDKS-177] 
 - Fix Instrument Test. [SDKS-162]
+
+#### Deprecated
+- `FRAuth.next()` is now deprecated, use `FRSession.authenticate` instead [SDKS-177] 
 
 ## [1.0.0]
 - General Availability release for SDKs
 
-#### Fixed
+#### Changed
 - Changed OAuth2 authorization request to POST [SDKS-125]
 - Store SSO token even SSO is disabled [SDKS-166]
 
