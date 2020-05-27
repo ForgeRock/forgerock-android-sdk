@@ -31,5 +31,15 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Action {
+
+    public static final String START_AUTHENTICATE = "START_AUTHENTICATE";
+    public static final String AUTHENTICATE = "AUTHENTICATE";
+    public static final String AUTHORIZE = "AUTHORIZE";
+    public static final String EXCHANGE_TOKEN = "EXCHANGE_TOKEN";
+    public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
+    public static final String REVOKE_TOKEN = "REVOKE_TOKEN";
+    public static final String LOGOUT = "LOGOUT";
+    public static final String USER_INFO = "USER_INFO";
+
     private String type;
 }

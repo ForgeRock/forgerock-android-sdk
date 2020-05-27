@@ -9,13 +9,18 @@ package org.forgerock.android.auth;
 
 import android.net.Uri;
 
-import okhttp3.*;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_2_1;
@@ -30,9 +35,8 @@ class AuthServiceClient {
             = MediaType.get("application/json; charset=utf-8");
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
-    private static final Action START_AUTHENTICATE = new Action("START_AUTHENTICATE");
-    private static final Action AUTHENTICATE = new Action("AUTHENTICATE");
-
+    private static final Action START_AUTHENTICATE = new Action(Action.START_AUTHENTICATE);
+    private static final Action AUTHENTICATE = new Action(Action.AUTHENTICATE);
 
     private ServerConfig serverConfig;
     private OkHttpClient okHttpClient;

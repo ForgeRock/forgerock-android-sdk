@@ -30,7 +30,7 @@ class UserService implements ResponseHandler {
 
     private OkHttpClient client;
     private ServerConfig serverConfig;
-    private static final Action USER_INFO = new Action("USER_INFO");
+    private static final Action USER_INFO = new Action(Action.USER_INFO);
 
     @Builder
     private UserService(ServerConfig serverConfig) {

@@ -33,10 +33,10 @@ public class OAuth2Client {
     private static final String TAG = "OAuth2Client";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    private static final Action AUTHORIZE = new Action("AUTHORIZE");
-    private static final Action EXCHANGE_TOKEN = new Action("EXCHANGE_TOKEN");
-    private static final Action REFRESH_TOKEN = new Action("REFRESH_TOKEN");
-    private static final Action REVOKE_TOKEN = new Action("REVOKE_TOKEN");
+    private static final Action AUTHORIZE = new Action(Action.AUTHORIZE);
+    private static final Action EXCHANGE_TOKEN = new Action(Action.EXCHANGE_TOKEN);
+    private static final Action REFRESH_TOKEN = new Action(Action.REFRESH_TOKEN);
+    private static final Action REVOKE_TOKEN = new Action(Action.REVOKE_TOKEN);
 
     /**
      * The registered client identifier
