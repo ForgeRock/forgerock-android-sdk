@@ -13,23 +13,22 @@ import androidx.annotation.NonNull;
  * Observes, modifies outgoing request from the SDK.
  * Interceptors can be used to add, remove, or transform headers, url, method on the request.
  */
-public interface RequestActionInterceptor extends RequestInterceptor {
+public interface FRRequestInterceptor<T> extends RequestInterceptor {
 
     default @NonNull
     Request intercept(@NonNull Request request) {
-        return intercept(request, (Action) request.tag());
+        return intercept(request, (T) request.tag());
     }
 
     /**
      * Intercepts outgoing request from the SDK.
      *
      * @param request The original outgoing request
-     * @param action  Type of request, available action type are (START_AUTHENTICATE, AUTHENTICATE,
-     *                AUTHORIZE, EXCHANGE_TOKEN, REFRESH_TOKEN, REVOKE_TOKEN, LOGOUT, USER_INFO)
+     * @param tag  The tag associate with the request. The SDK Tag outbound request with {@link Action}
      * @return The Updated Request
      */
 
     @NonNull
-    Request intercept(@NonNull Request request, Action action);
+    Request intercept(@NonNull Request request, T tag);
 
 }

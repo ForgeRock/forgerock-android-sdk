@@ -11,13 +11,12 @@ import androidx.annotation.NonNull;
 
 import org.forgerock.android.auth.Action;
 import org.forgerock.android.auth.Request;
-import org.forgerock.android.auth.RequestActionInterceptor;
-import org.forgerock.android.auth.RequestInterceptor;
+import org.forgerock.android.auth.FRRequestInterceptor;
 
 /**
- * Sample {@link RequestActionInterceptor} to add header
+ * Sample {@link FRRequestInterceptor} to add header
  */
-public class InjectHeaderAuthRequestInterceptor implements RequestActionInterceptor {
+public class InjectHeaderAuthRequestInterceptor implements FRRequestInterceptor<Action> {
 
     @NonNull
     @Override

@@ -11,9 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Action can be used for {@link RequestActionInterceptor} to easily identify what type of outgoing
+ * Action can be used for {@link FRRequestInterceptor} to easily identify what type of outgoing
  * event is being made from the SDK and for developers to customize the given {@link Request}
- * object in {@link RequestActionInterceptor}`. See {@link RequestInterceptor} for more detail.
+ * object in {@link FRRequestInterceptor}`. See {@link RequestInterceptor} for more detail.
  *
  * Currently, ForgeRock SDK makes following Requests with corresponding Actions:
  * <p>

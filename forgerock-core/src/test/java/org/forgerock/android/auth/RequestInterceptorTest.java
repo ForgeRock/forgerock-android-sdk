@@ -15,6 +15,7 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -373,13 +374,9 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(new RequestActionInterceptor() {
-                    @NonNull
-                    @Override
-                    public Request intercept(@NonNull Request request, Action action) {
-                        assertThat(action.getType()).isEqualTo("TEST");
-                        return request;
-                    }
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor((FRRequestInterceptor<Action>) (request, action) -> {
+                    assertThat(action.getType()).isEqualTo("TEST");
+                    return request;
                 })))
                 .build();
         RequestBody.create("", JSON);
@@ -395,7 +392,7 @@ public class RequestInterceptorTest {
     @Test
     public void testRegistry() {
         RequestInterceptorRegistry.getInstance().register(request -> request,
-                (RequestActionInterceptor) (request, action) -> request);
+                (FRRequestInterceptor) (request, action) -> request);
         assertThat(RequestInterceptorRegistry.getInstance().getRequestInterceptors().length).isEqualTo(2);
     }
 
