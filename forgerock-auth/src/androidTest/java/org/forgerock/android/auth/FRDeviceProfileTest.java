@@ -38,7 +38,7 @@ public class FRDeviceProfileTest {
     @Test
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
 
-        Config.getInstance(context);
+        Config.getInstance().init(context);
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
         FRDevice.getInstance().getProfile(future);
         JSONObject result = future.get();

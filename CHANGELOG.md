@@ -9,6 +9,8 @@
 - Allow server url paths to be configurable, Custom URL paths can be configured through `String.xml` or `ServerConfig` [SDKS-307]
 - Support `Authentication by Server` and `Transaction Authenticate to Tree` in Policy Environment. [SDKS-88]
 - Interface alignment with other platforms and introduce FRSession to authenticate against Authentication Tree in AM, persist and manage Session Token [SDKS-177]
+- Allow developers to customize SDK outbound request, for example customize url to provide query parameters or adding/removing headers [SDKS-308] 
+
 
 #### Changed
 - `FRUser.login` & `FRUser.register` now throws `AlreadyAuthenticatedException` when there is already authenticated user sessions [SDKS-177] 

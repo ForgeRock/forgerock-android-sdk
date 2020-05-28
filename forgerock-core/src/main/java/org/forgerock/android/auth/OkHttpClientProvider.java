@@ -57,16 +57,17 @@ class OkHttpClientProvider {
             builder.cookieJar(networkConfig.getCookieJar());
         }
 
+        if (networkConfig.getInterceptorSupplier() != null &&
+                networkConfig.getInterceptorSupplier().get() != null) {
+            for (Interceptor i : networkConfig.getInterceptorSupplier().get()) {
+                builder.addInterceptor(i);
+            }
+        }
+
         if (Logger.isDebugEnabled()) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.level(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(interceptor);
-        }
-
-        if (networkConfig.getInterceptors() != null) {
-            for (Interceptor i : networkConfig.getInterceptors()) {
-                builder.addInterceptor(i);
-            }
         }
 
         if (!networkConfig.getPins().isEmpty()) {

@@ -45,7 +45,8 @@ public class DeviceProfileCollectorCallbackTest {
         byte[] encoded = "public key".getBytes();
         when(publicKey.getEncoded()).thenReturn(encoded);
         when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-        Config.getInstance(context).setKeyStoreManager(keyStoreManager);
+        Config.getInstance().init(context);
+        Config.getInstance().setKeyStoreManager(keyStoreManager);
     }
 
     @Test

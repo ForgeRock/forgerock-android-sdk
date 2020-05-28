@@ -32,7 +32,11 @@ public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
     private static final String CONTENT_TYPE = "Content-Type";
-    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final Action AUTHORIZE = new Action(Action.AUTHORIZE);
+    private static final Action EXCHANGE_TOKEN = new Action(Action.EXCHANGE_TOKEN);
+    private static final Action REFRESH_TOKEN = new Action(Action.REFRESH_TOKEN);
+    private static final Action REVOKE_TOKEN = new Action(Action.REVOKE_TOKEN);
 
     /**
      * The registered client identifier
@@ -79,10 +83,11 @@ public class OAuth2Client {
 
             final PKCE pkce = generateCodeChallenge();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getAuthorizeUrl(token, pkce))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(AUTHORIZE)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -131,11 +136,12 @@ public class OAuth2Client {
                     .add(OAuth2.REFRESH_TOKEN, refreshToken)
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(REFRESH_TOKEN)
                     .build();
 
 
@@ -170,11 +176,12 @@ public class OAuth2Client {
                     .add(OAuth2.TOKEN, token)
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getRevokeUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(REVOKE_TOKEN)
                     .build();
 
 
@@ -217,11 +224,12 @@ public class OAuth2Client {
                     .add(OAuth2.CODE_VERIFIER, pkce.getCodeVerifier())
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(EXCHANGE_TOKEN)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {

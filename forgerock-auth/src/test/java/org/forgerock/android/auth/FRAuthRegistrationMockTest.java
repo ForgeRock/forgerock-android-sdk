@@ -45,9 +45,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -147,9 +147,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         final boolean[] unique = {false};
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
@@ -219,9 +219,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         final boolean[] minLength = {false};
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
@@ -292,9 +292,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -391,9 +391,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 

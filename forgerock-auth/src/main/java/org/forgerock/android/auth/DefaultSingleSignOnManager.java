@@ -41,6 +41,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
     private SingleSignOnManager singleSignOnManager;
     private ServerConfig serverConfig;
+    private static final Action LOGOUT = new Action(Action.LOGOUT);
 
     @Builder
     private DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
@@ -114,6 +115,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                 .header(ACCEPT_API_VERSION, API_VERSION_3_1)
                 .url(logout)
                 .post(RequestBody.create(new byte[0]))
+                .tag(LOGOUT)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

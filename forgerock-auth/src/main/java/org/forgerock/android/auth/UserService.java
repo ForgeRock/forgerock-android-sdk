@@ -30,6 +30,7 @@ class UserService implements ResponseHandler {
 
     private OkHttpClient client;
     private ServerConfig serverConfig;
+    private static final Action USER_INFO = new Action(Action.USER_INFO);
 
     @Builder
     private UserService(ServerConfig serverConfig) {
@@ -47,6 +48,7 @@ class UserService implements ResponseHandler {
             request = new Request.Builder()
                     .url(getUserInfoUrl())
                     .get()
+                    .tag(USER_INFO)
                     .build();
         } catch (MalformedURLException e) {
             Listener.onException(listener, e);
