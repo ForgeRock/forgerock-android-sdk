@@ -95,4 +95,11 @@ public class BaseTest {
                 .setBody(getJson(path)));
     }
 
+    protected MockResponse response(String path, int statusCode) {
+        return new MockResponse()
+                .setResponseCode(statusCode)
+                .addHeader("Content-Type", "application/json")
+                .setBody(getJson(path));
+    }
+
 }

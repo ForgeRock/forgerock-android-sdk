@@ -82,7 +82,7 @@ public class FRSession {
     }
 
     /**
-     * Trigger the Authentication Tree flow process with the {@link PolicyAdvice}
+     * Trigger the Authentication Tree flow process with the provided tree name
      *
      * @param context     The Application Context
      * @param serviceName Authentication Tree name
