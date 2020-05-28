@@ -259,16 +259,13 @@ class PushResponder {
             return httpClient;
         }
 
-        // Extract host from the URL, it's required to build the NetworkConfig and used by
+        // Build network config. The host is required to build the NetworkConfig and used by
         // OkHttpClientProvider. There is no need to monitor the the change of hosts considering
         // the usage of this SDK.
-        String host = url.getProtocol() + "://" + url.getAuthority();
-
-        // Build network config
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .timeout(TIMEOUT)
                 .timeUnit(SECONDS)
-                .host(host)
+                .host(url.getAuthority())
                 .build();
 
         // Obtain instance of OkHttp client
