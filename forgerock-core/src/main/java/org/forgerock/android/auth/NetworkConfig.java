@@ -35,7 +35,7 @@ class NetworkConfig {
 
     private Supplier<CookieJar> cookieJarSupplier;
 
-    private List<Interceptor> interceptors;
+    private Supplier<List<Interceptor>> interceptorSupplier;
 
     @Builder(builderMethodName = "networkBuilder")
     NetworkConfig(@NonNull String host,
@@ -43,7 +43,7 @@ class NetworkConfig {
                          TimeUnit timeUnit,
                          Supplier<CookieJar> cookieJarSupplier,
                          @Singular List<String> pins,
-                         @Singular List<Interceptor> interceptors) {
+                         Supplier<List<Interceptor>> interceptorSupplier) {
 
         this.host = host;
 
@@ -51,7 +51,7 @@ class NetworkConfig {
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = pins;
         this.cookieJarSupplier = cookieJarSupplier;
-        this.interceptors = interceptors;
+        this.interceptorSupplier = interceptorSupplier;
     }
 
     CookieJar getCookieJar() {

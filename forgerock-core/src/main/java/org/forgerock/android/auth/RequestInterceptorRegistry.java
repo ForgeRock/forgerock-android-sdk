@@ -10,24 +10,24 @@ package org.forgerock.android.auth;
 import lombok.Getter;
 
 /**
- * Factory to manage {@link RequestInterceptor}
+ * Registry to manage {@link RequestInterceptor}
  */
-public class RequestInterceptorFactory {
+public class RequestInterceptorRegistry {
 
-    private static final RequestInterceptorFactory INSTANCE = new RequestInterceptorFactory();
+    private static final RequestInterceptorRegistry INSTANCE = new RequestInterceptorRegistry();
 
     @Getter
     private RequestInterceptor[] requestInterceptors;
 
-    private RequestInterceptorFactory() {
+    private RequestInterceptorRegistry() {
     }
 
     /**
-     * Returns a cached instance {@link RequestInterceptorFactory}
+     * Returns a cached instance {@link RequestInterceptorRegistry}
      *
-     * @return instance of {@link RequestInterceptorFactory}
+     * @return instance of {@link RequestInterceptorRegistry}
      */
-    public static RequestInterceptorFactory getInstance() {
+    public static RequestInterceptorRegistry getInstance() {
         return INSTANCE;
     }
 

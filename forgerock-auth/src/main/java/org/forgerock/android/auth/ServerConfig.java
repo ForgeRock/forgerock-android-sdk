@@ -12,7 +12,6 @@ import android.content.Context;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,25 +47,24 @@ public class ServerConfig extends NetworkConfig {
 
     @lombok.Builder
     private ServerConfig(@NonNull Context context,
-                        String url,
-                        String realm,
-                        Integer timeout,
-                        TimeUnit timeUnit,
-                        Supplier<CookieJar> cookieJarSupplier,
-                        @Singular List<String> pins,
-                        String authenticateEndpoint,
-                        String authorizeEndpoint,
-                        String tokenEndpoint,
-                        String revokeEndpoint,
-                        String userInfoEndpoint,
-                        String logoutEndpoint) {
+                         String url,
+                         String realm,
+                         Integer timeout,
+                         TimeUnit timeUnit,
+                         Supplier<CookieJar> cookieJarSupplier,
+                         @Singular List<String> pins,
+                         String authenticateEndpoint,
+                         String authorizeEndpoint,
+                         String tokenEndpoint,
+                         String revokeEndpoint,
+                         String userInfoEndpoint,
+                         String logoutEndpoint) {
         super(getHost(context, url),
                 getTimeOut(context, timeout),
                 timeUnit, cookieJarSupplier,
                 getPins(context, pins),
-                singletonList(
-                        new OkHttpRequestInterceptor(
-                                RequestInterceptorFactory.getInstance().getRequestInterceptors()))
+                () -> singletonList(new OkHttpRequestInterceptor( //support dynamic change of RequestInterceptor
+                                RequestInterceptorRegistry.getInstance().getRequestInterceptors()))
         );
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;

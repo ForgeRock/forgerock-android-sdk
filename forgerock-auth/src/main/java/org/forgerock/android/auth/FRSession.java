@@ -76,7 +76,7 @@ public class FRSession {
                 .context(context)
                 .advice(advice)
                 .serverConfig(Config.getInstance().getServerConfig())
-                .sessionManager(Config.getInstance().getSessionManager())
+                .sessionManager(sessionManager)
                 .interceptor(new FRSession.SessionInterceptor())
                 .build().next(context, listener);
     }

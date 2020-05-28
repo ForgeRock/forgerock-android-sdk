@@ -36,6 +36,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
@@ -69,7 +70,7 @@ public class RequestInterceptorTest {
         final Boolean[] executed = {false};
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request -> {
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request -> {
                     assertThat(request.url().toString()).isEqualTo(getUrl() + "/");
                     assertThat(request.header("HeaderName")).isEqualTo("OriginalValue");
                     assertThat(request.method()).isEqualTo("POST");
@@ -86,8 +87,7 @@ public class RequestInterceptorTest {
                     assertThat(count).isEqualTo(1);
                     executed[0] = true;
                     return request;
-                }))
-                .build();
+                }))).build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
                 .header("HeaderName", "OriginalValue")
@@ -101,9 +101,9 @@ public class RequestInterceptorTest {
     public void testChainIntercept() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(
                         request -> request.newBuilder().addHeader("HeaderName", "HeaderValue").build(),
-                        request -> request.newBuilder().addHeader("HeaderName2", "HeaderValue2").build()))
+                        request -> request.newBuilder().addHeader("HeaderName2", "HeaderValue2").build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
@@ -119,9 +119,9 @@ public class RequestInterceptorTest {
     public void testAddHeader() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder().addHeader("HeaderName", "HeaderValue")
-                                .build()))
+                                .build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
@@ -135,9 +135,9 @@ public class RequestInterceptorTest {
     public void testRemoveHeader() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder().removeHeader("HeaderName")
-                                .build()))
+                                .build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .header("HeaderName", "OriginalValue")
@@ -152,9 +152,9 @@ public class RequestInterceptorTest {
     public void testReplaceHeader() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder().header("HeaderName", "HeaderValue2")
-                                .build()))
+                                .build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
@@ -169,9 +169,9 @@ public class RequestInterceptorTest {
     public void testCustomizeUrl() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder().url(getUrl() + "/somewhere")
-                                .build()))
+                                .build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
@@ -187,9 +187,9 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder().url(getUrl() + "?forceAuth=true")
-                                .build()))
+                                .build())))
                 .build();
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(getUrl())
@@ -209,14 +209,14 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request -> {
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request -> {
                     //Make sure we able to retrieve the existing content
                     assertThat(new String(request.body().getContent())).isEqualTo(data.toString());
                     assertThat(request.body().getContentType()).isEqualTo(JSON.toString());
                     return request.newBuilder()
                             .post(new Body(sample.toString(), JSON.toString()))
                             .build();
-                }))
+                })))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -233,10 +233,10 @@ public class RequestInterceptorTest {
     public void testGet() throws InterruptedException {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder()
                                 .get()
-                                .build()))
+                                .build())))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -255,10 +255,10 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder()
                                 .put(new Body(sample.toString(), JSON.toString()))
-                                .build()))
+                                .build())))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -281,10 +281,10 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder()
                                 .patch(new Body(sample.toString(), JSON.toString()))
-                                .build()))
+                                .build())))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -306,10 +306,10 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder()
                                 .delete()
-                                .build()))
+                                .build())))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -329,10 +329,10 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request ->
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request ->
                         request.newBuilder()
                                 .delete(new Body(sample.toString(), JSON.toString()))
-                                .build()))
+                                .build())))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -352,11 +352,11 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(request -> {
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(request -> {
                     Action action = (Action) request.tag();
                     assertThat(action.getType()).isEqualTo("TEST");
                     return request;
-                }))
+                })))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -373,14 +373,14 @@ public class RequestInterceptorTest {
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .interceptor(new OkHttpRequestInterceptor(new RequestActionInterceptor() {
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor(new RequestActionInterceptor() {
                     @NonNull
                     @Override
                     public Request intercept(@NonNull Request request, Action action) {
                         assertThat(action.getType()).isEqualTo("TEST");
                         return request;
                     }
-                }))
+                })))
                 .build();
         RequestBody.create("", JSON);
         okhttp3.Request request = new okhttp3.Request.Builder()
@@ -390,6 +390,13 @@ public class RequestInterceptorTest {
                 .build();
         send(networkConfig, request);
 
+    }
+
+    @Test
+    public void testRegistry() {
+        RequestInterceptorRegistry.getInstance().register(request -> request,
+                (RequestActionInterceptor) (request, action) -> request);
+        assertThat(RequestInterceptorRegistry.getInstance().getRequestInterceptors().length).isEqualTo(2);
     }
 
     private void send(NetworkConfig networkConfig, okhttp3.Request request) throws InterruptedException {

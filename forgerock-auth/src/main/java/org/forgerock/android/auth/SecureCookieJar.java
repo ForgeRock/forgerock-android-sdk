@@ -38,7 +38,7 @@ public class SecureCookieJar implements CookieJar {
     @Builder
     public SecureCookieJar(Context context, SingleSignOnManager singleSignOnManager, Long cacheIntervalMillis) {
         this.singleSignOnManager = singleSignOnManager == null ?
-                Config.getInstance(context).getSingleSignOnManager() : singleSignOnManager;
+                Config.getInstance().getSingleSignOnManager() : singleSignOnManager;
         this.cacheIntervalMillis = cacheIntervalMillis == null ?
                 context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000 : cacheIntervalMillis;
     }

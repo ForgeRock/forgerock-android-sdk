@@ -44,7 +44,7 @@ public class FRDeviceTest {
 
     @Before
     public void setUp() {
-        Config.getInstance(context);
+        Config.getInstance().init(context);
         Application application = ApplicationProvider.getApplicationContext();
         ShadowApplication app = Shadows.shadowOf(application);
         app.grantPermissions(Manifest.permission.ACCESS_FINE_LOCATION,

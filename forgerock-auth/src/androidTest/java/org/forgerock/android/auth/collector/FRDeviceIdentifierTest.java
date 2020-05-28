@@ -33,7 +33,7 @@ public class FRDeviceIdentifierTest {
     @Test
     public void testDeviceId() {
 
-        Config.getInstance(context);
+        Config.getInstance().init(context);
         DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
                 .context(context)
                 .keyStoreManager(KeyStoreManager.builder().context(context).build())
@@ -49,7 +49,7 @@ public class FRDeviceIdentifierTest {
     @Test
     public void testRegenerateDeviceId() throws GeneralSecurityException, IOException {
 
-        Config.getInstance(context);
+        Config.getInstance().init(context);
         DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
                 .context(context)
                 .keyStoreManager(KeyStoreManager.builder().context(context).build())

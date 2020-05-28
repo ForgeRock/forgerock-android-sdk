@@ -104,6 +104,7 @@ public class FRAuthMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn("andy_app");
 
         Config.reset();
+        Config.getInstance().init(context);
 
         final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
                 .context(context)
@@ -114,7 +115,7 @@ public class FRAuthMockTest extends BaseTest {
                 .serviceName("Example")
                 .context(mockContext)
                 .sessionManager(SessionManager.builder()
-                        .tokenManager(Config.getInstance(context).getTokenManager())
+                        .tokenManager(Config.getInstance().getTokenManager())
                         .singleSignOnManager(singleSignOnManager)
                         .build())
                 .serverConfig(serverConfig)

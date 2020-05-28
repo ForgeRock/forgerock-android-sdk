@@ -26,7 +26,7 @@ import okhttp3.CookieJar;
 @Getter
 public class Config {
 
-    private static Config mInstance;
+    private static Config mInstance = new Config();
     private Context context;
 
     //OAuth2
@@ -35,7 +35,7 @@ public class Config {
     private String scope;
     private String oAuthUrl;
 
-   //Server
+    //Server
     private String url;
     private String realm;
     private int timeout;
@@ -52,9 +52,23 @@ public class Config {
     //SSO Token Manager
     private Encryptor encryptor;
 
+    private boolean initialized = false;
+
+
+    private SharedPreferences ssoSharedPreferences;
+
+    //Token Manager
+    private SharedPreferences sharedPreferences;
+
+    //KeyStoreManager
+    private KeyStoreManager keyStoreManager;
+
     @VisibleForTesting
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    private Config() {
     }
 
     @VisibleForTesting
@@ -74,48 +88,35 @@ public class Config {
         this.sharedPreferences = sharedPreferences;
     }
 
-    private SharedPreferences ssoSharedPreferences;
-
-    //Token Manager
-    private SharedPreferences sharedPreferences;
-
-    //KeyStoreManager
-    private KeyStoreManager keyStoreManager;
-
-    private Config(Context context) {
-        this.context = context.getApplicationContext();
-        clientId = context.getString(R.string.forgerock_oauth_client_id);
-        redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
-        scope = context.getString(R.string.forgerock_oauth_scope);
-        oAuthUrl = context.getString(R.string.forgerock_oauth_url);
-        url = context.getString(R.string.forgerock_url);
-        realm = context.getString(R.string.forgerock_realm);
-        timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
-        cookieJar = null; // We cannot initialize default cookie jar here
-        pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
-        authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
-        authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
-        tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
-        revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
-        userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
-        logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
+    public synchronized void init(Context context) {
+        if (!initialized) {
+            this.context = context.getApplicationContext();
+            clientId = context.getString(R.string.forgerock_oauth_client_id);
+            redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
+            scope = context.getString(R.string.forgerock_oauth_scope);
+            oAuthUrl = context.getString(R.string.forgerock_oauth_url);
+            url = context.getString(R.string.forgerock_url);
+            realm = context.getString(R.string.forgerock_realm);
+            timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
+            cookieJar = null; // We cannot initialize default cookie jar here
+            pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
+            authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
+            authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
+            tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
+            revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
+            userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
+            logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
+        }
+        initialized = true;
     }
 
+    @Deprecated
     public static Config getInstance(Context context) {
-        if (mInstance == null) {
-            synchronized (Config.class) {
-                if (mInstance == null) {
-                    mInstance = new Config(context);
-                }
-            }
-        }
+        mInstance.init(context);
         return mInstance;
     }
 
     public static Config getInstance() {
-        if (mInstance == null) {
-            throw new IllegalStateException("Config is not initialized");
-        }
         return mInstance;
     }
 
@@ -199,7 +200,7 @@ public class Config {
     }
 
     public static void reset() {
-        mInstance = null;
+        mInstance = new Config();
     }
 
 }

@@ -57,8 +57,9 @@ class OkHttpClientProvider {
             builder.cookieJar(networkConfig.getCookieJar());
         }
 
-        if (networkConfig.getInterceptors() != null) {
-            for (Interceptor i : networkConfig.getInterceptors()) {
+        if (networkConfig.getInterceptorSupplier() != null &&
+                networkConfig.getInterceptorSupplier().get() != null) {
+            for (Interceptor i : networkConfig.getInterceptorSupplier().get()) {
                 builder.addInterceptor(i);
             }
         }

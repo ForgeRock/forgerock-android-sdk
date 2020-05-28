@@ -34,8 +34,8 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -73,8 +73,8 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -135,8 +135,8 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 

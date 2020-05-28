@@ -28,7 +28,7 @@ public class PersistentCookieTest extends BaseTest {
 
     @Before
     public void setUpCookieStore() {
-        Config.getInstance(context).setCookieJar(SecureCookieJar.builder().context(context)
+        Config.getInstance().setCookieJar(SecureCookieJar.builder().context(context)
                 .build());
     }
 
@@ -255,7 +255,7 @@ public class PersistentCookieTest extends BaseTest {
     public void cookieCache() throws InterruptedException, ExecutionException {
 
         OkHttpClientProvider.getInstance().clear();
-        Config.getInstance(context).setCookieJar(SecureCookieJar.builder()
+        Config.getInstance().setCookieJar(SecureCookieJar.builder()
                 .context(context)
                 .cacheIntervalMillis(1000L)
                 .build());

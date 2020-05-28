@@ -36,8 +36,7 @@ public class MyCustomDeviceProfile extends DeviceProfileCallback {
         super(jsonObject, index);
     }
 
-
-        @Override
+    @Override
     public void execute(Context context, FRListener<Void> listener) {
 
         FRDeviceCollector.FRDeviceCollectorBuilder builder = FRDeviceCollector.builder();
@@ -56,8 +55,6 @@ public class MyCustomDeviceProfile extends DeviceProfileCallback {
                     COLLECTORS.add(new HardwareCollector());
                     collect(context, listener, new JSONObject(), COLLECTORS);
                 }
-
-
             });
         }
         if (isLocation()) {
@@ -76,6 +73,5 @@ public class MyCustomDeviceProfile extends DeviceProfileCallback {
                 Listener.onException(listener, null);
             }
         });
-
     }
 }

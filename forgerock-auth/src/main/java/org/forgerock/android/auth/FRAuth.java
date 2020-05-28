@@ -40,16 +40,16 @@ public class FRAuth {
     public static void start(Context context) {
         if (!started) {
             started = true;
-            Config config = Config.getInstance(context);
+            Config.getInstance().init(context);
             //Clean up when server switch
             SharedPreferences sharedPreferences = context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
             String previousHost = sharedPreferences.getString("url", null);
             if (previousHost != null) {
-                if (!config.getUrl().equals(previousHost)) {
+                if (!Config.getInstance().getUrl().equals(previousHost)) {
                     Config.getInstance().getSessionManager().close();
                 }
             }
-            sharedPreferences.edit().putString("url", config.getUrl()).apply();
+            sharedPreferences.edit().putString("url", Config.getInstance().getUrl()).apply();
         }
     }
 
@@ -65,7 +65,7 @@ public class FRAuth {
                    SessionManager sessionManager,
                    @Singular List<Interceptor> interceptors) {
 
-        Config.getInstance(context);
+        Config.getInstance().init(context);
 
         this.sessionManager = sessionManager == null ? Config.getInstance().getSessionManager() : sessionManager;
 

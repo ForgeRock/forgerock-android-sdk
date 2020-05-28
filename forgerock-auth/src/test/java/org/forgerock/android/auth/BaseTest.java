@@ -46,8 +46,9 @@ public class BaseTest {
         server = new MockWebServer();
         server.start();
 
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().init(context);
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         serverConfig = getServerConfig();
         oAuth2Client = getOAuth2Client();
