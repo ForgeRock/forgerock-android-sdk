@@ -18,6 +18,7 @@ import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 
+import java.util.Collections;
 import java.util.List;
 
 class AuthenticatorManager {
@@ -43,12 +44,12 @@ class AuthenticatorManager {
         this.deviceToken = deviceToken;
 
         this.oathFactory = new OathFactory(context, storageClient);
-        OathCodeGenerator.init(storageClient);
+        OathCodeGenerator.getInstance(storageClient);
 
         if(deviceToken != null) {
             this.pushFactory = new PushFactory(context, storageClient, deviceToken);
             this.notificationFactory = new NotificationFactory(storageClient);
-            PushResponder.init(storageClient);
+            PushResponder.getInstance(storageClient);
         } else {
             Logger.debug(TAG, "No FCM device token provided. SDK will not be able to register Push mechanisms.");
         }
@@ -146,7 +147,7 @@ class AuthenticatorManager {
     }
 
     boolean removeMechanism(Mechanism mechanism) {
-        Logger.debug(TAG, "Removing Mechanim with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+        Logger.debug(TAG, "Removing Mechanism with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
 
         // If PushMechanism mechanism, remove any notifications associated with it
         if(mechanism.getType().equals(Mechanism.PUSH)) {
@@ -172,7 +173,7 @@ class AuthenticatorManager {
             this.deviceToken = newDeviceToken;
             this.pushFactory = new PushFactory(context, storageClient, newDeviceToken);
             this.notificationFactory = new NotificationFactory(storageClient);
-            PushResponder.init(storageClient);
+            PushResponder.getInstance(storageClient);
         } else {
             if(this.deviceToken.equals(newDeviceToken)) {
                 Logger.warn(TAG, "The SDK was already initialized with this device token: %s",
@@ -215,6 +216,7 @@ class AuthenticatorManager {
     List<PushNotification> getAllNotifications(@NonNull Mechanism mechanism) {
         if(mechanism.getType().equals(Mechanism.PUSH)) {
             List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
+            Collections.sort(notificationList);
             ((PushMechanism) mechanism).setPushNotificationList(notificationList);
             return notificationList;
         } else {
@@ -226,6 +228,7 @@ class AuthenticatorManager {
         if(account != null) {
             Logger.debug(TAG, "Loading associated data for the Account with ID: %s", account.getId());
             List<Mechanism> mechanismList = storageClient.getMechanismsForAccount(account);
+            Collections.sort(mechanismList);
             account.setMechanismList(mechanismList);
             for (Mechanism mechanism : mechanismList) {
                 mechanism.setAccount(account);
@@ -234,6 +237,7 @@ class AuthenticatorManager {
                     for (PushNotification notification : notificationList) {
                         notification.setPushMechanism(mechanism);
                     }
+                    Collections.sort(notificationList);
                     ((PushMechanism) mechanism).setPushNotificationList(notificationList);
                 }
             }

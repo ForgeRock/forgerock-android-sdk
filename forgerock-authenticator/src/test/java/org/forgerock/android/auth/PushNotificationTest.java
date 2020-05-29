@@ -211,7 +211,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
@@ -237,7 +237,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse().setResponseCode(HTTP_OK));
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
@@ -269,7 +269,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse());
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
@@ -296,7 +296,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
@@ -322,7 +322,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse().setResponseCode(HTTP_OK));
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());

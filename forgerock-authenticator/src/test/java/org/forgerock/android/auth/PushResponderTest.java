@@ -80,7 +80,7 @@ public class PushResponderTest extends FRABaseTest {
         server.enqueue(new MockResponse());
         HttpUrl baseUrl = server.url("/");
 
-        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
@@ -95,7 +95,7 @@ public class PushResponderTest extends FRABaseTest {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
         HttpUrl baseUrl = server.url("/");
 
-        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
@@ -113,7 +113,7 @@ public class PushResponderTest extends FRABaseTest {
         HttpUrl baseUrl = server.url("/");
 
         try {
-            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+            PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                     "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
             pushListenerFuture.get();
             Assert.fail("Should throw PushMechanismException");
@@ -127,7 +127,7 @@ public class PushResponderTest extends FRABaseTest {
     public void testShouldReplyAuthenticationMessageCorrectly() throws Exception {
         server.enqueue(new MockResponse());
 
-        PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
+        PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -140,7 +140,7 @@ public class PushResponderTest extends FRABaseTest {
     public void testReplyAuthenticationMessageServerConnectionFailure() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
-        PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
+        PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         int responseCode = (int) pushListenerFuture.get();
 
@@ -156,7 +156,7 @@ public class PushResponderTest extends FRABaseTest {
         server.enqueue(response);
 
         try {
-            PushResponder.init(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
+            PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
             pushListenerFuture.get();
             Assert.fail("Should throw PushMechanismException");
         } catch (Exception e) {
@@ -171,7 +171,7 @@ public class PushResponderTest extends FRABaseTest {
         HttpUrl baseUrl = server.url("/");
 
         try {
-            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "",
+            PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
             pushListenerFuture.get();
             Assert.fail("Should throw PushMechanismException");
@@ -187,7 +187,7 @@ public class PushResponderTest extends FRABaseTest {
         HttpUrl baseUrl = server.url("/");
 
         try {
-            PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "dGVzdHNlY3JldA==",
+            PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "dGVzdHNlY3JldA==",
                     "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
             pushListenerFuture.get();
             Assert.fail("Should throw PushMechanismException");
@@ -202,7 +202,7 @@ public class PushResponderTest extends FRABaseTest {
         String base64Secret = "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=";
         String base64Challenge = "9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg=";
 
-        String response = PushResponder.init(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
+        String response = PushResponder.getInstance(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
 
         assertEquals(response, "Df02AwA3Ra+sTGkL5+QvkEtN3eLdZiFmL5nxAV1m0k8=");
     }
@@ -215,7 +215,7 @@ public class PushResponderTest extends FRABaseTest {
         String response = null;
 
         try {
-            response = PushResponder.init(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
+            response = PushResponder.getInstance(storageClient).generateChallengeResponse(base64Secret, base64Challenge);
             fail("Should throw ChallengeResponseException");
         } catch (Exception e) {
             assertNull(response);
@@ -235,7 +235,7 @@ public class PushResponderTest extends FRABaseTest {
         payload.put("mechanismUid", "testMechanismUid");
         payload.put("response", "Df02AwA3Ra+sTGkL5+QvkEtN3eLdZiFmL5nxAV1m0k8=");
 
-        PushResponder.init(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", payload, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         String body = request.getBody().readUtf8();

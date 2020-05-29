@@ -283,6 +283,19 @@ public class PushNotification extends ModelObject<PushNotification> {
     }
 
     @Override
+    public int compareTo(PushNotification another) {
+        long thisTime = timeAdded.getTimeInMillis();
+        long otherTime = another.timeAdded.getTimeInMillis();
+        if (otherTime < thisTime) {
+            return -1;
+        }
+        if (otherTime == thisTime) {
+            return 0;
+        }
+        return 1;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

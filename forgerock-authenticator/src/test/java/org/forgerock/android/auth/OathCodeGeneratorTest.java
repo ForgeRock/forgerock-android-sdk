@@ -66,11 +66,11 @@ public class OathCodeGeneratorTest extends FRABaseTest {
                 .build();
 
         TimeKeeper timeKeeper = new TimeKeeper();
-        OathCodeGenerator.init(storageClient);
+        OathCodeGenerator.getInstance(storageClient);
 
-        assertEquals(OathCodeGenerator.init(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "785324");
-        assertEquals(OathCodeGenerator.init(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "361422");
-        assertEquals(OathCodeGenerator.init(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "054508");
+        assertEquals(OathCodeGenerator.getInstance(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "785324");
+        assertEquals(OathCodeGenerator.getInstance(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "361422");
+        assertEquals(OathCodeGenerator.getInstance(storageClient).generateNextCode(oath, timeKeeper).getCurrentCode(), "054508");
 
         assertEquals(oath.getCounter(), 3);
     }
@@ -88,7 +88,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
                 .build();
 
         TimeKeeper timeKeeper = new TimeKeeper();
-        OathCodeGenerator.init(storageClient);
+        OathCodeGenerator.getInstance(storageClient);
 
         assertEquals(OathCodeGenerator.getInstance().generateNextCode(oath, timeKeeper).getCurrentCode(), "60785324");
         assertEquals(OathCodeGenerator.getInstance().generateNextCode(oath, timeKeeper).getCurrentCode(), "92361422");
@@ -123,7 +123,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
                 .setPeriod(PERIOD)
                 .build();
 
-        OathCodeGenerator.init(storageClient);
+        OathCodeGenerator.getInstance(storageClient);
 
         assertEquals(OathCodeGenerator.getInstance().generateNextCode(oath, timeKeeper).getCurrentCode(), "994721");
         timeKeeper.timeTravel(30000);
@@ -147,7 +147,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
         TimeKeeper timeKeeper = new TimeKeeper();
 
         try {
-            OathCodeGenerator.init(storageClient).generateNextCode(oath, timeKeeper);
+            OathCodeGenerator.getInstance(storageClient).generateNextCode(oath, timeKeeper);
             fail("Should throw OathMechanismException");
         } catch (Exception e) {
             assertTrue(e instanceof OathMechanismException);
@@ -169,7 +169,7 @@ public class OathCodeGeneratorTest extends FRABaseTest {
         TimeKeeper timeKeeper = new TimeKeeper();
 
         try {
-            OathCodeGenerator.init(storageClient).generateNextCode(oath, timeKeeper);
+            OathCodeGenerator.getInstance(storageClient).generateNextCode(oath, timeKeeper);
             fail("Should throw OathMechanismException");
         } catch (Exception e) {
             assertTrue(e instanceof OathMechanismException);

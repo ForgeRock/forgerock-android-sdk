@@ -175,6 +175,18 @@ public class Account extends ModelObject<Account> {
     }
 
     @Override
+    public int compareTo(Account another) {
+        if (another == null) {
+            return -1;
+        }
+        int compareIssuer = issuer.compareTo(another.issuer);
+        if (compareIssuer == 0) {
+            return accountName.compareTo(another.accountName);
+        }
+        return compareIssuer;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

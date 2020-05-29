@@ -49,11 +49,11 @@ class OathCodeGenerator {
     }
 
     /**
-     * Initialize the OathCodeGenerator instance
+     * Initialize/Return the OathCodeGenerator instance
      *
      * @return OathCodeGenerator instance
      */
-    static synchronized OathCodeGenerator init(StorageClient storageClient) {
+    static synchronized OathCodeGenerator getInstance(StorageClient storageClient) {
         if (INSTANCE == null) {
             synchronized (OathCodeGenerator.class) {
                 if (INSTANCE == null) {

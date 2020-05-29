@@ -20,14 +20,10 @@ import java.util.Locale;
  * taken into account. The result is that multiple strings decode to the same
  * byte array, for example, string of sixteen 7s ("7...7") and seventeen 7s both
  * decode to the same byte array.
- * TODO(sarvar): Revisit this encoding and whether this ambiguity needs fixing.
- *
- * @author sweis@google.com (Steve Weis)
- * @author Neal Gafter
- */
+ **/
 public class Base32String {
-    // singleton
 
+    // singleton
     private static final Base32String INSTANCE =
             new Base32String("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"); // RFC 4648/3548
 
@@ -91,11 +87,7 @@ public class Base32String {
                 bitsLeft -= 8;
             }
         }
-        // We'll ignore leftover bits for now.
-        //
-        // if (next != outLength || bitsLeft >= SHIFT) {
-        //  throw new DecodingException("Bits left: " + bitsLeft);
-        // }
+
         return result;
     }
 

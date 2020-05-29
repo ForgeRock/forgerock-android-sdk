@@ -171,6 +171,11 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     @Override
+    public int compareTo(Mechanism another) {
+        return getType().compareTo(another.getType());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

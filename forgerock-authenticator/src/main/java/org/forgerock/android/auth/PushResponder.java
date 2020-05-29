@@ -17,7 +17,6 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -40,7 +39,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -83,11 +81,11 @@ class PushResponder {
     }
 
     /**
-     * Initialize the PushResponder instance
+     * Initialize/Return the PushResponder instance
      *
      * @return PushResponder instance
      */
-    static synchronized PushResponder init(@NonNull StorageClient storageClient) {
+    static synchronized PushResponder getInstance(@NonNull StorageClient storageClient) {
         if (INSTANCE == null) {
             synchronized (PushResponder.class) {
                 if (INSTANCE == null) {

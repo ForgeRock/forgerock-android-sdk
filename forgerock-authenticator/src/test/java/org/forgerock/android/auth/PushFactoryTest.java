@@ -71,7 +71,7 @@ public class PushFactoryTest extends FRABaseTest {
         storageClient.setNotificationData(context.getApplicationContext()
                 .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE));
 
-        PushResponder.init(storageClient);
+        PushResponder.getInstance(storageClient);
 
         factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
         doReturn(true).when(factory).checkGooglePlayServices();

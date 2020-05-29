@@ -27,7 +27,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     @Before
     public void setUp() {
         storageClient = mock(DefaultStorageClient.class);
-        OathCodeGenerator.init(storageClient);
+        OathCodeGenerator.getInstance(storageClient);
     }
 
     @Test
