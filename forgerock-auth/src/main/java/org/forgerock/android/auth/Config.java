@@ -41,6 +41,7 @@ public class Config {
     private int timeout;
     private List<String> pins;
     private CookieJar cookieJar;
+    private String cookieName;
 
     private String authenticateEndpoint;
     private String authorizeEndpoint;
@@ -99,6 +100,7 @@ public class Config {
             realm = context.getString(R.string.forgerock_realm);
             timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
             cookieJar = null; // We cannot initialize default cookie jar here
+            cookieName = context.getString(R.string.forgerock_cookie_name);
             pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
             authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
             authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
@@ -127,6 +129,7 @@ public class Config {
                 .realm(realm)
                 .timeout(timeout)
                 .cookieJarSupplier(() -> getCookieJar())
+                .cookieName(cookieName)
                 .authenticateEndpoint(authenticateEndpoint)
                 .authorizeEndpoint(authorizeEndpoint)
                 .tokenEndpoint(tokenEndpoint)

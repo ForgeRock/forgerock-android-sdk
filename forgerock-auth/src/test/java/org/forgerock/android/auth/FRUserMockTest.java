@@ -420,7 +420,7 @@ public class FRUserMockTest extends BaseTest {
             refreshTokenRevoke = revoke1;
             ssoTokenRevoke = revoke2;
         }
-        assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+        assertNotNull(ssoTokenRevoke.getHeader(serverConfig.getCookieName()));
         assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
 
         String body = refreshTokenRevoke.getBody().readUtf8();
@@ -457,14 +457,14 @@ public class FRUserMockTest extends BaseTest {
         rr = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
         boolean verified = false;
         if (rr.getPath().equals("/json/realms/root/sessions?_action=logout")) {
-            assertNotNull(rr.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+            assertNotNull(rr.getHeader(serverConfig.getCookieName()));
             assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
             verified = true;
         }
         rr = server.takeRequest(); //Post to /sessions?_action=logout endpoint
         //assertEquals("/json/realms/root/sessions?_action=logout", rr.getPath());
         if (rr.getPath().equals("/json/realms/root/sessions?_action=logout")) {
-            assertNotNull(rr.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+            assertNotNull(rr.getHeader(serverConfig.getCookieName()));
             assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
             verified = true;
         }
@@ -810,7 +810,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testCustomEndpoint() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+    public void testCustomEndpointAndCookieName() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
 
         when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn(context.getString(R.string.forgerock_oauth_client_id));
         when(mockContext.getString(R.string.forgerock_oauth_redirect_uri)).thenReturn(context.getString(R.string.forgerock_oauth_redirect_uri));
@@ -828,7 +828,9 @@ public class FRUserMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_userinfo_endpoint)).thenReturn("dummy/userinfo");
         when(mockContext.getString(R.string.forgerock_revoke_endpoint)).thenReturn("dummy/revoke");
         when(mockContext.getString(R.string.forgerock_logout_endpoint)).thenReturn("dummy/logout");
+        when(mockContext.getString(R.string.forgerock_cookie_name)).thenReturn("testCookieName");
         when(mockContext.getString(R.string.forgerock_auth_service)).thenReturn("UsernamePassword");
+
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -841,6 +843,7 @@ public class FRUserMockTest extends BaseTest {
 
         Config.reset();
         Config.getInstance().init(mockContext);
+        serverConfig = Config.getInstance().getServerConfig();
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
@@ -918,7 +921,7 @@ public class FRUserMockTest extends BaseTest {
             refreshTokenRevoke = revoke1;
             ssoTokenRevoke = revoke2;
         }
-        assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+        Assertions.assertThat(ssoTokenRevoke.getHeader("testCookieName")).isNotNull();
         assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
 
         String body = refreshTokenRevoke.getBody().readUtf8();
@@ -931,19 +934,15 @@ public class FRUserMockTest extends BaseTest {
     public void testRequestInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
 
         final HashMap<String, Integer> result = new HashMap<>();
-        RequestInterceptorRegistry.getInstance().register(new RequestInterceptor() {
-            @NonNull
-            @Override
-            public Request intercept(@NonNull Request request) {
-                String action = ((Action)request.tag()).getType();
-                Integer count = result.get(action);
-                if ( count == null) {
-                    result.put(action, 1);
-                } else {
-                    result.put(action, count++);
-                }
-                return request;
+        RequestInterceptorRegistry.getInstance().register(request -> {
+            String action = ((Action)request.tag()).getType();
+            Integer count = result.get(action);
+            if ( count == null) {
+                result.put(action, 1);
+            } else {
+                result.put(action, count++);
             }
+            return request;
         });
 
         frUserHappyPath();
@@ -973,8 +972,6 @@ public class FRUserMockTest extends BaseTest {
         Assertions.assertThat(result.get("REVOKE_TOKEN")).isEqualTo(1);
         Assertions.assertThat(result.get("LOGOUT")).isEqualTo(1);
         Assertions.assertThat(result.get("USER_INFO")).isEqualTo(1);
-
-
 
     }
 }

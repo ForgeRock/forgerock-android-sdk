@@ -7,7 +7,12 @@
 
 package org.forgerock.android.auth;
 
+import android.net.Uri;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
+
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.ApiException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +49,10 @@ public class OAuth2MockTest extends BaseTest {
         assertTrue(accessToken.getScope().contains("address"));
         assertEquals("Bearer", accessToken.getTokenType());
         assertEquals(3599, accessToken.getExpiresIn());
+
+        RecordedRequest recordedRequest = server.takeRequest(); //authorize
+        Assertions.assertThat(Uri.parse(recordedRequest.getPath()).
+                getQueryParameter(serverConfig.getCookieName())).isEqualTo(token.getValue());
 
     }
 
