@@ -333,6 +333,9 @@ public class PersistentCookieTest extends BaseTest {
     }
 
     private Map<String, String> toMap(String cookieStr) {
+        if (cookieStr == null) {
+            return null;
+        }
         String[] cookies = cookieStr.split(";");
         Map<String, String> result = new HashMap<>();
         for (String cookie: cookies ) {
@@ -341,6 +344,43 @@ public class PersistentCookieTest extends BaseTest {
         }
         return result;
     }
+
+    @Test
+    public void persistWithDifferentDomain() throws InterruptedException, ExecutionException {
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Set-Cookie", "iPlanetDirectoryPro=iPlanetDirectoryProCookie; Path=/; Domain=test")
+                .addHeader("Set-Cookie", "session-jwt=session-jwt-cookie; Expires=Tue, 21 Jan 2220 02:53:31 GMT; Path=/; Domain=localhost; HttpOnly")
+                .setBody(getJson("/authTreeMockTest_Authenticate_success.json")));
+
+        enqueue("/authTreeMockTest_Authenticate_success.json", HTTP_OK);
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+            }
+        };
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture);
+        assertThat(nodeListenerFuture.get()).isInstanceOf(FRSession.class);
+        assertThat(FRSession.getCurrentSession()).isNotNull();
+        assertThat(FRSession.getCurrentSession().getSessionToken()).isNotNull();
+
+        nodeListenerFuture.reset();
+        FRSession.authenticate(context, "Example", nodeListenerFuture);
+        nodeListenerFuture.get();
+
+        server.takeRequest();
+        RecordedRequest rr = server.takeRequest(); //Second request
+
+        assertThat(toMap(rr.getHeader("Cookie")).get("iPlanetDirectoryPro")).isNull(); //Not the same domain
+        assertThat(toMap(rr.getHeader("Cookie")).get("session-jwt")).isEqualTo("session-jwt-cookie");
+
+    }
+
 
 
 }
