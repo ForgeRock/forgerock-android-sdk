@@ -63,6 +63,7 @@ public class AccountTest extends FRABaseTest {
         assertEquals(account1, account2);
         assertTrue(account1.matches(account2));
         assertEquals(account1.hashCode(), account2.hashCode());
+        assertEquals(0, account1.compareTo(account2));
     }
 
     @Test
@@ -78,6 +79,7 @@ public class AccountTest extends FRABaseTest {
 
         assertFalse(account1.equals(account2));
         assertFalse(account1.matches(account2));
+        assertEquals(-1, account1.compareTo(account2));
     }
 
     @Test

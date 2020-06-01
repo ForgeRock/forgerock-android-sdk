@@ -107,7 +107,7 @@ public class PushMechanism extends Mechanism {
             jsonObject.put("type", getType());
             jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
             jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
-            jsonObject.put("timeCreated", getTimeCreated());
+            jsonObject.put("timeCreated", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }

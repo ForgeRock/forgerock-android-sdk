@@ -64,7 +64,7 @@ public class TOTPMechanism extends OathMechanism {
             jsonObject.put("algorithm", getAlgorithm());
             jsonObject.put("digits", getDigits());
             jsonObject.put("period", getPeriod());
-            jsonObject.put("timeCreated", getTimeCreated());
+            jsonObject.put("timeCreated", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }

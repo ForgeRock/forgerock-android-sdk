@@ -31,7 +31,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     /** The shared secret of the Mechanism */
     private final String secret;
     /** Date this object was stored */
-    private final Calendar timeCreated;
+    private final Calendar timeAdded;
     /** The Account associated with this mechanism **/
     private Account account;
 
@@ -46,17 +46,17 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * @param accountName String value of accountName or username
      * @param type String value of the mechanism type
      * @param secret String value of the shared secret
-     * @param timeCreated Date and Time this Mechanism was stored
+     * @param timeAdded Date and Time this Mechanism was stored
      */
     protected Mechanism(String mechanismUID, String issuer, String accountName, String type,
-                     String secret, Calendar timeCreated) {
+                     String secret, Calendar timeAdded) {
         this.id = issuer + "-" + accountName + "-" + type;
         this.mechanismUID = mechanismUID;
         this.issuer = issuer;
         this.accountName = accountName;
         this.type = type;
         this.secret = secret;
-        this.timeCreated = timeCreated;
+        this.timeAdded = timeAdded;
     }
 
     /**
@@ -103,8 +103,8 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * Get the Date and Time this mechanism was stored.
      * @return when this mechanism was stored.
      */
-    public Calendar getTimeCreated() {
-        return timeCreated;
+    public Calendar getTimeAdded() {
+        return timeAdded;
     }
 
     /**

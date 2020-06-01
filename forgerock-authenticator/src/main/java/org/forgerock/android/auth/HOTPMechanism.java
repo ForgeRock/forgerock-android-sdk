@@ -68,7 +68,7 @@ public class HOTPMechanism extends OathMechanism {
             jsonObject.put("algorithm", getAlgorithm());
             jsonObject.put("digits", getDigits());
             jsonObject.put("counter", excludeSensitiveData ? "REMOVED" : getCounter());
-            jsonObject.put("timeCreated", getTimeCreated());
+            jsonObject.put("timeCreated", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }

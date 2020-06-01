@@ -31,7 +31,7 @@ public class Account extends ModelObject<Account> {
     /** HEX Color code in String for Account */
     private final String backgroundColor;
     /** Date this object was stored */
-    private final Calendar timeCreated;
+    private final Calendar timeAdded;
     /** List of Mechanism objects associated with this account **/
     private List<Mechanism> mechanismList;
 
@@ -41,16 +41,16 @@ public class Account extends ModelObject<Account> {
      * @param accountName String value of accountName or username
      * @param imageURL URL of account's logo image (optional)
      * @param backgroundColor String HEX code of account's background color (optional)
-     * @param timeCreated Date and Time this Account was stored
+     * @param timeAdded Date and Time this Account was stored
      */
     private Account(String issuer, String accountName, String imageURL, String backgroundColor,
-                    Calendar timeCreated) {
+                    Calendar timeAdded) {
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
         this.accountName = accountName;
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
-        this.timeCreated = timeCreated;
+        this.timeAdded = timeAdded;
     }
 
     /**
@@ -105,8 +105,8 @@ public class Account extends ModelObject<Account> {
      * Get the Date and Time this Account was stored.
      * @return when this account was stored.
      */
-    public Calendar getTimeCreated() {
-        return timeCreated;
+    public Calendar getTimeAdded() {
+        return timeAdded;
     }
 
     /**
@@ -135,7 +135,7 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("imageURL", getImageURL());
             jsonObject.put("backgroundColor", getBackgroundColor());
-            jsonObject.put("timeCreated", getTimeCreated());
+            jsonObject.put("timeCreated", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }

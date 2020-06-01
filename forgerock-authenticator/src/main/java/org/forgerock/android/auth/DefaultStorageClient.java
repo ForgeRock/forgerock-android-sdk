@@ -111,7 +111,8 @@ class DefaultStorageClient implements StorageClient {
 
         List<Mechanism> allMechanisms = this.getAllMechanisms();
         for(Mechanism mechanism : allMechanisms){
-            if(mechanism.getId().contains(account.getId())){
+            if(mechanism.getIssuer().equals(account.getIssuer()) &&
+               mechanism.getAccountName().equals(account.getAccountName())){
                 mechanismList.add(mechanism);
             }
         }

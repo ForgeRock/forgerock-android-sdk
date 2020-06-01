@@ -71,12 +71,15 @@ public class PushNotificationTest extends FRABaseTest {
         assertEquals(pushNotification.getAmlbCookie(), AMLB_COOKIE);
         assertEquals(pushNotification.getTtl(), TTL);
         assertEquals(pushNotification.getTimeAdded(), timeAdded);
+        assertEquals(pushNotification.getTimeExpired(), timeExpired);
     }
 
     @Test
     public void testCreateNotificationWithOptionalParametersSuccessfuly() {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
+        long time = timeExpired.getTimeInMillis();
+        timeExpired.setTimeInMillis(time+3000);
         boolean approved = false;
         boolean pending = true;
 
@@ -100,6 +103,7 @@ public class PushNotificationTest extends FRABaseTest {
         assertEquals(pushNotification.getTimeAdded(), timeAdded);
         assertEquals(pushNotification.isApproved(), approved);
         assertEquals(pushNotification.isPending(), pending);
+        assertEquals(pushNotification.isExpired(), false);
     }
 
     @Test

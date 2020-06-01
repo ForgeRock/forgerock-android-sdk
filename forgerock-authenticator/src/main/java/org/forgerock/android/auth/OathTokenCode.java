@@ -19,6 +19,8 @@ public class OathTokenCode {
     private TimeKeeper timeKeeper;
     private OathMechanism.TokenType oathType;
 
+    private static final int MAX_VALUE = 1000;
+
     /**
      * Creates a OathTokenCode wrap with given data
      * @param timeKeeper class containing timekeeping functionality
@@ -78,6 +80,21 @@ public class OathTokenCode {
      */
     public OathMechanism.TokenType getOathType() {
         return oathType;
+    }
+
+    /**
+     * Get the current percent progress of the code for {@link TOTPMechanism}. This is a number
+     * between 0 and 1000, and represents the amount of time that has passed between the start and
+     * end times of the code.
+     * For {@link HOTPMechanism}, progress always returns 0.
+     * @return The percentage progress, a number between 0 and 1000.
+     */
+    public int getProgress() {
+        long cur = timeKeeper.getCurrentTimeMillis();
+        long total = until - start;
+        long state = cur - start;
+        int progress = (int) (state * MAX_VALUE / total);
+        return progress < MAX_VALUE ? progress : MAX_VALUE;
     }
 
 }

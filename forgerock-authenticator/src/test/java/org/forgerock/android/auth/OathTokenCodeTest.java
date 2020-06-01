@@ -7,12 +7,12 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.util.TimeKeeper;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class OathTokenCodeTest {
 
@@ -43,6 +43,23 @@ public class OathTokenCodeTest {
     }
 
     @Test
+    public void testShouldCreateHOTPCodeSuccessfully() {
+        long now = System.currentTimeMillis();
+
+        oathTokenCode = new OathTokenCode(timeKeeper,
+                CODE, now,
+                now + EXPIRY_DELAY,
+                OathMechanism.TokenType.HOTP);
+
+        assertNotNull(oathTokenCode);
+        assertNotNull(oathTokenCode.getCurrentCode());
+        assertEquals(now, oathTokenCode.getStart());
+        assertEquals(now + EXPIRY_DELAY, oathTokenCode.getUntil());
+        assertNotNull(oathTokenCode.getOathType());
+        assertEquals(oathTokenCode.getOathType(), OathMechanism.TokenType.HOTP);
+    }
+
+    @Test
     public void testShouldContainCorrectCode() {
         assertEquals(oathTokenCode.getOathType(), OathMechanism.TokenType.TOTP);
         assertEquals(oathTokenCode.getCurrentCode(), CODE);
@@ -57,29 +74,21 @@ public class OathTokenCodeTest {
 
     @Test
     public void testShouldReportProgressBeforeExpiry() {
-        assertEquals(getCurrentProgress(), 0);
+        assertEquals(oathTokenCode.getProgress(), 0);
         timeKeeper.timeTravel(EXPIRY_DELAY / 4);
-        assertEquals(getCurrentProgress(), 250);
+        assertEquals(oathTokenCode.getProgress(), 250);
         timeKeeper.timeTravel(EXPIRY_DELAY / 4);
-        assertEquals(getCurrentProgress(), 500);
+        assertEquals(oathTokenCode.getProgress(), 500);
         timeKeeper.timeTravel(EXPIRY_DELAY / 4);
-        assertEquals(getCurrentProgress(), 750);
+        assertEquals(oathTokenCode.getProgress(), 750);
         timeKeeper.timeTravel(EXPIRY_DELAY / 4);
-        assertEquals(getCurrentProgress(), 1000);
+        assertEquals(oathTokenCode.getProgress(), 1000);
     }
 
     @Test
     public void testShouldReportFullProgressAfterExpiry() {
         timeKeeper.timeTravel(EXPIRY_DELAY * 2);
-        assertEquals(getCurrentProgress(), 1000);
-    }
-
-    private int getCurrentProgress() {
-        long cur = timeKeeper.getCurrentTimeMillis();
-        long total = oathTokenCode.getUntil() - oathTokenCode.getStart();
-        long state = cur - oathTokenCode.getStart();
-        int progress = (int) (state * 1000 / total);
-        return progress < 1000 ? progress : 1000;
+        assertEquals(oathTokenCode.getProgress(), 1000);
     }
 
 }
