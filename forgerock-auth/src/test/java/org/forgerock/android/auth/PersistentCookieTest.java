@@ -380,7 +380,4 @@ public class PersistentCookieTest extends BaseTest {
         assertThat(toMap(rr.getHeader("Cookie")).get("session-jwt")).isEqualTo("session-jwt-cookie");
 
     }
-
-
-
 }

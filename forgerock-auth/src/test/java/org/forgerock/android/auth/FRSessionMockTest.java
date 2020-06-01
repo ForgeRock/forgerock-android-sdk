@@ -177,6 +177,7 @@ public class FRSessionMockTest extends BaseTest {
 
     @Test
     public void testWithNoSession() throws ExecutionException, InterruptedException {
+
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success_withNoSession.json", HttpURLConnection.HTTP_OK);
@@ -216,7 +217,68 @@ public class FRSessionMockTest extends BaseTest {
         assertThat(nodeListenerFuture.get()).isNull();
         assertThat(FRSession.getCurrentSession()).isNull();
         assertThat(FRUser.getCurrentUser()).isNull();
+
+        RecordedRequest recordedRequest = server.takeRequest(); //NameCallback
+        recordedRequest = server.takeRequest(); //PasswordCallback without Session
+        assertThat(Uri.parse(recordedRequest.getPath()).getQueryParameter("noSession")).isEqualTo("true");
     }
+
+    @Test
+    public void testWithSessionThenWithoutSession() throws ExecutionException, InterruptedException {
+        frSessionHappyPath();
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success_withNoSession.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        RequestInterceptorRegistry.getInstance().register((FRRequestInterceptor<Action>) (request, tag) -> {
+            if (tag.getType().equals(AUTHENTICATE)) {
+                return request.newBuilder()
+                        .url(Uri.parse(request.url().toString())
+                                .buildUpon()
+                                .appendQueryParameter("noSession", "true").toString())
+                        .build();
+            }
+            return request;
+        });
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture);
+        assertThat(nodeListenerFuture.get()).isNull(); //The without session oen should return null
+        //Retrieve the previous session
+        Assert.assertNotNull(FRSession.getCurrentSession()); //Retrieve the previous Session
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+
+        RecordedRequest recordedRequest = server.takeRequest(); //NameCallback with Session
+        recordedRequest = server.takeRequest(); //PasswordCallback with Session
+        recordedRequest = server.takeRequest(); //End of tree with Session
+
+        recordedRequest = server.takeRequest(); //NameCallback without Session
+        recordedRequest = server.takeRequest(); //PasswordCallback without Session
+        recordedRequest = server.takeRequest(); //PasswordCallback without Session
+        assertThat(Uri.parse(recordedRequest.getPath()).getQueryParameter("noSession")).isEqualTo("true");
+
+    }
+
 
     @Test
     public void testLogout() throws ExecutionException, InterruptedException {
