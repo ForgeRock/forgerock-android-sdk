@@ -16,6 +16,7 @@ import org.junit.runners.Suite;
 
         LoggerTest.class,
         KeyStoreManagerTest.class,
+        RequestInterceptorTest.class,
 
 })
 public class CoreTestSuite {

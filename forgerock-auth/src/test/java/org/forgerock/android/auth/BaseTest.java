@@ -46,8 +46,9 @@ public class BaseTest {
         server = new MockWebServer();
         server.start();
 
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().init(context);
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         serverConfig = getServerConfig();
         oAuth2Client = getOAuth2Client();
@@ -93,6 +94,13 @@ public class BaseTest {
                 .setResponseCode(statusCode)
                 .addHeader("Content-Type", "application/json")
                 .setBody(getJson(path)));
+    }
+
+    protected MockResponse response(String path, int statusCode) {
+        return new MockResponse()
+                .setResponseCode(statusCode)
+                .addHeader("Content-Type", "application/json")
+                .setBody(getJson(path));
     }
 
 }

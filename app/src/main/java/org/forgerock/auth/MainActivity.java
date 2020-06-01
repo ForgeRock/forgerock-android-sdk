@@ -30,6 +30,7 @@ import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
+import org.forgerock.android.auth.RequestInterceptorRegistry;
 import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
@@ -69,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*
+        RequestInterceptorRegistry.getInstance().register(
+                new ForceAuthRequestInterceptor(),
+                new InjectHeaderAuthRequestInterceptor());
+         */
+        //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);
         super.onCreate(savedInstanceState);
