@@ -138,7 +138,7 @@ class PushResponder {
      * @param listener Listener for receiving the HTTP call response code.
      */
     void authentication(@NonNull PushNotification pushNotification, boolean approved,
-                        final @NonNull FRAListener<Integer> listener) {
+                        final @NonNull FRAListener<Void> listener) {
         try {
             // Check if notification has been approved
             if(!pushNotification.isPending()) {
@@ -172,7 +172,7 @@ class PushResponder {
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    Logger.warn(TAG, "Response from server: \n" + response.toString());
+                    Logger.debug(TAG, "Response from server: \n" + response.toString());
                     // Check if operation succeed
                     if(response.code() == 200) {
                         // Update notification status
@@ -185,8 +185,11 @@ class PushResponder {
                         if(!storageClient.setNotification(pushNotification))
                             listener.onException(new PushMechanismException("Push Authentication " +
                                     "request was successfully processed, however it could not be persisted."));
+                        listener.onSuccess(null);
+                    } else {
+                        listener.onException(new PushMechanismException("Communication with " +
+                                "server returned " + response.code() + " code."));
                     }
-                    listener.onSuccess(response.code());
                 }
 
                 @Override
@@ -213,7 +216,7 @@ class PushResponder {
      * @param listener Listener for receiving the HTTP call response code.
      */
     void registration(String endpoint, String amlbCookie, String base64Secret,
-                      String messageId, Map<String, Object> payload, final FRAListener<Integer> listener) {
+                      String messageId, Map<String, Object> payload, final FRAListener<Void> listener) {
         try {
             // Registration URL
             URL url = new URL(endpoint);
@@ -230,8 +233,13 @@ class PushResponder {
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    Logger.warn(TAG, "Response from server: \n" + response.toString());
-                    listener.onSuccess(response.code());
+                    Logger.debug(TAG, "Response from server: \n" + response.toString());
+                    if(response.code() == 200) {
+                        listener.onSuccess(null);
+                    } else {
+                        listener.onException(new PushMechanismException("Communication with " +
+                                "server returned " + response.code() + " code."));
+                    }
                 }
 
                 @Override

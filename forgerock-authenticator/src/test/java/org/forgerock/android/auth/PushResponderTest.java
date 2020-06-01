@@ -29,7 +29,6 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.net.HttpURLConnection.HTTP_OK;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -83,26 +82,25 @@ public class PushResponderTest extends FRABaseTest {
         PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
         RecordedRequest request = server.takeRequest();
-        int responseCode = (int) pushListenerFuture.get();
 
-        assertEquals(responseCode, HTTP_OK);
         assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
         assertEquals("testCookie", request.getHeader("Cookie"));
     }
 
     @Test
-    public void testReplyRegistrationMessageServerConnectionFailure() throws Exception {
+    public void testReplyRegistrationMessageServerConnectionFailure() {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
         HttpUrl baseUrl = server.url("/");
 
         PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
                 "testMessageId", new HashMap<String, Object>(), pushListenerFuture);
-        RecordedRequest request = server.takeRequest();
-        int responseCode = (int) pushListenerFuture.get();
-
-        assertEquals(responseCode, HTTP_NOT_FOUND);
-        assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
-        assertEquals("testCookie", request.getHeader("Cookie"));
+        try {
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Communication with server returned 404 code."));
+        }
     }
 
     @Test
@@ -129,24 +127,24 @@ public class PushResponderTest extends FRABaseTest {
 
         PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
-        int responseCode = (int) pushListenerFuture.get();
+        pushListenerFuture.get();
 
-        assertEquals(responseCode, HTTP_OK);
         assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
         assertEquals(AMLB_COOKIE, request.getHeader("Cookie"));
     }
 
     @Test
-    public void testReplyAuthenticationMessageServerConnectionFailure() throws Exception {
+    public void testReplyAuthenticationMessageServerConnectionFailure() {
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
-        PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
-        RecordedRequest request = server.takeRequest();
-        int responseCode = (int) pushListenerFuture.get();
-
-        assertEquals(responseCode, HTTP_NOT_FOUND);
-        assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
-        assertEquals(AMLB_COOKIE, request.getHeader("Cookie"));
+        try {
+            PushResponder.getInstance(storageClient).authentication(newPushNotification(), true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Communication with server returned 404 code."));
+        }
     }
 
     @Test
@@ -239,9 +237,7 @@ public class PushResponderTest extends FRABaseTest {
                 "testMessageId", payload, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         String body = request.getBody().readUtf8();
-        int responseCode = (int) pushListenerFuture.get();
 
-        assertEquals(responseCode, HTTP_OK);
         assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
         assertEquals("testCookie", request.getHeader("Cookie"));
         assertThat(body, Matchers.containsString("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkZXZpY2VUeXBlIjoiYW5kcm9pZCIsIm1lY2hhbmlzbVVpZCI6InRlc3RNZWNoYW5pc21VaWQiLCJyZXNwb25zZSI6IkRmMDJBd0EzUmErc1RHa0w1K1F2a0V0TjNlTGRaaUZtTDVueEFWMW0wazg9IiwiY29tbXVuaWNhdGlvblR5cGUiOiJnY20iLCJkZXZpY2VJZCI6InRlc3RGY21Ub2tlbiJ9.UimglbtcwK6vD0mYZW_B3Yge6chPR--5mPmyHB0maas"));

@@ -114,24 +114,19 @@ class PushFactory extends MechanismFactory {
         payload.put("response", challengeResponse);
 
         PushResponder.getInstance().registration(registrationEndpoint, amlbCookie, base64Secret,
-                messageId, payload, new FRAListener<Integer>() {
+                messageId, payload, new FRAListener<Void>() {
             @Override
-            public void onSuccess(Integer returnCode) {
-                if (returnCode != HTTP_OK) {
-                    listener.onException(new MechanismCreationException("Communication with " +
-                            "server returned " + returnCode + " code."));
-                } else {
-                    Mechanism push = PushMechanism.builder()
-                            .setMechanismUID(mechanismUID)
-                            .setIssuer(issuer)
-                            .setAccountName(accountName)
-                            .setAuthenticationEndpoint(authenticationEndpoint)
-                            .setRegistrationEndpoint(registrationEndpoint)
-                            .setSecret(base64Secret)
-                            .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
-                            .build();
-                    listener.onSuccess(push);
-                }
+            public void onSuccess(Void result) {
+                Mechanism push = PushMechanism.builder()
+                        .setMechanismUID(mechanismUID)
+                        .setIssuer(issuer)
+                        .setAccountName(accountName)
+                        .setAuthenticationEndpoint(authenticationEndpoint)
+                        .setRegistrationEndpoint(registrationEndpoint)
+                        .setSecret(base64Secret)
+                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                        .build();
+                listener.onSuccess(push);
             }
 
             @Override

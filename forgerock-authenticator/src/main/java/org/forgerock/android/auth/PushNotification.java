@@ -227,7 +227,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * Accepts the push authentication request.
      * @param listener Listener for receiving the HTTP call response code.
      */
-    public final void accept(@NonNull FRAListener<Integer> listener) {
+    public final void accept(@NonNull FRAListener<Void> listener) {
         Logger.debug(TAG, "Accept Push Authentication request for message: %s", getMessageId());
         performAcceptDenyAsync(true, listener);
     }
@@ -236,12 +236,12 @@ public class PushNotification extends ModelObject<PushNotification> {
      * Deny the push authentication request.
      * @param listener Listener for receiving the HTTP call response code.
      */
-    public final void deny(@NonNull FRAListener<Integer> listener) {
+    public final void deny(@NonNull FRAListener<Void> listener) {
         Logger.debug(TAG, "Deny Push Authentication request for message: %s", getMessageId());
         performAcceptDenyAsync(false, listener);
     }
 
-    void performAcceptDenyAsync(boolean approved, FRAListener<Integer> listener) {
+    void performAcceptDenyAsync(boolean approved, FRAListener<Void> listener) {
         PushResponder.getInstance().authentication(this, approved, listener);
     }
 

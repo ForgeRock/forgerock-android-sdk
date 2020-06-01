@@ -189,6 +189,7 @@ public class PushNotificationTest extends FRABaseTest {
         server.enqueue(new MockResponse());
 
         StorageClient storageClient = mock(DefaultStorageClient.class);
+        PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
@@ -203,9 +204,8 @@ public class PushNotificationTest extends FRABaseTest {
         FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Integer>();
 
         pushNotification.accept(pushListenerFuture);
-        int responseCode = (int) pushListenerFuture.get();
+        pushListenerFuture.get();
 
-        assertEquals(HTTP_OK, responseCode);
         assertTrue(pushNotification.isApproved());
         assertFalse(pushNotification.isPending());
     }
@@ -227,13 +227,17 @@ public class PushNotificationTest extends FRABaseTest {
         RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
         PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
 
-        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Integer>();
-        pushNotification.accept(pushListenerFuture);
-        int responseCode = (int) pushListenerFuture.get();
-
-        assertEquals(HTTP_NOT_FOUND, responseCode);
-        assertFalse(pushNotification.isApproved());
-        assertTrue(pushNotification.isPending());
+        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Void>();
+        try{
+            pushNotification.accept(pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Communication with server returned 404 code"));
+            assertFalse(pushNotification.isApproved());
+            assertTrue(pushNotification.isPending());
+        }
     }
 
     @Test
@@ -288,9 +292,8 @@ public class PushNotificationTest extends FRABaseTest {
         FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Integer>();
 
         pushNotification.deny(pushListenerFuture);
-        int responseCode = (int) pushListenerFuture.get();
+        pushListenerFuture.get();
 
-        assertEquals(HTTP_OK, responseCode);
         assertFalse(pushNotification.isApproved());
         assertFalse(pushNotification.isPending());
     }
@@ -312,13 +315,17 @@ public class PushNotificationTest extends FRABaseTest {
         RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
         PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
 
-        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Integer>();
-        pushNotification.deny(pushListenerFuture);
-        int responseCode = (int) pushListenerFuture.get();
-
-        assertEquals(HTTP_NOT_FOUND, responseCode);
-        assertFalse(pushNotification.isApproved());
-        assertTrue(pushNotification.isPending());
+        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Void>();
+        try{
+            pushNotification.deny(pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Communication with server returned 404 code"));
+            assertFalse(pushNotification.isApproved());
+            assertTrue(pushNotification.isPending());
+        }
     }
 
     @Test
