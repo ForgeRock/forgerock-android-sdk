@@ -10,7 +10,7 @@
 - Support `Authentication by Server` and `Transaction Authenticate to Tree` in Policy Environment. [SDKS-88]
 - Interface alignment with other platforms and introduce FRSession to authenticate against Authentication Tree in AM, persist and manage Session Token [SDKS-177]
 - Allow developers to customize SDK outbound request, for example customize url to provide query parameters or adding/removing headers [SDKS-308] 
-
+- New `forgerock-authenticator` module added to the SDK. This module allows developers to easily incorporate One-Time Password and Push Authentication capabilities in their apps [SDKS-225] 
 
 #### Changed
 - `FRUser.login` & `FRUser.register` now throws `AlreadyAuthenticatedException` when there is already authenticated user sessions [SDKS-177] 
