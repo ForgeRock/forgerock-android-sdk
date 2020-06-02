@@ -7,7 +7,7 @@ SDK is **currently still in development** and scheduling for Beta release in Oct
 ## Requirements
 * Android 5.0 (API Level 21) and above
 
-## Quick Start
+## Quick Start (FRAuth)
 
 ### Add Forgerock Android SDK Dependency
 ```gradle
@@ -183,3 +183,134 @@ public class HomeFragment extends Fragment implements FRListener<Void> {
 
 }
 ```
+
+## Quick Start (ForgeRock Authenticator Client)
+
+### Add Forgerock Android SDK Dependency
+```gradle
+dependencies {
+    ...
+    implementation 'org.forgerock:forgerock-authenticator:<version>'
+}
+```
+#### Optional Dependency
+
+| Feature        | Dependency |
+| -------------  |:-------------:|
+| Push Authentication | implementation 'com.google.firebase:firebase-messaging:<version>' |
+
+### Add Compile Option
+
+```gradle
+android {
+    ...
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+```
+
+### Add OTP Authentication with Forgerock Authenticator Android SDK
+
+#### Start the SDK
+
+```java
+FRAClient fraClient = new FRAClient.FRAClientBuilder()
+                .withContext(this)
+                .start();
+```
+
+#### Register an OTP mechanism using the URL extract from a QRCode
+
+Implement `FRAListener<Mechanism>` in your Activity or Fragment to receive Mechanism created object.
+
+```java
+fraClient.createMechanismFromUri("qrcode_scan_result", new FRAListener<Mechanism>() {
+ 
+      @Override
+      public void onSuccess(Mechanism mechanism) {
+        // called when device enrollment was successful.
+      }
+ 
+      @Override
+      public void onFailure(final MechanismCreationException e) {
+        // called when device enrollment has failed.
+      }
+    });
+```
+
+#### Obtain OTP tokens
+
+You can obtain the current and next tokens using the `OathTokenCode` object, which is available by calling  `Oath#getOathCode`.
+
+```java
+OathTokenCode token = oath.getOathTokenCode();
+String code = token.getCurrentCode();
+```
+
+### Add Push Authentication with Forgerock Authenticator Android SDK
+
+In the Push Authentication feature, the FCM deviceToken required is to perform the device registration.  The token may be passed to the SDK during the initialization or later on. The device token will not be stored by the SDK on the client.
+
+#### Start the SDK
+
+Register the device token during the SDK initialization:
+
+```java
+FRAClient fraClient = new FRAClient.FRAClientBuilder()
+                .withFcmToken("some-fcm-token");
+                .withContext(this)
+                .start();
+```
+or register the device token after the SDK initialization:
+
+```java
+fraClient.registerForRemoteNotifications("some-fcm-token");
+```
+
+#### Register a Push mechanism using the URL extract from a QRCode
+
+Implement `FRAListener<Mechanism>` in your Activity or Fragment to receive Mechanism created object.
+
+```java
+fraClient.createMechanismFromUri("qrcode_scan_result", new FRAListener<Mechanism>() {
+ 
+      @Override
+      public void onSuccess(Mechanism mechanism) {
+        // called when device enrollment was successful.
+      }
+ 
+      @Override
+      public void onFailure(final MechanismCreationException e) {
+        // called when device enrollment has failed.
+      }
+    });
+```
+
+#### Handling Push Authentication
+
+You will receive FCM Push notifications on `FirebaseMessagingService#onMessageReceived`. The `RemoteMessage` must be handled using the method `FRAClient#handleMessage`. It will return a PushNotification object which contains the `accept` and `deny` methods to handle the authentication request.
+
+```java
+public void onMessageReceived(final RemoteMessage message) {
+   PushNotification notification = fraClient.handleMessage(message);
+}
+```
+
+Push notification approval:
+```java
+pushNotification.accept(new FRAListener<Void>() {
+ 
+      @Override
+      public void onSuccess(Void result) {
+        // called when accepting the push authentication request was successful.
+      }
+ 
+      @Override
+      public void onFailure(final PushAuthenticationException e) {
+        // called when accepting the push authentication request has failed.
+      }
+    });
+```
+

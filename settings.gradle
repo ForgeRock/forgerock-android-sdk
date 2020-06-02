@@ -11,3 +11,4 @@ include ':app', ':forgerock-auth', ':forgerock-auth-ui', ':forgerock-core'
 include ':pebblebank'
 project(':pebblebank').projectDir = new File('demo/pebblebank')
 */
+include ':forgerock-authenticator'

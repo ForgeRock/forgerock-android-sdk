@@ -11,7 +11,7 @@
 - Interface alignment with other platforms and introduce FRSession to authenticate against Authentication Tree in AM, persist and manage Session Token [SDKS-177]
 - Allow developers to customize SDK outbound request, for example customize url to provide query parameters or adding/removing headers [SDKS-308]
 - Allow developers to configure the cookie name [SDKS-364]
-
+- New `forgerock-authenticator` module added to the SDK. This module allows developers to easily incorporate One-Time Password and Push Authentication capabilities in their apps [SDKS-225] 
 
 #### Changed
 - `FRUser.login` & `FRUser.register` now throws `AlreadyAuthenticatedException` when there is already authenticated user sessions [SDKS-177] 
