@@ -100,12 +100,17 @@ public class FRSession {
     }
 
     @RequiredArgsConstructor
-    private static class SessionInterceptor implements Interceptor {
+    private static class SessionInterceptor implements Interceptor<SSOToken> {
 
         @Override
-        public void intercept(Chain chain, Object any) {
-            current = new FRSession();
-            chain.proceed(current);
+        public void intercept(Chain chain, SSOToken ssoToken) {
+            if (ssoToken == null) {
+                //We do not set the static session
+                chain.proceed(null);
+            } else {
+                current = new FRSession();
+                chain.proceed(current);
+            }
         }
     }
 }

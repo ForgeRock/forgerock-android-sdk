@@ -16,21 +16,21 @@ import org.forgerock.android.auth.FRRequestInterceptor;
 import org.forgerock.android.auth.Request;
 import org.forgerock.android.auth.RequestInterceptor;
 
-import static org.forgerock.android.auth.Action.START_AUTHENTICATE;
+import static org.forgerock.android.auth.Action.AUTHENTICATE;
 
 /**
- * Sample {@link RequestInterceptor} to add ForceAuth
+ * Sample {@link RequestInterceptor} to add noSession
  */
-public class ForceAuthRequestInterceptor implements FRRequestInterceptor<Action> {
+public class NoSessionRequestInterceptor implements FRRequestInterceptor<Action> {
 
     @NonNull
     @Override
     public Request intercept(@NonNull Request request, Action tag) {
-        if (tag.getType().equals(START_AUTHENTICATE)) {
+        if (tag.getType().equals(AUTHENTICATE)) {
             return request.newBuilder()
                     .url(Uri.parse(request.url().toString())
                             .buildUpon()
-                            .appendQueryParameter("ForceAuth", "true").toString())
+                            .appendQueryParameter("noSession", "true").toString())
                     .build();
         }
         return request;

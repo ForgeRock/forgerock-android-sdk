@@ -34,6 +34,7 @@ public class ServerConfig extends NetworkConfig {
 
     private String url;
     private String realm;
+    private String cookieName;
 
     /**
      * Server Endpoint setting, leave it empty to use default setting.
@@ -53,6 +54,7 @@ public class ServerConfig extends NetworkConfig {
                          TimeUnit timeUnit,
                          Supplier<CookieJar> cookieJarSupplier,
                          @Singular List<String> pins,
+                         String cookieName,
                          String authenticateEndpoint,
                          String authorizeEndpoint,
                          String tokenEndpoint,
@@ -68,6 +70,7 @@ public class ServerConfig extends NetworkConfig {
         );
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
+        this.cookieName = cookieName;
         this.authenticateEndpoint = authenticateEndpoint;
         this.authorizeEndpoint = authorizeEndpoint;
         this.tokenEndpoint = tokenEndpoint;
@@ -93,6 +96,5 @@ public class ServerConfig extends NetworkConfig {
     private static List<String> getPins(Context context, List<String> pins) {
         return pins == null ? Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins)) : pins;
     }
-
 
 }

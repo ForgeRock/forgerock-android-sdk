@@ -50,13 +50,14 @@ public class BaseTest {
         Config.getInstance().setUrl(getUrl());
         Config.getInstance().setEncryptor(new MockEncryptor());
 
-        serverConfig = getServerConfig();
+        serverConfig = Config.getInstance().getServerConfig();
         oAuth2Client = getOAuth2Client();
     }
 
     @After
     public void shutdown() throws IOException {
         server.shutdown();
+        RequestInterceptorRegistry.getInstance().register(null);
         Config.reset();
     }
 
@@ -71,13 +72,6 @@ public class BaseTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    protected ServerConfig getServerConfig() {
-        return ServerConfig.builder()
-                .context(context)
-                .url(getUrl())
-                .build();
     }
 
     protected OAuth2Client getOAuth2Client() {

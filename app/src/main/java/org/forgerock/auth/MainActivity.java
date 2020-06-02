@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
+                new NoSessionRequestInterceptor(),
                 new InjectHeaderAuthRequestInterceptor());
          */
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
@@ -96,27 +97,31 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 success.setVisibility(VISIBLE);
-                FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
-                    @Override
-                    public void onSuccess(final UserInfo result) {
-                        runOnUiThread(() -> {
-                            progressBar.setVisibility(INVISIBLE);
-                            try {
-                                content.setText(result.getRaw().toString(2));
-                            } catch (JSONException e) {
-                                onException(e);
-                            }
-                        });
-                    }
+                if (FRUser.getCurrentUser() != null) {
+                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
+                        @Override
+                        public void onSuccess(final UserInfo result) {
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(INVISIBLE);
+                                try {
+                                    content.setText(result.getRaw().toString(2));
+                                } catch (JSONException e) {
+                                    onException(e);
+                                }
+                            });
+                        }
 
-                    @Override
-                    public void onException(final Exception e) {
-                        runOnUiThread(() -> {
-                            progressBar.setVisibility(INVISIBLE);
-                            content.setText(e.getMessage());
-                        });
-                    }
-                });
+                        @Override
+                        public void onException(final Exception e) {
+                            runOnUiThread(() -> {
+                                progressBar.setVisibility(INVISIBLE);
+                                content.setText(e.getMessage());
+                            });
+                        }
+                    });
+                } else {
+                    Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "No Session", LENGTH_LONG).show();
+                }
             } else {
                 Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed", LENGTH_LONG).show();
             }

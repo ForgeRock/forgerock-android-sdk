@@ -29,13 +29,14 @@
     <string name="forgerock_url" translatable="false">http://openam.example.com:8081/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
+    <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
 
     <!-- SSO -->
     <string name="forgerock">ForgeRock</string> <!-- Account Label -->
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
 
     <!-- Service -->
-    <string name="forgerock_auth_service" translatable="false">Test</string>h
+    <string name="forgerock_auth_service" translatable="false">Test</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
 
     <!-- End of SDK Configuration -->

@@ -54,15 +54,15 @@ class AuthServiceResponseHandler implements ResponseHandler {
                         Node node = listener.onCallbackReceived(authService.getAuthServiceId(), jsonObject);
                         listener.onCallbackReceived(node);
                     }
-                    return;
-                }
-                //The Auth Tree is consider finished after SSO Token is received
-                if (jsonObject.has(TOKEN_ID)) {
+                } else {
+                    //The Auth Tree is consider finished if auth id not from the response
                     authService.done();
-                    Listener.onSuccess(listener, new SSOToken(jsonObject.getString(TOKEN_ID)));
-                    return;
+                    if (jsonObject.has(TOKEN_ID)) {
+                        Listener.onSuccess(listener, new SSOToken(jsonObject.getString(TOKEN_ID)));
+                    } else {
+                        Listener.onSuccess(listener, null);
+                    }
                 }
-                handleError(new UnsupportedOperationException("Unknown response content"));
             } else {
                 handleError(response, listener);
             }
