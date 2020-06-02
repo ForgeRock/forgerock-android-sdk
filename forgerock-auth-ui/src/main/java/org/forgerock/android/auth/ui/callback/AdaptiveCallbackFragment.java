@@ -27,6 +27,9 @@ import org.forgerock.android.auth.ui.AuthenticationExceptionListener;
 import org.forgerock.android.auth.ui.CallbackFragmentFactory;
 import org.forgerock.android.auth.ui.R;
 
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.CALLBACK;
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.NODE;
+
 
 /**
  * This Callback Fragment having the ability to change to suit different callback conditions.
@@ -47,7 +50,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            current = (Node) getArguments().getSerializable(CallbackFragmentFactory.NODE);
+            current = (Node) getArguments().getSerializable(NODE);
         }
         setAuthHandler(getParentFragment());
     }
@@ -77,7 +80,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         //Add callback to LinearLayout Vertically
         if (savedInstanceState == null) {
             for (Callback callback : current.getCallbacks()) {
-                Fragment fragment = CallbackFragmentFactory.getInstance().getFragment(callback);
+                Fragment fragment = CallbackFragmentFactory.getInstance().getFragment(current, callback);
                 if (fragment != null) {
                     getChildFragmentManager().beginTransaction()
                             .add(R.id.callbacks, fragment).commit();

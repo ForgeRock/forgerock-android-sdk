@@ -80,14 +80,12 @@ public class CallbackFragmentFactory {
                 fragment.setArguments(args);
                 return fragment;
             }
-        } else {
-            Fragment fragment = new AdaptiveCallbackFragment();
-            Bundle args = new Bundle();
-            args.putSerializable(NODE, node);
-            fragment.setArguments(args);
-            return fragment;
         }
-        throw new IllegalArgumentException("Node Fragment not found.");
+        Fragment fragment = new AdaptiveCallbackFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(NODE, node);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     /**
@@ -102,6 +100,27 @@ public class CallbackFragmentFactory {
         if (clazz != null) {
             Fragment fragment = newInstance(clazz);
             Bundle args = new Bundle();
+            args.putSerializable(CALLBACK, callback);
+            fragment.setArguments(args);
+            return fragment;
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the Fragment that represent the {@link Callback}
+     *
+     * @param node     The Callback's parent Node
+     * @param callback The Callback.
+     * @return The Fragment or null if fragment is not defined.
+     */
+    public Fragment getFragment(Node node, Callback callback) {
+
+        Class<? extends Fragment> clazz = fragments.get(callback.getType());
+        if (clazz != null) {
+            Fragment fragment = newInstance(clazz);
+            Bundle args = new Bundle();
+            args.putSerializable(NODE, node);
             args.putSerializable(CALLBACK, callback);
             fragment.setArguments(args);
             return fragment;

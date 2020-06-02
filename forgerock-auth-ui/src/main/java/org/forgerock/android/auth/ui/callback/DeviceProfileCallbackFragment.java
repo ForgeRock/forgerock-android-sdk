@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import org.forgerock.android.auth.callback.DeviceProfileCallback;
 import org.forgerock.android.auth.ui.R;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.view.View.GONE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +34,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public class DeviceProfileCallbackFragment extends CallbackFragment<DeviceProfileCallback> {
 
     private TextView message;
+    private ProgressBar progressBar;
     public static final int LOCATION_REQUEST_CODE = 100;
 
     public DeviceProfileCallbackFragment() {
@@ -50,7 +53,14 @@ public class DeviceProfileCallbackFragment extends CallbackFragment<DeviceProfil
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_device_profile_callback, container, false);
         message = view.findViewById(R.id.message);
-        message.setText(callback.getMessage());
+        progressBar = view.findViewById(R.id.collectingDeviceProfileProgress);
+        if (node.getCallbacks().size() == 1) { //auto submit if there is one node
+            progressBar.setVisibility(View.VISIBLE);
+            message.setText(callback.getMessage());
+        } else {
+            progressBar.setVisibility(GONE);
+            message.setVisibility(GONE);
+        }
 
         if (callback.isLocation()) {
             if (ContextCompat.checkSelfPermission(getContext(), ACCESS_FINE_LOCATION)
@@ -82,11 +92,17 @@ public class DeviceProfileCallbackFragment extends CallbackFragment<DeviceProfil
         callback.execute(this.getContext(), new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                next();
+                message.setVisibility(GONE);
+                progressBar.setVisibility(GONE);
+                if (node.getCallbacks().size() == 1) { //auto submit if there is one node
+                    next();
+                }
             }
 
             @Override
             public void onException(Exception e) {
+                message.setVisibility(GONE);
+                progressBar.setVisibility(GONE);
                 //Not likely to happen, Device Collector try best to collect.
                 cancel(e);
             }
