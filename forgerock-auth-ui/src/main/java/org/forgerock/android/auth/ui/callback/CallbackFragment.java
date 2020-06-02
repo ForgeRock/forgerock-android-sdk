@@ -12,8 +12,11 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.callback.Callback;
-import org.forgerock.android.auth.ui.CallbackFragmentFactory;
+
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.CALLBACK;
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.NODE;
 
 /**
  * UI Fragment which represent a Callback
@@ -24,6 +27,11 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
 
 
     private CallbackController callbackController;
+
+    /**
+     * The Callback's Node {@link Node}
+     */
+    protected Node node;
 
     /**
      * The Callback class see {@link Callback}
@@ -38,7 +46,8 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            callback = (T) getArguments().getSerializable(CallbackFragmentFactory.CALLBACK);
+            node = (Node) getArguments().getSerializable(NODE);
+            callback = (T) getArguments().getSerializable(CALLBACK);
         }
 
         if (getParentFragment() instanceof CallbackController) {
