@@ -26,7 +26,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static org.forgerock.android.auth.SSOToken.IPLANET_DIRECTORY_PRO;
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_3_1;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
@@ -111,7 +110,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         Request request = new Request.Builder()
-                .header(IPLANET_DIRECTORY_PRO, token.getValue())
+                .header(serverConfig.getCookieName(), token.getValue())
                 .header(ACCEPT_API_VERSION, API_VERSION_3_1)
                 .url(logout)
                 .post(RequestBody.create(new byte[0]))
@@ -152,6 +151,4 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
         builder.appendQueryParameter("_action", "logout");
         return new URL(builder.build().toString());
     }
-
-
 }

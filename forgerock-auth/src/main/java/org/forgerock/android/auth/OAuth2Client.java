@@ -261,7 +261,7 @@ public class OAuth2Client {
                     .appendPath("authorize");
         }
         return new URL(builder
-                .appendQueryParameter(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
+                .appendQueryParameter(serverConfig.getCookieName(), token.getValue())
                 .appendQueryParameter(OAuth2.CLIENT_ID, clientId)
                 .appendQueryParameter(OAuth2.SCOPE, scope)
                 .appendQueryParameter(OAuth2.RESPONSE_TYPE, responseType)

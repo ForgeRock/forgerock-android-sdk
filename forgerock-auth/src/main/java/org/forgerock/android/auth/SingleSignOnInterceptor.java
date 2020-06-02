@@ -19,6 +19,11 @@ class SingleSignOnInterceptor implements Interceptor<SSOToken> {
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
+        if (token == null) {
+            // trigger the tree with noSession parameter, we don't destroy the existing session.
+            chain.proceed(token);
+            return;
+        }
         Token storedToken = sessionManager.getSingleSignOnManager().getToken();
         //If token changed, we need to revoke Access Token
         if (storedToken != null ) {
