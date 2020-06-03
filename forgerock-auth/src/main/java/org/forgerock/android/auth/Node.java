@@ -80,7 +80,7 @@ public class Node implements Serializable {
      * @param context  The Application Context
      * @param listener Listener for receiving {@link AuthService} related changes
      */
-    public void next(Context context, NodeListener listener) {
+    public void next(Context context, NodeListener<?> listener) {
         AuthService.goToNext(context, this, listener);
     }
 

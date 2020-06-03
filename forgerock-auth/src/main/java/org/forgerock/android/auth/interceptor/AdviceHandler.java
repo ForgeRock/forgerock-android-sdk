@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 /**
  * Handler to handle the Advice
  */
-public interface AdviceHandler {
+public interface AdviceHandler<T> {
 
     /**
      * Called when an Advice is received
@@ -28,7 +28,7 @@ public interface AdviceHandler {
      * @return A Future representing pending completion of handling the advice
      */
     @WorkerThread
-    Future onAdviceReceived(Context context, PolicyAdvice advice);
+    Future<T> onAdviceReceived(Context context, PolicyAdvice advice);
 
 
 }

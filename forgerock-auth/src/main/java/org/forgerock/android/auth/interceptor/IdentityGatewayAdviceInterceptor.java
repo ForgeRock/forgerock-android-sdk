@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -28,7 +27,7 @@ import okhttp3.internal.http.StatusLine;
 /**
  * Reference Implementation of using {@link Interceptor} to handle advice from ForgeRock Identity Gateway
  */
-public abstract class IdentityGatewayAdviceInterceptor implements Interceptor {
+public abstract class IdentityGatewayAdviceInterceptor<T> implements Interceptor {
 
     @NonNull
     @Override
@@ -40,10 +39,9 @@ public abstract class IdentityGatewayAdviceInterceptor implements Interceptor {
             String location = response.header("location");
             PolicyAdvice advice = getAdvice(location);
             if (advice != null) {
-                AdviceHandler adviceHandler = getAdviceHandler(advice);
-                Future future = adviceHandler.onAdviceReceived(InitProvider.getCurrentActivity(), advice);
                 try {
-                    future.get();
+                    getAdviceHandler(advice)
+                            .onAdviceReceived(InitProvider.getCurrentActivity(), advice).get();
                 } catch (ExecutionException e) {
                     return response;
                 } catch (InterruptedException e) {
@@ -63,7 +61,7 @@ public abstract class IdentityGatewayAdviceInterceptor implements Interceptor {
      * @param advice The Advice
      * @return An {@link AdviceHandler} to handle the advice.
      */
-    public abstract AdviceHandler getAdviceHandler(PolicyAdvice advice);
+    public abstract AdviceHandler<T> getAdviceHandler(PolicyAdvice advice);
 
     /**
      * Extract the Advice from the location redirect url

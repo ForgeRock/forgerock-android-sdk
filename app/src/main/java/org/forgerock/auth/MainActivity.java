@@ -70,12 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
                 new NoSessionRequestInterceptor(),
                 new InjectHeaderAuthRequestInterceptor());
-         */
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);
@@ -215,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .followRedirects(false);
 
-                builder.addInterceptor(new IdentityGatewayAdviceInterceptor() {
+                builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
                     @Override
-                    public AdviceHandler getAdviceHandler(PolicyAdvice advice) {
+                    public AdviceHandler<Void> getAdviceHandler(PolicyAdvice advice) {
                         return new AdviceDialogHandler();
                     }
                 });

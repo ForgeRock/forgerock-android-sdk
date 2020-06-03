@@ -28,4 +28,8 @@
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
     <bool name="forgerock_enable_sso" traslatable="false">false</bool>
 
+    <!-- Service -->
+    <string name="forgerock_auth_service" translatable="false">Test</string>
+    <string name="forgerock_registration_service" translatable="false">Registration</string>
+
 </resources>

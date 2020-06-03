@@ -25,7 +25,7 @@ public class InterceptorHandler implements Interceptor.Chain {
 
     @Getter
     private Context context;
-    private List<? extends Interceptor> interceptors;
+    private List<? extends Interceptor<?>> interceptors;
     @Getter
     private FRListener listener;
     private int index;

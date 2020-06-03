@@ -65,6 +65,7 @@ class AuthServiceResponseHandler implements ResponseHandler {
                 }
             } else {
                 handleError(response, listener);
+
             }
         } catch (Exception e) {
             handleError(e);
@@ -72,7 +73,7 @@ class AuthServiceResponseHandler implements ResponseHandler {
     }
 
     @Override
-    public void handleError(Response response, FRListener listener) {
+    public void handleError(Response response, FRListener<?> listener) {
         switch (response.code()) {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
                 String body = getBody(response);

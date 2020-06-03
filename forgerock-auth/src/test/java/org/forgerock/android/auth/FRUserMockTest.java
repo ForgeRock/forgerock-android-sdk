@@ -10,8 +10,7 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-
-import androidx.annotation.NonNull;
+import android.util.Pair;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
@@ -381,8 +380,8 @@ public class FRUserMockTest extends BaseTest {
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
 
-        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword HTTP/1.1
-        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword");
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=Test HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=Test");
         rr = server.takeRequest(); //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
         Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate");
         rr = server.takeRequest(); //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
@@ -933,14 +932,14 @@ public class FRUserMockTest extends BaseTest {
     @Test
     public void testRequestInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
 
-        final HashMap<String, Integer> result = new HashMap<>();
+        final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
         RequestInterceptorRegistry.getInstance().register(request -> {
             String action = ((Action)request.tag()).getType();
-            Integer count = result.get(action);
-            if ( count == null) {
-                result.put(action, 1);
+            Pair<Action, Integer> pair = result.get(action);
+            if ( pair == null) {
+                result.put(action, new Pair<>((Action) request.tag(), 1));
             } else {
-                result.put(action, count++);
+                result.put(action, new Pair<>((Action) request.tag(), pair.second + 1));
             }
             return request;
         });
@@ -965,13 +964,15 @@ public class FRUserMockTest extends BaseTest {
         recordedRequest = server.takeRequest();
         recordedRequest = server.takeRequest();
 
-        Assertions.assertThat(result.get("START_AUTHENTICATE")).isEqualTo(1);
-        Assertions.assertThat(result.get("AUTHENTICATE")).isEqualTo(1);
-        Assertions.assertThat(result.get("AUTHORIZE")).isEqualTo(1);
-        Assertions.assertThat(result.get("EXCHANGE_TOKEN")).isEqualTo(1);
-        Assertions.assertThat(result.get("REVOKE_TOKEN")).isEqualTo(1);
-        Assertions.assertThat(result.get("LOGOUT")).isEqualTo(1);
-        Assertions.assertThat(result.get("USER_INFO")).isEqualTo(1);
+        Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("START_AUTHENTICATE").second).isEqualTo(1);
+        Assertions.assertThat(result.get("AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("AUTHENTICATE").second).isEqualTo(2);
+        Assertions.assertThat(result.get("AUTHORIZE").second).isEqualTo(1);
+        Assertions.assertThat(result.get("EXCHANGE_TOKEN").second).isEqualTo(1);
+        Assertions.assertThat(result.get("REVOKE_TOKEN").second).isEqualTo(1);
+        Assertions.assertThat(result.get("LOGOUT").second).isEqualTo(1);
+        Assertions.assertThat(result.get("USER_INFO").second).isEqualTo(1);
 
     }
 }
