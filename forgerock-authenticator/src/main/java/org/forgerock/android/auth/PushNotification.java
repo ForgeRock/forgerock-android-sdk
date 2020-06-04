@@ -251,7 +251,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @return a {@link PushNotification} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
      * or if {@code jsonString} is empty.
      */
-    public static PushNotification deserialize(String jsonString) {
+    static PushNotification deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }

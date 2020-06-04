@@ -148,7 +148,7 @@ public class Account extends ModelObject<Account> {
      * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    public static Account deserialize(String jsonString) {
+    static Account deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
