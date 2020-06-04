@@ -12,13 +12,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 
 import lombok.Builder;
-import lombok.NonNull;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -119,12 +120,12 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Listener.onException(listener, e);
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
                 } else {

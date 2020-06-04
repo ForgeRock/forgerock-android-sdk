@@ -43,11 +43,11 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:2.0.0-alpha1'
-    implementation 'org.forgerock:forgerock-auth-ui:2.0.0-alpha1'
+    implementation 'org.forgerock:forgerock-auth:2.0.0-beta'
+    implementation 'org.forgerock:forgerock-auth-ui:2.0.0-beta'
      */
 
-    implementation 'com.squareup.okhttp3:okhttp:4.2.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -59,7 +59,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'com.google.android.gms:play-services-safetynet:17.0.0'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 

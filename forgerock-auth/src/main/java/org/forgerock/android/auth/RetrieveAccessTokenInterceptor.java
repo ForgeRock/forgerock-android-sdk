@@ -20,7 +20,6 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
     @Override
     public void intercept(final Chain chain, final SSOToken sessionToken) {
 
-
         //With Verifier to verify the token is associated with the Session Token
         tokenManager.getAccessToken(accessToken -> accessToken.getSessionToken() != null &&
                         accessToken.getSessionToken().equals(sessionToken)
@@ -29,7 +28,7 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
                     public void onSuccess(AccessToken result) {
                         //We don't have to proceed to next, we have the AccessToken already
                         //Response to caller immediately
-                        chain.getListener().onSuccess(result);
+                        Listener.onSuccess(chain.getListener(), result);
                     }
 
                     @Override

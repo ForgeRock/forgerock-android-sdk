@@ -20,7 +20,7 @@ interface ResponseHandler {
      *
      * @param response API Response
      */
-    default void handleError(Response response, FRListener listener) {
+    default void handleError(Response response, FRListener<?> listener) {
         switch (response.code()) {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
                 Listener.onException(listener, new AuthenticationException(response.code(), response.message(), getBody(response)));

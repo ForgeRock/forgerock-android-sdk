@@ -26,7 +26,7 @@ class SessionManager {
     private TokenManager tokenManager;
     @Getter
     private SingleSignOnManager singleSignOnManager;
-    private List<Interceptor> interceptors;
+    private List<Interceptor<?>> interceptors;
 
     @Builder
     public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager)  {

@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import androidx.annotation.NonNull;
+
 import java.util.concurrent.*;
 
 /**
@@ -48,7 +50,7 @@ public class FRListenerFuture<T> implements FRListener<T>, Future<T> {
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
+    public T get(long timeout, @NonNull TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
         if (!done && !countDownLatch.await(timeout, unit)) {
             throw new TimeoutException("Timeout waiting for result");
         }

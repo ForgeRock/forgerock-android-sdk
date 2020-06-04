@@ -128,7 +128,7 @@ public class Config {
                 .url(url)
                 .realm(realm)
                 .timeout(timeout)
-                .cookieJarSupplier(() -> getCookieJar())
+                .cookieJarSupplier(this::getCookieJar)
                 .cookieName(cookieName)
                 .authenticateEndpoint(authenticateEndpoint)
                 .authorizeEndpoint(authorizeEndpoint)
@@ -157,7 +157,6 @@ public class Config {
                 .build();
     }
 
-    @VisibleForTesting
     SingleSignOnManager getSingleSignOnManager() {
         return DefaultSingleSignOnManager.builder()
                 .sharedPreferences(ssoSharedPreferences)

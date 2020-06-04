@@ -20,10 +20,10 @@ import java.util.concurrent.Future;
 /**
  * Handler to handle Policy Advice, this handler will prompt a dialog and trigger an auth tree.
  */
-public class AdviceDialogHandler implements AdviceHandler {
+public class AdviceDialogHandler implements AdviceHandler<Void> {
 
     @Override
-    public Future onAdviceReceived(Context context, PolicyAdvice advice) {
+    public Future<Void> onAdviceReceived(Context context, PolicyAdvice advice) {
         AdviceDialogFragment fragment = AdviceDialogFragment.newInstance(advice);
         FRListenerFuture<Void> future = new FRListenerFuture<>();
         fragment.setListener(future);

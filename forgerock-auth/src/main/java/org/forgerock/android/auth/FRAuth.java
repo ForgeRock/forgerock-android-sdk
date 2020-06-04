@@ -63,7 +63,7 @@ public class FRAuth {
                    PolicyAdvice advice,
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
-                   @Singular List<Interceptor> interceptors) {
+                   @Singular List<Interceptor<?>> interceptors) {
 
         Config.getInstance().init(context);
 
@@ -76,7 +76,7 @@ public class FRAuth {
                 .interceptor(new SingleSignOnInterceptor(
                         this.sessionManager));
 
-        for (Interceptor interceptor : interceptors) {
+        for (Interceptor<?> interceptor : interceptors) {
             builder.interceptor(interceptor);
         }
 
@@ -91,7 +91,7 @@ public class FRAuth {
      * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
      */
     @Deprecated
-    public void start(final Context context, final NodeListener listener) {
+    public void start(final Context context, final NodeListener<?> listener) {
         sessionManager.close();
         authService.next(context, listener);
     }
@@ -108,14 +108,14 @@ public class FRAuth {
      * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
      */
     @Deprecated
-    public void next(final Context context, final NodeListener listener) {
+    public void next(final Context context, final NodeListener<?> listener) {
         authService.next(context, listener);
     }
 
     static class FRAuthBuilder {
 
         public FRAuth build() {
-            List<Interceptor> interceptors;
+            List<Interceptor<?>> interceptors;
             switch (this.interceptors == null ? 0 : this.interceptors.size()) {
                 case 0:
                     interceptors = java.util.Collections.emptyList();
@@ -124,7 +124,7 @@ public class FRAuth {
                     interceptors = java.util.Collections.singletonList(this.interceptors.get(0));
                     break;
                 default:
-                    interceptors = java.util.Collections.unmodifiableList(new ArrayList<Interceptor>(this.interceptors));
+                    interceptors = java.util.Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
             return new FRAuth(context, serviceName, advice, serverConfig, sessionManager, interceptors);

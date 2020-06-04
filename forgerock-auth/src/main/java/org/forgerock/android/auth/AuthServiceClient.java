@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import android.net.Uri;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -22,6 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static org.forgerock.android.auth.Action.START_AUTHENTICATE;
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_2_1;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
@@ -35,8 +37,8 @@ class AuthServiceClient {
             = MediaType.get("application/json; charset=utf-8");
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
-    private static final Action START_AUTHENTICATE = new Action(Action.START_AUTHENTICATE);
-    private static final Action AUTHENTICATE = new Action(Action.AUTHENTICATE);
+    public static final String TREE = "tree";
+    public static final String TYPE = "type";
 
     private ServerConfig serverConfig;
     private OkHttpClient okHttpClient;
@@ -54,11 +56,15 @@ class AuthServiceClient {
      */
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
+            Action action = new Action(Action.START_AUTHENTICATE,
+                    new JSONObject()
+                            .put(TREE, authService.getAuthIndexValue())
+                            .put(TYPE, authService.getAuthIndexType()));
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl(authService))
                     .post(RequestBody.create(new byte[0]))
                     .header(ACCEPT_API_VERSION, API_VERSION_2_1)
-                    .tag(START_AUTHENTICATE)
+                    .tag(action)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -82,16 +88,22 @@ class AuthServiceClient {
     /**
      * Go to next node from the auth tree
      *
-     * @param node    The current node
-     * @param handler The response handler to handle the API result.
+     * @param authService The Auth Service
+     * @param node        The current node
+     * @param handler     The response handler to handle the API result.
      */
-    void authenticate(final Node node, final AuthServiceResponseHandler handler) {
+    void authenticate(final AuthService authService, final Node node, final AuthServiceResponseHandler handler) {
         try {
+            Action action = new Action(Action.AUTHENTICATE,
+                    new JSONObject()
+                            .put(TREE, authService.getAuthIndexValue())
+                            .put(TYPE, authService.getAuthIndexType()));
+
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl())
                     .post(RequestBody.create(node.toJsonObject().toString(), JSON))
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
-                    .tag(AUTHENTICATE)
+                    .tag(action)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {

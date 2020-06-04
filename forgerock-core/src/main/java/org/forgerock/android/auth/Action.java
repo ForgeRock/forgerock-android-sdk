@@ -7,8 +7,11 @@
 
 package org.forgerock.android.auth;
 
+import org.json.JSONObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Action can be used for {@link FRRequestInterceptor} to easily identify what type of outgoing
@@ -18,8 +21,8 @@ import lombok.Getter;
  * Currently, ForgeRock SDK makes following Requests with corresponding Actions:
  * <p>
  * <ul>
- * <li>START_AUTHENTICATE - Initial Request made to the Authentication Tree: '/json/realms/{realm}/authenticate'</li>
- * <li>AUTHENTICATE - Any subsequent Requests made to the Authentication Tree: '/json/realms/{realm}/authenticate'</li>
+ * <li>START_AUTHENTICATE - Initial Request made to the Authentication Tree: '/json/realms/{realm}/authenticate', tree name is provided in the payload</li>
+ * <li>AUTHENTICATE - Any subsequent Requests made to the Authentication Tree: '/json/realms/{realm}/authenticate' tree name is provided in the payload</li>
  * <li>AUTHORIZE - Request for exchanging SSO Token to Authorization code: '/oauth2/realms/{realm}/authorize' </li>
  * <li>EXCHANGE_TOKEN - OAuth2 token exchange request with Authorization Code: '/oauth2/realms/{realm}/access_token'</li>
  * <li>REFRESH_TOKEN - OAuth2 token refresh request with given 'refresh_token': '/oauth2/realms/{realm}/access_token'</li>
@@ -29,6 +32,7 @@ import lombok.Getter;
  * </ul>
  */
 @Getter
+@RequiredArgsConstructor
 @AllArgsConstructor
 public class Action {
 
@@ -41,5 +45,8 @@ public class Action {
     public static final String LOGOUT = "LOGOUT";
     public static final String USER_INFO = "USER_INFO";
 
-    private String type;
+    private final String type;
+
+    private JSONObject payload;
+
 }
