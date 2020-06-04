@@ -37,6 +37,8 @@ class AuthServiceClient {
             = MediaType.get("application/json; charset=utf-8");
     private static final String AUTH_INDEX_TYPE = "authIndexType";
     private static final String AUTH_INDEX_VALUE = "authIndexValue";
+    public static final String TREE = "tree";
+    public static final String TYPE = "type";
 
     private ServerConfig serverConfig;
     private OkHttpClient okHttpClient;
@@ -55,7 +57,9 @@ class AuthServiceClient {
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
             Action action = new Action(Action.START_AUTHENTICATE,
-                    new JSONObject().put("tree", authService.getName()));
+                    new JSONObject()
+                            .put(TREE, authService.getAuthIndexValue())
+                            .put(TYPE, authService.getAuthIndexType()));
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl(authService))
                     .post(RequestBody.create(new byte[0]))
@@ -91,7 +95,9 @@ class AuthServiceClient {
     void authenticate(final AuthService authService, final Node node, final AuthServiceResponseHandler handler) {
         try {
             Action action = new Action(Action.AUTHENTICATE,
-                    new JSONObject().put("tree", authService.getName()));
+                    new JSONObject()
+                            .put(TREE, authService.getAuthIndexValue())
+                            .put(TYPE, authService.getAuthIndexType()));
 
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl())

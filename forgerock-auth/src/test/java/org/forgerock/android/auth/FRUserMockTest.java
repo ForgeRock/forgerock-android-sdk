@@ -965,8 +965,10 @@ public class FRUserMockTest extends BaseTest {
         recordedRequest = server.takeRequest();
 
         Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("type")).isEqualTo("service");
         Assertions.assertThat(result.get("START_AUTHENTICATE").second).isEqualTo(1);
         Assertions.assertThat(result.get("AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("AUTHENTICATE").first.getPayload().getString("type")).isEqualTo("service");
         Assertions.assertThat(result.get("AUTHENTICATE").second).isEqualTo(2);
         Assertions.assertThat(result.get("AUTHORIZE").second).isEqualTo(1);
         Assertions.assertThat(result.get("EXCHANGE_TOKEN").second).isEqualTo(1);
