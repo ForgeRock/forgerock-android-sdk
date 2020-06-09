@@ -43,6 +43,7 @@ public class BaseTest {
         ShadowLog.clear();
 
         MockitoAnnotations.initMocks(this);
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         server = new MockWebServer();
         server.start();
 

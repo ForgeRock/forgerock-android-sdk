@@ -49,6 +49,7 @@ public class RequestInterceptorTest {
 
     @Before
     public void setUp() throws IOException, JSONException {
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         server = new MockWebServer();
         server.start();
         server.enqueue(new MockResponse().setResponseCode(200));
