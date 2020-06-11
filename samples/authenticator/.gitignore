@@ -1,0 +1,8 @@
+*.iml
+.idea
+gen
+out
+.gradle
+build
+local.properties
+google-services.json

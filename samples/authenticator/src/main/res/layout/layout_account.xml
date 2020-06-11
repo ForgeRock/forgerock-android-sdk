@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+-->
+
+<org.forgerock.authenticator.sample.view.layout.AccountLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="96dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="10dp"
+            android:layout_gravity="left"
+            android:src="@drawable/forgerock_placeholder"
+            android:scaleType="fitCenter"
+            />
+
+        <LinearLayout
+            android:id="@+id/account_details"
+            android:layout_width="150dp"
+            android:layout_height="48dp"
+            android:layout_toRightOf="@+id/image"
+            android:layout_toEndOf="@+id/image"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/issuer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:ellipsize="end"
+                android:gravity="left|center"
+                android:singleLine="true"
+                tools:text="ForgeRock"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/accountName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="left|center"
+                android:singleLine="true"
+                tools:text="john.doe"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="12sp"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <GridView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:columnWidth="250dp"
+            android:gravity="center"
+            android:horizontalSpacing="8dp"
+            android:numColumns="auto_fit"
+            android:padding="8dp"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="8dp"
+            android:background="@color/white"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp">
+
+            <org.forgerock.authenticator.sample.view.layout.MechanismIconLayout
+                android:id="@+id/iconA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"/>
+
+            <org.forgerock.authenticator.sample.view.layout.MechanismIconLayout
+                android:id="@+id/iconB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/account_sub_item"
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/account_details">
+            <include layout="@layout/layout_account_detail" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</org.forgerock.authenticator.sample.view.layout.AccountLayout>
