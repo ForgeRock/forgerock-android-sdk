@@ -5,10 +5,16 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-include ':app', ':forgerock-auth', ':forgerock-auth-ui', ':forgerock-core'
+include ':forgerock-auth', ':forgerock-auth-ui', ':forgerock-core', ':forgerock-authenticator'
+
+include ':auth'
+project(':auth').projectDir = new File('samples/auth')
+
+include ':authenticator'
+project(':authenticator').projectDir = new File('samples/authenticator')
 
 /*
 include ':pebblebank'
 project(':pebblebank').projectDir = new File('demo/pebblebank')
 */
-include ':forgerock-authenticator'
+

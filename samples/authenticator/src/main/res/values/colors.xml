@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+-->
+
+<resources>
+    <color name="colorPrimary">#032b75</color>
+    <color name="colorPrimaryDark">#032b75</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="app_bar_background">#2B6CAC</color>
+    <color name="default_background">#FFFFFF</color>
+
+    <color name="barcode_scanner_background">#000</color>
+    <color name="barcode_scanner_border_background">#a0000000</color>
+
+    <color name="notification_badge">#aaa</color>
+    <color name="new_notification_badge">#FF4829</color>
+    <color name="normal_timer_color">#032b75</color>
+    <color name="warning_timer_color">#A94442</color>
+    <color name="account_background">#032b75</color>
+    <color name="off_white">#f7f7f7</color>
+    <color name="light_gray">#eee</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="push_approve_background">#34C759</color>
+    <color name="push_deny_background">#FF3B30</color>
+
+</resources>
