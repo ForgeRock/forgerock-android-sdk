@@ -210,6 +210,7 @@ dependencies {
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.google.android.gms:play-services-location:17.0.0'
+    androidTestImplementation 'org.assertj:assertj-core:3.14.0'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:4.3.1'

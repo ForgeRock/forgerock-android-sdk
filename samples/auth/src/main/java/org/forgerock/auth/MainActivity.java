@@ -70,10 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
                 new NoSessionRequestInterceptor(),
                 new InjectHeaderAuthRequestInterceptor());
+         */
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);

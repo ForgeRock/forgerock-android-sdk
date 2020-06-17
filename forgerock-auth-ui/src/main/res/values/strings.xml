@@ -34,9 +34,21 @@
     <string name="UNIQUE">{prompt} Must be Unique</string>
     <string name="MIN_LENGTH">{prompt} Must longer than {minLength} characters</string>
     <string name="MAX_LENGTH">{prompt} Must not longer than {maxLength} characters</string>
-    <string name="AT_LEAST_X_CAPITAL_LETTERS">{prompt} At least {numCaps} capital letters</string>
-    <string name="AT_LEAST_X_NUMBERS">{prompt} At least {numNums} numbers</string>
+    <string name="AT_LEAST_X_CAPITAL_LETTERS">{prompt} must contain at least {numCaps} capital letter(s)</string>
+    <string name="AT_LEAST_X_NUMBERS">{prompt} must contain at least {numNums} numberic value(s)</string>
     <string name="VALID_EMAIL_ADDRESS_FORMAT">{prompt} Invalid email address format</string>
+    <string name="CANNOT_CONTAIN_CHARACTERS">{prompt} must not contain following characters {forbiddenChars}</string>
+    <string name="REQUIRED">{prompt} is required</string>
+    <string name="MATCH_REGEXP">{prompt} Regular exp not match {regexp}</string>
+    <string name="VALID_TYPE">{prompt} Invalid type {invalidType}</string>
+    <string name="VALID_NUMBER">{prompt} Invalid number</string>
+    <string name="MINIMUM_NUMBER_VALUE">{prompt} Less than minimum number value</string>
+    <string name="MAXIMUM_NUMBER_VALUE">{prompt} Greater than maximum number value</string>
+    <string name="VALID_NAME_FORMAT">{prompt} Invalid name format</string>
+    <string name="VALID_PHONE_FORMAT">{prompt} Invalid phone format</string>
+    <string name="CANNOT_CONTAIN_DUPLICATES">{prompt} must not contain duplicates {duplicateValue}</string>
+    <string name="CANNOT_CONTAIN_OTHERS">{prompt} must not contain {disallowedFields}</string>
+    <string name="VALID_DATE">{prompt} Invalid date</string>
 
 
     <string name="createdate">CreateDate</string>
