@@ -36,7 +36,7 @@
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
 
     <!-- Service -->
-    <string name="forgerock_auth_service" translatable="false">ChoiceCallbackTest</string>
+    <string name="forgerock_auth_service" translatable="false">Test</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
 
     <!-- End of SDK Configuration -->

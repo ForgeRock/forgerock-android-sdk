@@ -6,13 +6,25 @@
       "output": [
         {
           "name": "policies",
-          "value": [
-            "unique",
-            "no-internal-user-conflict",
-            "cannot-contain-characters",
-            "minimum-length",
-            "maximum-length"
-          ]
+          "value": {
+            "policies": [
+              {
+                "policyId": "unique"
+              },
+              {
+                "policyId": "no-internal-user-conflict"
+              },
+              {
+                "policyId": "cannot-contain-characters"
+              },
+              {
+                "policyId": "minimum-length"
+              },
+              {
+                "policyId": "maximum-length"
+              }
+            ]
+          }
         },
         {
           "name": "failedPolicies",
