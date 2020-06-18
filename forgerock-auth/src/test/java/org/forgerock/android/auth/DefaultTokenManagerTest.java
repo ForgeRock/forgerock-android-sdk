@@ -228,11 +228,9 @@ public class DefaultTokenManagerTest extends BaseTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
-        Thread.sleep(2000); //sleep for 2 seconds
         AccessToken storedAccessToken2 = getAccessToken(tokenManager); //set threshold for 1 second
 
-        assertNotEquals(storedAccessToken1.getValue(), storedAccessToken2.getValue());
+        assertNotEquals(accessToken.getValue(), storedAccessToken2.getValue());
     }
 
     @Test(expected = AuthenticationRequiredException.class)
