@@ -41,7 +41,7 @@ public class PollingWaitCallbackTest extends TreeTest {
                     ConfirmationCallback callback = node.getCallback(ConfirmationCallback.class);
                     assertThat(callback.getPrompt()).isEmpty();
                     assertThat(callback.getMessageType()).isEqualTo(0);
-                    assertThat(callback.getOptions()).contains("Exit");
+                    assertThat(callback.getOptions().contains("Exit")).isTrue();
                     assertThat(callback.getOptionType()).isEqualTo(-1);
                     assertThat(callback.getDefaultOption()).isEqualTo(0);
                     callback.setSelectedIndex(0);

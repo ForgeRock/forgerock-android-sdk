@@ -32,10 +32,22 @@ public class SetPersistentCookieTest extends TreeTest {
         super.testTree();
         Collection<String> cookies = Config.getInstance().getSingleSignOnManager().getCookies();
         //Assert that session-jwt is set
+        /* Does not support stream
         assertThat(cookies.stream().anyMatch(s -> {
             Cookie cookie1 = Cookie.parse(HttpUrl.parse(Config.getInstance().getUrl()), s);
             return cookie1.name().equals("session-jwt") && cookie1.httpOnly() && cookie1.secure();
         })).isTrue();
+         */
+
+        boolean found = false;
+        for (String cookie : cookies) {
+            Cookie cookie1 = Cookie.parse(HttpUrl.parse(Config.getInstance().getUrl()), cookie);
+            if (cookie1.name().equals("session-jwt") && cookie1.httpOnly() && cookie1.secure()) {
+                found = true;
+            }
+        }
+        assertThat(found).isTrue();
+
 
         FRSession.getCurrentSession().logout();
         cookies = Config.getInstance().getSingleSignOnManager().getCookies();

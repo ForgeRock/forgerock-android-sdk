@@ -65,7 +65,7 @@ public class AccessToken extends Token implements Serializable {
      * @return true if the expiration is before the current time
      */
     public boolean isExpired(long threshold) {
-        Date now = new Date(System.currentTimeMillis() - (threshold * 1000L));
+        Date now = new Date(System.currentTimeMillis() + (threshold * 1000L));
         return expiration != null && expiration.before(now);
     }
 
