@@ -15,9 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import org.forgerock.android.auth.Node;
+
 import org.forgerock.android.auth.callback.PasswordCallback;
-import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.ui.R;
 

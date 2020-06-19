@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Getter
-public class ValidatedCreatePasswordCallback extends AbstractValidatedCallback {
+public class ValidatedPasswordCallback extends AbstractValidatedCallback {
 
     /**
      * Return whether the password
@@ -39,7 +39,7 @@ public class ValidatedCreatePasswordCallback extends AbstractValidatedCallback {
     private String prompt;
 
     @Keep
-    public ValidatedCreatePasswordCallback(@NotNull JSONObject raw, int index) throws JSONException {
+    public ValidatedPasswordCallback(@NotNull JSONObject raw, int index) throws JSONException {
         super(raw, index);
     }
 

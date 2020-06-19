@@ -16,13 +16,13 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
+import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
 import org.forgerock.android.auth.ui.R;
 
 /**
- * UI representation for {@link ValidatedCreateUsernameCallback}
+ * UI representation for {@link ValidatedUsernameCallback}
  */
-public class ValidatedCreateUsernameCallbackFragment extends AbstractValidatedCallbackFragment<ValidatedCreateUsernameCallback> {
+public class ValidatedUsernameCallbackFragment extends AbstractValidatedCallbackFragment<ValidatedUsernameCallback> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

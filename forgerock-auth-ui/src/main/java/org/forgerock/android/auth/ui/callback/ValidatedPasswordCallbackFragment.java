@@ -17,13 +17,13 @@ import android.widget.EditText;
 
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
 import org.forgerock.android.auth.ui.R;
 
 /**
- * UI representation for {@link ValidatedCreatePasswordCallback}
+ * UI representation for {@link ValidatedPasswordCallback}
  */
-public class ValidatedCreatePasswordCallbackFragment extends AbstractValidatedCallbackFragment<ValidatedCreatePasswordCallback> {
+public class ValidatedPasswordCallbackFragment extends AbstractValidatedCallbackFragment<ValidatedPasswordCallback> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

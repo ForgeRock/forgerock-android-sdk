@@ -9,10 +9,8 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 
-import org.forgerock.android.auth.callback.NameCallback;
-import org.forgerock.android.auth.callback.PasswordCallback;
-import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
-import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
+import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
 
 import static org.forgerock.android.auth.AndroidBaseTest.PASSWORD;
 import static org.forgerock.android.auth.AndroidBaseTest.USERNAME;
@@ -28,13 +26,13 @@ public class PlatformUsernamePasswordNodeListener extends NodeListenerFuture<FRS
     @Override
     public void onCallbackReceived(Node node) {
         boolean moveToNext = false;
-        if (node.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-            node.getCallback(ValidatedCreateUsernameCallback.class).setUsername(USERNAME);
+        if (node.getCallback(ValidatedUsernameCallback.class) != null) {
+            node.getCallback(ValidatedUsernameCallback.class).setUsername(USERNAME);
             moveToNext = true;
         }
 
-        if (node.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-            node.getCallback(ValidatedCreatePasswordCallback.class).setPassword(PASSWORD.toCharArray());
+        if (node.getCallback(ValidatedPasswordCallback.class) != null) {
+            node.getCallback(ValidatedPasswordCallback.class).setPassword(PASSWORD.toCharArray());
             moveToNext = true;
         }
         if (moveToNext) {

@@ -22,10 +22,10 @@ public class HiddenValueCallback extends AbstractCallback {
     private String id;
     private String defaultValue = "";
 
+    @Keep
     public HiddenValueCallback(JSONObject jsonObject, int index) {
         super(jsonObject, index);
     }
-
 
     @Override
     protected void setAttribute(String name, Object value) {
