@@ -33,6 +33,7 @@ import org.forgerock.authenticator.sample.view.activity.PushNotificationActivity
 public class MechanismIconLayout extends FrameLayout {
 
     private Context context;
+
     /**
      * Create an icon that a will represent a Mechanism.
      * @param context The context that the view is created from.

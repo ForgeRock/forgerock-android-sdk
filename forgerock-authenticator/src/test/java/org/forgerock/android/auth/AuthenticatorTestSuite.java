@@ -31,5 +31,5 @@ import org.junit.runners.Suite;
         PushMechanismTest.class,
         TOTPMechanismTest.class
 })
-public class AuthenticatorTestSuite {
+public class ,--,AuthenticatorTestSuite {
 }

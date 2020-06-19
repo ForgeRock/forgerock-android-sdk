@@ -60,7 +60,7 @@ public class AccountLayout extends RelativeLayout {
                 .placeholder(R.drawable.forgerock_placeholder)
                 .into(logoView);
 
-        // There should currently only be at most two mechanisms associated with the Identity
+        // There should currently only be at most two mechanisms associated with the Account
         List<MechanismIconLayout> icons = new ArrayList<>();
         icons.add((MechanismIconLayout) findViewById(R.id.iconA));
         icons.add((MechanismIconLayout) findViewById(R.id.iconB));

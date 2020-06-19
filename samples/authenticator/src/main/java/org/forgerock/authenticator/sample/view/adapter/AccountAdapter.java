@@ -21,6 +21,7 @@ import org.forgerock.authenticator.sample.R;
 import org.forgerock.authenticator.sample.view.layout.AccountDetailLayout;
 import org.forgerock.authenticator.sample.view.layout.AccountLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
