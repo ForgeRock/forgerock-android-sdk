@@ -47,7 +47,7 @@ public class AuthenticatorModel {
     public static AuthenticatorModel getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException("AuthenticatorModel is not initialized. " +
-                    "Please make sure to call AuthenticatorModel#init first.");
+                    "Please make sure to call AuthenticatorModel#getInstance passing the Context first.");
         }
         return INSTANCE;
     }

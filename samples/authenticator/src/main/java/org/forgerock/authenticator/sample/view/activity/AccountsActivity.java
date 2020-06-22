@@ -38,6 +38,7 @@ public class AccountsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
 
         authenticatorModel = AuthenticatorModel.getInstance(getApplicationContext());
@@ -73,8 +74,8 @@ public class AccountsActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setListVisibility();
                         accountAdapter.notifyDataSetChanged();
+                        setListVisibility();
                     }
                 });
             }

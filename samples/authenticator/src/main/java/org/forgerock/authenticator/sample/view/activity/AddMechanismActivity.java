@@ -83,7 +83,6 @@ public class AddMechanismActivity extends AppCompatActivity {
         AuthenticatorModel.getInstance().createMechanismFromUri(scanResult, new FRAListener<Mechanism>() {
             @Override
             public void onSuccess(final Mechanism mechanism) {
-                AuthenticatorModel.getInstance().notifyDataChanged();
                 AddMechanismActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -93,6 +92,7 @@ public class AddMechanismActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+                AuthenticatorModel.getInstance().notifyDataChanged();
             }
 
             @Override

@@ -45,25 +45,19 @@ public class PushParserTest {
     }
 
     @Test
-    public void testTEMP() throws MechanismParsingException {
-        Map<String, String> result = pushParser.map("pushauth://push/forgerock:test?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:c41aa93e-3197-4493-9a8d-b621dcacebfa1590379586344&issuer=Rm9yZ2VSb2Nr");
-        assertEquals(result.get(PushParser.ACCOUNT_NAME), "test");
-    }
-
-    @Test
     public void testShouldParseIssuer() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
         assertEquals(result.get(PushParser.ISSUER), "ForgeRock");
     }
 
     @Test
-    public void testShouldParseAuthenticationEndoint() throws MechanismParsingException {
+    public void testShouldParseAuthenticationEndpoint() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
         assertEquals(result.get(PushParser.AUTHENTICATION_ENDPOINT), "http://dev.openam.example.com:8081/openam/json/dev/push/sns/message?_action=authenticate");
     }
 
     @Test
-    public void testShouldParseRegistrationEndoint() throws MechanismParsingException {
+    public void testShouldParseRegistrationEndpoint() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
         assertEquals(result.get(PushParser.REGISTRATION_ENDPOINT), "http://dev.openam.example.com:8081/openam/json/dev/push/sns/message?_action=register");
     }
@@ -75,7 +69,7 @@ public class PushParserTest {
     }
 
     @Test
-    public void testShouldParseChallange() throws MechanismParsingException {
+    public void testShouldParseChallenge() throws MechanismParsingException {
         Map<String, String> result = pushParser.map("pushauth://push/forgerock:user?a=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&b=519387&r=aHR0cDovL2Rldi5vcGVuYW0uZXhhbXBsZS5jb206ODA4MS9vcGVuYW0vanNvbi9kZXYvcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&s=b3uYLkQ7dRPjBaIzV0t_aijoXRgMq-NP5AwVAvRfa_E&c=9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg&l=YW1sYmNvb2tpZT0wMQ&m=REGISTER:8be951c6-af83-438d-8f74-421bd18650421570561063169&issuer=Rm9yZ2VSb2Nr");
         assertEquals(result.get(PushParser.CHALLENGE), "9giiBAdUHjqpo0XE4YdZ7pRlv0hrQYwDz8Z1wwLLbkg=");
     }
