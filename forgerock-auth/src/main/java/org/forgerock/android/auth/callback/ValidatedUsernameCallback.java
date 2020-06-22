@@ -21,12 +21,12 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Getter
-public class ValidatedCreateUsernameCallback extends AbstractValidatedCallback {
+public class ValidatedUsernameCallback extends AbstractValidatedCallback {
 
     private String prompt;
 
     @Keep
-    public ValidatedCreateUsernameCallback(@NotNull JSONObject raw, int index) throws JSONException {
+    public ValidatedUsernameCallback(@NotNull JSONObject raw, int index) throws JSONException {
         super(raw, index);
     }
 

@@ -11,40 +11,37 @@ import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.TreeTest;
+import org.forgerock.android.auth.UsernamePasswordNodeListener;
 
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ValidatedCreateUsernameCallbackTest extends TreeTest {
+public class HiddenValueCallbackTest extends TreeTest {
 
     private int hit = 0;
 
     @Override
     protected String getTreeName() {
-        return "PlatformUsernamePasswordTest";
+        return "HiddenValueCallbackTest";
     }
 
     @Override
     protected NodeListenerFuture<FRSession> getNodeListenerFuture() {
-        return new NodeListenerFuture<FRSession>() {
+        return new UsernamePasswordNodeListener(context) {
             @Override
             public void onCallbackReceived(Node node) {
-                boolean moveToNext = false;
-                if (node.getCallback(ValidatedUsernameCallback.class) != null) {
-                    node.getCallback(ValidatedUsernameCallback.class).setUsername(USERNAME);
-                    moveToNext = true;
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("myId");
+                    assertThat(callback.getValue()).isEqualTo("myValue");
+                    callback.setValue("test");
+                    node.next(context, this );
                     hit++;
+                    return;
                 }
+                super.onCallbackReceived(node);
 
-                if (node.getCallback(ValidatedPasswordCallback.class) != null) {
-                    node.getCallback(ValidatedPasswordCallback.class).setPassword(PASSWORD.toCharArray());
-                    moveToNext = true;
-                    hit++;
-                }
-                if (moveToNext) {
-                    node.next(context, this);
-                }
             }
         };
     }
@@ -52,6 +49,6 @@ public class ValidatedCreateUsernameCallbackTest extends TreeTest {
     @Override
     public void testTree() throws ExecutionException, InterruptedException {
         super.testTree();
-        assertThat(hit).isEqualTo(2);
+        assertThat(hit).isEqualTo(1);
     }
 }

@@ -20,8 +20,8 @@ import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.callback.StringAttributeInputCallback;
-import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
-import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
+import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
@@ -170,14 +170,14 @@ public class FRUserMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }

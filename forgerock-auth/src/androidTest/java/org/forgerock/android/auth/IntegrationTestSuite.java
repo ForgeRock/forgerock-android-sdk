@@ -10,17 +10,16 @@ package org.forgerock.android.auth;
 import org.forgerock.android.auth.callback.ChoiceCallbackTest;
 import org.forgerock.android.auth.callback.ConfirmationCallbackTest;
 import org.forgerock.android.auth.callback.DeviceProfileCallbackTest;
-import org.forgerock.android.auth.callback.DeviceProfileCollectorCallbackAndroidTest;
+import org.forgerock.android.auth.callback.HiddenValueCallbackTest;
 import org.forgerock.android.auth.callback.KbaCreateCallbackTest;
 import org.forgerock.android.auth.callback.NameCallbackTest;
 import org.forgerock.android.auth.callback.PageCallback65Test;
 import org.forgerock.android.auth.callback.PageCallbackTest;
 import org.forgerock.android.auth.callback.PasswordCallbackTest;
 import org.forgerock.android.auth.callback.PollingWaitCallbackTest;
-import org.forgerock.android.auth.callback.ReCaptchaCallback;
+import org.forgerock.android.auth.callback.ReCaptchaCallbackTest;
 import org.forgerock.android.auth.callback.TermsAndConditionCallbackTest;
 import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallbackTest;
-import org.forgerock.android.auth.collector.FRDeviceIdentifierTest;
 import org.junit.experimental.categories.Categories;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -37,9 +36,10 @@ import org.junit.runners.Suite;
         PageCallback65Test.class,
         PasswordCallbackTest.class,
         PollingWaitCallbackTest.class,
-        ReCaptchaCallback.class,
+        ReCaptchaCallbackTest.class,
         TermsAndConditionCallbackTest.class,
         ValidatedCreateUsernameCallbackTest.class,
+        HiddenValueCallbackTest.class,
 
         //Other
         SetPersistentCookieTest.class,

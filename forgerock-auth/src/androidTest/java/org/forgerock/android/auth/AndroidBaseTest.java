@@ -16,7 +16,7 @@ import org.junit.Before;
 public abstract class AndroidBaseTest {
 
     protected Context context = ApplicationProvider.getApplicationContext();
-    public static String USERNAME = "bjensen";
+    public static String USERNAME = "tcruse";
     public static String PASSWORD = "password";
 
     protected String TREE = "Simple";

@@ -54,14 +54,14 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -175,8 +175,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    ValidatedCreateUsernameCallback callback = state.getCallback(ValidatedCreateUsernameCallback.class);
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    ValidatedUsernameCallback callback = state.getCallback(ValidatedUsernameCallback.class);
                     if (unique[0]) {
                         assertEquals("Username", callback.getPrompt());
                         try {
@@ -197,7 +197,7 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                                     .getJSONObject(4).optString("policyId"));
                             assertEquals(1, callback.getFailedPolicies().size());
                             assertEquals("UNIQUE", callback.getFailedPolicies().get(0).getPolicyRequirement());
-                            state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                            state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                             state.next(context, this);
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
@@ -211,8 +211,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -262,8 +262,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    ValidatedCreateUsernameCallback callback = state.getCallback(ValidatedCreateUsernameCallback.class);
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    ValidatedUsernameCallback callback = state.getCallback(ValidatedUsernameCallback.class);
                     if (minLength[0]) {
                         assertEquals("Username", callback.getPrompt());
                         try {
@@ -285,7 +285,7 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                             assertEquals(1, callback.getFailedPolicies().size());
                             assertEquals("MIN_LENGTH", callback.getFailedPolicies().get(0).getPolicyRequirement());
                             assertEquals(3, callback.getFailedPolicies().get(0).getParams().get("minLength"));
-                            state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                            state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                             state.next(context, this);
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
@@ -298,8 +298,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -348,14 +348,14 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -447,14 +447,14 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }

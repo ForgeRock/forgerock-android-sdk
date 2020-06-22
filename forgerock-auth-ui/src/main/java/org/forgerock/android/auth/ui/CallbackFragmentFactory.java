@@ -45,8 +45,8 @@ public class CallbackFragmentFactory {
         register(ChoiceCallback.class, ChoiceCallbackFragment.class);
         register(PasswordCallback.class, PasswordCallbackFragment.class);
         register(NameCallback.class, NameCallbackFragment.class);
-        register(ValidatedCreateUsernameCallback.class, ValidatedCreateUsernameCallbackFragment.class);
-        register(ValidatedCreatePasswordCallback.class, ValidatedCreatePasswordCallbackFragment.class);
+        register(ValidatedUsernameCallback.class, ValidatedUsernameCallbackFragment.class);
+        register(ValidatedPasswordCallback.class, ValidatedPasswordCallbackFragment.class);
         register(StringAttributeInputCallback.class, StringAttributeInputCallbackFragment.class);
         register(KbaCreateCallback.class, KbaCreateCallbackFragment.class);
         register(TermsAndConditionsCallback.class, TermsAndConditionsCallbackFragment.class);
