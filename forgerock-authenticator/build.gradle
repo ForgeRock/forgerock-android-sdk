@@ -10,7 +10,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-
+apply plugin: "com.adarshr.test-logger"
 
 android {
     compileSdkVersion 29
@@ -38,6 +38,9 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+        unitTests.all {
+            exclude '**/*TestSuite*'
+        }
     }
 
     compileOptions {
@@ -141,6 +144,24 @@ repositories {
     google()
 }
 
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses true
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+}
+
 /**
  * Dependencies
  */
@@ -168,7 +189,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.27.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.1'
     testImplementation 'org.robolectric:robolectric:4.3.1'
-    testCompileOnly "com.google.firebase:firebase-messaging:20.2.0"
+    testImplementation "com.google.firebase:firebase-messaging:20.2.0"
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
