@@ -102,7 +102,7 @@ class OathCodeGenerator {
             Logger.warn(TAG, e, "Invalid algorithm used: %s", oath.getAlgorithm());
             throw new OathMechanismException("Error generating next OTP code: Invalid algorithm used.", e);
         } catch (Base32String.DecodingException e) {
-            Logger.warn(TAG, e,"Could not decode secret: %s", oath.getSecret());
+            Logger.warn(TAG, e,"Could not decode secret.");
             throw new OathMechanismException("Error generating next OTP code: Could not decode secret.", e);
         }
 
