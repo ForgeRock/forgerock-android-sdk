@@ -303,31 +303,6 @@ public class PushFactoryTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldFailGoogleServicesInvalidState() {
-        String uri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
-                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
-                "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl(server, "register") + "&" +
-                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
-                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
-                "l=YW1sYmNvb2tpZT0wMQ==&" +
-                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
-                "issuer=Rm9yZ2Vyb2Nr&" +
-                "version=1";
-
-        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
-        try {
-            factory.createFromUri(uri, pushListenerFuture);
-            pushListenerFuture.get();
-            Assert.fail("Should throw MechanismCreationException");
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof MechanismCreationException);
-            assertTrue(e.getLocalizedMessage().contains("Missing configuration for Google Play Services"));
-        }
-    }
-
-    @Test
     public void testShouldFailGoogleServicesNotEnabled() {
         String uri = "pushauth://push/forgerock:demo?" +
                 "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
