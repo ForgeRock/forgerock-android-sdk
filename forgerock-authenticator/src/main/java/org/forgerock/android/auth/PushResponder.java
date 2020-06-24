@@ -123,7 +123,7 @@ class PushResponder {
             hmac.init(key);
         } catch (NoSuchAlgorithmException | IllegalArgumentException | InvalidKeyException e) {
             Logger.warn(TAG, e, "Failed to generate challenge-response for the secret" +
-                    " %s using algorithm %s.", base64Secret, JWT_ALGORITHM);
+                    " using algorithm %s.", JWT_ALGORITHM);
             throw new ChallengeResponseException("Failed to generate challenge-response.", e);
         }
         byte[] output = hmac.doFinal(challenge);

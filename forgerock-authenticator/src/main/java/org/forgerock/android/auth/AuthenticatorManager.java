@@ -107,7 +107,8 @@ class AuthenticatorManager {
     }
 
     Account getAccount(Mechanism mechanism) {
-        Logger.debug(TAG, "Retrieving Account with Mechanism ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+        String mechanismUID = mechanism.getMechanismUID();
+        Logger.debug(TAG, "Retrieving Account with Mechanism ID '%s' from the StorageClient.", mechanismUID);
 
         // Retrieve account from StorageClient
         Account account;
@@ -121,14 +122,15 @@ class AuthenticatorManager {
     }
 
     Mechanism getMechanism(PushNotification notification) {
-        Logger.debug(TAG, "Retrieving Mechanism with ID '%s' from the StorageClient.", notification.getMechanismUID());
+        String mechanismUID = notification.getMechanismUID();
+        Logger.debug(TAG, "Retrieving Mechanism with ID '%s' from the StorageClient.", mechanismUID);
 
         // Retrieve mechanism from StorageClient
         Mechanism mechanism;
         if(notification.getPushMechanism() != null) {
             mechanism = notification.getPushMechanism();
         } else {
-            mechanism = storageClient.getMechanismByUUID(notification.getMechanismUID());
+            mechanism = storageClient.getMechanismByUUID(mechanismUID);
         }
 
         return mechanism;
@@ -147,13 +149,14 @@ class AuthenticatorManager {
     }
 
     boolean removeMechanism(Mechanism mechanism) {
-        Logger.debug(TAG, "Removing Mechanism with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+        String mechanismUID = mechanism.getMechanismUID();
+        Logger.debug(TAG, "Removing Mechanism with ID '%s' from the StorageClient.", mechanismUID);
 
         // If PushMechanism mechanism, remove any notifications associated with it
         if(mechanism.getType().equals(Mechanism.PUSH)) {
             List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
             if(!notificationList.isEmpty()) {
-                Logger.debug(TAG, "Removing Push Notifications for Mechanism with ID '%s' from the StorageClient.", mechanism.getMechanismUID());
+                Logger.debug(TAG, "Removing Push Notifications for Mechanism with ID '%s' from the StorageClient.", mechanismUID);
                 for (PushNotification notification : notificationList) {
                     storageClient.removeNotification(notification);
                 }

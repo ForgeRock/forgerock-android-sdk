@@ -96,12 +96,12 @@ class OathFactory extends MechanismFactory {
             listener.onException(new MechanismCreationException("Invalid secret for this algorithm."));
             return;
         } catch (Base32String.DecodingException e) {
-            Logger.warn(TAG, "Unexpected error decoding the secret: %s", secretStr);
-            listener.onException(new MechanismCreationException("Could not decode secret:  " + secretStr, e));
+            Logger.warn(TAG, "Unexpected error decoding the secret.");
+            listener.onException(new MechanismCreationException("Could not decode secret.", e));
             return;
         } catch (NullPointerException e) {
-            Logger.warn(TAG, e,"Unexpected null whilst parsing secret: %s", secretStr);
-            listener.onException(new MechanismCreationException("Unexpected null whilst parsing secret: " + secretStr, e));
+            Logger.warn(TAG, e,"Unexpected null whilst parsing secret.");
+            listener.onException(new MechanismCreationException("Unexpected null whilst parsing secret.", e));
             return;
         }
 
