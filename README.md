@@ -1,316 +1,124 @@
-# ForgeRock Android SDK 
-ForgeRock Android SDK is a toolkit that allows developers communicate efficiently with ForgeRock Platform and ForgeRock Identity Cloud.
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ForgeRock/forgerock-android-sdk?color=%23f46200&label=Version&style=flat-square)](CHANGELOG.md)
 
-## Release Status
-SDK is **currently still in development** and scheduling for Beta release in October, 2019. Please note that SDK's interfaces, functionalities, and designs may change at any time prior to the official release.
+<p align="center">
+  <a href="https://github.com/ForgeRock">
+    <img src="https://www.forgerock.com/themes/custom/forgerock/images/fr-logo-horz-color.svg" alt="Logo">
+  </a>
+  <h2 align="center">ForgeRock SDK for Android</h2>
+  <p align="center">
+    <a href="./blob/master/CHANGELOG.md">Change Log</a>
+    ·
+    <a href="#support">Support</a>
+    ·
+    <a href="#documentation">Docs</a>
+  </p>
+  <hr/>
+</p>
+
+The ForgeRock Android SDK enables you to quickly integrate the [ForgeRock Identity Platform](https://www.forgerock.com/digital-identity-and-access-management-platform) into your Android apps.
+
+Use the SDKs to leverage _[Intelligent Authentication](https://www.forgerock.com/platform/access-management/intelligent-authentication)_ in [ForgeRock's Access Management (AM)](https://www.forgerock.com/platform/access-management) product, to easily step through each stage of an authentication tree by using callbacks.
+
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- REQUIREMENTS - Supported AM versions, API versions, any other requirements. -->
 
 ## Requirements
-* Android 5.0 (API Level 21) and above
 
-## Quick Start (FRAuth)
+* ForgeRock Identity Platform
+    * Access Management (AM) 6.5.2+
 
-### Add Forgerock Android SDK Dependency
-```gradle
+* Android API level 21+
+    * Android 5.0 (Lollipop), 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie)
+
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- INSTALLATION - If you want to start quickly with minimal assistance. -->
+
+## Installation
+
+```groovy
 dependencies {
-    ...
     implementation 'org.forgerock:forgerock-auth:<version>'
 }
 ```
-#### Optional Dependency
 
-| Feature        | Dependency | 
-| -------------  |:-------------:| 
-| UI Template    | implementation 'org.forgerock:forgerock-auth-ui:1.0.0| 
-| ReCAPTCHA     | implementation 'com.google.android.gms:play-services-safetynet:17.0.0'      |
-| Location for Device Profile | implementation 'com.google.android.gms:play-services-safetynet:17.0.0' |
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- QUICK START - Get one of the included samples up and running in as few steps as possible. -->
 
-### Add Compile Option
+## Getting Started
 
-```gradle
-android {
-    ...
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-```
+To try out the ForgeRock Android SDK sample, perform these steps:
 
-### Configure Forgerock Android SDK
+1. Setup an Access Management (AM) instance, as described in the **[Documentation](https://sdks.forgerock.com/android/01_prepare-am/)**.
+2. Clone this repo:
 
-#### Using res/values/strings.xml
+    ```
+    git clone https://github.com/ForgeRock/forgerock-android-sdk.git
+    ```
+3. Open the Android SDK project in [Android Studio](https://developer.android.com/studio).
+4. Open `/app/src/main/res/values/strings.xml` and edit the values to match your AM instance.
+5. On the **Run** menu, click **Run 'app'**.
 
-| Attribute        | Description           | Default Value  |
-| -----------------|---------------------| -----:|
-| forgerock_oauth_client_id     | OAuth2 client's `client_id` registered in OpenAM| N/A |
-| forgerock_oauth_redirect_uri     | OAuth2 client's `redirect_uri` registered in OpenAM      |   N/A |
-| forgerock_oauth_scope |   OAuth2 client's `scope` registered in OpenAM   | N/A
-| forgerock_oauth_threshold | Threshold in seconds to refresh OAuth2 token set before `access_token` expires through FRAuth SDK's token management feature. | 30 |
-| forgerock_url | Base URL of OpenAM | N/A |
-| forgerock_realm | `realm` in OpenAM | root |
-| forgerock_timeout | Timeout in seconds of each request that FRAuth SDK communicates to OpenAM. | 30 |
-| forgerock | SSO Account Label | N/A |
-| forgerock_account_name | SSO Account Name | N/A |
-| forgerock_auth_service | Authentication Tree name registered in OpenAM for user authentication. | N/A |
-| forgerock_registration_service | Authentication Tree name registered in OpenAM for user registration. | N/A |
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- DOCS - Link off to the AM-centric documentation at sdks.forgerock.com. -->
 
-See below for sample `strings.xml`:
+## Documentation
 
-```xml
-...
-<!-- OAuth -->
-<string name="forgerock_oauth_client_id" translatable="false">place holder</string>
-<string name="forgerock_oauth_redirect_uri" translatable="false">place holder</string>
-<string name="forgerock_oauth_scope" translatable="false">place holder</string>
-<integer name="forgerock_oauth_threshold" translatable="false">30</integer> <!-- in second -->
- 
-<!-- Server -->
-<string name="forgerock_url" translatable="false">place holder</string>
-<string name="forgerock_realm" translatable="false">place holder</string>
-<integer name="forgerock_timeout" translatable="false">30</integer>
- 
-<!-- SSO -->
-<string name="forgerock">place holder</string>
-<string name="forgerock_account_name" translatable="false">place holder</string>
- 
-<!-- Service -->
-<string name="forgerock_auth_service" translatable="false">place holder</string>
-<string name="forgerock_registration_service" translatable="false">place holder</string>
+Documentation for the SDKs is provided at **<https://sdks.forgerock.com>**, and includes topics such as:
 
-```
+* Introducting the SDK Features
+* Preparing AM for use with the SDKS
+* API Reference documentation
 
-#### SSO Configuration
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- SUPPORT -->
 
-Add `android:sharedUserId` to `AndroidManifest.xml` for the SSO Group
+## Support
 
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          android:sharedUserId="org.forgerock.singleSignOn"
-          package="org.forgerock.auth">
-```
+If you encounter any issues, be sure to check our **[Troubleshooting](https://backstage.forgerock.com/knowledge/kb/article/a68547609)** pages.
 
-Add `AuthenticatorService` to `AndroidManifest.xml` and reference to authenticator resource
+Support tickets can be raised whenever you need our assistance; here are some examples of when it is appropriate to open a ticket (but not limited to):
 
-```xml
-<service android:name="org.forgerock.android.auth.authenticator.AuthenticatorService">
-    <intent-filter>
-        <action android:name="android.accounts.AccountAuthenticator"/>
-    </intent-filter>
-    <meta-data
-        android:name="android.accounts.AccountAuthenticator"
-        android:resource="@xml/forgerock_authenticator" />
-</service>
-```
+* Suspected bugs or problems with ForgeRock software.
+* Requests for assistance - please look at the **[Documentation](https://sdks.forgerock.com)** and **[Knowledge Base](https://backstage.forgerock.com/knowledge/kb/home/g32324668)** first.
 
-Create `forgerock_authenticator.xml` under `res/xml` folder
+You can raise a ticket using **[BackStage](https://backstage.forgerock.com/support/tickets)**, our customer support portal that provides one stop access to ForgeRock services. 
 
-```xml
-<account-authenticator
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:accountType="org.forgerock"
-        android:icon="@mipmap/ic_logo"
-        android:smallIcon="@mipmap/ic_logo"
-        android:label="@string/forgerock"/>
+BackStage shows all currently open support tickets and allows you to raise a new one by clicking **New Ticket**.
 
-```
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- COLLABORATION -->
 
-### Add Authentication with Forgerock Android SDK 
+## Contributing
 
-#### Start the SDK
+If you would like to contribute to this project you can fork the repository, clone it to your machine and get started.
 
-```java
-FRAuth.start();
-```
+<!-- Note: Found elsewhere, but is Java-only //-->
+Be sure to check out our [Coding Style and Guidelines](https://wikis.forgerock.org/confluence/display/devcom/Coding+Style+and+Guidelines) page.
 
-#### Embedded Login
-`forgerock-authui` provides simple authentication template in your application.
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- LEGAL -->
 
-Include `LoginFragment` in your Activity or Fragment
+## Disclaimer
 
-```xml
-<fragment
-    android:id="@+id/loginFragment"
-    android:name="org.forgerock.android.auth.ui.LoginFragment"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" /
-```
+> This code is provided on an “as is” basis, without warranty of any kind, to the fullest extent permitted by law.
+>
+> ForgeRock does not warrant or guarantee the individual success developers may have in implementing the code on their development platforms or in production configurations.
+>
+> ForgeRock does not warrant, guarantee or make any representations regarding the use, results of use, accuracy, timeliness or completeness of any data or information relating to this code.
+>
+> ForgeRock disclaims all warranties, expressed or implied, and in particular, disclaims all warranties of merchantability, and warranties related to the code, or any service or software related thereto.
+>
+> ForgeRock shall not be liable for any direct, indirect or consequential damages or costs of any type arising out of any action taken by you or others related to the code.
 
-Here is an example of embedded the `forgerock-authui` to `fragment`:
+<!------------------------------------------------------------------------------------------------------------------------------------>
+<!-- LICENSE - Links to the MIT LICENSE file in each repo. -->
 
-```xml
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.main.HomeFragment">
+## License
 
-            <androidx.cardview.widget.CardView
-                    android:id="@+id/signIn"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:translationZ="2dp"
-                    app:cardCornerRadius="2dp">
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-                    <fragment
-                            android:id="@+id/loginFragment"
-                            android:name="org.forgerock.android.auth.ui.LoginFragment"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-            </androidx.cardview.widget.CardView>
+---
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+&copy; Copyright 2020 ForgeRock AS. All Rights Reserved
 
-```
-
-Implement `FRListener<Void>` in your Activity or Fragment to receive Authentication result.
-
-```java
-public class HomeFragment extends Fragment implements FRListener<Void> {
-    ...
-
-    @Override
-    public void onSuccess(Void result) {
-        //Retrieve the authenticated User
-        FRUser.getCurrentUser();
-    }
-
-    @Override
-    public void onException(Exception e) {
-        //Handle Exception
-    }
-
-}
-```
-
-## Quick Start (ForgeRock Authenticator Client)
-
-### Add Forgerock Android SDK Dependency
-```gradle
-dependencies {
-    ...
-    implementation 'org.forgerock:forgerock-authenticator:<version>'
-}
-```
-#### Optional Dependency
-
-| Feature        | Dependency |
-| -------------  |:-------------:|
-| Push Authentication | implementation 'com.google.firebase:firebase-messaging:<version>' |
-
-### Add Compile Option
-
-```gradle
-android {
-    ...
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-```
-
-### Add OTP Authentication with Forgerock Authenticator Android SDK
-
-#### Start the SDK
-
-```java
-FRAClient fraClient = new FRAClient.FRAClientBuilder()
-                .withContext(this)
-                .start();
-```
-
-#### Register an OTP mechanism using the URL extract from a QRCode
-
-Implement `FRAListener<Mechanism>` in your Activity or Fragment to receive Mechanism created object.
-
-```java
-fraClient.createMechanismFromUri("qrcode_scan_result", new FRAListener<Mechanism>() {
- 
-      @Override
-      public void onSuccess(Mechanism mechanism) {
-        // called when device enrollment was successful.
-      }
- 
-      @Override
-      public void onFailure(final MechanismCreationException e) {
-        // called when device enrollment has failed.
-      }
-    });
-```
-
-#### Obtain OTP tokens
-
-You can obtain the current and next tokens using the `OathTokenCode` object, which is available by calling  `Oath#getOathCode`.
-
-```java
-OathTokenCode token = oath.getOathTokenCode();
-String code = token.getCurrentCode();
-```
-
-### Add Push Authentication with Forgerock Authenticator Android SDK
-
-In the Push Authentication feature, the FCM deviceToken required is to perform the device registration.  The token may be passed to the SDK during the initialization or later on. The device token will not be stored by the SDK on the client.
-
-#### Start the SDK
-
-Register the device token during the SDK initialization:
-
-```java
-FRAClient fraClient = new FRAClient.FRAClientBuilder()
-                .withFcmToken("some-fcm-token");
-                .withContext(this)
-                .start();
-```
-or register the device token after the SDK initialization:
-
-```java
-fraClient.registerForRemoteNotifications("some-fcm-token");
-```
-
-#### Register a Push mechanism using the URL extract from a QRCode
-
-Implement `FRAListener<Mechanism>` in your Activity or Fragment to receive Mechanism created object.
-
-```java
-fraClient.createMechanismFromUri("qrcode_scan_result", new FRAListener<Mechanism>() {
- 
-      @Override
-      public void onSuccess(Mechanism mechanism) {
-        // called when device enrollment was successful.
-      }
- 
-      @Override
-      public void onFailure(final MechanismCreationException e) {
-        // called when device enrollment has failed.
-      }
-    });
-```
-
-#### Handling Push Authentication
-
-You will receive FCM Push notifications on `FirebaseMessagingService#onMessageReceived`. The `RemoteMessage` must be handled using the method `FRAClient#handleMessage`. It will return a PushNotification object which contains the `accept` and `deny` methods to handle the authentication request.
-
-```java
-public void onMessageReceived(final RemoteMessage message) {
-   PushNotification notification = fraClient.handleMessage(message);
-}
-```
-
-Push notification approval:
-```java
-pushNotification.accept(new FRAListener<Void>() {
- 
-      @Override
-      public void onSuccess(Void result) {
-        // called when accepting the push authentication request was successful.
-      }
- 
-      @Override
-      public void onFailure(final PushAuthenticationException e) {
-        // called when accepting the push authentication request has failed.
-      }
-    });
-```
-
+[forgerock-logo]: https://www.forgerock.com/themes/custom/forgerock/images/fr-logo-horz-color.svg "ForgeRock Logo"
