@@ -13,12 +13,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
-
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 3
-        versionName "2.0.0-beta"
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
