@@ -8,11 +8,9 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import androidx.test.core.app.ApplicationProvider;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +20,11 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 @RunWith(RobolectricTestRunner.class)
 public class ServerConfigTest {

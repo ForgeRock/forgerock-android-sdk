@@ -13,12 +13,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
-
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 2
-        versionName "1.0"
+        versionCode 3
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -47,7 +46,7 @@ android {
             ant.taskdef(name: 'delombok',
                     classname: 'lombok.delombok.ant.Tasks$Delombok',
                     classpath: configurations.delombok.asPath)
-            ant.delombok(verbose:'true', from:srcJava, to:"$buildDir/src-delomboked")
+            ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
         }
     }
 
@@ -107,7 +106,7 @@ bintray {
         version {
             name = project.version
             desc = 'Forgerock Android SDK'
-            released  = new Date()
+            released = new Date()
         }
     }
 }
@@ -143,11 +142,11 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 

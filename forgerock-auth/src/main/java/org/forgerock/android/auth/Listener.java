@@ -34,7 +34,7 @@ public class Listener {
      * @param listener The listener to listen for events
      * @param value    The Exception send with the event.
      */
-    public static void onException(final FRListener listener, final Exception value) {
+    public static void onException(final FRListener<?> listener, final Exception value) {
         if (listener != null) {
             listener.onException(value);
         }

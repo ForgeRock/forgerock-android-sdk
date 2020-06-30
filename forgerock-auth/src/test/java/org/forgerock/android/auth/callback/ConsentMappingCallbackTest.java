@@ -46,6 +46,10 @@ public class ConsentMappingCallbackTest {
                 "                    \"value\": false\n" +
                 "                },\n" +
                 "                {\n" +
+                "                    \"name\": \"message\",\n" +
+                "                    \"value\": \"Test Message\"\n" +
+                "                },\n" +
+                "                {\n" +
                 "                    \"name\": \"fields\",\n" +
                 "                    \"value\": [\n" +
                 "                        \"First Name\",\n" +
@@ -73,6 +77,7 @@ public class ConsentMappingCallbackTest {
         assertEquals("Actual Profile", callback.getAccessLevel());
         assertFalse(callback.isRequired());
         assertEquals("First Name", callback.getFields()[0]);
+        assertEquals("Test Message", callback.getMessage());
 
         callback.setAccept(true);
 

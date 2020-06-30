@@ -9,9 +9,11 @@ package org.forgerock.android.auth;
 
 import android.net.Uri;
 import android.util.Base64;
+
 import lombok.Getter;
 import lombok.NonNull;
 import okhttp3.*;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,12 +26,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
     private static final String CONTENT_TYPE = "Content-Type";
-    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final Action AUTHORIZE = new Action(Action.AUTHORIZE);
+    private static final Action EXCHANGE_TOKEN = new Action(Action.EXCHANGE_TOKEN);
+    private static final Action REFRESH_TOKEN = new Action(Action.REFRESH_TOKEN);
+    private static final Action REVOKE_TOKEN = new Action(Action.REVOKE_TOKEN);
 
     /**
      * The registered client identifier
@@ -64,7 +71,7 @@ public class OAuth2Client {
      * @param token    The SSO Token received with the result of {@link AuthService}
      * @param listener Listener that listens to changes resulting from OAuth endpoints .
      */
-    public void exchangeToken(@NonNull Token token, final FRListener<AccessToken> listener) {
+    public void exchangeToken(@NonNull SSOToken token, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchanging Access Token with SSO Token.");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
         try {
@@ -76,10 +83,11 @@ public class OAuth2Client {
 
             final PKCE pkce = generateCodeChallenge();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getAuthorizeUrl(token, pkce))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(AUTHORIZE)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -99,7 +107,7 @@ public class OAuth2Client {
 
                         @Override
                         public void onSuccess(String code) {
-                            token(code, pkce, handler, listener);
+                            token(token, code, pkce, handler, listener);
                         }
                     });
                 }
@@ -111,7 +119,7 @@ public class OAuth2Client {
         }
     }
 
-    public void refresh(@NonNull String refreshToken, final FRListener<AccessToken> listener) {
+    public void refresh(@NonNull SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Refreshing Access Token");
 
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -128,11 +136,12 @@ public class OAuth2Client {
                     .add(OAuth2.REFRESH_TOKEN, refreshToken)
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(REFRESH_TOKEN)
                     .build();
 
 
@@ -145,7 +154,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(response, listener);
+                    handler.handleTokenResponse(sessionToken, response, listener);
                 }
             });
 
@@ -167,11 +176,12 @@ public class OAuth2Client {
                     .add(OAuth2.TOKEN, token)
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getRevokeUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(REVOKE_TOKEN)
                     .build();
 
 
@@ -196,11 +206,12 @@ public class OAuth2Client {
     /**
      * Sends an token request to the authorization service.
      *
-     * @param code    The Authorization code.
-     * @param pkce    The Proof Key for Code Exchange
-     * @param handler Handle changes resulting from OAuth endpoints.
+     * @param sessionToken The Session Token
+     * @param code         The Authorization code.
+     * @param pkce         The Proof Key for Code Exchange
+     * @param handler      Handle changes resulting from OAuth endpoints.
      */
-    private void token(@NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
+    private void token(@NonNull SSOToken sessionToken, @NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchange Access Token with Authorization Code");
         try {
             FormBody.Builder builder = new FormBody.Builder();
@@ -213,11 +224,12 @@ public class OAuth2Client {
                     .add(OAuth2.CODE_VERIFIER, pkce.getCodeVerifier())
                     .build();
 
-            Request request = new Request.Builder()
+            okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getTokenUrl())
                     .post(body)
                     .header(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED)
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .tag(EXCHANGE_TOKEN)
                     .build();
 
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -228,7 +240,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(response, listener);
+                    handler.handleTokenResponse(sessionToken, response, listener);
                 }
 
             });
@@ -238,16 +250,18 @@ public class OAuth2Client {
         }
     }
 
-
     private URL getAuthorizeUrl(Token token, PKCE pkce) throws MalformedURLException, UnsupportedEncodingException {
-
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("authorize")
-                .appendQueryParameter(SSOToken.IPLANET_DIRECTORY_PRO, token.getValue())
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getAuthorizeEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getAuthorizeEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("authorize");
+        }
+        return new URL(builder
+                .appendQueryParameter(serverConfig.getCookieName(), token.getValue())
                 .appendQueryParameter(OAuth2.CLIENT_ID, clientId)
                 .appendQueryParameter(OAuth2.SCOPE, scope)
                 .appendQueryParameter(OAuth2.RESPONSE_TYPE, responseType)
@@ -258,26 +272,32 @@ public class OAuth2Client {
     }
 
     private URL getTokenUrl() throws MalformedURLException {
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("access_token")
-                .build().toString());
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getTokenEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getTokenEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("access_token");
+        }
+        return new URL(builder.build().toString());
     }
 
     private URL getRevokeUrl() throws MalformedURLException {
-        return new URL(Uri.parse(serverConfig.getUrl())
-                .buildUpon()
-                .appendPath("oauth2")
-                .appendPath("realms")
-                .appendPath(serverConfig.getRealm())
-                .appendPath("token")
-                .appendPath("revoke")
-                .build().toString());
-    }
 
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getRevokeEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getRevokeEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("token")
+                    .appendPath("revoke");
+        }
+        return new URL(builder.build().toString());
+    }
 
     private PKCE generateCodeChallenge() throws UnsupportedEncodingException {
         int encodeFlags = Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE;

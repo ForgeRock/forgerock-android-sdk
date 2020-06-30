@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.os.Build;
+
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;

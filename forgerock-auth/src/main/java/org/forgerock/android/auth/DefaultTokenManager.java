@@ -74,16 +74,17 @@ class DefaultTokenManager implements TokenManager {
                                Long cacheIntervalMillis,
                                Long threshold) {
 
-        Config config = Config.getInstance(context);
-        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, var -> new SecuredSharedPreferences(var
-                , ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS));
+        this.sharedPreferences = sharedPreferences == null ? new SecuredSharedPreferences(context,
+                ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
 
         Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());
 
-        this.oAuth2Client = config.applyDefaultIfNull(oAuth2Client);
+        this.oAuth2Client = oAuth2Client;
         this.accessTokenRef = new AtomicReference<>();
-        this.cacheIntervalMillis = config.applyDefaultIfNull(cacheIntervalMillis);
-        this.threshold = config.applyDefaultThresholdIfNull(threshold);
+        this.cacheIntervalMillis = cacheIntervalMillis == null
+                ? context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000 : cacheIntervalMillis;
+        this.threshold = threshold == null
+                ? context.getResources().getInteger(R.integer.forgerock_oauth_threshold) : threshold;
     }
 
     @SuppressLint("ApplySharedPref")
@@ -95,34 +96,42 @@ class DefaultTokenManager implements TokenManager {
                 .commit();
     }
 
-    /**
-     * Refresh the AccessToken if expired
-     *
-     * @return The AccessToken
-     */
     @Override
-    @WorkerThread
-    public AccessToken getAccessToken() throws AuthenticationRequiredException {
-        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
-        getAccessToken(future);
-        try {
-            return future.get();
-        } catch (Exception e) {
-            throw new AuthenticationRequiredException(e);
-        }
+    public void exchangeToken(@NonNull SSOToken token, FRListener<AccessToken> listener) {
+        oAuth2Client.exchangeToken(token, listener);
     }
 
     @Override
-    public void getAccessToken(FRListener<AccessToken> tokenListener) {
+    public void getAccessToken(AccessTokenVerifier verifier, FRListener<AccessToken> tokenListener) {
         AccessToken accessToken = getAccessTokenLocally();
         if (accessToken != null) {
             accessToken.setPersisted(true);
+
+            if (verifier != null && !verifier.isValid(accessToken)) {
+                //This can run in the background.
+                revoke(new FRListener<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        Listener.onException(tokenListener,
+                                new AuthenticationRequiredException("Access Token is not valid, authentication is required."));
+                    }
+
+                    @Override
+                    public void onException(Exception e) {
+                        Listener.onException(tokenListener,
+                                new AuthenticationRequiredException("Access Token is not valid, authentication is required."));
+                    }
+                });
+                return;
+            }
+
             if (accessToken.isExpired(threshold)) {
                 Logger.debug(TAG, "Access Token Expired!");
-                refresh(tokenListener);
+                refresh(accessToken, tokenListener);
             } else {
                 Listener.onSuccess(tokenListener, accessToken);
             }
+
         } else {
             Listener.onException(tokenListener,
                     new AuthenticationRequiredException("No Access Token, authentication is required."));
@@ -135,25 +144,8 @@ class DefaultTokenManager implements TokenManager {
         return sharedPreferences.getString(ACCESS_TOKEN, null) != null;
     }
 
-    @WorkerThread
     @Override
-    public AccessToken refresh() throws AuthenticationRequiredException {
-        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
-        refresh(future);
-        try {
-            return future.get();
-        } catch (Exception e) {
-            throw new AuthenticationRequiredException(e);
-        }
-    }
-
-    @Override
-    public void refresh(final FRListener<AccessToken> listener) {
-        AccessToken accessToken = getAccessTokenLocally();
-        if (accessToken == null) {
-            Listener.onException(listener, new AuthenticationRequiredException("Refresh Token does not exists."));
-            return;
-        }
+    public void refresh(@NonNull AccessToken accessToken, final FRListener<AccessToken> listener) {
 
         String refreshToken = accessToken.getRefreshToken();
         if (refreshToken == null) {
@@ -161,7 +153,7 @@ class DefaultTokenManager implements TokenManager {
             return;
         }
         clear();
-        oAuth2Client.refresh(refreshToken, new FRListener<AccessToken>() {
+        oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken token) {
                 persist(token);

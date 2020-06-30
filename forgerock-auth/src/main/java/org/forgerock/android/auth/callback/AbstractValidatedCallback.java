@@ -32,7 +32,7 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
      *
      * @return validation policies
      */
-    private List<String> policies;
+    private JSONObject policies;
 
     /**
      * Return the list of failed policies for this callback.
@@ -40,6 +40,8 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
      * @return list of failed policies
      */
     private List<FailedPolicy> failedPolicies;
+
+    private Boolean validateOnly;
 
     public AbstractValidatedCallback(JSONObject jsonObject, int index) throws JSONException {
         super(jsonObject, index);
@@ -49,29 +51,19 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
     protected void setAttribute(String name, Object value) {
         switch (name) {
             case "policies":
-                preparePolicy((JSONArray) value);
+                policies = ((JSONObject) value);
                 break;
             case "failedPolicies":
                 prepareFailedPolicy((JSONArray) value);
                 break;
+            case "validateOnly":
+                validateOnly = (Boolean) value;
             default:
                 //ignore
         }
     }
 
     public abstract String getPrompt();
-
-    private void preparePolicy(JSONArray array) {
-        List<String> list = new ArrayList<>();
-        try {
-            for (int i = 0; i < array.length(); i++) {
-                list.add(array.getString(i));
-            }
-        } catch (JSONException e) {
-           throw new RuntimeException(e);
-        }
-        policies = Collections.unmodifiableList(list);
-    }
 
     private void prepareFailedPolicy(JSONArray array) {
         List<AbstractValidatedCallback.FailedPolicy> list = new ArrayList<>();

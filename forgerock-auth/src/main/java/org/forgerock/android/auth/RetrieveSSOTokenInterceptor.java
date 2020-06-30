@@ -14,12 +14,12 @@ import org.forgerock.android.auth.exception.AuthenticationRequiredException;
  * Interceptor to intercept the received token and exchange to {@link AccessToken}.
  */
 @RequiredArgsConstructor
-class RetrieveSSOTokenInterceptor implements Interceptor {
+class RetrieveSSOTokenInterceptor implements Interceptor<Void> {
 
     private final SingleSignOnManager singleSignOnManager;
 
     @Override
-    public void intercept(final Chain chain, final Object input) {
+    public void intercept(final Chain chain, final Void input) {
 
         SSOToken ssoToken = singleSignOnManager.getToken();
         if (ssoToken != null) {

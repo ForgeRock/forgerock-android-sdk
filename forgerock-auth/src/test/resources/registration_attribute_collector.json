@@ -18,14 +18,24 @@
         },
         {
           "name": "policies",
-          "value": [
-            "valid-email-address-format",
-            "maximum-length"
-          ]
+          "value": {
+            "policies": [
+              {
+                "policyId": "valid-email-address-format"
+              },
+              {
+                "policyId": "maximum-length"
+              }
+            ]
+          }
         },
         {
           "name": "failedPolicies",
           "value": []
+        },
+        {
+          "name": "validateOnly",
+          "value": true
         },
         {
           "name": "value",
@@ -56,14 +66,24 @@
         },
         {
           "name": "policies",
-          "value": [
-            "minimum-length",
-            "maximum-length"
-          ]
+          "value": {
+            "policies": [
+              {
+                "policyId": "minimum-length"
+              },
+              {
+                "policyId": "maximum-length"
+              }
+            ]
+          }
         },
         {
           "name": "failedPolicies",
           "value": []
+        },
+        {
+          "name": "validateOnly",
+          "value": false
         },
         {
           "name": "value",
@@ -94,14 +114,24 @@
         },
         {
           "name": "policies",
-          "value": [
-            "minimum-length",
-            "maximum-length"
-          ]
+          "value": {
+            "policies": [
+              {
+                "policyId": "minimum-length"
+              },
+              {
+                "policyId": "maximum-length"
+              }
+            ]
+          }
         },
         {
           "name": "failedPolicies",
           "value": []
+        },
+        {
+          "name": "validateOnly",
+          "value": false
         },
         {
           "name": "value",

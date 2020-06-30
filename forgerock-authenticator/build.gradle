@@ -1,0 +1,199 @@
+/*
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.adarshr.test-logger"
+
+android {
+    compileSdkVersion 29
+
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 3
+        versionName "2.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            exclude '**/*TestSuite*'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        pickFirst '**/*.so'
+    }
+}
+
+/**
+ * Generate Javadoc
+ */
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    destinationDir = new File("$buildDir/generated-javadoc")
+    failOnError = false
+    ext.androidDoc = "${android.sdkDirectory}/docs/reference"
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.linksOffline("http://d.android.com/reference", ext.androidDoc)
+    options.links("http://docs.oracle.com/javase/7/docs/api/")
+    options.links("http://d.android.com/reference/")
+}
+
+/**
+ * JCenter Dependency Manager
+ */
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+group 'org.forgerock'
+
+project.version = System.getProperty("bintray.version")
+
+bintray {
+    user = System.getProperty("bintray.user")
+    key = System.getProperty("bintray.apiKey")
+
+    configurations = ['archives']
+
+    pkg {
+        repo = 'maven'
+        name = 'forgerock-authenticator'
+        userOrg = 'forgerock-sdk'
+        desc = 'ForgeRock SDK is a toolkit that allows developers communicate efficiently with ForgeRock OpenAM and ForgeRock Identity Cloud.'
+        licenses = ['MIT']
+        labels = ['aar', 'android', 'oauth', 'security', 'forgerock']
+        publicDownloadNumbers = true
+        vcsUrl = gitUrl
+        issueTrackerUrl = issueUrl
+        websiteUrl = siteUrl
+        version {
+            name = project.version
+            desc = 'Forgerock Android SDK'
+            released = new Date()
+        }
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'Forgerock Authenticator SDK'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses true
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+}
+
+/**
+ * Dependencies
+ */
+dependencies {
+    api project(':forgerock-core')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // JWT
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.14'
+
+    // Common
+    implementation 'androidx.annotation:annotation:1.1.0'
+
+    // FCM Notifications, make it optional for developer
+    compileOnly "com.google.firebase:firebase-messaging:20.2.0"
+
+    // Networking
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
+
+    // Testing
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'androidx.test:runner:1.2.0'
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.mockito:mockito-core:2.27.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.1'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+    testImplementation "com.google.firebase:firebase-messaging:20.2.0"
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+

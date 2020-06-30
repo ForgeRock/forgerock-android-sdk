@@ -8,9 +8,12 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import androidx.test.core.app.ApplicationProvider;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -40,16 +43,22 @@ public class BaseTest {
         ShadowLog.clear();
 
         MockitoAnnotations.initMocks(this);
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         server = new MockWebServer();
         server.start();
-        serverConfig = getServerConfig();
-        oAuth2Client = getOAuth2Client();
 
+        Config.getInstance().init(context);
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        serverConfig = Config.getInstance().getServerConfig();
+        oAuth2Client = getOAuth2Client();
     }
 
     @After
     public void shutdown() throws IOException {
         server.shutdown();
+        RequestInterceptorRegistry.getInstance().register(null);
         Config.reset();
     }
 
@@ -66,13 +75,6 @@ public class BaseTest {
         }
     }
 
-    protected ServerConfig getServerConfig() {
-        return ServerConfig.builder()
-                .context(context)
-                .url(getUrl())
-                .build();
-    }
-
     protected OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
                 .clientId("andy_app")
@@ -87,6 +89,13 @@ public class BaseTest {
                 .setResponseCode(statusCode)
                 .addHeader("Content-Type", "application/json")
                 .setBody(getJson(path)));
+    }
+
+    protected MockResponse response(String path, int statusCode) {
+        return new MockResponse()
+                .setResponseCode(statusCode)
+                .addHeader("Content-Type", "application/json")
+                .setBody(getJson(path));
     }
 
 }

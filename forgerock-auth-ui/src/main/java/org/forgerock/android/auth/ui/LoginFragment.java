@@ -15,11 +15,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import org.forgerock.android.auth.*;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+
+import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FRSession;
+import org.forgerock.android.auth.Listener;
+import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.AuthenticationTimeoutException;
@@ -31,7 +38,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     private static final String CURRENT_EMBEDDED_FRAGMENT = "CURRENT_EMBEDDED_FRAGMENT";
     private boolean loadOnStartup;
-    FRUserViewModel viewModel;
+    FRViewModel<FRSession> viewModel;
     ProgressBar progressBar;
     //Listener to listener for Login Event
     private FRListener<Void> listener;
@@ -44,7 +51,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
         progressBar = view.findViewById(R.id.progress);
         setListener(getParentFragment());
 
-        viewModel = ViewModelProviders.of(this).get(FRUserViewModel.class);
+        viewModel = new ViewModelProvider(this).get(FRSessionViewModel.class);
 
         if (savedInstanceState == null) {
             if (loadOnStartup) {
@@ -70,8 +77,9 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
         viewModel.getExceptionLiveData().observe(getViewLifecycleOwner(), e -> {
             progressBar.setVisibility(INVISIBLE);
-            if (!handleException(e)) {
-                cancel(e);
+            Exception exception = e.getValue();
+            if (exception != null && !handleException(exception)) {
+                cancel(exception);
             }
         });
 
@@ -90,10 +98,9 @@ public class LoginFragment extends Fragment implements AuthHandler {
         }
     }
 
-
     public void start() {
         progressBar.setVisibility(VISIBLE);
-        viewModel.login(getContext());
+        viewModel.authenticate(getContext());
     }
 
     @Override
@@ -104,16 +111,31 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     @Override
     public void cancel(Exception e) {
-        Listener.onException(listener, e );
+
+        //We clean up the child fragment(s), so it won't be recreated with lifecycle method
+        FragmentManager fm = getChildFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        for (Fragment fragment: fm.getFragments()) {
+            ft.remove(fragment);
+        }
+        ft.commit();
+        Listener.onException(listener, e);
     }
 
+    /**
+     * Handle Exception during Intelligent Tree Authentication
+     *
+     * @param e The Exception
+     * @return True if user can continue with the current Node (e.g Invalid password)
+     * , False if we cannot continue the flow.
+     */
     private boolean handleException(final Exception e) {
         if (e instanceof AuthenticationRequiredException || e instanceof AuthenticationTimeoutException) {
-            viewModel.login(getContext());
+            viewModel.authenticate(getContext());
         } else if (e instanceof AuthenticationException) {
             Fragment fragment = getChildFragmentManager().findFragmentByTag(CURRENT_EMBEDDED_FRAGMENT);
             if (fragment instanceof AuthenticationExceptionListener) {
-                ((AuthenticationExceptionListener)fragment).onAuthenticationException((AuthenticationException) e);
+                ((AuthenticationExceptionListener) fragment).onAuthenticationException((AuthenticationException) e);
             } else {
                 cancel(e);
             }
@@ -127,7 +149,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
     public void onInflate(@NonNull Context context, @NonNull AttributeSet attrs, @Nullable Bundle savedInstanceState) {
         super.onInflate(context, attrs, savedInstanceState);
         //Retrieve fragment configuration from attr.xml
-        TypedArray a = context.obtainStyledAttributes(attrs,R.styleable.LoginFragment);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoginFragment);
         this.loadOnStartup = a.getBoolean(R.styleable.LoginFragment_loadOnStartup, true);
         a.recycle();
     }

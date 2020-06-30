@@ -8,46 +8,51 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
-import androidx.lifecycle.*;
-import lombok.Getter;
+
+import androidx.lifecycle.ViewModel;
+
+import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
+import org.forgerock.android.auth.PolicyAdvice;
 
 /**
+ *
  * {@link ViewModel} Wrapper for {@link FRUser}
+ * @deprecated As of release 1.1, replaced by {@link FRSessionViewModel} ()}
  */
-public class FRUserViewModel extends ViewModel {
+@Deprecated
+public class FRUserViewModel extends FRViewModel<FRUser> {
 
-    @Getter
-    private MutableLiveData<SingleLiveEvent<Node>> nodeLiveData = new MutableLiveData<>();
-    @Getter
-    private MutableLiveData<FRUser> resultLiveData = new MutableLiveData<>();
-    @Getter
-    private MutableLiveData<Exception> exceptionLiveData = new MutableLiveData<>();
     private NodeListener<FRUser> nodeListener;
 
     public FRUserViewModel() {
         nodeListener = new NodeListener<FRUser>() {
             @Override
             public void onCallbackReceived(Node node) {
-                nodeLiveData.postValue(new SingleLiveEvent<>(node));
+                getNodeLiveData().postValue(new SingleLiveEvent<>(node));
             }
 
             @Override
             public void onSuccess(FRUser result) {
-                resultLiveData.postValue(result);
+                getResultLiveData().postValue(result);
             }
 
             @Override
             public void onException(Exception e) {
-                exceptionLiveData.postValue(e);
+                getExceptionLiveData().postValue(new SingleLiveEvent<>(e));
             }
         };
     }
 
-    public void login(Context context) {
+    public void authenticate(Context context) {
         FRUser.login(context, nodeListener);
+    }
+
+    @Override
+    public void authenticate(Context context, PolicyAdvice advice) {
+        throw new UnsupportedOperationException();
     }
 
     public void register(Context context) {

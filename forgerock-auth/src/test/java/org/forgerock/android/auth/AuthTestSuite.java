@@ -15,6 +15,7 @@ import org.junit.runners.Suite;
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
 
+        ServerConfigTest.class,
         ChoiceCallbackTest.class,
         ConfirmationCallbackTest.class,
         LocationCallbackTest.class,
@@ -24,11 +25,12 @@ import org.junit.runners.Suite;
         TextOutputCallbackTest.class,
         ReCaptchaCallbackTest.class,
         ConsentMappingCallbackTest.class,
+        DeviceProfileCollectorCallbackTest.class,
+        MetadataCallbackTest.class,
 
         AuthServiceMockTest.class,
         AuthServiceTest.class,
         OAuth2MockTest.class,
-        ServerConfigTest.class,
         AccessTokenTest.class,
 
         FRAuthMockTest.class,
@@ -38,10 +40,12 @@ import org.junit.runners.Suite;
         DefaultSingleSignOnManagerTest.class,
 
         FRUserMockTest.class,
+        FRSessionMockTest.class,
         RootDetectorTest.class,
         FRDeviceTest.class,
 
-        LoggerTest.class,
+        PersistentCookieTest.class,
+        PolicyAdviceTest.class
 
 })
 public class AuthTestSuite {

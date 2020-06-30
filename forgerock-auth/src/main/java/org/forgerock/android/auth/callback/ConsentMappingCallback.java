@@ -28,6 +28,7 @@ public class ConsentMappingCallback extends AbstractCallback {
     private String accessLevel;
     private boolean isRequired;
     private String[] fields;
+    private String message;
 
     @Keep
     public ConsentMappingCallback(JSONObject jsonObject, int index) {
@@ -60,6 +61,9 @@ public class ConsentMappingCallback extends AbstractCallback {
                         this.fields[i] = array.optString(i);
                     }
                 }
+                break;
+            case "message":
+                this.message = (String) value;
                 break;
             default:
                 //ignore

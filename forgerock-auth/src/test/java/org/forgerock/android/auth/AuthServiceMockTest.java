@@ -54,7 +54,7 @@ public class AuthServiceMockTest extends BaseTest {
                 .build();
 
         final List<Node> nodes = new ArrayList<>();
-        NodeListenerFuture<Token> nodeListenerFuture = new NodeListenerFuture<Token>() {
+        NodeListenerFuture<SSOToken> nodeListenerFuture = new NodeListenerFuture<SSOToken>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -469,6 +469,57 @@ public class AuthServiceMockTest extends BaseTest {
         } catch (ExecutionException e) {
             throw e.getCause();
         }
+
+    }
+
+    @Test
+    public void authTreeMetadataWithStageCallbackTest() throws InterruptedException, JSONException {
+
+        enqueue("/authTreeMockTest_Authenticate_MetadataWithStageCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+
+        final AuthService authService = AuthService.builder()
+                .serverConfig(serverConfig)
+                .name("Example")
+                .build();
+
+        final List<Node> nodes = new ArrayList<>();
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node node) {
+                node.getCallback(NameCallback.class).setName("tester");
+
+                //Different way to set Callback
+                PasswordCallback passwordCallback = node.getCallback(PasswordCallback.class);
+                passwordCallback.setPassword("password".toCharArray());
+                node.setCallback(passwordCallback);
+                node.next(context, this);
+                nodes.add(node);
+            }
+        };
+
+        authService.next(context, nodeListenerFuture);
+
+        server.takeRequest(); //next
+        RecordedRequest rr = server.takeRequest(); //PageCallback Post
+        String body = rr.getBody().readUtf8();
+
+        //Assert What received
+        assertEquals("UsernamePassword", nodes.get(0).getStage());
+        assertEquals(3, nodes.get(0).getCallbacks().size());
+
+        //Assert what sent to server
+        assertEquals(nodes.get(0).toJsonObject().toString(), body);
+        JSONObject jsonBody = new JSONObject(body);
+        assertEquals("tester", ((JSONObject) ((JSONObject) jsonBody.getJSONArray("callbacks").get(0))
+                .getJSONArray("input").get(0)).getString("value"));
+        assertEquals("password", ((JSONObject) ((JSONObject) jsonBody.getJSONArray("callbacks").get(1))
+                .getJSONArray("input").get(0)).getString("value"));
+        assertEquals("UsernamePassword", ((JSONObject) ((JSONObject) jsonBody.getJSONArray("callbacks").get(2))
+                .getJSONArray("output").get(0)).getJSONObject("value").getString("stage"));
+        assertEquals("UsernamePassword", jsonBody.getString("stage"));
 
     }
 

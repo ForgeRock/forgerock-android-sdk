@@ -7,7 +7,12 @@
 
 package org.forgerock.android.auth;
 
+import android.net.Uri;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
+
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.ApiException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +34,7 @@ public class OAuth2MockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -45,6 +50,10 @@ public class OAuth2MockTest extends BaseTest {
         assertEquals("Bearer", accessToken.getTokenType());
         assertEquals(3599, accessToken.getExpiresIn());
 
+        RecordedRequest recordedRequest = server.takeRequest(); //authorize
+        Assertions.assertThat(Uri.parse(recordedRequest.getPath()).
+                getQueryParameter(serverConfig.getCookieName())).isEqualTo(token.getValue());
+
     }
 
     @Test
@@ -53,7 +62,7 @@ public class OAuth2MockTest extends BaseTest {
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -75,7 +84,7 @@ public class OAuth2MockTest extends BaseTest {
                 .addHeader("Location", "http://www.example.com:8080/callback?error_description=Failed%20to%20get%20resource%20owner%20session%20from%20request&state=abc123&error=invalid_request")
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 
@@ -107,7 +116,7 @@ public class OAuth2MockTest extends BaseTest {
                 .setBody(errorMessage)
         );
 
-        Token token = new Token("ssoToken");
+        SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
 

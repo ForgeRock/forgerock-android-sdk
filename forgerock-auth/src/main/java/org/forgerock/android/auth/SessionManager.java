@@ -26,22 +26,18 @@ class SessionManager {
     private TokenManager tokenManager;
     @Getter
     private SingleSignOnManager singleSignOnManager;
-    @Getter
-    private OAuth2Client oAuth2Client;
-    private List<Interceptor> interceptors;
+    private List<Interceptor<?>> interceptors;
 
     @Builder
-    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager, OAuth2Client oAuth2Client) {
-        Config config = Config.getInstance();
+    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager)  {
 
-        this.tokenManager = config.applyDefaultIfNull(tokenManager);
-        this.singleSignOnManager = config.applyDefaultIfNull(singleSignOnManager);
-        this.oAuth2Client = config.applyDefaultIfNull(oAuth2Client);
+        this.tokenManager = tokenManager;
+        this.singleSignOnManager = singleSignOnManager;
 
         this.interceptors = Arrays.asList(
-                new RetrieveAccessTokenInterceptor(this.tokenManager),
                 new RetrieveSSOTokenInterceptor(this.singleSignOnManager),
-                new OAuthInterceptor(this.oAuth2Client),
+                new RetrieveAccessTokenInterceptor(this.tokenManager),
+                new OAuthInterceptor(this.tokenManager),
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }
 
@@ -57,12 +53,12 @@ class SessionManager {
     }
 
     /**
-     * Retrieve the {@link AccessToken}, if the {@link AccessToken} is expired, {@link AccessToken#refreshToken} will
+     * Retrieve the {@link AccessToken}, if the {@link AccessToken} is expired, {@link AccessToken#getRefreshToken()} will
      * be used.
      *
      * @param listener The Listener to listen for the result
      */
-    public void getAccessToken(final FRListener<AccessToken> listener) {
+    void getAccessToken(final FRListener<AccessToken> listener) {
         InterceptorHandler interceptorHandler = new InterceptorHandler(null, interceptors, listener, 0);
         interceptorHandler.proceed(null);
     }
@@ -72,14 +68,14 @@ class SessionManager {
      *
      * @return whether there are valid or invalid session stored on this manager.
      */
-    public boolean hasSession() {
+    boolean hasSession() {
         return (singleSignOnManager.hasToken() || tokenManager.hasToken());
     }
 
     /**
      * Close the session, all tokens will be removed.
      */
-    public void close() {
+    void close() {
         tokenManager.revoke(null);
         singleSignOnManager.revoke(null);
     }

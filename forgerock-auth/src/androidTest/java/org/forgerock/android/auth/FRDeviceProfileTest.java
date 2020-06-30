@@ -38,7 +38,7 @@ public class FRDeviceProfileTest {
     @Test
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
 
-        Config.getInstance(context);
+        Config.getInstance().init(context);
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
         FRDevice.getInstance().getProfile(future);
         JSONObject result = future.get();
@@ -66,7 +66,7 @@ public class FRDeviceProfileTest {
         assertTrue(result.getJSONObject("hardware").getJSONObject("display").optInt("orientation", -1) != -1);
         assertTrue(result.getJSONObject("hardware").getJSONObject("camera").optInt("numberOfCameras", -1) != -1);
 
-        assertNotNull(result.getJSONObject("browser").getString("agent"));
+        assertNotNull(result.getJSONObject("browser").getString("userAgent"));
 
         result.getJSONObject("network").getBoolean("connected");
 

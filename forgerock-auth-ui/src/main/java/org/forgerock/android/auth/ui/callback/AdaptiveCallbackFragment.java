@@ -27,6 +27,9 @@ import org.forgerock.android.auth.ui.AuthenticationExceptionListener;
 import org.forgerock.android.auth.ui.CallbackFragmentFactory;
 import org.forgerock.android.auth.ui.R;
 
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.CALLBACK;
+import static org.forgerock.android.auth.ui.CallbackFragmentFactory.NODE;
+
 
 /**
  * This Callback Fragment having the ability to change to suit different callback conditions.
@@ -36,9 +39,8 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
 
     private Node current;
     private LinearLayout errorLayout;
+    private LinearLayout callbackLayout;
     private AuthHandler authHandler;
-    private Button nextButton;
-    private Button cancelButton;
 
     public AdaptiveCallbackFragment() {
         // Required empty public constructor
@@ -48,7 +50,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            current = (Node) getArguments().getSerializable(CallbackFragmentFactory.NODE);
+            current = (Node) getArguments().getSerializable(NODE);
         }
         setAuthHandler(getParentFragment());
     }
@@ -71,15 +73,18 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_callbacks, container, false);
         errorLayout = view.findViewById(R.id.error);
-        nextButton = view.findViewById(R.id.next);
-        cancelButton = view.findViewById(R.id.cancel);
+        callbackLayout = view.findViewById(R.id.callbacks);
+        Button nextButton = view.findViewById(R.id.next);
+        Button cancelButton = view.findViewById(R.id.cancel);
 
         //Add callback to LinearLayout Vertically
         if (savedInstanceState == null) {
             for (Callback callback : current.getCallbacks()) {
-                Fragment fragment = CallbackFragmentFactory.getInstance().getFragment(callback);
-                getChildFragmentManager().beginTransaction()
-                        .add(R.id.callbacks, fragment).commit();
+                Fragment fragment = CallbackFragmentFactory.getInstance().getFragment(current, callback);
+                if (fragment != null) {
+                    getChildFragmentManager().beginTransaction()
+                            .add(R.id.callbacks, fragment).commit();
+                }
             }
         }
 
@@ -89,7 +94,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         });
 
         //Action to proceed cancel
-        cancelButton.setOnClickListener(v -> { authHandler.cancel(new OperationCanceledException()); });
+        cancelButton.setOnClickListener(v -> authHandler.cancel(new OperationCanceledException()));
 
         return view;
     }
@@ -111,7 +116,14 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     }
 
     @Override
+    public void cancel(Exception e) {
+        callbackLayout.setVisibility(View.GONE);
+        authHandler.cancel(e);
+    }
+
+    @Override
     public void next() {
+        callbackLayout.setVisibility(View.GONE);
         authHandler.next(current);
     }
 }

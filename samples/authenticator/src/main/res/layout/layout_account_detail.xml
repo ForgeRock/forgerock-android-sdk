@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (c) 2020 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+-->
+
+<org.forgerock.authenticator.sample.view.layout.AccountDetailLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fra="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/account_detail">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/refresh"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="5dp"
+            android:background="@android:color/transparent"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="150dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/icon_refresh"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:layout_marginLeft="60dp"
+            android:id="@+id/code_section">
+
+            <TextView
+                android:id="@+id/code"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:gravity="left|bottom"
+                tools:text="1234 5678"
+                android:textSize="24sp"
+                android:textColor="#4d4d4d"
+                android:textStyle="bold"
+                android:typeface="monospace"
+                />
+        </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progressOuter"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:layout_marginLeft="60dp"
+            android:layout_below="@id/code_section"
+            android:max="1000"
+            android:progress="1"
+            android:minHeight="2dp"
+            android:minWidth="150dp"
+            android:progressTint="#f96700"
+            tools:progress="200"
+            />
+    </RelativeLayout>
+
+
+
+</org.forgerock.authenticator.sample.view.layout.AccountDetailLayout>

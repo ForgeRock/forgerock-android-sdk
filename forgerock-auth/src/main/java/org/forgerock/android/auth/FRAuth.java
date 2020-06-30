@@ -40,86 +40,82 @@ public class FRAuth {
     public static void start(Context context) {
         if (!started) {
             started = true;
-            Config config = Config.getInstance(context);
+            Config.getInstance().init(context);
             //Clean up when server switch
             SharedPreferences sharedPreferences = context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
             String previousHost = sharedPreferences.getString("url", null);
             if (previousHost != null) {
-                if (!config.getUrl().equals(previousHost)) {
-                    SessionManager.builder().build().close();
+                if (!Config.getInstance().getUrl().equals(previousHost)) {
+                    Config.getInstance().getSessionManager().close();
                 }
             }
-            sharedPreferences.edit().putString("url", config.getUrl()).apply();
+            sharedPreferences.edit().putString("url", Config.getInstance().getUrl()).apply();
         }
     }
 
+    /**
+     * @deprecated As of release 1.1, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
+     */
+    @Deprecated
     @Builder
-    public FRAuth(@NonNull Context context,
-                  String serviceName,
-                  ServerConfig serverConfig,
-                  SessionManager sessionManager,
-                  @Singular List<Interceptor> interceptors) {
+    private FRAuth(@NonNull Context context,
+                   String serviceName,
+                   PolicyAdvice advice,
+                   ServerConfig serverConfig,
+                   SessionManager sessionManager,
+                   @Singular List<Interceptor<?>> interceptors) {
 
-        Config config = Config.getInstance(context);
+        Config.getInstance().init(context);
 
-        this.sessionManager = config.applyDefaultIfNull(sessionManager);
+        this.sessionManager = sessionManager == null ? Config.getInstance().getSessionManager() : sessionManager;
 
         AuthService.AuthServiceBuilder builder = AuthService.builder()
                 .name(serviceName)
-                .serverConfig(config.applyDefaultIfNull(serverConfig))
-                .interceptor(new SingleSignOnInterceptor(this.sessionManager.getSingleSignOnManager()))
-                .interceptor(new OAuthInterceptor(this.sessionManager.getOAuth2Client()))
-                .interceptor(new AccessTokenStoreInterceptor(this.sessionManager.getTokenManager()));
+                .advice(advice)
+                .serverConfig(serverConfig == null ? Config.getInstance().getServerConfig() : serverConfig)
+                .interceptor(new SingleSignOnInterceptor(
+                        this.sessionManager));
 
-        for (Interceptor interceptor : interceptors) {
+        for (Interceptor<?> interceptor : interceptors) {
             builder.interceptor(interceptor);
         }
 
         authService = builder.build();
     }
 
-    public static FRAuthBuilder builder() {
-        return new FRAuthBuilder();
-    }
-
     /**
-     * Move on to the next node in the auth process. If user session already exists, return the existing user session.
+     * Discard the existing user session and trigger the Authentication Tree flow process.
      *
      * @param context  The Application Context
      * @param listener Listener for receiving {@link FRAuth} related changes
+     * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
      */
-    public void next(final Context context, final NodeListener listener) {
-
-        sessionManager.getAccessToken(new FRListener<AccessToken>() {
-            @Override
-            public void onSuccess(AccessToken result) {
-                //Session exists, run the interceptor
-                authService.next(context, result, listener);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                //Start new flow
-                authService.next(context, listener);
-            }
-        });
-    }
-
-    /**
-     * Discard the existing user session and Move on to the next node in the auth process.
-     *
-     * @param context  The Application Context
-     * @param listener Listener for receiving {@link FRAuth} related changes
-     */
-    public void start(final Context context, final NodeListener listener) {
+    @Deprecated
+    public void start(final Context context, final NodeListener<?> listener) {
         sessionManager.close();
         authService.next(context, listener);
     }
 
-    public static class FRAuthBuilder {
+    static FRAuthBuilder builder() {
+        return new FRAuthBuilder();
+    }
+
+    /**
+     * Trigger the Authentication Tree flow process.
+     *
+     * @param context  The Application Context
+     * @param listener Listener for receiving {@link FRAuth} related changes
+     * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
+     */
+    @Deprecated
+    public void next(final Context context, final NodeListener<?> listener) {
+        authService.next(context, listener);
+    }
+
+    static class FRAuthBuilder {
 
         public FRAuth build() {
-            List<Interceptor> interceptors;
+            List<Interceptor<?>> interceptors;
             switch (this.interceptors == null ? 0 : this.interceptors.size()) {
                 case 0:
                     interceptors = java.util.Collections.emptyList();
@@ -128,10 +124,10 @@ public class FRAuth {
                     interceptors = java.util.Collections.singletonList(this.interceptors.get(0));
                     break;
                 default:
-                    interceptors = java.util.Collections.unmodifiableList(new ArrayList<Interceptor>(this.interceptors));
+                    interceptors = java.util.Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
-            return new FRAuth(context, serviceName, serverConfig, sessionManager, interceptors);
+            return new FRAuth(context, serviceName, advice, serverConfig, sessionManager, interceptors);
         }
     }
 }

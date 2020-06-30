@@ -8,23 +8,30 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.util.Pair;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.callback.StringAttributeInputCallback;
-import org.forgerock.android.auth.callback.ValidatedCreatePasswordCallback;
-import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallback;
+import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
+import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
+import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.hamcrest.collection.IsIn;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
@@ -34,6 +41,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -44,11 +52,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRUserMockTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
+    private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
 
     @Test
     public void frUserHappyPath() throws InterruptedException, ExecutionException, MalformedURLException, ParseException, JSONException {
@@ -62,9 +72,10 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -149,22 +160,24 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -189,9 +202,9 @@ public class FRUserMockTest extends BaseTest {
 
     @Test
     public void testAccessToken() throws Exception {
-       frUserHappyPath();
+        frUserHappyPath();
         AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
-       assertNotNull(accessToken.getValue());
+        assertNotNull(accessToken.getValue());
     }
 
     @Test
@@ -213,9 +226,11 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -266,9 +281,11 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -315,9 +332,11 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -361,12 +380,18 @@ public class FRUserMockTest extends BaseTest {
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
 
-        RecordedRequest rr = server.takeRequest(); //Start the Auth Service
-        rr = server.takeRequest(); //Post Name Callback
-        rr = server.takeRequest(); //Post Password Callback
-        rr = server.takeRequest(); //Post to /authorize endpoint
-        rr = server.takeRequest(); //Post to /access-token endpoint
-        rr = server.takeRequest(); //Post to /user-info endpoint
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=Test HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=Test");
+        rr = server.takeRequest(); //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate");
+        rr = server.takeRequest(); //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate");
+        rr = server.takeRequest(); //Post to /authorize endpoint GET /oauth2/realms/root/authorize?iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&client_id=andy_app&scope=openid&response_type=code&redirect_uri=https%3A%2F%2Fwww.example.com%3A8080%2Fcallback&code_challenge=PnQUh9V3GPr5qamcKZ39fcv4o81KJbhYls89L5rkVs8&code_challenge_method=S256 HTTP/1.1
+        Assertions.assertThat(rr.getPath()).startsWith("/oauth2/realms/root/authorize");
+        rr = server.takeRequest(); //Post to /access-token endpoint POST /oauth2/realms/root/access_token HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/oauth2/realms/root/access_token");
+        rr = server.takeRequest(); //Post to /user-info endpoint GET /oauth2/realms/root/userinfo HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/oauth2/realms/root/userinfo");
 
         AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
         assertNotNull(FRUser.getCurrentUser());
@@ -394,7 +419,7 @@ public class FRUserMockTest extends BaseTest {
             refreshTokenRevoke = revoke1;
             ssoTokenRevoke = revoke2;
         }
-        assertNotNull(ssoTokenRevoke.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
+        assertNotNull(ssoTokenRevoke.getHeader(serverConfig.getCookieName()));
         assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
 
         String body = refreshTokenRevoke.getBody().readUtf8();
@@ -429,10 +454,20 @@ public class FRUserMockTest extends BaseTest {
 
         assertFalse(Config.getInstance().getSessionManager().hasSession());
         rr = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        boolean verified = false;
+        if (rr.getPath().equals("/json/realms/root/sessions?_action=logout")) {
+            assertNotNull(rr.getHeader(serverConfig.getCookieName()));
+            assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
+            verified = true;
+        }
         rr = server.takeRequest(); //Post to /sessions?_action=logout endpoint
         //assertEquals("/json/realms/root/sessions?_action=logout", rr.getPath());
-        assertNotNull(rr.getHeader(SSOToken.IPLANET_DIRECTORY_PRO));
-        assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
+        if (rr.getPath().equals("/json/realms/root/sessions?_action=logout")) {
+            assertNotNull(rr.getHeader(serverConfig.getCookieName()));
+            assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
+            verified = true;
+        }
+        assertTrue(verified);
     }
 
     @Test
@@ -451,9 +486,10 @@ public class FRUserMockTest extends BaseTest {
                 .setBody("{}"));
 
 
-        Config.getInstance(context).setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
-        Config.getInstance(context).setUrl(getUrl());
-        Config.getInstance(context).setEncryptor(new MockEncryptor());
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -494,6 +530,451 @@ public class FRUserMockTest extends BaseTest {
         //Using the Access Token to revoke
         assertTrue(body.contains(accessToken.getValue()));
 
+
+    }
+
+    @Test
+    public void testAccessTokenAndSSOTokenRefreshWithSSOToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        SharedPreferences tokenManagerSharedPreferences = context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE);
+        SharedPreferences ssoManagerSharedPreferences = context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE);
+        Config.getInstance().setSharedPreferences(tokenManagerSharedPreferences);
+        Config.getInstance().setSsoSharedPreferences(ssoManagerSharedPreferences);
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+        FRSession.authenticate(context, "Example", nodeListenerFuture);
+
+        Assert.assertTrue(nodeListenerFuture.get() instanceof FRSession);
+
+        final TokenManager tokenManager = DefaultTokenManager.builder()
+                .sharedPreferences(tokenManagerSharedPreferences)
+                .context(context)
+                .build();
+
+        //Check AccessToken Storage
+        AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
+        assertNotNull(accessToken);
+        assertNotNull(accessToken.getValue());
+
+        //Check SSOToken Storage
+        final SingleSignOnManager singleSignOnManager = Config.getInstance().getSingleSignOnManager();
+        Token token = singleSignOnManager.getToken();
+        assertNotNull(token);
+        assertNotNull(token.getValue());
+
+        //Clear the Access Token
+        tokenManager.clear();
+
+        accessToken = FRUser.getCurrentUser().getAccessToken();
+        assertNotNull(accessToken.getValue());
+
+
+    }
+
+    @Test
+    public void testSSOEnabled() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        //For AppB
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        Assert.assertTrue(nodeListenerFuture.get() instanceof FRUser);
+
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service
+        rr = server.takeRequest(); //Post Name Callback
+        rr = server.takeRequest(); //Post Password Callback
+        rr = server.takeRequest(); //Post to /authorize endpoint
+        rr = server.takeRequest(); //Post to /access-token endpoint
+
+        //Switch to another App with Access Token does not exists
+        final TokenManager tokenManager = DefaultTokenManager.builder()
+                .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
+                .context(context)
+                .build();
+        tokenManager.clear();
+
+        assertNotNull(FRUser.getCurrentUser().getAccessToken());
+        rr = server.takeRequest(); //Post to /authorize endpoint
+        rr = server.takeRequest(); //Post to /access-token endpoint
+
+    }
+
+    @Test(expected = AlreadyAuthenticatedException.class)
+    public void testRelogin() throws Throwable {
+        frUserHappyPath();
+        NodeListenerFuture<FRUser> listener = new NodeListenerFuture<FRUser>() {
+            @Override
+            public void onCallbackReceived(Node node) {
+
+            }
+        };
+        FRUser.login(context, listener);
+        try {
+            listener.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test(expected = AlreadyAuthenticatedException.class)
+    public void testReregister() throws Throwable {
+        frUserHappyPath();
+
+        NodeListenerFuture<FRUser> listener = new NodeListenerFuture<FRUser>() {
+            @Override
+            public void onCallbackReceived(Node node) {
+
+            }
+        };
+        FRUser.register(context, listener);
+        try {
+            listener.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
+    }
+
+    @Test
+    public void testSessionTokenMismatch() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
+        frUserHappyPath();
+
+        //We have Access Token now.
+        assertTrue(Config.getInstance().getTokenManager().hasToken());
+
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success2.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRSession.authenticate(context, "any", nodeListenerFuture);
+        FRSession session = nodeListenerFuture.get();
+        assertEquals("dummy sso token", session.getSessionToken().getValue());
+
+        //Access Token should be removed
+        assertFalse(Config.getInstance().getTokenManager().hasToken());
+
+    }
+
+    @Test
+    public void testSessionTokenMatch() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
+        frUserHappyPath();
+
+        //We have Access Token now.
+        assertTrue(Config.getInstance().getTokenManager().hasToken());
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        //Return Same SSO Token
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRSession.authenticate(context, "any", nodeListenerFuture);
+        nodeListenerFuture.get();
+
+        //Access Token should not be removed
+        assertTrue(Config.getInstance().getTokenManager().hasToken());
+
+    }
+
+    @Test
+    public void testSessionTokenUpdated() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+        frUserHappyPath();
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+
+        SingleSignOnManager singleSignOnManager = Config.getInstance().getSingleSignOnManager();
+        TokenManager tokenManager = Config.getInstance().getTokenManager();
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        tokenManager.getAccessToken(null, future);
+
+        //Make sure the access token is bound to the Session Token
+        assertEquals(singleSignOnManager.getToken(), future.get().getSessionToken());
+
+        //Change the SSO Token, it can be done by SSO scenario.
+        singleSignOnManager.persist(new SSOToken("New Dummy SSO Token"));
+
+        FRUser.getCurrentUser().getAccessToken();
+
+    }
+
+    @Test
+    public void testCustomEndpointAndCookieName() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+
+        when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn(context.getString(R.string.forgerock_oauth_client_id));
+        when(mockContext.getString(R.string.forgerock_oauth_redirect_uri)).thenReturn(context.getString(R.string.forgerock_oauth_redirect_uri));
+        when(mockContext.getString(R.string.forgerock_oauth_scope)).thenReturn(context.getString(R.string.forgerock_oauth_scope));
+        when(mockContext.getString(R.string.forgerock_oauth_url)).thenReturn(context.getString(R.string.forgerock_oauth_url));
+        when(mockContext.getString(R.string.forgerock_realm)).thenReturn(context.getString(R.string.forgerock_realm));
+        Resources resources = Mockito.mock(Resources.class);
+        when(mockContext.getResources()).thenReturn(resources);
+        when(mockContext.getApplicationContext()).thenReturn(context);
+        when(resources.getInteger(R.integer.forgerock_timeout)).thenReturn(30);
+        when(resources.getStringArray(R.array.forgerock_pins)).thenReturn(context.getResources().getStringArray(R.array.forgerock_pins));
+        when(mockContext.getString(R.string.forgerock_authenticate_endpoint)).thenReturn("dummy/authenticate");
+        when(mockContext.getString(R.string.forgerock_authorize_endpoint)).thenReturn("dummy/authorize");
+        when(mockContext.getString(R.string.forgerock_token_endpoint)).thenReturn("dummy/token");
+        when(mockContext.getString(R.string.forgerock_userinfo_endpoint)).thenReturn("dummy/userinfo");
+        when(mockContext.getString(R.string.forgerock_revoke_endpoint)).thenReturn("dummy/revoke");
+        when(mockContext.getString(R.string.forgerock_logout_endpoint)).thenReturn("dummy/logout");
+        when(mockContext.getString(R.string.forgerock_cookie_name)).thenReturn("testCookieName");
+        when(mockContext.getString(R.string.forgerock_auth_service)).thenReturn("UsernamePassword");
+
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
+
+        Config.reset();
+        Config.getInstance().init(mockContext);
+        serverConfig = Config.getInstance().getServerConfig();
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(mockContext, nodeListenerFuture);
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        FRListenerFuture<UserInfo> future = new FRListenerFuture<>();
+        FRUser.getCurrentUser().getUserInfo(future);
+        future.get();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=UsernamePassword HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate?authIndexType=service&authIndexValue=UsernamePassword");
+        rr = server.takeRequest(); //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate");
+        rr = server.takeRequest(); //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/authenticate");
+        rr = server.takeRequest(); //Post to /authorize endpoint GET /oauth2/realms/root/authorize?iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&client_id=andy_app&scope=openid&response_type=code&redirect_uri=https%3A%2F%2Fwww.example.com%3A8080%2Fcallback&code_challenge=PnQUh9V3GPr5qamcKZ39fcv4o81KJbhYls89L5rkVs8&code_challenge_method=S256 HTTP/1.1
+        Assertions.assertThat(rr.getPath()).startsWith("/dummy/authorize");
+        rr = server.takeRequest(); //Post to /access-token endpoint POST /oauth2/realms/root/access_token HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/token");
+        rr = server.takeRequest(); //Post to /user-info endpoint GET /oauth2/realms/root/userinfo HTTP/1.1
+        Assertions.assertThat(rr.getPath()).isEqualTo("/dummy/userinfo");
+
+        AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
+        assertNotNull(FRUser.getCurrentUser());
+
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /sessions?_action=logout endpoint
+
+        //revoke Refresh Token and SSO Token are performed async
+        List<String> result = new ArrayList<>();
+        result.add("/dummy/logout?_action=logout");
+        result.add("/dummy/revoke");
+        assertThat(revoke1.getPath(), new IsIn(result));
+        assertThat(revoke2.getPath(), new IsIn(result));
+
+        RecordedRequest refreshTokenRevoke;
+        RecordedRequest ssoTokenRevoke;
+        if (revoke1.getPath().equals("/dummy/logout?_action=logout")) {
+            ssoTokenRevoke = revoke1;
+            refreshTokenRevoke = revoke2;
+        } else {
+            refreshTokenRevoke = revoke1;
+            ssoTokenRevoke = revoke2;
+        }
+        Assertions.assertThat(ssoTokenRevoke.getHeader("testCookieName")).isNotNull();
+        assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
+
+        String body = refreshTokenRevoke.getBody().readUtf8();
+        assertTrue(body.contains(OAuth2.TOKEN));
+        assertTrue(body.contains(OAuth2.CLIENT_ID));
+        assertTrue(body.contains(accessToken.getRefreshToken()));
+    }
+
+    @Test
+    public void testRequestInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
+
+        final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
+        RequestInterceptorRegistry.getInstance().register(request -> {
+            String action = ((Action)request.tag()).getType();
+            Pair<Action, Integer> pair = result.get(action);
+            if ( pair == null) {
+                result.put(action, new Pair<>((Action) request.tag(), 1));
+            } else {
+                result.put(action, new Pair<>((Action) request.tag(), pair.second + 1));
+            }
+            return request;
+        });
+
+        frUserHappyPath();
+
+        //Logout
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        FRUser.getCurrentUser().logout();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+        recordedRequest = server.takeRequest();
+
+        Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("type")).isEqualTo("service");
+        Assertions.assertThat(result.get("START_AUTHENTICATE").second).isEqualTo(1);
+        Assertions.assertThat(result.get("AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
+        Assertions.assertThat(result.get("AUTHENTICATE").first.getPayload().getString("type")).isEqualTo("service");
+        Assertions.assertThat(result.get("AUTHENTICATE").second).isEqualTo(2);
+        Assertions.assertThat(result.get("AUTHORIZE").second).isEqualTo(1);
+        Assertions.assertThat(result.get("EXCHANGE_TOKEN").second).isEqualTo(1);
+        Assertions.assertThat(result.get("REVOKE_TOKEN").second).isEqualTo(1);
+        Assertions.assertThat(result.get("LOGOUT").second).isEqualTo(1);
+        Assertions.assertThat(result.get("USER_INFO").second).isEqualTo(1);
 
     }
 }

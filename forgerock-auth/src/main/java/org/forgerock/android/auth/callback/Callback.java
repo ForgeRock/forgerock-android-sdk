@@ -20,7 +20,7 @@ public interface Callback extends Serializable {
      *
      * @return The callback id.
      */
-    int getId();
+    int get_id();
 
     /**
      * Return the raw content of the Callback.
@@ -28,7 +28,8 @@ public interface Callback extends Serializable {
     String getContent();
 
     /**
-     * Return the type of the Callback
+     * Return the type of the Callback, the type name should align with the Callback type returned
+     * from AM
      */
     String getType();
 

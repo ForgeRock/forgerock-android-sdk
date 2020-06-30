@@ -10,16 +10,31 @@ package org.forgerock.android.auth;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Interceptor to intercept the received token and exchange to {@link AccessToken}.
+ * Interceptor to intercept the received token.
  */
 @RequiredArgsConstructor
 class SingleSignOnInterceptor implements Interceptor<SSOToken> {
 
-    private final SingleSignOnManager singleSignOnManager;
+    private final SessionManager sessionManager;
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
-        singleSignOnManager.persist(token);
+        if (token == null) {
+            // trigger the tree with noSession parameter, we don't destroy the existing session.
+            chain.proceed(token);
+            return;
+        }
+        Token storedToken = sessionManager.getSingleSignOnManager().getToken();
+        //If token changed, we need to revoke Access Token
+        if (storedToken != null ) {
+            if (storedToken.equals(token)) {
+                chain.proceed(token);
+                return;
+            } else {
+                sessionManager.getTokenManager().revoke(null);
+            }
+        }
+        sessionManager.getSingleSignOnManager().persist(token);
         chain.proceed(token);
     }
 

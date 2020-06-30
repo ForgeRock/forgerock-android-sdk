@@ -65,10 +65,9 @@ public class ConfirmationCallback extends AbstractPromptCallback {
 
     private int optionType;
 
-    /**
-     *
-     */
     private int messageType;
+
+    private int selectedIndex;
 
     @Keep
     public ConfirmationCallback(JSONObject jsonObject, int index) throws JSONException {
@@ -84,6 +83,7 @@ public class ConfirmationCallback extends AbstractPromptCallback {
                 break;
             case "defaultOption":
                 this.defaultOption = (int) value;
+                this.selectedIndex = this.defaultOption;
                 break;
             case "messageType":
                 this.messageType = (int) value;
@@ -122,6 +122,7 @@ public class ConfirmationCallback extends AbstractPromptCallback {
      *                  {@code options} list.
      */
     public void setSelectedIndex(int selection) {
+        selectedIndex = selection;
         setValue(selection);
     }
 

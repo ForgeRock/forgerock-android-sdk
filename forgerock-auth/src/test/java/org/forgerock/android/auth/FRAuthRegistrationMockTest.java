@@ -7,8 +7,11 @@
 
 package org.forgerock.android.auth;
 
+import android.content.Context;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
+
 import org.forgerock.android.auth.callback.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +29,8 @@ import static org.junit.Assert.*;
 @RunWith(RobolectricTestRunner.class)
 public class FRAuthRegistrationMockTest extends BaseTest {
 
+    private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
+
     /**
      * Start -> Platform Username -> Platform Password -> Attribute Collector -> Create Object
      */
@@ -41,34 +46,22 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -81,38 +74,56 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 assertEquals("mail", email.getName());
                 assertEquals("Email Address", email.getPrompt());
                 assertTrue(email.isRequired());
-                assertEquals("valid-email-address-format", email.getPolicies().get(0));
-                assertEquals("maximum-length", email.getPolicies().get(1));
-                assertEquals(0, email.getFailedPolicies().size());
-                assertEquals("", email.getValue());
-                email.setValue("test@test.com");
+                try {
+                    assertEquals("valid-email-address-format", email.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(0).optString("policyId"));
+                    assertEquals("maximum-length", email.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(1).optString("policyId"));
+                    assertEquals(0, email.getFailedPolicies().size());
+                    assertEquals("", email.getValue());
+                    assertTrue(email.getValidateOnly());
+                    email.setValue("test@test.com");
 
-                assertEquals("givenName", firstName.getName());
-                assertEquals("First Name", firstName.getPrompt());
-                assertTrue(firstName.isRequired());
-                assertEquals("minimum-length", firstName.getPolicies().get(0));
-                assertEquals("maximum-length", firstName.getPolicies().get(1));
-                assertEquals(0, firstName.getFailedPolicies().size());
-                assertEquals("", firstName.getValue());
-                firstName.setValue("My First Name");
+                    assertEquals("givenName", firstName.getName());
+                    assertEquals("First Name", firstName.getPrompt());
+                    assertTrue(firstName.isRequired());
+                    assertEquals("minimum-length", firstName.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(0).optString("policyId"));
+                    assertEquals("maximum-length", firstName.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(1).optString("policyId"));
+                    assertFalse(firstName.getValidateOnly());
+                    assertEquals(0, firstName.getFailedPolicies().size());
+                    assertEquals("", firstName.getValue());
+                    firstName.setValue("My First Name");
 
-                assertEquals("sn", lastName.getName());
-                assertEquals("Last Name", lastName.getPrompt());
-                assertTrue(lastName.isRequired());
-                assertEquals("minimum-length", lastName.getPolicies().get(0));
-                assertEquals("maximum-length", lastName.getPolicies().get(1));
-                assertEquals(0, lastName.getFailedPolicies().size());
-                assertEquals("", lastName.getValue());
-                lastName.setValue("My Last Name");
+                    assertEquals("sn", lastName.getName());
+                    assertEquals("Last Name", lastName.getPrompt());
+                    assertTrue(lastName.isRequired());
+                    assertEquals("minimum-length", lastName.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(0).optString("policyId"));
+                    assertEquals("maximum-length", lastName.getPolicies()
+                            .getJSONArray("policies")
+                            .getJSONObject(1).optString("policyId"));
+                    assertEquals(0, lastName.getFailedPolicies().size());
+                    assertEquals("", lastName.getValue());
+                    assertFalse(lastName.getValidateOnly());
+                    lastName.setValue("My Last Name");
 
-                state.next(context, this);
-
+                    state.next(context, this);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
@@ -155,40 +166,43 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
-
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         final boolean[] unique = {false};
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    ValidatedCreateUsernameCallback callback = state.getCallback(ValidatedCreateUsernameCallback.class);
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    ValidatedUsernameCallback callback = state.getCallback(ValidatedUsernameCallback.class);
                     if (unique[0]) {
                         assertEquals("Username", callback.getPrompt());
-                        assertEquals("unique", callback.getPolicies().get(0));
-                        assertEquals("no-internal-user-conflict", callback.getPolicies().get(1));
-                        assertEquals("cannot-contain-characters", callback.getPolicies().get(2));
-                        assertEquals("minimum-length", callback.getPolicies().get(3));
-                        assertEquals("maximum-length", callback.getPolicies().get(4));
-                        assertEquals(1, callback.getFailedPolicies().size());
-                        assertEquals("UNIQUE", callback.getFailedPolicies().get(0).getPolicyRequirement());
-                        state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
-                        state.next(context, this);
+                        try {
+                            assertEquals("unique", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(0).optString("policyId"));
+                            assertEquals("no-internal-user-conflict", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(1).optString("policyId"));
+                            assertEquals("cannot-contain-characters", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(2).optString("policyId"));
+                            assertEquals("minimum-length", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(3).optString("policyId"));
+                            assertEquals("maximum-length", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(4).optString("policyId"));
+                            assertEquals(1, callback.getFailedPolicies().size());
+                            assertEquals("UNIQUE", callback.getFailedPolicies().get(0).getPolicyRequirement());
+                            state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
+                            state.next(context, this);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+
                         return;
                     }
                     unique[0] = true;
@@ -197,8 +211,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -217,9 +231,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
     }
 
@@ -239,41 +253,43 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
-
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
         final boolean[] minLength = {false};
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    ValidatedCreateUsernameCallback callback = state.getCallback(ValidatedCreateUsernameCallback.class);
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    ValidatedUsernameCallback callback = state.getCallback(ValidatedUsernameCallback.class);
                     if (minLength[0]) {
                         assertEquals("Username", callback.getPrompt());
-                        assertEquals("unique", callback.getPolicies().get(0));
-                        assertEquals("no-internal-user-conflict", callback.getPolicies().get(1));
-                        assertEquals("cannot-contain-characters", callback.getPolicies().get(2));
-                        assertEquals("minimum-length", callback.getPolicies().get(3));
-                        assertEquals("maximum-length", callback.getPolicies().get(4));
-                        assertEquals(1, callback.getFailedPolicies().size());
-                        assertEquals("MIN_LENGTH", callback.getFailedPolicies().get(0).getPolicyRequirement());
-                        assertEquals(3, callback.getFailedPolicies().get(0).getParams().get("minLength"));
-                        state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
-                        state.next(context, this);
+                        try {
+                            assertEquals("unique", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(0).optString("policyId"));
+                            assertEquals("no-internal-user-conflict", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(1).optString("policyId"));
+                            assertEquals("cannot-contain-characters", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(2).optString("policyId"));
+                            assertEquals("minimum-length", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(3).optString("policyId"));
+                            assertEquals("maximum-length", callback.getPolicies()
+                                    .getJSONArray("policies")
+                                    .getJSONObject(4).optString("policyId"));
+                            assertEquals(1, callback.getFailedPolicies().size());
+                            assertEquals("MIN_LENGTH", callback.getFailedPolicies().get(0).getPolicyRequirement());
+                            assertEquals(3, callback.getFailedPolicies().get(0).getParams().get("minLength"));
+                            state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
+                            state.next(context, this);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
                         return;
                     }
                     minLength[0] = true;
@@ -282,8 +298,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -302,9 +318,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
 
     }
 
@@ -324,34 +340,22 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -384,9 +388,9 @@ public class FRAuthRegistrationMockTest extends BaseTest {
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector
@@ -435,34 +439,22 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
 
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .oAuth2Client(oAuth2Client)
-                        .tokenManager(new DoNothingTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
             @Override
             public void onCallbackReceived(Node state) {
-                if (state.getCallback(ValidatedCreateUsernameCallback.class) != null) {
-                    state.getCallback(ValidatedCreateUsernameCallback.class).setUsername("tester");
+                if (state.getCallback(ValidatedUsernameCallback.class) != null) {
+                    state.getCallback(ValidatedUsernameCallback.class).setUsername("tester");
                     state.next(context, this);
                     return;
                 }
 
-                if (state.getCallback(ValidatedCreatePasswordCallback.class) != null) {
-                    state.getCallback(ValidatedCreatePasswordCallback.class).setPassword("password".toCharArray());
+                if (state.getCallback(ValidatedPasswordCallback.class) != null) {
+                    state.getCallback(ValidatedPasswordCallback.class).setPassword("password".toCharArray());
                     state.next(context, this);
                     return;
                 }
@@ -483,18 +475,18 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 }
 
                 TermsAndConditionsCallback termsAndConditionsCallback = state.getCallback(TermsAndConditionsCallback.class);
-                assertEquals("1.0", termsAndConditionsCallback.getVersion() );
-                assertEquals("This is a demo for Terms & Conditions", termsAndConditionsCallback.getTerms() );
-                assertEquals("2019-07-11T22:23:55.737Z", termsAndConditionsCallback.getCreateDate() );
+                assertEquals("1.0", termsAndConditionsCallback.getVersion());
+                assertEquals("This is a demo for Terms & Conditions", termsAndConditionsCallback.getTerms());
+                assertEquals("2019-07-11T22:23:55.737Z", termsAndConditionsCallback.getCreateDate());
                 termsAndConditionsCallback.setAccept(true);
 
                 state.next(context, this);
             }
         };
 
-        frAuth.next(context, nodeListenerFuture);
+        FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertTrue(nodeListenerFuture.get() instanceof AccessToken);
+        Assert.assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector

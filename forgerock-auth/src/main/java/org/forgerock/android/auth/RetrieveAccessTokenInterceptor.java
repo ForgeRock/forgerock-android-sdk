@@ -13,25 +13,30 @@ import lombok.RequiredArgsConstructor;
  * Interceptor to intercept the received token and exchange to {@link AccessToken}.
  */
 @RequiredArgsConstructor
-class RetrieveAccessTokenInterceptor implements Interceptor {
+class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
     private final TokenManager tokenManager;
 
     @Override
-    public void intercept(final Chain chain, final Object input) {
+    public void intercept(final Chain chain, final SSOToken sessionToken) {
 
-        tokenManager.getAccessToken(new FRListener<AccessToken>() {
-            @Override
-            public void onSuccess(AccessToken result) {
-                chain.getListener().onSuccess(result);
-            }
+        //With Verifier to verify the token is associated with the Session Token
+        tokenManager.getAccessToken(accessToken -> accessToken.getSessionToken() != null &&
+                        accessToken.getSessionToken().equals(sessionToken)
+                , new FRListener<AccessToken>() {
+                    @Override
+                    public void onSuccess(AccessToken result) {
+                        //We don't have to proceed to next, we have the AccessToken already
+                        //Response to caller immediately
+                        Listener.onSuccess(chain.getListener(), result);
+                    }
 
-            @Override
-            public void onException(Exception e) {
-                //If cannot get the AccessToken, process to next interceptor in the chain.
-                chain.proceed(input);
-            }
-        });
+                    @Override
+                    public void onException(Exception e) {
+                        //If cannot get the AccessToken, process to next interceptor in the chain.
+                        chain.proceed(sessionToken);
+                    }
+                });
     }
 
 }

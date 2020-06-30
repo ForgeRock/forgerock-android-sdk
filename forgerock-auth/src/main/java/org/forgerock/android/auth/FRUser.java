@@ -8,9 +8,13 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
 import androidx.annotation.WorkerThread;
-import lombok.RequiredArgsConstructor;
+
+import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+
+import lombok.RequiredArgsConstructor;
 
 public class FRUser {
 
@@ -20,8 +24,7 @@ public class FRUser {
     private SessionManager sessionManager;
 
     private FRUser() {
-        sessionManager = SessionManager.builder()
-                .build();
+        sessionManager = Config.getInstance().getSessionManager();
     }
 
     /**
@@ -81,7 +84,6 @@ public class FRUser {
 
         UserService.builder()
                 .serverConfig(Config.getInstance().getServerConfig())
-                .sessionManager(sessionManager)
                 .build()
                 .userinfo(new FRListener<UserInfo>() {
                     @Override
@@ -97,35 +99,56 @@ public class FRUser {
     }
 
     /**
-     * Trigger the user login process, the login service name can be defined under <b>string.xml</b> file with
+     * Trigger the user login process, the login service name is defined under <b>string.xml</b> file with
      * <b>forgerock_auth_service</b>
      *
      * @param context  The Application Context
      * @param listener Listener to listen login event.
+     * <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
      */
     public static void login(Context context, final NodeListener<FRUser> listener) {
-        createFRAuth(context, context.getString(R.string.forgerock_auth_service))
-                .next(context, listener);
-    }
+        SessionManager sessionManager = Config.getInstance().getSessionManager();
 
-    private static FRAuth createFRAuth(Context context, String serviceName) {
+        if (sessionManager.hasSession() ) {
+            Listener.onException(listener, new AlreadyAuthenticatedException("User is already authenticated"));
+            return;
+        }
+
+        createFRAuth(context, context.getString(R.string.forgerock_auth_service), sessionManager)
+                .next(context, listener);
+
+   }
+
+    private static FRAuth createFRAuth(Context context, String serviceName, SessionManager sessionManager) {
         return FRAuth.builder()
                 .serviceName(serviceName)
                 .context(context)
+                .serverConfig(Config.getInstance().getServerConfig())
+                .sessionManager(sessionManager)
+                .interceptor(new OAuthInterceptor(sessionManager.getTokenManager()))
+                .interceptor(new AccessTokenStoreInterceptor(sessionManager.getTokenManager()))
                 .interceptor(new UserInterceptor())
                 .build();
     }
 
     /**
-     * Trigger the user login process, the registration service name can be defined under <b>string.xml</b> file with
+     * Trigger the user registration process, the registration service name is defined under <b>string.xml</b> file with
      * <b>forgerock_registration_service</b>
      *
      * @param context  The Application Context
-     * @param listener Listener to listen login event.
+     * @param listener Listener to listen register event.
+     * <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
      */
     public static void register(Context context, NodeListener<FRUser> listener) {
-        createFRAuth(context, context.getString(R.string.forgerock_registration_service))
-                .start(context, listener);
+        SessionManager sessionManager = Config.getInstance().getSessionManager();
+
+        if (sessionManager.hasSession() ) {
+            Listener.onException(listener, new AlreadyAuthenticatedException("User is already authenticated"));
+            return;
+        }
+
+        createFRAuth(context, context.getString(R.string.forgerock_registration_service), sessionManager)
+                .next(context, listener);
     }
 
     @RequiredArgsConstructor

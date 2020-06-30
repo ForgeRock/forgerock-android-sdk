@@ -48,7 +48,9 @@ public interface DeviceCollector extends Interceptor<JSONObject> {
      * @param container  The container for the collected data.
      * @param collectors List of {@link DeviceCollector}
      */
-    default void collect(Context context, FRListener<JSONObject> listener, JSONObject container, List<? extends Interceptor> collectors) {
+    default void collect(Context context, FRListener<JSONObject> listener,
+                         JSONObject container,
+                         List<DeviceCollector> collectors) {
         InterceptorHandler interceptorHandler = InterceptorHandler.builder()
                 .context(context)
                 .interceptors(collectors)
@@ -74,11 +76,10 @@ public interface DeviceCollector extends Interceptor<JSONObject> {
 
             @Override
             public void onException(Exception e) {
+                //Continue to collect.
                 chain.proceed(data);
             }
         });
 
     }
-
-
 }

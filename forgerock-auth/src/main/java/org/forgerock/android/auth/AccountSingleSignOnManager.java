@@ -20,13 +20,19 @@ import android.os.Build;
 import android.util.Base64;
 
 import org.forgerock.android.auth.authenticator.AuthenticatorService;
+import org.json.JSONArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.Builder;
 import lombok.NonNull;
+
+import static java.util.Collections.emptySet;
 
 /**
  * Manage SSO Token with {@link AccountManager} as the storage.
@@ -41,6 +47,7 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
     private static final String ACCOUNT_TYPE = "accountType";
     private static final String ORG_FORGEROCK_V_1_SSO_KEYS = "org.forgerock.v1.SSO_KEYS";
     private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
+    private static final String COOKIES = "org.forgerock.v1.COOKIES";
 
     private String accountType;
     private Encryptor encryptor;
@@ -49,7 +56,6 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
 
     @Builder
     public AccountSingleSignOnManager(@NonNull Context context, Encryptor encryptor) throws Exception {
-        Config config = Config.getInstance(context);
         try {
             this.accountType = getAccountType(context);
         } catch (Exception e) {
@@ -58,26 +64,44 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             throw e;
         }
         this.accountManager = AccountManager.get(context);
-        this.account = new Account(config.getAccountName(), accountType);
-        this.encryptor = config.applyDefaultIfNull(encryptor, context, this::getEncryptor);
+        this.account = new Account(context.getString(R.string.forgerock_account_name), accountType);
+        this.encryptor = encryptor == null ? getEncryptor(context): encryptor;
         Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
     }
 
     @Override
     public void persist(SSOToken token) {
-        persist(token, true);
+        persist(SSO_TOKEN, token.getValue().getBytes(), true);
     }
 
-    private void persist(SSOToken token, boolean retry) {
+    @Override
+    public void persist(Collection<String> cookies) {
+        if (cookies.isEmpty()) {
+            persist(COOKIES, null, true);
+            return;
+        }
+        JSONArray array = new JSONArray();
+        for (String s : cookies) {
+            array.put(s);
+        }
+        persist(COOKIES, array.toString().getBytes(), true);
+
+    }
+
+    private void persist(String alias, byte[] data, boolean retry) {
         accountManager.addAccountExplicitly(account, null, null);
         try {
-            accountManager.setUserData(account, SSO_TOKEN,
-                    Base64.encodeToString(encryptor.encrypt(token.getValue().getBytes()), Base64.DEFAULT));
+            if (data == null) {
+                accountManager.setUserData(account, alias, null);
+            } else {
+                accountManager.setUserData(account, alias,
+                        Base64.encodeToString(encryptor.encrypt(data), Base64.DEFAULT));
+            }
         } catch (Exception e) {
             try {
                 encryptor.reset();
                 if (retry) {
-                    persist(token, false);
+                    persist(alias, data, false);
                 } else {
                     throw new RuntimeException(e);
                 }
@@ -86,6 +110,7 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             }
         }
     }
+
 
     @Override
     public void clear() {
@@ -114,9 +139,28 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                 return null;
             }
         } catch (Exception e) {
+            Logger.warn(TAG, e, "Failed to decrypt data");
             return null;
         }
+    }
 
+    @Override
+    public Collection<String> getCookies() {
+        try {
+            String encryptedCookies = accountManager.getUserData(account, COOKIES);
+            if (encryptedCookies != null) {
+                JSONArray array = new JSONArray(new String(encryptor.decrypt(Base64.decode(encryptedCookies, Base64.DEFAULT))));
+                Set<String> set = new HashSet<>();
+                for (int i = 0; i < array.length(); i++) {
+                    set.add(array.getString(i));
+                }
+                return set;
+            } else {
+                return emptySet();
+            }
+        } catch (Exception e) {
+            return emptySet();
+        }
     }
 
     @Override

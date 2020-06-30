@@ -15,11 +15,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class OAuthInterceptor implements Interceptor<SSOToken> {
 
-    private final OAuth2Client oAuth2Client;
+    private final TokenManager tokenManager;
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
-        oAuth2Client.exchangeToken(token, new FRListener<AccessToken>() {
+        tokenManager.exchangeToken(token, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken accessToken) {
                 chain.proceed(accessToken);

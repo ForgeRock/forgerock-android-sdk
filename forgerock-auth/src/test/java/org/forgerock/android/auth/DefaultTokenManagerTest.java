@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 
@@ -37,7 +38,7 @@ public class DefaultTokenManagerTest extends BaseTest {
     }
 
     @Test
-    public void storeAccessToken() throws AuthenticationRequiredException {
+    public void storeAccessToken() throws Throwable {
 
         TokenManager tokenManager = DefaultTokenManager.builder()
                 .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
@@ -54,7 +55,7 @@ public class DefaultTokenManagerTest extends BaseTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken = tokenManager.getAccessToken();
+        AccessToken storedAccessToken = getAccessToken(tokenManager);
         assertEquals("access token", storedAccessToken.getValue());
         assertEquals("id token", storedAccessToken.getIdToken());
         assertTrue(storedAccessToken.getScope().contains("openid"));
@@ -65,7 +66,7 @@ public class DefaultTokenManagerTest extends BaseTest {
     }
 
     @Test(expected = AuthenticationRequiredException.class)
-    public void clearAccessToken() throws AuthenticationRequiredException {
+    public void clearAccessToken() throws Throwable {
 
         TokenManager tokenManager = DefaultTokenManager.builder()
                 .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
@@ -83,11 +84,12 @@ public class DefaultTokenManagerTest extends BaseTest {
         tokenManager.persist(accessToken);
         tokenManager.clear();
 
-        tokenManager.getAccessToken();
+        getAccessToken(tokenManager);
+
     }
 
     @Test
-    public void tokenManagerWithCache() throws AuthenticationRequiredException {
+    public void tokenManagerWithCache() throws Throwable {
 
         TokenManager tokenManager = DefaultTokenManager.builder()
                 .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
@@ -105,15 +107,15 @@ public class DefaultTokenManagerTest extends BaseTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
-        AccessToken storedAccessToken2 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager);
 
         //If reference are equal, they come from the cache
         assertSame(storedAccessToken1, storedAccessToken2);
     }
 
     @Test
-    public void tokenManagerWithoutCache() throws AuthenticationRequiredException {
+    public void tokenManagerWithoutCache() throws Throwable {
 
         TokenManager tokenManager = DefaultTokenManager.builder()
                 .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
@@ -130,8 +132,8 @@ public class DefaultTokenManagerTest extends BaseTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
-        AccessToken storedAccessToken2 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager);
 
         //If reference are equal, they come from the cache
         assertNotSame(storedAccessToken1, storedAccessToken2);
@@ -139,7 +141,7 @@ public class DefaultTokenManagerTest extends BaseTest {
     }
 
     @Test
-    public void testCacheExpired() throws AuthenticationRequiredException, InterruptedException {
+    public void testCacheExpired() throws Throwable {
 
         TokenManager tokenManager = DefaultTokenManager.builder()
                 .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
@@ -157,16 +159,16 @@ public class DefaultTokenManagerTest extends BaseTest {
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
         Thread.sleep(200);
-        AccessToken storedAccessToken2 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager);
 
         //If reference are equal, they come from the cache
         assertNotSame(storedAccessToken1, storedAccessToken2);
     }
 
     @Test
-    public void testTokenRefresh() throws AuthenticationRequiredException, InterruptedException {
+    public void testTokenRefresh() throws Throwable {
 
         enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK);
 
@@ -183,20 +185,21 @@ public class DefaultTokenManagerTest extends BaseTest {
                 .tokenType("Bearer")
                 .refreshToken("refresh token")
                 .expiresIn(1)
+                .sessionToken(new SSOToken("dummy"))
                 .build();
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
         Thread.sleep(1000);
-        AccessToken storedAccessToken2 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager);
 
         assertNotEquals(storedAccessToken1.getValue(), storedAccessToken2.getValue());
         assertEquals("Refreshed Token", storedAccessToken2.getValue());
     }
 
     @Test
-    public void testTokenRefreshWithThreshold() throws AuthenticationRequiredException, InterruptedException {
+    public void testTokenRefreshWithThreshold() throws Throwable {
 
         enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK);
 
@@ -220,19 +223,18 @@ public class DefaultTokenManagerTest extends BaseTest {
                 .tokenType("Bearer")
                 .refreshToken("refresh token")
                 .expiresIn(1) //expire in 1 seconds
+                .sessionToken(new SSOToken("dummy"))
                 .build();
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
-        Thread.sleep(2000); //sleep for 2 seconds
-        AccessToken storedAccessToken2 = tokenManager.getAccessToken(); //set threshold for 1 second
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager); //set threshold for 1 second
 
-        assertNotEquals(storedAccessToken1.getValue(), storedAccessToken2.getValue());
+        assertNotEquals(accessToken.getValue(), storedAccessToken2.getValue());
     }
 
     @Test(expected = AuthenticationRequiredException.class)
-    public void testTokenRefreshWithException() throws AuthenticationRequiredException, InterruptedException {
+    public void testTokenRefreshWithException() throws Throwable {
 
         server.enqueue(new MockResponse()
                 .setBody("{\n" +
@@ -254,15 +256,28 @@ public class DefaultTokenManagerTest extends BaseTest {
                 .tokenType("Bearer")
                 .refreshToken("refresh token")
                 .expiresIn(1)
+                .sessionToken(new SSOToken("dummy"))
                 .build();
 
         tokenManager.persist(accessToken);
 
-        AccessToken storedAccessToken1 = tokenManager.getAccessToken();
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
         assertNotNull(storedAccessToken1);
         Thread.sleep(1000);
-        tokenManager.getAccessToken();
+        getAccessToken(tokenManager);
 
+    }
+
+    private AccessToken getAccessToken(TokenManager tokenManager) throws Throwable {
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        tokenManager.getAccessToken(null, future);
+        try {
+            return future.get();
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        } catch (InterruptedException e) {
+            throw e;
+        }
     }
 
 

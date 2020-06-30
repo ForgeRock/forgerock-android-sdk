@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +18,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- *  Models an OAuth2 access token.
+ * Models an OAuth2 access token.
  */
 @Getter
 public class AccessToken extends Token implements Serializable {
@@ -28,11 +29,12 @@ public class AccessToken extends Token implements Serializable {
     private String tokenType;
     private Scope scope;
     private Date expiration;
+    private SSOToken sessionToken;
     @Setter
     private boolean persisted;
 
     @lombok.Builder
-    public AccessToken(String value, long expiresIn, Date expiration, String refreshToken, String idToken, String tokenType, Scope scope) {
+    public AccessToken(String value, long expiresIn, Date expiration, String refreshToken, String idToken, String tokenType, Scope scope, SSOToken sessionToken) {
         super(value);
         this.expiresIn = expiresIn;
         if (expiration == null) {
@@ -44,7 +46,7 @@ public class AccessToken extends Token implements Serializable {
         this.idToken = idToken;
         this.tokenType = tokenType;
         this.scope = scope;
-
+        this.sessionToken = sessionToken;
     }
 
     /**
@@ -58,12 +60,12 @@ public class AccessToken extends Token implements Serializable {
 
     /**
      * Convenience method for checking expiration
-     * @param threshold Threshold in Seconds
      *
+     * @param threshold Threshold in Seconds
      * @return true if the expiration is before the current time
      */
     public boolean isExpired(long threshold) {
-        Date now = new Date(System.currentTimeMillis() - (threshold * 1000L));
+        Date now = new Date(System.currentTimeMillis() + (threshold * 1000L));
         return expiration != null && expiration.before(now);
     }
 
@@ -118,7 +120,7 @@ public class AccessToken extends Token implements Serializable {
 
             StringTokenizer st = new StringTokenizer(s, " ");
 
-            while(st.hasMoreTokens()) {
+            while (st.hasMoreTokens()) {
                 scope.add(st.nextToken());
             }
 
@@ -134,8 +136,9 @@ public class AccessToken extends Token implements Serializable {
             result.put("refreshToken", getRefreshToken());
             result.put("idToken", getIdToken());
             result.put("tokenType", getTokenType());
-            result.put("scope", getScope() == null ? null: getScope().toJsonArray());
+            result.put("scope", getScope() == null ? null : getScope().toJsonArray());
             result.put("expiration", getExpiration().getTime());
+            result.put("sessionToken", getSessionToken() == null ? null : getSessionToken().getValue());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -148,11 +151,12 @@ public class AccessToken extends Token implements Serializable {
             return AccessToken.builder()
                     .value(result.getString("value"))
                     .expiresIn(result.optLong("expiresIn", -1))
-                    .refreshToken(result.optString("refreshToken", null))
-                    .idToken(result.optString("idToken", null))
-                    .tokenType(result.optString("tokenType", null))
+                    .refreshToken(result.has("refreshToken") ? result.getString("refreshToken"): null)
+                    .idToken(result.has("idToken") ? result.getString("idToken"): null)
+                    .tokenType(result.has("tokenType") ? result.getString("tokenType"): null)
                     .scope(Scope.fromJsonArray(result.optJSONArray("scope")))
                     .expiration(expiration(result.optLong("expiration", -1)))
+                    .sessionToken(result.has("sessionToken") ? new SSOToken(result.optString("sessionToken")) : null)
                     .build();
         } catch (JSONException e) {
             return null;
@@ -165,9 +169,6 @@ public class AccessToken extends Token implements Serializable {
         }
         return new Date(expiration);
     }
-
-
-
 
 
 }

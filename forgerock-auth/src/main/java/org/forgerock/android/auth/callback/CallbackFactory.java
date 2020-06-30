@@ -30,8 +30,8 @@ public class CallbackFactory {
         register(NameCallback.class);
         register(PasswordCallback.class);
         register(StringAttributeInputCallback.class);
-        register(ValidatedCreatePasswordCallback.class);
-        register(ValidatedCreateUsernameCallback.class);
+        register(ValidatedPasswordCallback.class);
+        register(ValidatedUsernameCallback.class);
         register(KbaCreateCallback.class);
         register(TermsAndConditionsCallback.class);
         register(PollingWaitCallback.class);
@@ -39,6 +39,9 @@ public class CallbackFactory {
         register(TextOutputCallback.class);
         register(ReCaptchaCallback.class);
         register(ConsentMappingCallback.class);
+        register(HiddenValueCallback.class);
+        register(DeviceProfileCallback.class);
+        register(MetadataCallback.class);
     }
 
     /**

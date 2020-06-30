@@ -12,10 +12,7 @@ import android.util.LruCache;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
-
-import org.forgerock.android.auth.callback.*;
 
 import java.util.*;
 
@@ -27,14 +24,15 @@ import java.util.*;
 public class AuthService {
 
     private static final String TAG = AuthService.class.getSimpleName();
-
-    private final Map<String, Class<? extends Callback>> callbacks = new HashMap<>();
+    private static final String SERVICE = "service";
+    private static final String COMPOSITE_ADVICE = "composite_advice";
 
     @Getter
     private String name;
     @Getter
     private String authServiceId;
-    private List<Interceptor> interceptors;
+    private PolicyAdvice advice;
+    private List<Interceptor<?>> interceptors;
 
     private AuthServiceClient authServiceClient;
 
@@ -42,13 +40,19 @@ public class AuthService {
     private static LruCache<String, AuthService> authServices = new LruCache<>(10);
 
     @Builder
-    private AuthService(@NonNull String name,
+    private AuthService(String name,
+                        PolicyAdvice advice,
                         ServerConfig serverConfig,
-                        @Singular List<Interceptor> interceptors) {
+                        @Singular List<Interceptor<?>> interceptors) {
 
         this.name = name;
-
-        this.callbacks.putAll(CallbackFactory.getInstance().getCallbacks());
+        this.advice = advice;
+        if (name == null && advice == null) {
+            throw new IllegalArgumentException("Either Service name or Advice is required.");
+        }
+        if (name != null && advice != null) {
+            throw new IllegalArgumentException("Either provide Service name or Advice, but not both.");
+        }
 
         authServiceId = UUID.randomUUID().toString();
         authServiceClient = new AuthServiceClient(serverConfig);
@@ -66,20 +70,19 @@ public class AuthService {
      * @param currentNode The current state with addition data requested from the Callback
      * @param listener    Listener for receiving {@link AuthService} related changes
      */
-    static void goToNext(final Context context, final Node currentNode, final NodeListener listener) {
+    static void goToNext(final Context context, final Node currentNode, final NodeListener<?> listener) {
         final AuthService authService = authServices.get(currentNode.getAuthServiceId());
         if (authService == null) {
             Logger.warn(TAG, "Auth Service id: %s not found.", currentNode.getAuthServiceId());
             throw new IllegalStateException("AuthService Not Found!");
         }
-        authService.authServiceClient.authenticate(currentNode,
+        authService.authServiceClient.authenticate(authService, currentNode,
                 new AuthServiceResponseHandler(
                         authService,
                         new NodeInterceptorHandler(
                                 context,
                                 authService.interceptors,
-                                listener, 0)
-                        , authService.callbacks));
+                                listener, 0)));
 
     }
 
@@ -89,24 +92,30 @@ public class AuthService {
      * @param context  The Application Context
      * @param listener Listener for receiving {@link AuthService} related changes
      */
-    public void next(Context context, final NodeListener listener) {
+    public void next(Context context, final NodeListener<?> listener) {
         authServiceClient.authenticate(this,
                 new AuthServiceResponseHandler(this,
-                        new NodeInterceptorHandler(context, interceptors, listener, 0), callbacks));
+                        new NodeInterceptorHandler(context, interceptors, listener, 0)));
     }
 
-    /**
-     * Move on to the next node in the tree with SSO Token, user has been authenticated
-     *
-     * @param context  The Application Context
-     * @param listener Listener for receiving {@link AuthService} related changes
-     */
-    void next(Context context, Token token, final NodeListener listener) {
-        new InterceptorHandler(
-                context,
-                interceptors,
-                listener, 0).proceed(token);
+    String getAuthIndexType() {
+        if (isService()) {
+            return SERVICE;
+        }
+        return COMPOSITE_ADVICE;
     }
+
+    String getAuthIndexValue() {
+        if (isService()) {
+            return name;
+        }
+        return advice.toString();
+    }
+
+    private boolean isService() {
+        return name != null;
+    }
+
 
     void done() {
         Logger.debug(TAG, "Auth Service %s flow completed", authServiceId);
@@ -117,7 +126,7 @@ public class AuthService {
 
         public AuthService build() {
 
-            List<Interceptor> interceptors;
+            List<Interceptor<?>> interceptors;
             switch (this.interceptors == null ? 0 : this.interceptors.size()) {
                 case 0:
                     interceptors = Collections.emptyList();
@@ -126,10 +135,10 @@ public class AuthService {
                     interceptors = Collections.singletonList(this.interceptors.get(0));
                     break;
                 default:
-                    interceptors = Collections.unmodifiableList(new ArrayList<Interceptor>(this.interceptors));
+                    interceptors = Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
-            AuthService authService = new AuthService(name, serverConfig, interceptors);
+            AuthService authService = new AuthService(name, advice, serverConfig, interceptors);
             authServices.put(authService.authServiceId, authService);
             return authService;
 

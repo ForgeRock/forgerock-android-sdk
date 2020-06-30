@@ -17,13 +17,13 @@ import java.util.List;
  */
 class NodeInterceptorHandler extends InterceptorHandler implements NodeListener<SSOToken> {
 
-    NodeInterceptorHandler(Context context, List<Interceptor> interceptors, NodeListener listener, int index) {
+    NodeInterceptorHandler(Context context, List<Interceptor<?>> interceptors, NodeListener<?> listener, int index) {
         super(context, interceptors, listener, index);
     }
 
     @Override
     public void onCallbackReceived(Node node) {
-        ((NodeListener)getListener()).onCallbackReceived(node);
+        ((NodeListener<?>)getListener()).onCallbackReceived(node);
     }
 
     @Override

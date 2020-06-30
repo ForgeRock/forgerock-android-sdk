@@ -10,8 +10,14 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.Builder;
 import lombok.NonNull;
+
+import static java.util.Collections.emptySet;
 
 /**
  * Manage SSO Token with {@link SharedPreferences} as the storage.
@@ -25,21 +31,34 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
     private static final String ORG_FORGEROCK_V_1_SSO_TOKENS = "org.forgerock.v1.SSO_TOKENS";
 
     private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
+    private static final String COOKIES = "org.forgerock.v1.COOKIES";
 
+    //The SharedPreferences to store the token
     private SharedPreferences sharedPreferences;
 
     @Builder
     public SharedPreferencesSignOnManager(@NonNull Context context, SharedPreferences sharedPreferences) {
-        Config config = Config.getInstance(context);
-        this.sharedPreferences = config.applyDefaultIfNull(sharedPreferences, context, var -> new SecuredSharedPreferences(var
-                , ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS));
+        this.sharedPreferences = sharedPreferences == null ?
+                new SecuredSharedPreferences(context, ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
     }
 
     @Override
     public void persist(SSOToken token) {
-        sharedPreferences.edit()
+       sharedPreferences.edit()
                 .putString(SSO_TOKEN, token.getValue())
                 .commit();
+    }
+
+    @Override
+    public void persist(Collection<String> cookies) {
+        if (cookies.isEmpty()) {
+            sharedPreferences.edit().remove(COOKIES).commit();
+        } else {
+            Set<String> set = new HashSet<>(cookies);
+            sharedPreferences.edit()
+                    .putStringSet(COOKIES, set)
+                    .commit();
+        }
     }
 
     @Override
@@ -54,6 +73,11 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
             return new SSOToken(token);
         }
         return null;
+    }
+
+    @Override
+    public Collection<String> getCookies() {
+        return sharedPreferences.getStringSet(COOKIES, emptySet());
     }
 
     @Override

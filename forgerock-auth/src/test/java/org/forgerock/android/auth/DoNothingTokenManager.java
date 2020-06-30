@@ -16,21 +16,17 @@ public class DoNothingTokenManager implements TokenManager {
     }
 
     @Override
-    public AccessToken refresh() {
-        return null;
+    public void exchangeToken(SSOToken token, FRListener<AccessToken> listener) {
+
     }
 
     @Override
-    public void refresh(FRListener<AccessToken> listener) throws AuthenticationRequiredException {
+    public void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException {
+
     }
 
     @Override
-    public AccessToken getAccessToken() throws AuthenticationRequiredException {
-        return null;
-    }
-
-    @Override
-    public void getAccessToken(FRListener<AccessToken> tokenListener) {
+    public void getAccessToken(AccessTokenVerifier accessTokenVerifier, FRListener<AccessToken> tokenListener) {
         tokenListener.onException(new AuthenticationRequiredException("No Access Token!"));
     }
 

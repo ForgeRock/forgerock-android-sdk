@@ -10,7 +10,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-
+apply plugin: "com.adarshr.test-logger"
 
 android {
     compileSdkVersion 29
@@ -22,8 +22,8 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 2
-        versionName "1.0"
+        versionCode 3
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +35,8 @@ android {
         }
     }
 
+    /* Comment this to debug instrument Test,
+    * There is an issue for AS to run NDK with intrument Test */
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'
@@ -50,7 +52,15 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    packagingOptions {
+        pickFirst '**/*.so'
+    }
 
+    testOptions {
+        unitTests.all {
+            exclude '**/*TestSuite*'
+        }
+    }
 }
 
 /**
@@ -126,7 +136,7 @@ bintray {
         version {
             name = project.version
             desc = 'Forgerock Android SDK'
-            released  = new Date()
+            released = new Date()
         }
     }
 }
@@ -155,14 +165,36 @@ install {
     }
 }
 
+
+
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses true
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+}
+
+
 /**
  * Dependencies
  */
 dependencies {
+    api project(':forgerock-core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
     implementation 'androidx.annotation:annotation:1.1.0'
 
     //Make it optional for developer
@@ -178,12 +210,17 @@ dependencies {
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.google.android.gms:play-services-location:17.0.0'
+    androidTestImplementation 'org.assertj:assertj-core:3.14.0'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation 'org.mockito:mockito-core:2.27.0'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
+    testImplementation 'org.assertj:assertj-core:3.14.0'
+
+    testImplementation 'org.mockito:mockito-core:2.27.0'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
@@ -194,6 +231,7 @@ dependencies {
 }
 repositories {
     mavenCentral()
+
 }
 
 
