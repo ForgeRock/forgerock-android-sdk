@@ -20,6 +20,7 @@
 
 #### Fixed
 - Fix Instrument Test. [SDKS-162]
+- Fix Refresh of Access Token with Threshold not working consistently. [SDKS-476]
 
 #### Deprecated
 - `FRAuth.next()` is now deprecated, use `FRSession.authenticate` instead [SDKS-177] 
