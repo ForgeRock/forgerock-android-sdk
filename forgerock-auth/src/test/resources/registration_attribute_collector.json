@@ -144,6 +144,132 @@
           "value": ""
         }
       ]
+    },
+    {
+      "type": "NumberAttributeInputCallback",
+      "output": [
+        {
+          "name": "name",
+          "value": "age"
+        },
+        {
+          "name": "prompt",
+          "value": "Age"
+        },
+        {
+          "name": "required",
+          "value": true
+        },
+        {
+          "name": "policies",
+          "value": {
+            "policyRequirements": [
+              "VALID_TYPE"
+            ],
+            "fallbackPolicies": null,
+            "name": "age",
+            "policies": [
+              {
+                "policyRequirements": [
+                  "VALID_TYPE"
+                ],
+                "policyId": "valid-type",
+                "params": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "conditionalPolicies": null
+          }
+        },
+        {
+          "name": "failedPolicies",
+          "value": []
+        },
+        {
+          "name": "validateOnly",
+          "value": false
+        },
+        {
+          "name": "value",
+          "value": null
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken4",
+          "value": null
+        },
+        {
+          "name": "IDToken4validateOnly",
+          "value": false
+        }
+      ]
+    },
+    {
+      "type": "BooleanAttributeInputCallback",
+      "output": [
+        {
+          "name": "name",
+          "value": "happy"
+        },
+        {
+          "name": "prompt",
+          "value": "Happy"
+        },
+        {
+          "name": "required",
+          "value": true
+        },
+        {
+          "name": "policies",
+          "value": {
+            "policyRequirements": [
+              "VALID_TYPE"
+            ],
+            "fallbackPolicies": null,
+            "name": "happy",
+            "policies": [
+              {
+                "policyRequirements": [
+                  "VALID_TYPE"
+                ],
+                "policyId": "valid-type",
+                "params": {
+                  "types": [
+                    "boolean"
+                  ]
+                }
+              }
+            ],
+            "conditionalPolicies": null
+          }
+        },
+        {
+          "name": "failedPolicies",
+          "value": []
+        },
+        {
+          "name": "validateOnly",
+          "value": false
+        },
+        {
+          "name": "value",
+          "value": false
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken5",
+          "value": false
+        },
+        {
+          "name": "IDToken5validateOnly",
+          "value": false
+        }
+      ]
     }
   ]
 }

@@ -7,17 +7,21 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.callback.BooleanAttributeInputCallbackTest;
 import org.forgerock.android.auth.callback.ChoiceCallbackTest;
 import org.forgerock.android.auth.callback.ConfirmationCallbackTest;
+import org.forgerock.android.auth.callback.ConsentMappingCallbackTest;
 import org.forgerock.android.auth.callback.DeviceProfileCallbackTest;
 import org.forgerock.android.auth.callback.HiddenValueCallbackTest;
 import org.forgerock.android.auth.callback.KbaCreateCallbackTest;
 import org.forgerock.android.auth.callback.NameCallbackTest;
+import org.forgerock.android.auth.callback.NumberAttributeInputCallbackTest;
 import org.forgerock.android.auth.callback.PageCallback65Test;
 import org.forgerock.android.auth.callback.PageCallbackTest;
 import org.forgerock.android.auth.callback.PasswordCallbackTest;
 import org.forgerock.android.auth.callback.PollingWaitCallbackTest;
 import org.forgerock.android.auth.callback.ReCaptchaCallbackTest;
+import org.forgerock.android.auth.callback.StringAttributeInputCallbackTest;
 import org.forgerock.android.auth.callback.TermsAndConditionCallbackTest;
 import org.forgerock.android.auth.callback.ValidatedCreateUsernameCallbackTest;
 import org.junit.experimental.categories.Categories;
@@ -27,19 +31,23 @@ import org.junit.runners.Suite;
 @RunWith(Categories.class)
 @Suite.SuiteClasses({
         //Callback
+        BooleanAttributeInputCallbackTest.class,
         ChoiceCallbackTest.class,
         ConfirmationCallbackTest.class,
+        ConsentMappingCallbackTest.class,
         DeviceProfileCallbackTest.class,
+        HiddenValueCallbackTest.class,
         KbaCreateCallbackTest.class,
         NameCallbackTest.class,
-        PageCallbackTest.class,
+        NumberAttributeInputCallbackTest.class,
         PageCallback65Test.class,
+        PageCallbackTest.class,
         PasswordCallbackTest.class,
         PollingWaitCallbackTest.class,
         ReCaptchaCallbackTest.class,
+        StringAttributeInputCallbackTest.class,
         TermsAndConditionCallbackTest.class,
         ValidatedCreateUsernameCallbackTest.class,
-        HiddenValueCallbackTest.class,
 
         //Other
         SetPersistentCookieTest.class,

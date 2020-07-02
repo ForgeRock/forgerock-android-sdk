@@ -41,7 +41,9 @@ public abstract class AbstractCallback implements Callback {
             for (int i = 0; i < output.length(); i++) {
                 try {
                     JSONObject elm = output.getJSONObject(i);
-                    setAttribute(getName(elm), elm.get(VALUE));
+                    if (!elm.isNull(VALUE)) {
+                        setAttribute(getName(elm), elm.get(VALUE));
+                    }
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }

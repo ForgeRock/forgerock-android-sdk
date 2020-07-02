@@ -12,6 +12,7 @@ import android.content.Context;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +71,8 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 StringAttributeInputCallback email = ((StringAttributeInputCallback) callbacks.get(0));
                 StringAttributeInputCallback firstName = ((StringAttributeInputCallback) callbacks.get(1));
                 StringAttributeInputCallback lastName = ((StringAttributeInputCallback) callbacks.get(2));
+                NumberAttributeInputCallback age = ((NumberAttributeInputCallback) callbacks.get(3));
+                BooleanAttributeInputCallback happy = ((BooleanAttributeInputCallback) callbacks.get(4));
 
                 assertEquals("mail", email.getName());
                 assertEquals("Email Address", email.getPrompt());
@@ -114,6 +117,24 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     assertFalse(lastName.getValidateOnly());
                     lastName.setValue("My Last Name");
 
+                    Assertions.assertThat(happy.getName()).isEqualTo("happy");
+                    Assertions.assertThat(happy.getPrompt()).isEqualTo("Happy");
+                    Assertions.assertThat(happy.isRequired()).isTrue();
+                    Assertions.assertThat(happy.getPolicies().getString("name")).isEqualTo("happy");
+                    Assertions.assertThat(happy.getFailedPolicies()).isEmpty();
+                    Assertions.assertThat(happy.getValidateOnly()).isFalse();
+                    Assertions.assertThat(happy.getValue()).isFalse();
+                    happy.setValue(true);
+
+                    Assertions.assertThat(age.getName()).isEqualTo("age");
+                    Assertions.assertThat(age.getPrompt()).isEqualTo("Age");
+                    Assertions.assertThat(age.isRequired()).isTrue();
+                    Assertions.assertThat(age.getPolicies().getString("name")).isEqualTo("age");
+                    Assertions.assertThat(age.getFailedPolicies()).isEmpty();
+                    Assertions.assertThat(age.getValidateOnly()).isFalse();
+                    Assertions.assertThat(age.getValue()).isNull();
+                    age.setValue(30);
+
                     state.next(context, this);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
@@ -147,6 +168,15 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .getJSONArray("input")
                 .getJSONObject(0).getString("value"));
 
+        Assertions.assertThat(body.getJSONArray("callbacks")
+                .getJSONObject(3)
+                .getJSONArray("input")
+                .getJSONObject(0).getDouble("value")).isEqualTo(30);
+
+        Assertions.assertThat(body.getJSONArray("callbacks")
+                .getJSONObject(4)
+                .getJSONArray("input")
+                .getJSONObject(0).getBoolean("value")).isTrue();
 
     }
 
