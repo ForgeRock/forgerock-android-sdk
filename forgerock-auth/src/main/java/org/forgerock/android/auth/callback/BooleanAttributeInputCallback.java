@@ -38,7 +38,7 @@ public class BooleanAttributeInputCallback extends AttributeInputCallback {
     @Override
     protected void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
-        if ("value".equals(name)) {
+        if (VALUE.equals(name)) {
             this.value = (Boolean) value;
         }
     }
