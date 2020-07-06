@@ -162,4 +162,73 @@ public class NumberAttributeInputCallbackTest {
         NumberAttributeInputCallback callback = new NumberAttributeInputCallback(raw, 0);
         Assertions.assertThat(callback.getValue()).isEqualTo(123);
     }
+
+    @Test
+    public void basicDecimal() throws JSONException {
+        JSONObject raw = new JSONObject("{\n" +
+                "            \"type\": \"NumberAttributeInputCallback\",\n" +
+                "            \"output\": [\n" +
+                "                {\n" +
+                "                    \"name\": \"name\",\n" +
+                "                    \"value\": \"age\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"prompt\",\n" +
+                "                    \"value\": \"Age\"\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"required\",\n" +
+                "                    \"value\": true\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"policies\",\n" +
+                "                    \"value\": {\n" +
+                "                        \"policyRequirements\": [\n" +
+                "                            \"VALID_TYPE\"\n" +
+                "                        ],\n" +
+                "                        \"fallbackPolicies\": null,\n" +
+                "                        \"name\": \"age\",\n" +
+                "                        \"policies\": [\n" +
+                "                            {\n" +
+                "                                \"policyRequirements\": [\n" +
+                "                                    \"VALID_TYPE\"\n" +
+                "                                ],\n" +
+                "                                \"policyId\": \"valid-type\",\n" +
+                "                                \"params\": {\n" +
+                "                                    \"types\": [\n" +
+                "                                        \"number\"\n" +
+                "                                    ]\n" +
+                "                                }\n" +
+                "                            }\n" +
+                "                        ],\n" +
+                "                        \"conditionalPolicies\": null\n" +
+                "                    }\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"failedPolicies\",\n" +
+                "                    \"value\": []\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"validateOnly\",\n" +
+                "                    \"value\": false\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"value\",\n" +
+                "                    \"value\": 23.2\n" +
+                "                }\n" +
+                "            ],\n" +
+                "            \"input\": [\n" +
+                "                {\n" +
+                "                    \"name\": \"IDToken1\",\n" +
+                "                    \"value\": null\n" +
+                "                },\n" +
+                "                {\n" +
+                "                    \"name\": \"IDToken1validateOnly\",\n" +
+                "                    \"value\": false\n" +
+                "                }\n" +
+                "            ]\n" +
+                "        }");
+        NumberAttributeInputCallback callback = new NumberAttributeInputCallback(raw, 0);
+        Assertions.assertThat(callback.getValue()).isEqualTo(23.2);
+    }
 }

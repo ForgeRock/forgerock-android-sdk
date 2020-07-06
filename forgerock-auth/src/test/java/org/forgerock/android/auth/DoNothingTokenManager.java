@@ -21,6 +21,11 @@ public class DoNothingTokenManager implements TokenManager {
     }
 
     @Override
+    public void exchangeToken(String code, PKCE pkce, FRListener<AccessToken> listener) {
+
+    }
+
+    @Override
     public void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException {
 
     }
