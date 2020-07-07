@@ -30,6 +30,8 @@ public class CallbackFactory {
         register(NameCallback.class);
         register(PasswordCallback.class);
         register(StringAttributeInputCallback.class);
+        register(NumberAttributeInputCallback.class);
+        register(BooleanAttributeInputCallback.class);
         register(ValidatedPasswordCallback.class);
         register(ValidatedUsernameCallback.class);
         register(KbaCreateCallback.class);

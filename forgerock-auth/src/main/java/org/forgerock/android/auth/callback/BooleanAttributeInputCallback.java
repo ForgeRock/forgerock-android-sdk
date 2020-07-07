@@ -20,18 +20,18 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Getter
-public class StringAttributeInputCallback extends AttributeInputCallback {
+public class BooleanAttributeInputCallback extends AttributeInputCallback {
 
     /**
      * The attribute Value
      */
-    private String value;
+    private Boolean value;
 
     /**
      * Constructor for this Callback.
      */
     @Keep
-    public StringAttributeInputCallback(JSONObject jsonObject, int index) throws JSONException {
+    public BooleanAttributeInputCallback(JSONObject jsonObject, int index) throws JSONException {
         super(jsonObject, index);
     }
 
@@ -39,12 +39,17 @@ public class StringAttributeInputCallback extends AttributeInputCallback {
     protected void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
         if (VALUE.equals(name)) {
-            this.value = (String) value;
+            this.value = (Boolean) value;
         }
+    }
+
+    public void setValue(Boolean value) {
+        this.value = value;
+        super.setValue(value);
     }
 
     @Override
     public String getType() {
-        return "StringAttributeInputCallback";
+        return "BooleanAttributeInputCallback";
     }
 }

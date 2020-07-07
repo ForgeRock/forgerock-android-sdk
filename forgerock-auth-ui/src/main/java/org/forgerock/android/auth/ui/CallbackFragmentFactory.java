@@ -48,6 +48,8 @@ public class CallbackFragmentFactory {
         register(ValidatedUsernameCallback.class, ValidatedUsernameCallbackFragment.class);
         register(ValidatedPasswordCallback.class, ValidatedPasswordCallbackFragment.class);
         register(StringAttributeInputCallback.class, StringAttributeInputCallbackFragment.class);
+        register(BooleanAttributeInputCallback.class, BooleanAttributeInputCallbackFragment.class);
+        register(NumberAttributeInputCallback.class, NumberAttributeInputCallbackFragment.class);
         register(KbaCreateCallback.class, KbaCreateCallbackFragment.class);
         register(TermsAndConditionsCallback.class, TermsAndConditionsCallbackFragment.class);
         register(PollingWaitCallback.class, PollingWaitCallbackFragment.class);

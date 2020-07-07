@@ -1,4 +1,10 @@
-# Version 2.0.0
+# Version 2.1.0
+
+## [2.1.0]
+
+#### Added
+- Support NumberAttributeInputCallback [SDKS-495]
+- Support BooleanAttributeInputCallback [SDKS-497]
 
 ## [2.0.0]
 
