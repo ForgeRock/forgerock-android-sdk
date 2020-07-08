@@ -33,7 +33,6 @@ public class NumberAttributeInputCallbackFragment extends AbstractValidatedCallb
         EditText text = view.findViewById(R.id.value);
         TextInputLayout textInputLayout = view.findViewById(R.id.inputLayout);
         textInputLayout.setHint(callback.getPrompt());
-
         setError(textInputLayout);
 
         if (callback.getValue() != null) {
@@ -53,7 +52,7 @@ public class NumberAttributeInputCallbackFragment extends AbstractValidatedCallb
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().length() == 0) {
-                    callback.setValue(0);
+                    callback.setValue(0d);
                 } else {
                     callback.setValue(Double.parseDouble(s.toString()));
                 }

@@ -48,7 +48,6 @@ public class NumberAttributeInputCallback extends AttributeInputCallback {
     }
 
     public void setValue(Double value) {
-        this.value = value;
         super.setValue(value);
     }
 

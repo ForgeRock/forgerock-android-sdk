@@ -65,6 +65,10 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
 
     public abstract String getPrompt();
 
+    public void setValidateOnly(boolean validateOnly) {
+        setValue(validateOnly, 1);
+    }
+
     private void prepareFailedPolicy(JSONArray array) {
         List<AbstractValidatedCallback.FailedPolicy> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {

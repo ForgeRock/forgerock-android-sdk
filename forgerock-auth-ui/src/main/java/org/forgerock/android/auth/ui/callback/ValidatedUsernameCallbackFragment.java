@@ -33,6 +33,7 @@ public class ValidatedUsernameCallbackFragment extends AbstractValidatedCallback
         TextInputLayout textInputLayout = view.findViewById(R.id.usernameInputLayout);
         textInputLayout.setHint(callback.getPrompt());
         setError(textInputLayout);
+        text.setText((String)callback.getInputValue());
 
         text.addTextChangedListener(new TextWatcher() {
             @Override

@@ -44,7 +44,6 @@ public class BooleanAttributeInputCallback extends AttributeInputCallback {
     }
 
     public void setValue(Boolean value) {
-        this.value = value;
         super.setValue(value);
     }
 

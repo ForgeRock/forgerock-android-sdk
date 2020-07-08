@@ -43,6 +43,10 @@ public class StringAttributeInputCallback extends AttributeInputCallback {
         }
     }
 
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
     @Override
     public String getType() {
         return "StringAttributeInputCallback";
