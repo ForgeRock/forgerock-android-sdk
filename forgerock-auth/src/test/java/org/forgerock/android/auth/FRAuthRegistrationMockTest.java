@@ -133,7 +133,7 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                     Assertions.assertThat(age.getFailedPolicies()).isEmpty();
                     Assertions.assertThat(age.getValidateOnly()).isFalse();
                     Assertions.assertThat(age.getValue()).isNull();
-                    age.setValue(30);
+                    age.setValue(30d);
 
                     state.next(context, this);
                 } catch (JSONException e) {

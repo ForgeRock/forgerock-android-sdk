@@ -73,7 +73,7 @@ public abstract class AbstractCallback implements Callback {
      * @param value The input value
      * @param index The index of the element.
      */
-    public void setValue(Object value, int index) {
+    protected void setValue(Object value, int index) {
         try {
             JSONObject json = getContentAsJson();
             JSONObject input = getInput(json, index);
@@ -89,8 +89,30 @@ public abstract class AbstractCallback implements Callback {
      *
      * @param value The input value
      */
-    public void setValue(Object value) {
+    protected void setValue(Object value) {
         setValue(value, 0);
+    }
+
+    /**
+     * Get the first value for input
+     */
+    public Object getInputValue() {
+        return getInputValue(0);
+    }
+
+
+    /**
+     * Get the value for input
+     * @param index The index of the element.
+     */
+    public Object getInputValue(int index) {
+        JSONObject input = null;
+        try {
+            input = getInput(getContentAsJson(), index);
+            return input.get(VALUE);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private JSONObject getInput(JSONObject content, int index) throws JSONException {

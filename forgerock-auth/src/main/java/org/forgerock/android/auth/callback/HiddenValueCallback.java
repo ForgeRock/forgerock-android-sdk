@@ -44,6 +44,10 @@ public class HiddenValueCallback extends AbstractCallback {
         }
     }
 
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
     @Override
     public String getType() {
         return "HiddenValueCallback";
