@@ -8,11 +8,13 @@
 package org.forgerock.android.auth.ui.page;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
@@ -37,6 +39,15 @@ public class UsernamePasswordPageFragment extends PageFragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_username_password_page, container, false);
         errorLayout = view.findViewById(R.id.error);
+
+        TextView header = view.findViewById(R.id.header);
+        TextView description = view.findViewById(R.id.description);
+        if (!TextUtils.isEmpty(node.getHeader())) {
+            header.setText(node.getHeader());
+        }
+        if (!TextUtils.isEmpty(node.getDescription())) {
+            description.setText(node.getDescription());
+        }
 
         view.findViewById(R.id.signIn).setOnClickListener(v -> {
             errorLayout.setVisibility(View.GONE);
