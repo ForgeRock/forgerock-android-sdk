@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -27,7 +28,8 @@ import org.forgerock.android.auth.ui.AuthenticationExceptionListener;
 import org.forgerock.android.auth.ui.CallbackFragmentFactory;
 import org.forgerock.android.auth.ui.R;
 
-import static org.forgerock.android.auth.ui.CallbackFragmentFactory.CALLBACK;
+import static android.text.TextUtils.isEmpty;
+import static android.view.View.GONE;
 import static org.forgerock.android.auth.ui.CallbackFragmentFactory.NODE;
 
 
@@ -40,6 +42,7 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     private Node current;
     private LinearLayout errorLayout;
     private LinearLayout callbackLayout;
+    private LinearLayout pageLayout;
     private AuthHandler authHandler;
 
     public AdaptiveCallbackFragment() {
@@ -74,8 +77,23 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         View view = inflater.inflate(R.layout.fragment_callbacks, container, false);
         errorLayout = view.findViewById(R.id.error);
         callbackLayout = view.findViewById(R.id.callbacks);
+        pageLayout = view.findViewById(R.id.page);
         Button nextButton = view.findViewById(R.id.next);
         Button cancelButton = view.findViewById(R.id.cancel);
+
+        TextView header = view.findViewById(R.id.header);
+        if (isEmpty(current.getHeader())) {
+            header.setVisibility(GONE);
+        } else {
+            header.setText(current.getHeader());
+        }
+
+        TextView description = view.findViewById(R.id.description);
+        if (isEmpty(current.getDescription())) {
+            description.setVisibility(GONE);
+        } else {
+            description.setText(current.getDescription());
+        }
 
         //Add callback to LinearLayout Vertically
         if (savedInstanceState == null) {
@@ -117,13 +135,13 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
 
     @Override
     public void cancel(Exception e) {
-        callbackLayout.setVisibility(View.GONE);
+        callbackLayout.setVisibility(GONE);
         authHandler.cancel(e);
     }
 
     @Override
     public void next() {
-        callbackLayout.setVisibility(View.GONE);
+        callbackLayout.setVisibility(GONE);
         authHandler.next(current);
     }
 }
