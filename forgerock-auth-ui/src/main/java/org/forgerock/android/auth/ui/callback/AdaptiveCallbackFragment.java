@@ -42,7 +42,6 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     private Node current;
     private LinearLayout errorLayout;
     private LinearLayout callbackLayout;
-    private LinearLayout pageLayout;
     private AuthHandler authHandler;
 
     public AdaptiveCallbackFragment() {
@@ -77,7 +76,6 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         View view = inflater.inflate(R.layout.fragment_callbacks, container, false);
         errorLayout = view.findViewById(R.id.error);
         callbackLayout = view.findViewById(R.id.callbacks);
-        pageLayout = view.findViewById(R.id.page);
         Button nextButton = view.findViewById(R.id.next);
         Button cancelButton = view.findViewById(R.id.cancel);
 
