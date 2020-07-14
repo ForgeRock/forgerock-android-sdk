@@ -5,6 +5,7 @@
 #### Added
 - Support NumberAttributeInputCallback [SDKS-495]
 - Support BooleanAttributeInputCallback [SDKS-497]
+- Access to the Page Node's header and description property [SDKS-518]
 
 ## [2.0.0]
 

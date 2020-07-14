@@ -34,5 +34,7 @@
       "_id": 1
     }
   ],
-  "stage": "UsernamePassword"
+  "stage": "UsernamePassword",
+  "header": "HeaderValue",
+  "description": "PageDesc"
 }

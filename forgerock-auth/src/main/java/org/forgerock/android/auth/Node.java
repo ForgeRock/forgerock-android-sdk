@@ -26,9 +26,14 @@ public class Node implements Serializable {
 
     public static final String AUTH_ID = "authId";
     public static final String STAGE = "stage";
+    public static final String HEADER = "header";
+    public static final String DESCRIPTION = "description";
+
 
     private final String authId;
     private final String stage;
+    private final String header;
+    private final String description;
     private final String authServiceId;
     private final List<Callback> callbacks;
 

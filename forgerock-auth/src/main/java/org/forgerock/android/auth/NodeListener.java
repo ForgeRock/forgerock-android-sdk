@@ -20,12 +20,15 @@ import java.util.List;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 import static org.forgerock.android.auth.Node.AUTH_ID;
+import static org.forgerock.android.auth.Node.DESCRIPTION;
+import static org.forgerock.android.auth.Node.HEADER;
 import static org.forgerock.android.auth.Node.STAGE;
 
 /**
  * Interface for an object that listens to changes resulting from a {@link AuthService}.
  */
 public interface NodeListener<T> extends FRListener<T> {
+
 
     /**
      * Notify the listener that the {@link AuthService} has been started and moved to the first node.
@@ -49,6 +52,8 @@ public interface NodeListener<T> extends FRListener<T> {
 
         return new Node(response.getString(AUTH_ID)
                 , response.optString(STAGE, getStage(callbacks))
+                , response.optString(HEADER, null)
+                , response.optString(DESCRIPTION, null)
                 , authServiceId,
                 callbacks);
     }
