@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth.ui;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.lifecycle.ViewModel;
@@ -15,6 +16,8 @@ import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.PolicyAdvice;
+
+import static org.forgerock.android.auth.ui.LoginFragment.TREE_NAME;
 
 /**
  * {@link ViewModel} Wrapper for {@link org.forgerock.android.auth.FRSession}
@@ -43,7 +46,14 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
     }
 
     public void authenticate(Context context) {
-        FRSession.authenticate(context, context.getString(R.string.forgerock_auth_service), nodeListener);
+        String tree = context.getString(R.string.forgerock_auth_service);
+        if (context instanceof Activity) {
+            String treeName = ((Activity) context).getIntent().getStringExtra(TREE_NAME);
+            if (treeName != null) {
+                tree = treeName;
+            }
+        }
+        FRSession.authenticate(context, tree, nodeListener);
     }
 
     @Override

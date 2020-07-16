@@ -37,6 +37,7 @@ import static android.view.View.VISIBLE;
 public class LoginFragment extends Fragment implements AuthHandler {
 
     private static final String CURRENT_EMBEDDED_FRAGMENT = "CURRENT_EMBEDDED_FRAGMENT";
+    public static final String TREE_NAME = "TREE_NAME";
     private boolean loadOnStartup;
     FRViewModel<FRSession> viewModel;
     ProgressBar progressBar;

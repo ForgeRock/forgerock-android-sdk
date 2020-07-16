@@ -10,7 +10,7 @@
 
     <item android:id="@+id/login"
           android:icon="@android:drawable/ic_menu_more"
-          android:title="@string/login"
+          android:title="@string/authenticate"
           app:showAsAction="collapseActionView"/>
 
     <item android:id="@+id/logout"
