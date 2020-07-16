@@ -12,7 +12,7 @@
     <string name="userinfo">UserInfo</string>
     <string name="invoke">Invoke</string>
     <string name="register">Register</string>
-    <string name="login">Login</string>
+    <string name="authenticate">Authenticate</string>
 
 
     <!--  ForgeRock SDK Configuration -->
