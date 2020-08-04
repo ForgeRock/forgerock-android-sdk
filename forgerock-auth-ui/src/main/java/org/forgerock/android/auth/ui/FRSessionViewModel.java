@@ -9,6 +9,7 @@ package org.forgerock.android.auth.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.lifecycle.ViewModel;
 
@@ -59,6 +60,11 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
     @Override
     public void authenticate(Context context, PolicyAdvice advice) {
         FRSession.getCurrentSession().authenticate(context, advice, nodeListener);
+    }
+
+    @Override
+    public void authenticate(Context context, Uri resumeUri) {
+        FRSession.authenticate(context, resumeUri, nodeListener);
     }
 
     public void register(Context context) {

@@ -8,10 +8,10 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.lifecycle.ViewModel;
 
-import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
@@ -52,6 +52,11 @@ public class FRUserViewModel extends FRViewModel<FRUser> {
 
     @Override
     public void authenticate(Context context, PolicyAdvice advice) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void authenticate(Context context, Uri resumeUri) {
         throw new UnsupportedOperationException();
     }
 

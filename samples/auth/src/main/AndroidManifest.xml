@@ -36,10 +36,23 @@
         <activity android:name="org.forgerock.auth.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
+           </intent-filter>
+
+            <!-- Deep link to handle resumeURI -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http"
+                    android:host="openam.example.com"
+                    android:port="8081"
+                    android:pathPrefix="/openam" />
             </intent-filter>
+            <!-- End of Deep link setting -->
+
         </activity>
+
     </application>
 
 </manifest>

@@ -22,14 +22,8 @@ public class AuthServiceTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWithServiceNameAndAdvice() {
-        PolicyAdvice policyAdvice = PolicyAdvice.builder()
-                .type("test")
-                .value("test").build();
-
+    public void testWithoutServiceNameAndAdviceAndResumeURI() {
         AuthService.builder()
-                .advice(policyAdvice)
-                .name("test")
                 .build();
     }
 }

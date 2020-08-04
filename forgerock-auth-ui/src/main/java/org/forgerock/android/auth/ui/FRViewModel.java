@@ -8,6 +8,7 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -55,6 +56,8 @@ public abstract class FRViewModel<T> extends ViewModel {
     public abstract void authenticate(Context context);
 
     public abstract void authenticate(Context context, PolicyAdvice advice);
+
+    public abstract void authenticate(Context context, Uri resumeUri);
 
     public abstract void register(Context context);
 

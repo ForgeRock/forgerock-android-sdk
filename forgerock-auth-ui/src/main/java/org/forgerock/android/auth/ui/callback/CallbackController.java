@@ -36,5 +36,10 @@ public interface CallbackController {
      */
     void cancel(Exception e);
 
+    /**
+     * Suspend the current authentication
+     */
+    void suspend();
+
 
 }

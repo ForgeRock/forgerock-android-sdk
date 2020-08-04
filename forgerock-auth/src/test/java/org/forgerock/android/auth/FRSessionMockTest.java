@@ -8,11 +8,15 @@
 package org.forgerock.android.auth;
 
 import android.net.Uri;
+import android.os.OperationCanceledException;
+import android.util.Pair;
 
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
+import org.forgerock.android.auth.callback.SuspendedTextOutputCallback;
+import org.forgerock.android.auth.exception.SuspendedAuthSessionException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,9 +24,11 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.android.auth.Action.AUTHENTICATE;
 
 @RunWith(RobolectricTestRunner.class)
@@ -279,6 +285,135 @@ public class FRSessionMockTest extends BaseTest {
 
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNoSuspendId() {
+        FRSession.authenticate(context, Uri.parse("http://dummy/"), null);
+    }
+
+    @Test
+    public void testWithSuspendedEmail() throws ExecutionException, InterruptedException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_EmailSuspended.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        final boolean[] suspended = {false};
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+
+                if (state.getCallback(SuspendedTextOutputCallback.class) != null) {
+                    suspended[0] = true;
+                    this.onException(new OperationCanceledException());
+                }
+
+            }
+        };
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture);
+        try {
+            nodeListenerFuture.get();
+            fail("Should throw exception");
+        } catch (ExecutionException e) {
+            assertThat(e.getCause()).isInstanceOf(OperationCanceledException.class);
+        }
+        assertThat(FRSession.getCurrentSession()).isNull();
+        assertThat(suspended[0]).isTrue();
+
+    }
+
+    @Test
+    public void testWithResumeUri() throws ExecutionException, InterruptedException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+
+        final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
+        RequestInterceptorRegistry.getInstance().register(request -> {
+            String action = ((Action)request.tag()).getType();
+            Pair<Action, Integer> pair = result.get(action);
+            if ( pair == null) {
+                result.put(action, new Pair<>((Action) request.tag(), 1));
+            } else {
+                result.put(action, new Pair<>((Action) request.tag(), pair.second + 1));
+            }
+            return request;
+        });
+
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+
+            }
+        };
+
+        FRSession.authenticate(context,
+                Uri.parse("http://openam.example.com:8081/openam/XUI?realm=/&suspendedId=YGJ1o1snV96U6u7XT8SaHhX4Cv8"),
+                nodeListenerFuture);
+
+
+        assertThat(nodeListenerFuture.get()).isInstanceOf(FRSession.class);
+        assertThat(result.get("RESUME_AUTHENTICATE")).isNotNull();
+        assertThat(FRSession.getCurrentSession()).isNotNull();
+        assertThat(FRSession.getCurrentSession().getSessionToken()).isNotNull();
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath()).isEqualTo("/json/realms/root/authenticate?suspendedId=YGJ1o1snV96U6u7XT8SaHhX4Cv8");
+        assertThat(recordedRequest.getMethod()).isEqualTo("POST");
+
+    }
+
+    @Test
+    public void testWithExpiredSuspendedId() throws InterruptedException {
+        enqueue("/authTreeMockTest_Authenticate_Expired_SuspendedId.json", HttpURLConnection.HTTP_UNAUTHORIZED);
+
+        Config.getInstance().setUrl(getUrl());
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+            }
+        };
+
+        FRSession.authenticate(context,
+                Uri.parse("http://openam.example.com:8081/openam/XUI?realm=/&suspendedId=YGJ1o1snV96U6u7XT8SaHhX4Cv8"),
+                nodeListenerFuture);
+
+
+        try {
+            nodeListenerFuture.get();
+            fail("Should throw exception");
+        } catch (ExecutionException e) {
+            assertThat(e.getCause()).isInstanceOf(SuspendedAuthSessionException.class);
+        }
+    }
 
     @Test
     public void testLogout() throws ExecutionException, InterruptedException {
@@ -296,7 +431,6 @@ public class FRSessionMockTest extends BaseTest {
         assertThat(singleSignOnManager.getToken()).isNull();
 
         assertThat(FRSession.getCurrentSession()).isNull();
-
 
     }
 }

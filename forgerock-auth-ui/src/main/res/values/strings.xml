@@ -58,7 +58,6 @@
     <string name="privacy">Allow %1$s to access your %2$s</string>
 
     <!-- Device Profile Callback Fragment -->
-    <string name="fetching_device_profile">Fetching Device Profile</string>
     <string name="request_location_rationale">Location is required for Authentication</string>
     <string name="signInDescription">Please provide Username and Password.</string>
 

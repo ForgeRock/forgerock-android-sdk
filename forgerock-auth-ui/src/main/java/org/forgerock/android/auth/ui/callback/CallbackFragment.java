@@ -93,4 +93,11 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
     public void cancel(Exception e) {
         callbackController.cancel(e);
     }
+
+    /**
+     * Suspend the current authentication flow.
+     */
+    public void suspend() {
+        callbackController.suspend();
+    }
 }

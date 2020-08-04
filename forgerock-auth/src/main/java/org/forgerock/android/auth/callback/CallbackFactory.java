@@ -39,6 +39,7 @@ public class CallbackFactory {
         register(PollingWaitCallback.class);
         register(ConfirmationCallback.class);
         register(TextOutputCallback.class);
+        register(SuspendedTextOutputCallback.class);
         register(ReCaptchaCallback.class);
         register(ConsentMappingCallback.class);
         register(HiddenValueCallback.class);

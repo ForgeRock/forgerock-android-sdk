@@ -55,6 +55,7 @@ public class CallbackFragmentFactory {
         register(PollingWaitCallback.class, PollingWaitCallbackFragment.class);
         register(ConfirmationCallback.class, ConfirmationCallbackFragment.class);
         register(TextOutputCallback.class, TextOutputCallbackFragment.class);
+        register(SuspendedTextOutputCallback.class, SuspendedTextOutputCallbackFragment.class);
         register(ReCaptchaCallback.class, ReCaptchaCallbackFragment.class);
         register(ConsentMappingCallback.class, ConsentMappingCallbackFragment.class);
         register(DeviceProfileCallback.class, DeviceProfileCallbackFragment.class);

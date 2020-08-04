@@ -51,6 +51,7 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -70,12 +71,14 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
                 new NoSessionRequestInterceptor(),
                 new InjectHeaderAuthRequestInterceptor());
          */
+
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);
@@ -86,6 +89,20 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
         content = findViewById(org.forgerock.auth.R.id.content);
         progressBar = findViewById(org.forgerock.auth.R.id.progressBar);
         progressBar.setVisibility(INVISIBLE);
+
+        if (getIntent() != null) {
+            if (getIntent().getData() != null) {
+                Intent resume = new Intent(this, SimpleLoginActivity.class);
+                resume.setData(getIntent().getData());
+                startActivityForResult(resume, AUTH_REQUEST_CODE);
+            }
+        }
+   }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        userinfo();
     }
 
     @Override
@@ -97,33 +114,14 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 success.setVisibility(VISIBLE);
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
-                        @Override
-                        public void onSuccess(final UserInfo result) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                try {
-                                    content.setText(result.getRaw().toString(2));
-                                } catch (JSONException e) {
-                                    onException(e);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(final Exception e) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                content.setText(e.getMessage());
-                            });
-                        }
-                    });
-                } else {
-                    Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "No Session", LENGTH_LONG).show();
-                }
+                userinfo();
             } else {
-                Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed", LENGTH_LONG).show();
+                Exception exception = null;
+                if (data != null) {
+                    exception = (Exception) data.getSerializableExtra(SimpleLoginActivity.EXCEPTION);
+                }
+                Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed:" +
+                        exception != null? exception.getMessage(): "", LENGTH_LONG).show();
             }
         }
     }
@@ -183,35 +181,18 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                 });
                 return true;
             case R.id.userinfo:
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
-                        @Override
-                        public void onSuccess(final UserInfo result) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                try {
-                                    content.setText(result.getRaw().toString(2));
-                                } catch (JSONException e) {
-                                    onException(e);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(final Exception e) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                content.setText(e.getMessage());
-                            });
-                        }
-                    });
-                } else {
-                    content.setText("No User Session");
-                }
-                return true;
+                userinfo();
+               return true;
             case org.forgerock.auth.R.id.invoke:
+
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .followRedirects(false);
+
+                if (Logger.isDebugEnabled()) {
+                    HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                    interceptor.level(HttpLoggingInterceptor.Level.BODY);
+                    builder.addInterceptor(interceptor);
+                }
 
                 builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
                     @Override
@@ -250,6 +231,34 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void userinfo() {
+        if (FRUser.getCurrentUser() != null) {
+            FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
+                @Override
+                public void onSuccess(final UserInfo result) {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        try {
+                            content.setText(result.getRaw().toString(2));
+                        } catch (JSONException e) {
+                            onException(e);
+                        }
+                    });
+                }
+
+                @Override
+                public void onException(final Exception e) {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        content.setText(e.getMessage());
+                    });
+                }
+            });
+        } else {
+            content.setText("No User Session");
         }
     }
 

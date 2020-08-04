@@ -9,7 +9,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content" android:id="@+id/choiceLayout" android:layout_margin="8dp">
+              android:layout_height="wrap_content" android:id="@+id/choiceLayout">
 
     <Spinner
             android:layout_width="match_parent"
