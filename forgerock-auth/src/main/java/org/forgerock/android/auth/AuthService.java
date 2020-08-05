@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -66,7 +66,7 @@ public class AuthService {
     /**
      * Check to see if it is resuming the tree.
      *
-     * @return Tree if it is resuming the tree, else false.
+     * @return true if it is resuming the tree, else false.
      */
     boolean isResume() {
         return resumeURI != null;

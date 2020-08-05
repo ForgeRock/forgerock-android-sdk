@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                 startActivityForResult(resume, AUTH_REQUEST_CODE);
             }
         }
-   }
+    }
 
     @Override
     protected void onPostResume() {
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                     exception = (Exception) data.getSerializableExtra(SimpleLoginActivity.EXCEPTION);
                 }
                 Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed:" +
-                        exception != null? exception.getMessage(): "", LENGTH_LONG).show();
+                        exception != null ? exception.getMessage() : "", LENGTH_LONG).show();
             }
         }
     }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                 return true;
             case R.id.userinfo:
                 userinfo();
-               return true;
+                return true;
             case org.forgerock.auth.R.id.invoke:
 
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
