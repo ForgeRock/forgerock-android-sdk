@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2019 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -58,7 +58,6 @@
     <string name="privacy">Allow %1$s to access your %2$s</string>
 
     <!-- Device Profile Callback Fragment -->
-    <string name="fetching_device_profile">Fetching Device Profile</string>
     <string name="request_location_rationale">Location is required for Authentication</string>
     <string name="signInDescription">Please provide Username and Password.</string>
 

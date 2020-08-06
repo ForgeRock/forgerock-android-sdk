@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.LruCache;
 
 import lombok.Builder;
@@ -24,13 +25,17 @@ import java.util.*;
 public class AuthService {
 
     private static final String TAG = AuthService.class.getSimpleName();
-    private static final String SERVICE = "service";
-    private static final String COMPOSITE_ADVICE = "composite_advice";
+    public static final String SERVICE = "service";
+    public static final String COMPOSITE_ADVICE = "composite_advice";
+    public static final String SUSPENDED_ID = "suspendedId";
 
     @Getter
     private String name;
     @Getter
     private String authServiceId;
+    @Getter
+    private Uri resumeURI;
+
     private PolicyAdvice advice;
     private List<Interceptor<?>> interceptors;
 
@@ -42,21 +47,40 @@ public class AuthService {
     @Builder
     private AuthService(String name,
                         PolicyAdvice advice,
+                        Uri resumeURI,
                         ServerConfig serverConfig,
                         @Singular List<Interceptor<?>> interceptors) {
 
         this.name = name;
         this.advice = advice;
-        if (name == null && advice == null) {
-            throw new IllegalArgumentException("Either Service name or Advice is required.");
+        this.resumeURI = resumeURI;
+        if (name == null && advice == null && resumeURI == null) {
+            throw new IllegalArgumentException("Either Service name or Advice or SuspendedId is required.");
         }
-        if (name != null && advice != null) {
-            throw new IllegalArgumentException("Either provide Service name or Advice, but not both.");
-        }
-
+        validateResumeUri();
         authServiceId = UUID.randomUUID().toString();
         authServiceClient = new AuthServiceClient(serverConfig);
         this.interceptors = interceptors;
+    }
+
+    /**
+     * Check to see if it is resuming the tree.
+     *
+     * @return true if it is resuming the tree, else false.
+     */
+    boolean isResume() {
+        return resumeURI != null;
+    }
+
+    /**
+     * Verify if the resume URI contains suspendedID.
+     *
+     * @throws IllegalArgumentException when resumeUri does not contains suspended ID.
+     */
+    void validateResumeUri() {
+        if (resumeURI != null && resumeURI.getQueryParameter(SUSPENDED_ID) == null) {
+            throw new IllegalArgumentException("Suspended Id is missing from the resume URI");
+        }
     }
 
     public static AuthServiceBuilder builder() {
@@ -118,7 +142,7 @@ public class AuthService {
 
 
     void done() {
-        Logger.debug(TAG, "Auth Service %s flow completed", authServiceId);
+        Logger.debug(TAG, "Auth Service %s flow completed or suspended", authServiceId);
         authServices.remove(authServiceId);
     }
 
@@ -138,7 +162,7 @@ public class AuthService {
                     interceptors = Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
-            AuthService authService = new AuthService(name, advice, serverConfig, interceptors);
+            AuthService authService = new AuthService(name, advice, resumeURI, serverConfig, interceptors);
             authServices.put(authService.authServiceId, authService);
             return authService;
 

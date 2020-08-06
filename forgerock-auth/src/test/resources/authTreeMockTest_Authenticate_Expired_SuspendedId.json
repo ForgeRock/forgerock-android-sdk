@@ -1,0 +1,5 @@
+{
+  "code": 401,
+  "reason": "Unauthorized",
+  "message": "org.forgerock.openam.auth.nodes.framework.token.SuspendedAuthSessionException: Token not found. It may have expired."
+}

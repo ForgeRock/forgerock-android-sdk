@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -43,6 +43,8 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     private LinearLayout errorLayout;
     private LinearLayout callbackLayout;
     private AuthHandler authHandler;
+    private Button nextButton;
+    private Button cancelButton;
 
     public AdaptiveCallbackFragment() {
         // Required empty public constructor
@@ -76,8 +78,8 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         View view = inflater.inflate(R.layout.fragment_callbacks, container, false);
         errorLayout = view.findViewById(R.id.error);
         callbackLayout = view.findViewById(R.id.callbacks);
-        Button nextButton = view.findViewById(R.id.next);
-        Button cancelButton = view.findViewById(R.id.cancel);
+        nextButton = view.findViewById(R.id.next);
+        cancelButton = view.findViewById(R.id.cancel);
 
         TextView header = view.findViewById(R.id.header);
         if (isEmpty(current.getHeader())) {
@@ -110,7 +112,8 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
         });
 
         //Action to proceed cancel
-        cancelButton.setOnClickListener(v -> authHandler.cancel(new OperationCanceledException()));
+        cancelButton.setOnClickListener(v ->
+                authHandler.cancel(new OperationCanceledException()));
 
         return view;
     }
@@ -135,6 +138,11 @@ public class AdaptiveCallbackFragment extends Fragment implements Authentication
     public void cancel(Exception e) {
         callbackLayout.setVisibility(GONE);
         authHandler.cancel(e);
+    }
+
+    @Override
+    public void suspend() {
+        nextButton.setVisibility(View.GONE);
     }
 
     @Override

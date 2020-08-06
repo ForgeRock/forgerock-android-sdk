@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
  * <p>
  * <ul>
  * <li>START_AUTHENTICATE - Initial Request made to the Authentication Tree: '/json/realms/{realm}/authenticate', tree name is provided in the payload</li>
+ * <li>RESUME_AUTHENTICATE - Resume request made to the Authentication Tree: '/json/realms/{realm}/authenticate'</li>
  * <li>AUTHENTICATE - Any subsequent Requests made to the Authentication Tree: '/json/realms/{realm}/authenticate' tree name is provided in the payload</li>
  * <li>AUTHORIZE - Request for exchanging SSO Token to Authorization code: '/oauth2/realms/{realm}/authorize' </li>
  * <li>EXCHANGE_TOKEN - OAuth2 token exchange request with Authorization Code: '/oauth2/realms/{realm}/access_token'</li>
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class Action {
 
     public static final String START_AUTHENTICATE = "START_AUTHENTICATE";
+    public static final String RESUME_AUTHENTICATE = "RESUME_AUTHENTICATE";
     public static final String AUTHENTICATE = "AUTHENTICATE";
     public static final String AUTHORIZE = "AUTHORIZE";
     public static final String EXCHANGE_TOKEN = "EXCHANGE_TOKEN";

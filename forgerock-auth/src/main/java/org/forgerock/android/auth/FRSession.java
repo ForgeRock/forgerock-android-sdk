@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.net.Uri;
 
 import lombok.RequiredArgsConstructor;
 
@@ -93,6 +94,23 @@ public class FRSession {
         FRAuth.builder()
                 .context(context)
                 .serviceName(serviceName)
+                .serverConfig(Config.getInstance().getServerConfig())
+                .sessionManager(Config.getInstance().getSessionManager())
+                .interceptor(new FRSession.SessionInterceptor())
+                .build().next(context, listener);
+    }
+
+    /**
+     * Trigger the Authentication Tree flow process with the provided resume URI
+     *
+     * @param context   The Application Context
+     * @param resumeURI Resume URI
+     * @param listener  Listener to listen login event.
+     */
+    public static void authenticate(Context context, Uri resumeURI, final NodeListener<FRSession> listener) {
+        FRAuth.builder()
+                .context(context)
+                .resumeURI(resumeURI)
                 .serverConfig(Config.getInstance().getServerConfig())
                 .sessionManager(Config.getInstance().getSessionManager())
                 .interceptor(new FRSession.SessionInterceptor())

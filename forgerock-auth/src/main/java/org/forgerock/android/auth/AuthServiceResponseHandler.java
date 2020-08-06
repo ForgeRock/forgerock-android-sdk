@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationTimeoutException;
+import org.forgerock.android.auth.exception.SuspendedAuthSessionException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +26,7 @@ import okhttp3.Response;
 class AuthServiceResponseHandler implements ResponseHandler {
 
     private static final String TOKEN_ID = "tokenId";
+    public static final String SUSPENDED_AUTH_SESSION_EXCEPTION = "org.forgerock.openam.auth.nodes.framework.token.SuspendedAuthSessionException";
     private NodeListener<SSOToken> listener;
     private AuthService authService;
 
@@ -85,10 +87,14 @@ class AuthServiceResponseHandler implements ResponseHandler {
                     handleError(new AuthenticationException(response.code(), response.message(), body));
                     return;
                 }
-                switch (getErrorCode(responseBody)) {
+                switch (getError(responseBody)) {
                     case "110":
                         authService.done();
                         handleError(new AuthenticationTimeoutException(response.code(), response.message(), body));
+                        return;
+                    case SUSPENDED_AUTH_SESSION_EXCEPTION:
+                        authService.done();
+                        handleError(new SuspendedAuthSessionException(response.code(), response.message(), body));
                         return;
                     default:
                         handleError(new AuthenticationException(response.code(), response.message(), body));
@@ -100,12 +106,17 @@ class AuthServiceResponseHandler implements ResponseHandler {
     }
 
 
-    private String getErrorCode(JSONObject body) {
+    private String getError(JSONObject body) {
         JSONObject detail = body.optJSONObject("detail");
         if (detail != null) {
             return detail.optString("errorCode", "-1");
         }
+        String message = body.optString("message","");
+        if (message.contains(SUSPENDED_AUTH_SESSION_EXCEPTION)) {
+            return SUSPENDED_AUTH_SESSION_EXCEPTION;
+        }
         return "-1";
+
     }
 
     void handleError(Exception e) {

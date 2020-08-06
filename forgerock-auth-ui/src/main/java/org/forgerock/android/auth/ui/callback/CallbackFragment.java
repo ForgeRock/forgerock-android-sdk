@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -92,5 +92,12 @@ public abstract class CallbackFragment<T extends Callback> extends Fragment {
      */
     public void cancel(Exception e) {
         callbackController.cancel(e);
+    }
+
+    /**
+     * Suspend the current authentication flow.
+     */
+    public void suspend() {
+        callbackController.suspend();
     }
 }
