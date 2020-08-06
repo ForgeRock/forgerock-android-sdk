@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,7 +10,6 @@ package org.forgerock.android.auth;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -33,6 +32,7 @@ import lombok.Builder;
 import lombok.NonNull;
 
 import static java.util.Collections.emptySet;
+import static org.forgerock.android.auth.Encryptor.getEncryptor;
 
 /**
  * Manage SSO Token with {@link AccountManager} as the storage.
@@ -65,7 +65,9 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
         }
         this.accountManager = AccountManager.get(context);
         this.account = new Account(context.getString(R.string.forgerock_account_name), accountType);
-        this.encryptor = encryptor == null ? getEncryptor(context): encryptor;
+        this.encryptor = encryptor == null ?
+                getEncryptor(context, ORG_FORGEROCK_V_1_SSO_KEYS, this, this) :
+                encryptor;
         Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
     }
 
@@ -200,21 +202,6 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
         }
         throw new IllegalArgumentException("AccountType is not defined under forgerock_authenticator.xml");
 
-    }
-
-    @SuppressLint("NewApi")
-    private Encryptor getEncryptor(Context context) {
-        switch (Build.VERSION.SDK_INT) {
-            case Build.VERSION_CODES.LOLLIPOP:
-            case Build.VERSION_CODES.LOLLIPOP_MR1:
-                return new AndroidLEncryptor(context, ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            case Build.VERSION_CODES.M:
-                return new AndroidMEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            case Build.VERSION_CODES.N:
-                return new AndroidNEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-            default:
-                return new AndroidNEncryptor(ORG_FORGEROCK_V_1_SSO_KEYS, this);
-        }
     }
 
     @Override
