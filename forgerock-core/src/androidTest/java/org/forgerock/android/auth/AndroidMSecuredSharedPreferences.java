@@ -12,7 +12,7 @@ import android.content.Context;
 public class AndroidMSecuredSharedPreferences extends SecuredSharedPreferences {
 
     AndroidMSecuredSharedPreferences(Context context, String fileName, String keyAlias) {
-        super(context, fileName, keyAlias );
+        super(context, fileName, keyAlias);
     }
 
 }

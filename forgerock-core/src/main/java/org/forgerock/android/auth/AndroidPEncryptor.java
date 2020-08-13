@@ -35,9 +35,8 @@ class AndroidPEncryptor extends AndroidNEncryptor {
         specBuilder.setUnlockedDeviceRequired(true);
 
         if (context.getPackageManager().hasSystemFeature(FEATURE_STRONGBOX_KEYSTORE)) {
-            Logger.debug(TAG, "String box keystore is used.");
+            Logger.debug(TAG, "Strong box keystore is used.");
             specBuilder.setIsStrongBoxBacked(true);
-
         }
     }
 
