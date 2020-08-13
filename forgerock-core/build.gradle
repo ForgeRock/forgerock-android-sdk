@@ -14,7 +14,6 @@ apply plugin: "com.adarshr.test-logger"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
 
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
@@ -23,8 +22,8 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 3
-        versionName "2.0.0"
+        versionCode 4
+        versionName "2.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -200,9 +199,9 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.3.1'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
-    testImplementation 'org.assertj:assertj-core:3.14.0'
+    testImplementation 'org.assertj:assertj-core:3.16.1'
 
-    testImplementation 'org.mockito:mockito-core:2.27.0'
+    testImplementation 'org.mockito:mockito-core:3.3.3'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 
