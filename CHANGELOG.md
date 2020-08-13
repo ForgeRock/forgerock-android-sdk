@@ -7,6 +7,7 @@
 - Support BooleanAttributeInputCallback [SDKS-497]
 - Access to the Page Node's header and description property [SDKS-518]
 - Support Email Suspend Node [SDKS-505]
+- Security Enhancement for Android 28+ Device [SDKS-571]
 
 ## [2.0.0]
 

@@ -1,11 +1,15 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Build;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -38,5 +42,23 @@ public interface Encryptor {
      * Reset the Encryption Provider, remove all created keys
      */
     void reset() throws GeneralSecurityException, IOException;
+
+    @SuppressLint("NewApi")
+    static Encryptor getEncryptor(Context context, String keyAlias, SecretKeyStore secretKeyStore, KeyUpdatedListener listener) {
+        switch (Build.VERSION.SDK_INT) {
+            case Build.VERSION_CODES.LOLLIPOP:
+            case Build.VERSION_CODES.LOLLIPOP_MR1:
+                return new AndroidLEncryptor(context, keyAlias, secretKeyStore);
+            case Build.VERSION_CODES.M:
+                return new AndroidMEncryptor(keyAlias, listener);
+            case Build.VERSION_CODES.N:
+            case Build.VERSION_CODES.N_MR1:
+            case Build.VERSION_CODES.O:
+            case Build.VERSION_CODES.O_MR1:
+                return new AndroidNEncryptor(keyAlias, listener);
+            default:
+                return new AndroidPEncryptor(context, keyAlias, listener);
+        }
+    }
 
 }
