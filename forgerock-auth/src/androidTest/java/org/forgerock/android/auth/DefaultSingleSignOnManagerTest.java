@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,8 +7,12 @@
 
 package org.forgerock.android.auth;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
+
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +50,7 @@ public class DefaultSingleSignOnManagerTest {
     }
 
     @Test
-    public void clearAccessToken() {
+    public void clearSSOToken() {
         SSOToken token = new SSOToken("MyTokenValue");
         tokenManager.persist(token);
         tokenManager.clear();
@@ -84,4 +88,56 @@ public class DefaultSingleSignOnManagerTest {
         assertEquals("MyTokenValue2", storedToken.getValue());
 
     }
+
+    @Test
+    public void testAccount() {
+        SSOToken token = new SSOToken("MyTokenValue");
+        tokenManager.persist(token);
+
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        //Only one account Created
+        Assertions.assertThat(accounts).hasSize(1);
+        Assertions.assertThat(accounts[0].name).isEqualTo("ForgeRock");
+
+        tokenManager.clear();
+        accounts = accountManager.getAccountsByType("org.forgerock");
+        Assertions.assertThat(accounts).hasSize(0);
+
+    }
+
+    @Test
+    public void testAccountNotCreatedBySDK() {
+        SSOToken token = new SSOToken("MyTokenValue");
+        tokenManager.persist(token);
+
+        AccountManager accountManager = AccountManager.get(context);
+        Account account = new Account("Dummy", "org.forgerock");
+        accountManager.addAccountExplicitly(account, null, null);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        Assertions.assertThat(accounts).hasSize(2);
+
+        //Assert that TokenManager has successfully remove the account
+        tokenManager.clear();
+        accounts = accountManager.getAccountsByType("org.forgerock");
+        Assertions.assertThat(accounts).hasSize(1);
+        Assertions.assertThat(accounts[0].name).isEqualTo("Dummy");
+        accountManager.removeAccount(accounts[0], null, null);
+
+    }
+
+    @Test
+    public void testPersistEmptyData() {
+        SSOToken ssoToken = new SSOToken("");
+        tokenManager.persist(ssoToken);
+
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        //Account should not be created
+        Assertions.assertThat(accounts).hasSize(0);
+
+    }
+
+
+
 }
