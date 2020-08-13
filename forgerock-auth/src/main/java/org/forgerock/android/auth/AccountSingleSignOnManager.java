@@ -55,7 +55,7 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
     private Account account;
 
     @Builder
-    public AccountSingleSignOnManager(@NonNull Context context, Encryptor encryptor) throws Exception {
+    AccountSingleSignOnManager(@NonNull Context context, @NonNull String accountName, Encryptor encryptor) throws Exception {
         try {
             this.accountType = getAccountType(context);
         } catch (Exception e) {
@@ -64,7 +64,7 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             throw e;
         }
         this.accountManager = AccountManager.get(context);
-        this.account = new Account(context.getString(R.string.forgerock_account_name), accountType);
+        this.account = new Account(accountName, accountType);
         this.encryptor = encryptor == null ?
                 getEncryptor(context, ORG_FORGEROCK_V_1_SSO_KEYS, this, this) :
                 encryptor;
@@ -91,6 +91,10 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
     }
 
     private void persist(String alias, byte[] data, boolean retry) {
+        if ((data == null || data.length == 0) && !isAccountExists()) {
+            //Account does not exist and nothing to persist
+            return;
+        }
         accountManager.addAccountExplicitly(account, null, null);
         try {
             if (data == null) {
@@ -113,20 +117,33 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
         }
     }
 
+    private boolean isAccountExists() {
+        Account[] accounts = accountManager.getAccountsByType(accountType);
+        for (Account acc : accounts) {
+            if (acc.name.equals(account.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public void clear() {
         Account[] accounts = accountManager.getAccountsByType(accountType);
         for (Account acc : accounts) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                accountManager.removeAccountExplicitly(acc);
-            } else {
-                AccountManagerFuture<Boolean> future = accountManager.removeAccount(acc, null, null);
-                try {
-                    future.getResult();
-                } catch (Exception e) {
-                    Logger.warn(TAG, e, "Failed to remove Account %s.", acc.name);
+            if (acc.name.equals(account.name)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    accountManager.removeAccountExplicitly(acc);
+                } else {
+                    AccountManagerFuture<Boolean> future = accountManager.removeAccount(acc, null, null);
+                    try {
+                        future.getResult();
+                    } catch (Exception e) {
+                        Logger.warn(TAG, e, "Failed to remove Account %s.", acc.name);
+                    }
                 }
+                return;
             }
         }
     }

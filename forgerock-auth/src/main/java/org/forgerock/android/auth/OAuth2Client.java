@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -62,7 +62,6 @@ public class OAuth2Client {
         this.scope = scope;
         this.redirectUri = redirectUri;
         this.serverConfig = serverConfig;
-        this.okHttpClient = OkHttpClientProvider.getInstance().lookup(serverConfig);
     }
 
     /**
@@ -90,7 +89,7 @@ public class OAuth2Client {
                     .tag(AUTHORIZE)
                     .build();
 
-            okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+            getOkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -145,7 +144,7 @@ public class OAuth2Client {
                     .build();
 
 
-            okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+            getOkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -185,7 +184,7 @@ public class OAuth2Client {
                     .build();
 
 
-            okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+            getOkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -201,6 +200,13 @@ public class OAuth2Client {
         } catch (IOException e) {
             Listener.onException(listener, e);
         }
+    }
+
+    private OkHttpClient getOkHttpClient() {
+        if (okHttpClient == null) {
+            okHttpClient = OkHttpClientProvider.getInstance().lookup(serverConfig);
+        }
+        return okHttpClient;
     }
 
     /**
@@ -232,7 +238,7 @@ public class OAuth2Client {
                     .tag(EXCHANGE_TOKEN)
                     .build();
 
-            okHttpClient.newCall(request).enqueue(new Callback() {
+            getOkHttpClient().newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     listener.onException(e);
@@ -313,4 +319,5 @@ public class OAuth2Client {
             return new PKCE("plain", codeVerifier, codeVerifier);
         }
     }
+
 }

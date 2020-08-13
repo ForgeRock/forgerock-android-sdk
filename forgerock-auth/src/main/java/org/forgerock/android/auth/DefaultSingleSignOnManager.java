@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -44,10 +44,15 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     private static final Action LOGOUT = new Action(Action.LOGOUT);
 
     @Builder
-    private DefaultSingleSignOnManager(@NonNull Context context, ServerConfig serverConfig, Encryptor encryptor, SharedPreferences sharedPreferences) {
+    private DefaultSingleSignOnManager(@NonNull Context context,
+                                       ServerConfig serverConfig,
+                                       String accountName,
+                                       Encryptor encryptor,
+                                       SharedPreferences sharedPreferences) {
         try {
             singleSignOnManager = AccountSingleSignOnManager.builder()
                     .context(context)
+                    .accountName(accountName == null ? context.getString(R.string.forgerock_account_name) : accountName)
                     .encryptor(encryptor).build();
         } catch (Exception e) {
             Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
