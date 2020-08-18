@@ -73,6 +73,7 @@
     <!-- Duplicate entry scanned-->
     <string name="duplicate_title">Replace this authentication method?</string>
     <string name="duplicate_message">This authentication method is already registered. Do you want to replace this authentication method?</string>
+    <string name="duplicate_message_noreplace">This authentication method is already registered.</string>
     <string name="duplicate_yes">Replace</string>
     <string name="duplicate_no">Cancel</string>
 
