@@ -160,9 +160,9 @@ public class AccountsActivity extends AppCompatActivity {
                             if(exception instanceof DuplicateMechanismException)  {
                                 final Mechanism duplicate = ((DuplicateMechanismException) exception).getCausingMechanism();
                                 AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-                                builder.setTitle(R.string.duplicate_title)
+                                builder.setTitle(R.string.duplicate_title_noreplace)
                                         .setMessage(R.string.duplicate_message_noreplace)
-                                        .setNeutralButton(R.string.duplicate_yes, new DialogInterface.OnClickListener() {
+                                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 AuthenticatorModel.getInstance().removeMechanism(duplicate);
                                                 finish();
@@ -175,7 +175,7 @@ public class AccountsActivity extends AppCompatActivity {
                             // Check for any other issue
                             else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-                                String message = getString(R.string.add_error_qrcode);
+                                String message = getString(R.string.add_error_qrcode_noretry);
                                 message += getString(R.string.add_error_qrcode_detail, exception.getLocalizedMessage());
                                 builder.setMessage(message)
                                         .setNeutralButton(R.string.ok,  new DialogInterface.OnClickListener() {
