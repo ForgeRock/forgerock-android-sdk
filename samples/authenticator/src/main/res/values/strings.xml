@@ -33,6 +33,7 @@
 
     <string name="add_success">Mechanism successfully added to "%1$s" account</string>
     <string name="add_error_qrcode">Could not interpret the QR code. Do you want to try again?</string>
+    <string name="add_error_qrcode_noretry">Could not interpret the QR code.</string>
     <string name="add_error_qrcode_detail">\n\nError detail:\n%1$s\n</string>
     <string name="error_scanning">Error in scanning</string>
     <string name="title_activity_add_account">AddAccountActivity</string>
@@ -72,6 +73,7 @@
 
     <!-- Duplicate entry scanned-->
     <string name="duplicate_title">Replace this authentication method?</string>
+    <string name="duplicate_title_noreplace">Duplicated authentication method</string>
     <string name="duplicate_message">This authentication method is already registered. Do you want to replace this authentication method?</string>
     <string name="duplicate_message_noreplace">This authentication method is already registered.</string>
     <string name="duplicate_yes">Replace</string>
