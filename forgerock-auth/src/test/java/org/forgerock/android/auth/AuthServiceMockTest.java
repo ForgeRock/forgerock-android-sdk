@@ -361,6 +361,8 @@ public class AuthServiceMockTest extends BaseTest {
 
         //Assert What received
         assertEquals("UsernamePassword", nodes.get(0).getStage());
+        assertEquals("HeaderValue", nodes.get(0).getHeader());
+        assertEquals("PageDesc", nodes.get(0).getDescription());
         assertEquals(2, nodes.get(0).getCallbacks().size());
 
         //Assert what sent to server
@@ -378,7 +380,7 @@ public class AuthServiceMockTest extends BaseTest {
     @Test(expected = IllegalStateException.class)
     public void authTreeInvalidState() {
 
-        Node node = new Node("", "", "dummy", null);
+        Node node = new Node("", "","", "", "dummy", null);
         NodeListenerFuture future = new NodeListenerFuture() {
             @Override
             public void onCallbackReceived(Node node) {

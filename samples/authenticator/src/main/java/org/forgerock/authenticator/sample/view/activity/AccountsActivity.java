@@ -8,8 +8,12 @@
 package org.forgerock.authenticator.sample.view.activity;
 
 import android.app.ActionBar;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -18,10 +22,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.forgerock.android.auth.Account;
+import org.forgerock.android.auth.FRAListener;
+import org.forgerock.android.auth.Mechanism;
+import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.authenticator.sample.R;
 import org.forgerock.authenticator.sample.controller.AuthenticatorModel;
 import org.forgerock.authenticator.sample.controller.AuthenticatorModelListener;
@@ -118,6 +126,72 @@ public class AccountsActivity extends AppCompatActivity {
                 super.onOptionsItemSelected(item);
         }
         return false;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        final Activity thisActivity = this;
+
+        final Uri uri = intent.getData();
+        if (uri != null) {
+            AuthenticatorModel.getInstance().createMechanismFromUri(uri.toString(), new FRAListener<Mechanism>() {
+                @Override
+                public void onSuccess(final Mechanism mechanism) {
+                    thisActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Mechanism successfully stored
+                            Toast.makeText(thisActivity, String.format(getString(R.string.add_success),
+                                    mechanism.getAccountName()), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    });
+                    AuthenticatorModel.getInstance().notifyDataChanged();
+                }
+
+                @Override
+                public void onException(final Exception exception) {
+                    thisActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Check if it's a duplication exception issue
+                            if(exception instanceof DuplicateMechanismException)  {
+                                final Mechanism duplicate = ((DuplicateMechanismException) exception).getCausingMechanism();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                                builder.setTitle(R.string.duplicate_title_noreplace)
+                                        .setMessage(R.string.duplicate_message_noreplace)
+                                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                AuthenticatorModel.getInstance().removeMechanism(duplicate);
+                                                finish();
+                                                return;
+                                            }
+                                        })
+                                        .setCancelable(false)
+                                        .show();
+                            }
+                            // Check for any other issue
+                            else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                                String message = getString(R.string.add_error_qrcode_noretry);
+                                message += getString(R.string.add_error_qrcode_detail, exception.getLocalizedMessage());
+                                builder.setMessage(message)
+                                        .setNeutralButton(R.string.ok,  new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                finish();
+                                            }
+                                        })
+                                        .setCancelable(false)
+                                        .show();
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private void setListVisibility() {

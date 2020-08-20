@@ -63,6 +63,10 @@ public class DeviceProfileCallback extends AbstractCallback implements ActionCal
         }
     }
 
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
     @Override
     public void execute(Context context, FRListener<Void> listener) {
 

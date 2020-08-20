@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,7 +8,9 @@
 package org.forgerock.android.auth.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -33,10 +35,12 @@ import org.forgerock.android.auth.exception.AuthenticationTimeoutException;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+import static org.forgerock.android.auth.AuthService.SUSPENDED_ID;
 
 public class LoginFragment extends Fragment implements AuthHandler {
 
     private static final String CURRENT_EMBEDDED_FRAGMENT = "CURRENT_EMBEDDED_FRAGMENT";
+    public static final String TREE_NAME = "TREE_NAME";
     private boolean loadOnStartup;
     FRViewModel<FRSession> viewModel;
     ProgressBar progressBar;
@@ -100,6 +104,16 @@ public class LoginFragment extends Fragment implements AuthHandler {
 
     public void start() {
         progressBar.setVisibility(VISIBLE);
+        if (getActivity() != null) {
+            Intent intent = getActivity().getIntent();
+            Uri data = intent.getData();
+            //If the intent contains suspendedId, we resume the flow
+            if (data != null && data.getQueryParameter(SUSPENDED_ID) != null) {
+                //Resume suspended Tree
+                viewModel.authenticate(getContext(), data);
+                return;
+            }
+        }
         viewModel.authenticate(getContext());
     }
 

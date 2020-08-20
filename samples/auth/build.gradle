@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -43,11 +43,12 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:2.0.0-beta'
-    implementation 'org.forgerock:forgerock-auth-ui:2.0.0-beta'
+    implementation 'org.forgerock:forgerock-auth:2.0.0'
+    implementation 'org.forgerock:forgerock-auth-ui:2.0.0'
      */
 
     implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

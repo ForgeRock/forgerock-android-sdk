@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -30,6 +30,8 @@ public class CallbackFactory {
         register(NameCallback.class);
         register(PasswordCallback.class);
         register(StringAttributeInputCallback.class);
+        register(NumberAttributeInputCallback.class);
+        register(BooleanAttributeInputCallback.class);
         register(ValidatedPasswordCallback.class);
         register(ValidatedUsernameCallback.class);
         register(KbaCreateCallback.class);
@@ -37,6 +39,7 @@ public class CallbackFactory {
         register(PollingWaitCallback.class);
         register(ConfirmationCallback.class);
         register(TextOutputCallback.class);
+        register(SuspendedTextOutputCallback.class);
         register(ReCaptchaCallback.class);
         register(ConsentMappingCallback.class);
         register(HiddenValueCallback.class);

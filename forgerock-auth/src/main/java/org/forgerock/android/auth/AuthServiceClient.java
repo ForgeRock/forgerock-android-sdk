@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,7 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static org.forgerock.android.auth.Action.START_AUTHENTICATE;
+import static org.forgerock.android.auth.AuthService.SUSPENDED_ID;
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.ServerConfig.API_VERSION_2_1;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
@@ -56,10 +56,17 @@ class AuthServiceClient {
      */
     void authenticate(final AuthService authService, final AuthServiceResponseHandler handler) {
         try {
-            Action action = new Action(Action.START_AUTHENTICATE,
-                    new JSONObject()
-                            .put(TREE, authService.getAuthIndexValue())
-                            .put(TYPE, authService.getAuthIndexType()));
+            Action action = null;
+
+            if (authService.isResume()) {
+                action = new Action(Action.RESUME_AUTHENTICATE);
+           } else {
+                action = new Action(Action.START_AUTHENTICATE,
+                        new JSONObject()
+                                .put(TREE, authService.getAuthIndexValue())
+                                .put(TYPE, authService.getAuthIndexType()));
+            }
+
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl(authService))
                     .post(RequestBody.create(new byte[0]))
@@ -94,10 +101,15 @@ class AuthServiceClient {
      */
     void authenticate(final AuthService authService, final Node node, final AuthServiceResponseHandler handler) {
         try {
-            Action action = new Action(Action.AUTHENTICATE,
-                    new JSONObject()
-                            .put(TREE, authService.getAuthIndexValue())
-                            .put(TYPE, authService.getAuthIndexType()));
+            Action action = null;
+            if (authService.isResume()) {
+                action = new Action(Action.AUTHENTICATE);
+            } else {
+                action = new Action(Action.AUTHENTICATE,
+                        new JSONObject()
+                                .put(TREE, authService.getAuthIndexValue())
+                                .put(TYPE, authService.getAuthIndexType()));
+            }
 
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getUrl())
@@ -124,6 +136,12 @@ class AuthServiceClient {
     }
 
     private URL getUrl(AuthService authService) throws MalformedURLException {
+        if (authService.isResume()) {
+            return new URL(getUriBuilder()
+                    .appendQueryParameter(SUSPENDED_ID, authService.getResumeURI()
+                            .getQueryParameter(SUSPENDED_ID))
+                    .build().toString());
+        }
         return new URL(getUriBuilder()
                 .appendQueryParameter(AUTH_INDEX_TYPE, authService.getAuthIndexType())
                 .appendQueryParameter(AUTH_INDEX_VALUE, authService.getAuthIndexValue())

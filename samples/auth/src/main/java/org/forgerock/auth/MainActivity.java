@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -30,13 +30,13 @@ import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
-import org.forgerock.android.auth.RequestInterceptorRegistry;
 import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.forgerock.android.auth.interceptor.AdviceHandler;
 import org.forgerock.android.auth.interceptor.IdentityGatewayAdviceInterceptor;
 import org.forgerock.android.auth.ui.AdviceDialogHandler;
+import org.forgerock.android.auth.ui.LoginFragment;
 import org.forgerock.android.auth.ui.SimpleLoginActivity;
 import org.forgerock.android.auth.ui.SimpleRegisterActivity;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +51,7 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -58,7 +59,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FRListener<String> {
 
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
@@ -70,12 +71,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
                 new NoSessionRequestInterceptor(),
                 new InjectHeaderAuthRequestInterceptor());
          */
+
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);
@@ -86,6 +89,20 @@ public class MainActivity extends AppCompatActivity {
         content = findViewById(org.forgerock.auth.R.id.content);
         progressBar = findViewById(org.forgerock.auth.R.id.progressBar);
         progressBar.setVisibility(INVISIBLE);
+
+        if (getIntent() != null) {
+            if (getIntent().getData() != null) {
+                Intent resume = new Intent(this, SimpleLoginActivity.class);
+                resume.setData(getIntent().getData());
+                startActivityForResult(resume, AUTH_REQUEST_CODE);
+            }
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        userinfo();
     }
 
     @Override
@@ -97,33 +114,14 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 success.setVisibility(VISIBLE);
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
-                        @Override
-                        public void onSuccess(final UserInfo result) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                try {
-                                    content.setText(result.getRaw().toString(2));
-                                } catch (JSONException e) {
-                                    onException(e);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(final Exception e) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                content.setText(e.getMessage());
-                            });
-                        }
-                    });
-                } else {
-                    Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "No Session", LENGTH_LONG).show();
-                }
+                userinfo();
             } else {
-                Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed", LENGTH_LONG).show();
+                Exception exception = null;
+                if (data != null) {
+                    exception = (Exception) data.getSerializableExtra(SimpleLoginActivity.EXCEPTION);
+                }
+                Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed:" +
+                        exception != null ? exception.getMessage() : "", LENGTH_LONG).show();
             }
         }
     }
@@ -142,8 +140,7 @@ public class MainActivity extends AppCompatActivity {
             case org.forgerock.auth.R.id.login:
                 success.setVisibility(INVISIBLE);
                 content.setText("");
-                Intent loginIntent = new Intent(this, SimpleLoginActivity.class);
-                startActivityForResult(loginIntent, AUTH_REQUEST_CODE);
+                TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
                 return true;
 
             case org.forgerock.auth.R.id.register:
@@ -159,8 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 if (FRUser.getCurrentUser() != null) {
                     FRUser.getCurrentUser().logout();
                 }
-                Intent relogin = new Intent(this, SimpleLoginActivity.class);
-                startActivityForResult(relogin, AUTH_REQUEST_CODE);
+                TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
 
                 return true;
             case org.forgerock.auth.R.id.profile:
@@ -185,35 +181,18 @@ public class MainActivity extends AppCompatActivity {
                 });
                 return true;
             case R.id.userinfo:
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
-                        @Override
-                        public void onSuccess(final UserInfo result) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                try {
-                                    content.setText(result.getRaw().toString(2));
-                                } catch (JSONException e) {
-                                    onException(e);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(final Exception e) {
-                            runOnUiThread(() -> {
-                                progressBar.setVisibility(INVISIBLE);
-                                content.setText(e.getMessage());
-                            });
-                        }
-                    });
-                } else {
-                    content.setText("No User Session");
-                }
+                userinfo();
                 return true;
             case org.forgerock.auth.R.id.invoke:
+
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .followRedirects(false);
+
+                if (Logger.isDebugEnabled()) {
+                    HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                    interceptor.level(HttpLoggingInterceptor.Level.BODY);
+                    builder.addInterceptor(interceptor);
+                }
 
                 builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
                     @Override
@@ -255,6 +234,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void userinfo() {
+        if (FRUser.getCurrentUser() != null) {
+            FRUser.getCurrentUser().getUserInfo(new FRListener<UserInfo>() {
+                @Override
+                public void onSuccess(final UserInfo result) {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        try {
+                            content.setText(result.getRaw().toString(2));
+                        } catch (JSONException e) {
+                            onException(e);
+                        }
+                    });
+                }
+
+                @Override
+                public void onException(final Exception e) {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        content.setText(e.getMessage());
+                    });
+                }
+            });
+        } else {
+            content.setText("No User Session");
+        }
+    }
+
     private void checkPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(Objects.requireNonNull(this),
                 ACCESS_FINE_LOCATION)) {
@@ -271,4 +278,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onSuccess(String result) {
+        Intent loginIntent = new Intent(this, SimpleLoginActivity.class);
+        loginIntent.putExtra(LoginFragment.TREE_NAME, result);
+        startActivityForResult(loginIntent, AUTH_REQUEST_CODE);
+    }
+
+    @Override
+    public void onException(Exception e) {
+    }
 }

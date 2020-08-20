@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class FRAuth {
     private FRAuth(@NonNull Context context,
                    String serviceName,
                    PolicyAdvice advice,
+                   Uri resumeURI,
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
                    @Singular List<Interceptor<?>> interceptors) {
@@ -72,6 +74,7 @@ public class FRAuth {
         AuthService.AuthServiceBuilder builder = AuthService.builder()
                 .name(serviceName)
                 .advice(advice)
+                .resumeURI(resumeURI)
                 .serverConfig(serverConfig == null ? Config.getInstance().getServerConfig() : serverConfig)
                 .interceptor(new SingleSignOnInterceptor(
                         this.sessionManager));
@@ -127,7 +130,7 @@ public class FRAuth {
                     interceptors = java.util.Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
-            return new FRAuth(context, serviceName, advice, serverConfig, sessionManager, interceptors);
+            return new FRAuth(context, serviceName, advice, resumeURI, serverConfig, sessionManager, interceptors);
         }
     }
 }

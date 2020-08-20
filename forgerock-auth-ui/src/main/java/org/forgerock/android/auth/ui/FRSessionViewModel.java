@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,7 +7,9 @@
 
 package org.forgerock.android.auth.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.lifecycle.ViewModel;
 
@@ -15,6 +17,8 @@ import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.PolicyAdvice;
+
+import static org.forgerock.android.auth.ui.LoginFragment.TREE_NAME;
 
 /**
  * {@link ViewModel} Wrapper for {@link org.forgerock.android.auth.FRSession}
@@ -43,12 +47,24 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
     }
 
     public void authenticate(Context context) {
-        FRSession.authenticate(context, context.getString(R.string.forgerock_auth_service), nodeListener);
+        String tree = context.getString(R.string.forgerock_auth_service);
+        if (context instanceof Activity) {
+            String treeName = ((Activity) context).getIntent().getStringExtra(TREE_NAME);
+            if (treeName != null) {
+                tree = treeName;
+            }
+        }
+        FRSession.authenticate(context, tree, nodeListener);
     }
 
     @Override
     public void authenticate(Context context, PolicyAdvice advice) {
         FRSession.getCurrentSession().authenticate(context, advice, nodeListener);
+    }
+
+    @Override
+    public void authenticate(Context context, Uri resumeUri) {
+        FRSession.authenticate(context, resumeUri, nodeListener);
     }
 
     public void register(Context context) {

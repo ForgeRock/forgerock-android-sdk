@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,21 +7,29 @@
 
 package org.forgerock.android.auth;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.util.Base64;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import lombok.Getter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import lombok.Getter;
+
+import static org.forgerock.android.auth.Encryptor.getEncryptor;
 
 /**
  * An implementation of {@link SharedPreferences} that encrypts values.
@@ -45,11 +53,23 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
     private final String keyAlias;
 
     SecuredSharedPreferences(Context context, String fileName, String keyAlias) {
+        this(context, fileName, keyAlias, null);
+    }
+
+    SecuredSharedPreferences(Context context, String fileName, String keyAlias, Encryptor encryptor) {
         this.sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         this.listeners = new ArrayList<>();
         this.keyAlias = keyAlias;
-        this.encryptor = getEncryptor(context);
+        if (encryptor == null) {
+            this.encryptor = getEncryptor(context,
+                    keyAlias,
+                    new SharedPreferencesSecretKeyStore(keyAlias, sharedPreferences),
+                    this);
+        } else {
+            this.encryptor = encryptor;
+        }
     }
+
 
     @Override
     @NonNull
@@ -219,22 +239,6 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
         }
     }
 
-    @SuppressLint("NewApi")
-    protected Encryptor getEncryptor(Context context) {
-        switch (Build.VERSION.SDK_INT) {
-            case Build.VERSION_CODES.LOLLIPOP:
-            case Build.VERSION_CODES.LOLLIPOP_MR1:
-                return new AndroidLEncryptor(context, keyAlias,
-                        new SharedPreferencesSecretKeyStore(keyAlias, sharedPreferences));
-            case Build.VERSION_CODES.M:
-                return new AndroidMEncryptor(keyAlias, this);
-            case Build.VERSION_CODES.N:
-                return new AndroidNEncryptor(keyAlias, this);
-            default:
-                return new AndroidNEncryptor(keyAlias, this);
-        }
-
-    }
 
     @Override
     public void onKeyUpdated() {
