@@ -12,11 +12,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "org.forgerock.auth"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -43,8 +43,8 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:2.0.0'
-    implementation 'org.forgerock:forgerock-auth-ui:2.0.0'
+    implementation 'org.forgerock:forgerock-auth:2.1.0'
+    implementation 'org.forgerock:forgerock-auth-ui:2.1.0'
      */
 
     implementation 'com.squareup.okhttp3:okhttp:4.3.1'
