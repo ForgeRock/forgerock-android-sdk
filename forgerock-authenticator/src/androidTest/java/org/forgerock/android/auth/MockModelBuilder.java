@@ -14,7 +14,7 @@ import java.util.Calendar;
  */
 public class MockModelBuilder {
 
-    public static Account createAccount(String issuer, String accountName){
+    public static Account createAccount(String issuer, String accountName) {
         Account account = Account.builder()
                 .setAccountName(accountName)
                 .setIssuer(issuer)
@@ -24,7 +24,7 @@ public class MockModelBuilder {
     }
 
     public static Account createAccount(String issuer, String accountName, String imageUrl,
-                                        String backgroundColor){
+                                        String backgroundColor) {
         Account account = Account.builder()
                 .setAccountName(accountName)
                 .setIssuer(issuer)
@@ -37,19 +37,31 @@ public class MockModelBuilder {
 
     public static OathMechanism createOath(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
                                            String algorithm, String secret, int digits, long counter, int period) {
-        OathMechanism oath = OathMechanism.builder()
-                .setMechanismUID(mechanismUID)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setType(oathType)
-                .setAlgorithm(algorithm)
-                .setSecret(secret)
-                .setDigits(digits)
-                .setCounter(counter)
-                .setPeriod(period)
-                .build();
 
-        return oath;
+        switch (OathMechanism.TokenType.TOTP) {
+            case TOTP:
+                return TOTPMechanism.builder()
+                        .setMechanismUID(mechanismUID)
+                        .setIssuer(issuer)
+                        .setAccountName(accountName)
+                        .setAlgorithm(algorithm)
+                        .setSecret(secret)
+                        .setDigits(digits)
+                        .setPeriod(period)
+                        .build();
+            case HOTP:
+                return HOTPMechanism.builder()
+                        .setMechanismUID(mechanismUID)
+                        .setIssuer(issuer)
+                        .setAccountName(accountName)
+                        .setAlgorithm(algorithm)
+                        .setSecret(secret)
+                        .setDigits(digits)
+                        .setCounter(counter)
+                        .build();
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static PushMechanism createPush(String mechanismUID, String issuer, String accountName, String secret,
