@@ -38,7 +38,7 @@ public class MockModelBuilder {
     public static OathMechanism createOath(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
                                            String algorithm, String secret, int digits, long counter, int period) {
 
-        switch (OathMechanism.TokenType.TOTP) {
+        switch (oathType) {
             case TOTP:
                 return TOTPMechanism.builder()
                         .setMechanismUID(mechanismUID)
