@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
  * <li>REVOKE_TOKEN - OAuth2 token revocation with given 'access_token' or 'refresh_token': '/oauth2/realms/{realm}/token/revoke'</li>
  * <li>LOGOUT - AM Session logout request to revoke SSO Token: '/json/realms/{realm}/sessions?_action=logout'</li>
  * <li>USER_INFO - Retrieving user info: `/oauth2/realms/{realm}/userinfo`</li>
+ * <li>END_SESSION - End session API: `/oauth2/realms/{realm}/connect/endSession`</li>
  * </ul>
  */
 @Getter
@@ -46,6 +47,7 @@ public class Action {
     public static final String REVOKE_TOKEN = "REVOKE_TOKEN";
     public static final String LOGOUT = "LOGOUT";
     public static final String USER_INFO = "USER_INFO";
+    public static final String END_SESSION = "END_SESSION";
 
     private final String type;
 

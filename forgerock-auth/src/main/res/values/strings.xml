@@ -33,6 +33,7 @@
     <string name="forgerock_revoke_endpoint" translatable="false"/>
     <string name="forgerock_userinfo_endpoint" translatable="false"/>
     <string name="forgerock_logout_endpoint" translatable="false"/>
+    <string name="forgerock_endsession_endpoint" translatable="false"/>
 
     <!-- SSO -->
     <string name="forgerock">ForgeRock</string> <!-- Account Label -->

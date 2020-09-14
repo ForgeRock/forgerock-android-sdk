@@ -30,11 +30,20 @@ public interface TokenManager {
     void exchangeToken(SSOToken token, final FRListener<AccessToken> listener);
 
     /**
+     * Sends an authorization request to the authorization service.
+     *
+     * @param code     The Authorization Code
+     * @param pkce     The Proof Key for Code Exchange
+     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     */
+    void exchangeToken(String code, PKCE pkce, final FRListener<AccessToken> listener);
+
+    /**
      * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not
      * refresh the token and persist it.
      *
      * @param accessToken AccessToken
-     * @param listener Listener to listen for refresh event.
+     * @param listener    Listener to listen for refresh event.
      * @throws AuthenticationRequiredException When failed to Refresh the {@link AccessToken}
      */
     void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException;
@@ -47,7 +56,7 @@ public interface TokenManager {
      * If the stored {@link AccessToken} is expired, auto refresh the token
      *
      * @param accessTokenVerifier Verifier to verify the access token.
-     * @param tokenListener Listener to listen for get access token event.
+     * @param tokenListener       Listener to listen for get access token event.
      */
     void getAccessToken(AccessTokenVerifier accessTokenVerifier, FRListener<AccessToken> tokenListener);
 

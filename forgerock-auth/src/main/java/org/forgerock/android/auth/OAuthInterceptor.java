@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -19,6 +21,10 @@ class OAuthInterceptor implements Interceptor<SSOToken> {
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
+        if (token == null) {
+            Listener.onException(chain.getListener(), new AuthenticationRequiredException("Authentication Required."));
+            return;
+        }
         tokenManager.exchangeToken(token, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken accessToken) {
@@ -27,9 +33,8 @@ class OAuthInterceptor implements Interceptor<SSOToken> {
 
             @Override
             public void onException(Exception e) {
-                chain.getListener().onException(e);
+                Listener.onException(chain.getListener(), e);
             }
         });
     }
-
 }

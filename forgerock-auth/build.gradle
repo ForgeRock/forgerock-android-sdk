@@ -200,6 +200,7 @@ dependencies {
     //Make it optional for developer
     compileOnly 'com.google.android.gms:play-services-location:17.0.0'
     compileOnly 'com.google.android.gms:play-services-safetynet:17.0.0'
+    compileOnly 'net.openid:appauth:0.7.1'
 
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'

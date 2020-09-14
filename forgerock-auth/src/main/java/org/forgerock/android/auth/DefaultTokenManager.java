@@ -102,6 +102,11 @@ class DefaultTokenManager implements TokenManager {
     }
 
     @Override
+    public void exchangeToken(String code, PKCE pkce, FRListener<AccessToken> listener) {
+        oAuth2Client.token(null, code, pkce, new OAuth2ResponseHandler(), listener);
+    }
+
+    @Override
     public void getAccessToken(AccessTokenVerifier verifier, FRListener<AccessToken> tokenListener) {
         AccessToken accessToken = getAccessTokenLocally();
         if (accessToken != null) {
@@ -112,6 +117,7 @@ class DefaultTokenManager implements TokenManager {
                 revoke(new FRListener<Void>() {
                     @Override
                     public void onSuccess(Void result) {
+                        //Success revoke, but we telling caller that, no Access Token is available.
                         Listener.onException(tokenListener,
                                 new AuthenticationRequiredException("Access Token is not valid, authentication is required."));
                     }
@@ -219,8 +225,26 @@ class DefaultTokenManager implements TokenManager {
             Listener.onException(listener, new IllegalStateException("Access Token Not found!"));
             return;
         }
-        oAuth2Client.revoke(accessToken, listener);
+        //There are 2 steps here to revoke the token, the AccessToken and idToken
+        oAuth2Client.revoke(accessToken, new FRListener<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                if (StringUtils.isNotEmpty(accessToken.getIdToken())) {
+                    oAuth2Client.endSession(accessToken.getIdToken(), listener);
+                } else {
+                    Listener.onSuccess(listener, result);
+                }
+            }
 
+            @Override
+            public void onException(Exception e) {
+                //Try best to end the session
+                if (StringUtils.isNotEmpty(accessToken.getIdToken())) {
+                    oAuth2Client.endSession(accessToken.getIdToken(), null);
+                }
+                Listener.onException(listener, e);
+            }
+        });
     }
 
 }

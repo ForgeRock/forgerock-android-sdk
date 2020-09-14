@@ -8,11 +8,12 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.util.List;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Singular;
 
 /**
  * Follow the {@link Interceptor.Chain} and executes each {@link Interceptor}
@@ -25,6 +26,7 @@ public class InterceptorHandler implements Interceptor.Chain {
 
     @Getter
     private Context context;
+    @Singular
     private List<? extends Interceptor<?>> interceptors;
     @Getter
     private FRListener listener;

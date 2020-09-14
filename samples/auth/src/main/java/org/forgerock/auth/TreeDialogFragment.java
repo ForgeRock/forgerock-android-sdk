@@ -27,7 +27,7 @@ import org.forgerock.android.auth.Listener;
  */
 public class TreeDialogFragment extends DialogFragment {
 
-    private FRListener<String> listener;
+    private MainActivity listener;
 
     public static TreeDialogFragment newInstance() {
         return new TreeDialogFragment();
@@ -57,7 +57,12 @@ public class TreeDialogFragment extends DialogFragment {
         start.setOnClickListener(v -> {
             dismiss();
             TextView treeName = view.findViewById(R.id.treeName);
-            Listener.onSuccess(listener, treeName.getText().toString());
+            listener.launchTree(treeName.getText().toString());
+        });
+        Button launchBrowser = view.findViewById(R.id.launchBrowser);
+        launchBrowser.setOnClickListener(v -> {
+            dismiss();
+            listener.launchBrowser();
         });
 
         return view;
@@ -66,8 +71,8 @@ public class TreeDialogFragment extends DialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof FRListener)  {
-            listener = (FRListener<String>) context;
+        if (context instanceof MainActivity)  {
+            listener = (MainActivity) context;
         }
     }
 }

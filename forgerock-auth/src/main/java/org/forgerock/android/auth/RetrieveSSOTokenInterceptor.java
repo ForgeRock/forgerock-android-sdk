@@ -8,7 +8,6 @@
 package org.forgerock.android.auth;
 
 import lombok.RequiredArgsConstructor;
-import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
 /**
  * Interceptor to intercept the received token and exchange to {@link AccessToken}.
@@ -20,13 +19,8 @@ class RetrieveSSOTokenInterceptor implements Interceptor<Void> {
 
     @Override
     public void intercept(final Chain chain, final Void input) {
-
         SSOToken ssoToken = singleSignOnManager.getToken();
-        if (ssoToken != null) {
-            chain.proceed(ssoToken);
-        } else {
-            chain.getListener().onException(new AuthenticationRequiredException("Authentication Required"));
-        }
+        chain.proceed(ssoToken);
     }
 
 }

@@ -59,7 +59,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 
-public class MainActivity extends AppCompatActivity implements FRListener<String> {
+public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        userinfo();
     }
 
     @Override
@@ -278,14 +277,35 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     }
 
 
-    @Override
-    public void onSuccess(String result) {
+    public void launchTree(String result) {
         Intent loginIntent = new Intent(this, SimpleLoginActivity.class);
         loginIntent.putExtra(LoginFragment.TREE_NAME, result);
         startActivityForResult(loginIntent, AUTH_REQUEST_CODE);
     }
 
-    @Override
-    public void onException(Exception e) {
+    public void launchBrowser() {
+        FRUser.browser().appAuthConfigurer()
+                .authorizationRequest(r -> {
+                    //r.setLoginHint("login");
+                    r.setPrompt("login");
+                })
+                .customTabsIntent(t -> {
+                    t.setShowTitle(true);
+                    t.setToolbarColor(getResources().getColor(R.color.colorAccent));
+                }).done()
+                .login(this, new FRListener<FRUser>() {
+                    @Override
+                    public void onSuccess(FRUser result) {
+                        userinfo();
+                    }
+
+                    @Override
+                    public void onException(Exception e) {
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(INVISIBLE);
+                            content.setText(e.getMessage());
+                        });
+                    }
+                });
     }
 }

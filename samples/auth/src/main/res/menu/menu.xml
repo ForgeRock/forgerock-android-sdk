@@ -37,4 +37,5 @@
         android:icon="@android:drawable/ic_menu_call"
         android:title="@string/invoke"
         app:showAsAction="collapseActionView"/>
+
 </menu>
