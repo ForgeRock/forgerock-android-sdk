@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -76,10 +77,14 @@ public class OAuth2Client {
     /**
      * Sends an authorization request to the authorization service.
      *
-     * @param token    The SSO Token received with the result of {@link AuthService}
-     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     * @param token                The SSO Token received with the result of {@link AuthService}
+     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     *                             request
+     * @param listener             Listener that listens to changes resulting from OAuth endpoints .
      */
-    public void exchangeToken(@NonNull SSOToken token, final FRListener<AccessToken> listener) {
+    public void exchangeToken(@NonNull SSOToken token,
+                              @NonNull Map<String, String> additionalParameters,
+                              final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchanging Access Token with SSO Token.");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
         try {
@@ -92,7 +97,7 @@ public class OAuth2Client {
             final PKCE pkce = generateCodeChallenge();
 
             okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(getAuthorizeUrl(token, pkce))
+                    .url(getAuthorizeUrl(token, pkce, additionalParameters))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .tag(AUTHORIZE)
@@ -115,7 +120,7 @@ public class OAuth2Client {
 
                         @Override
                         public void onSuccess(String code) {
-                            token(token, code, pkce, handler, listener);
+                            token(token, code, pkce, additionalParameters, handler, listener);
                         }
                     });
                 }
@@ -250,19 +255,26 @@ public class OAuth2Client {
     /**
      * Sends an token request to the authorization service.
      *
-     * @param sessionToken The Session Token
-     * @param code         The Authorization code.
-     * @param pkce         The Proof Key for Code Exchange
-     * @param handler      Handle changes resulting from OAuth endpoints.
+     * @param sessionToken         The Session Token
+     * @param code                 The Authorization code.
+     * @param pkce                 The Proof Key for Code Exchange
+     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     *                             request
+     * @param handler              Handle changes resulting from OAuth endpoints.
      */
     public void token(@Nullable SSOToken sessionToken,
                       @NonNull String code,
                       final PKCE pkce,
+                      final Map<String, String> additionalParameters,
                       final OAuth2ResponseHandler handler,
                       final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchange Access Token with Authorization Code");
         try {
             FormBody.Builder builder = new FormBody.Builder();
+
+            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+                builder.add(entry.getKey(), entry.getValue());
+            }
 
             RequestBody body = builder
                     .add(OAuth2.CLIENT_ID, clientId)
@@ -298,8 +310,11 @@ public class OAuth2Client {
         }
     }
 
-    private URL getAuthorizeUrl(Token token, PKCE pkce) throws MalformedURLException, UnsupportedEncodingException {
+    private URL getAuthorizeUrl(Token token, PKCE pkce, Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
         Uri.Builder builder = Uri.parse(getAuthorizeUrl().toString()).buildUpon();
+        for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+            builder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
         return new URL(builder
                 .appendQueryParameter(serverConfig.getCookieName(), token.getValue())
                 .appendQueryParameter(OAuth2.CLIENT_ID, clientId)

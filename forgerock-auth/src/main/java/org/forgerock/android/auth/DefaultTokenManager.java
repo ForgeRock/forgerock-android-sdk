@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,10 +11,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.WorkerThread;
-
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +23,7 @@ import lombok.Builder;
 import lombok.NonNull;
 
 import static org.forgerock.android.auth.OAuth2.ACCESS_TOKEN;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 /**
  * Default implementation for {@link TokenManager}. By default this class uses {@link SecuredSharedPreferences} to persist
@@ -97,13 +97,13 @@ class DefaultTokenManager implements TokenManager {
     }
 
     @Override
-    public void exchangeToken(@NonNull SSOToken token, FRListener<AccessToken> listener) {
-        oAuth2Client.exchangeToken(token, listener);
+    public void exchangeToken(@NonNull SSOToken token, @NonNull Map<String, String> additionalParameters, FRListener<AccessToken> listener) {
+        oAuth2Client.exchangeToken(token, additionalParameters, listener);
     }
 
     @Override
-    public void exchangeToken(String code, PKCE pkce, FRListener<AccessToken> listener) {
-        oAuth2Client.token(null, code, pkce, new OAuth2ResponseHandler(), listener);
+    public void exchangeToken(String code, PKCE pkce, Map<String, String> additionalParameters, FRListener<AccessToken> listener) {
+        oAuth2Client.token(null, code, pkce, additionalParameters, new OAuth2ResponseHandler(), listener);
     }
 
     @Override
@@ -229,7 +229,7 @@ class DefaultTokenManager implements TokenManager {
         oAuth2Client.revoke(accessToken, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                if (StringUtils.isNotEmpty(accessToken.getIdToken())) {
+                if (isNotEmpty(accessToken.getIdToken())) {
                     oAuth2Client.endSession(accessToken.getIdToken(), listener);
                 } else {
                     Listener.onSuccess(listener, result);
@@ -239,7 +239,7 @@ class DefaultTokenManager implements TokenManager {
             @Override
             public void onException(Exception e) {
                 //Try best to end the session
-                if (StringUtils.isNotEmpty(accessToken.getIdToken())) {
+                if (isNotEmpty(accessToken.getIdToken())) {
                     oAuth2Client.endSession(accessToken.getIdToken(), null);
                 }
                 Listener.onException(listener, e);

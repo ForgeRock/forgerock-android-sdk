@@ -9,6 +9,7 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import lombok.Getter;
@@ -45,7 +46,18 @@ import lombok.NoArgsConstructor;
 @Getter
 public class MetadataCallback extends AbstractCallback {
 
-    private JSONObject value;
+    private String value;
+
+    public JSONObject getValue() {
+        if (value != null) {
+            try {
+                return new JSONObject(value);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
 
     @Keep
     public MetadataCallback(JSONObject jsonObject, int index) {
@@ -55,7 +67,9 @@ public class MetadataCallback extends AbstractCallback {
     @Override
     protected void setAttribute(String name, Object value) {
         if ("data".equals(name)) {
-            this.value = (JSONObject) value;
+            if (value != null) {
+                this.value = value.toString();
+            }
         }
     }
 

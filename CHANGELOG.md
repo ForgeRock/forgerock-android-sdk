@@ -1,4 +1,7 @@
-# Version 2.1.0
+# Version 2.2.0
+
+## [2.2.0]
+- Centralize Login (`AppAuth` Integration) [SDKS-330]
 
 ## [2.1.0]
 

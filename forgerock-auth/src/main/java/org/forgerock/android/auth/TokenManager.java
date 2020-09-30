@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+
+import java.util.Map;
 
 /**
  * Interface to Manage OAuth2 Tokens
@@ -25,18 +27,22 @@ public interface TokenManager {
      * Sends an authorization request to the authorization service.
      *
      * @param token    The SSO Token received with the result of {@link AuthService}
+     *
      * @param listener Listener that listens to changes resulting from OAuth endpoints .
      */
-    void exchangeToken(SSOToken token, final FRListener<AccessToken> listener);
+    void exchangeToken(SSOToken token, final Map<String, String> additionalParameters, final FRListener<AccessToken> listener);
 
     /**
      * Sends an authorization request to the authorization service.
      *
-     * @param code     The Authorization Code
-     * @param pkce     The Proof Key for Code Exchange
-     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     * @param code                 The Authorization Code
+     * @param pkce                 The Proof Key for Code Exchange
+     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     *                             request
+     * @param listener             Listener that listens to changes resulting from OAuth endpoints .
      */
-    void exchangeToken(String code, PKCE pkce, final FRListener<AccessToken> listener);
+    void exchangeToken(String code, PKCE pkce, Map<String, String> additionalParameters, final FRListener<AccessToken> listener);
+
 
     /**
      * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not

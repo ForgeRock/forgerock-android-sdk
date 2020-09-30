@@ -11,6 +11,8 @@ import net.openid.appauth.AuthorizationResponse;
 
 import lombok.RequiredArgsConstructor;
 
+import static java.util.Collections.emptyMap;
+
 /**
  * Interceptor to intercept the received authorization code and exchange to {@link AccessToken}.
  */
@@ -26,17 +28,18 @@ class ExchangeAccessTokenInterceptor implements Interceptor<AuthorizationRespons
                 response.request.codeVerifierChallengeMethod,
                 response.request.codeVerifier);
 
-        tokenManager.exchangeToken(response.authorizationCode, pkce, new FRListener<AccessToken>() {
-            @Override
-            public void onSuccess(AccessToken result) {
-                chain.proceed(result);
-            }
+        tokenManager.exchangeToken(response.authorizationCode, pkce, emptyMap(),
+                new FRListener<AccessToken>() {
+                    @Override
+                    public void onSuccess(AccessToken result) {
+                        chain.proceed(result);
+                    }
 
-            @Override
-            public void onException(Exception e) {
-                Listener.onException(chain.getListener(), e);
-            }
-        });
+                    @Override
+                    public void onException(Exception e) {
+                        Listener.onException(chain.getListener(), e);
+                    }
+                });
 
     }
 

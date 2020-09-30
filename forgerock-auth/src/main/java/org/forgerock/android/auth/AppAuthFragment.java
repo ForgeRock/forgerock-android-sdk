@@ -7,37 +7,48 @@
 
 package org.forgerock.android.auth;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.OperationCanceledException;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import net.openid.appauth.AppAuthConfiguration;
-import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
-import org.forgerock.android.auth.exception.AuthenticationException;
+import org.forgerock.android.auth.exception.BrowserAuthenticationException;
 
-import java.net.HttpURLConnection;
+import static net.openid.appauth.AuthorizationException.EXTRA_EXCEPTION;
 
-import static android.app.Activity.RESULT_CANCELED;
-
+/**
+ * Headless Fragment to receive callback result from AppAuth library
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 public class AppAuthFragment extends Fragment {
 
-    private static final String TAG = AppAuthFragment.class.getName();
-    private static final int AUTH_REQUEST_CODE = 100;
+    static final String TAG = AppAuthFragment.class.getName();
+    static final int AUTH_REQUEST_CODE = 100;
 
     private FRUser.Browser browser;
 
-    public static AppAuthFragment init(FragmentManager fragmentManager, FRUser.Browser browser) {
+    /**
+     * Initialize the Fragment to receive AppAuth callback event.
+     */
+    static AppAuthFragment init(FragmentManager fragmentManager, FRUser.Browser browser) {
+        AppAuthFragment existing = (AppAuthFragment) fragmentManager.findFragmentByTag(TAG);
+        if (existing != null) {
+            existing.browser = null;
+            fragmentManager.beginTransaction().remove(existing).commitNow();
+        }
+
         AppAuthFragment fragment = new AppAuthFragment();
         fragment.browser = browser;
         fragmentManager.beginTransaction().add(fragment, AppAuthFragment.TAG).commit();
@@ -50,6 +61,7 @@ public class AppAuthFragment extends Fragment {
 
         OAuth2Client oAuth2Client = Config.getInstance().getOAuth2Client();
         AppAuthConfigurer configurer = browser.getAppAuthConfigurer();
+
         //Allow caller to override Authorization Service Configuration setting
         AuthorizationServiceConfiguration configuration = configurer.getAuthorizationServiceConfigurationSupplier().get();
         AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(configuration,
@@ -65,38 +77,41 @@ public class AppAuthFragment extends Fragment {
         //Allow caller to override AppAuth default setting
         AppAuthConfiguration.Builder appAuthConfigurationBuilder = new AppAuthConfiguration.Builder();
         configurer.getAppAuthConfigurationBuilder().accept(appAuthConfigurationBuilder);
-        AuthorizationService authorizationService = new AuthorizationService(getContext(), appAuthConfigurationBuilder.build());
+        AuthorizationService authorizationService = new AuthorizationService(getContext(),
+                appAuthConfigurationBuilder.build());
 
         //Allow caller to override custom tabs default setting
         CustomTabsIntent.Builder intentBuilder =
                 authorizationService.createCustomTabsIntentBuilder(authorizationRequest.toUri());
         configurer.getCustomTabsIntentBuilder().accept(intentBuilder);
 
-        Intent intent = authorizationService.getAuthorizationRequestIntent(
-                authorizationRequest,
-                intentBuilder.build());
-
-        startActivityForResult(intent, AUTH_REQUEST_CODE);
+        try {
+            Intent intent = authorizationService.getAuthorizationRequestIntent(
+                    authorizationRequest, intentBuilder.build());
+            startActivityForResult(intent, AUTH_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            if (browser.isFailedOnNoBrowserFound()) {
+                throw e;
+            }
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        getActivity().getSupportFragmentManager().beginTransaction().remove(this).commitNow();
-        if (resultCode == RESULT_CANCELED) {
-            Listener.onException(browser.getListener(), new OperationCanceledException());
-        } else {
-            if (requestCode == AUTH_REQUEST_CODE) {
-                String error = data.getStringExtra(AuthorizationException.EXTRA_EXCEPTION);
-                if (error != null) {
-                    Listener.onException(browser.getListener(),
-                            new AuthenticationException(HttpURLConnection.HTTP_UNAUTHORIZED, error,
-                                    error));
-                } else {
-                    Listener.onSuccess(browser.getListener(), AuthorizationResponse.fromIntent(data));
-                }
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().beginTransaction().remove(this).commitNow();
+        }
+        if (data != null) {
+            String error = data.getStringExtra(EXTRA_EXCEPTION);
+            if (error != null) {
+                Listener.onException(browser.getListener(),
+                        new BrowserAuthenticationException(error));
             } else {
-                Listener.onException(browser.getListener(), new UnsupportedOperationException("Invalid result Code."));
+                Listener.onSuccess(browser.getListener(), AuthorizationResponse.fromIntent(data));
             }
+        } else {
+            //Not expected
+            Listener.onException(browser.getListener(), new BrowserAuthenticationException("No response data"));
         }
         browser = null;
     }

@@ -30,6 +30,7 @@ import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
+import org.forgerock.android.auth.RequestInterceptorRegistry;
 import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
@@ -44,6 +45,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -72,12 +75,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /*
         RequestInterceptorRegistry.getInstance().register(
-                new ForceAuthRequestInterceptor(),
-                new NoSessionRequestInterceptor(),
-                new InjectHeaderAuthRequestInterceptor());
-         */
+                //new IDTokenRequestInterceptor(),
+                //new ForceAuthRequestInterceptor(),
+                //new NoSessionRequestInterceptor()
+                //new InjectHeaderAuthRequestInterceptor()
+        );
 
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
@@ -284,13 +287,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchBrowser() {
+
         FRUser.browser().appAuthConfigurer()
                 .authorizationRequest(r -> {
+                    Map<String, String> additionalParameters = new HashMap<>();
+                    additionalParameters.put("KEY1", "VALUE1");
+                    additionalParameters.put("KEY2", "VALUE2");
                     //r.setLoginHint("login");
-                    r.setPrompt("login");
+                    //r.setPrompt("login");
                 })
                 .customTabsIntent(t -> {
-                    t.setShowTitle(true);
+                    t.setShowTitle(false);
                     t.setToolbarColor(getResources().getColor(R.color.colorAccent));
                 }).done()
                 .login(this, new FRListener<FRUser>() {
@@ -305,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
                             progressBar.setVisibility(INVISIBLE);
                             content.setText(e.getMessage());
                         });
+
                     }
                 });
     }

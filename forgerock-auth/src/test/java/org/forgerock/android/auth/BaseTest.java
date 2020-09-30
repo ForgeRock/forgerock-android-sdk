@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -77,9 +77,9 @@ public class BaseTest {
 
     protected OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
-                .clientId("andy_app")
-                .scope("openid email address")
-                .redirectUri("http://www.example.com:8080/callback")
+                .clientId(Config.getInstance().getClientId())
+                .scope(Config.getInstance().getScope())
+                .redirectUri(Config.getInstance().getRedirectUri())
                 .serverConfig(serverConfig)
                 .build();
     }

@@ -11,6 +11,7 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.util.Consumer;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationRequest;
@@ -18,14 +19,12 @@ import net.openid.appauth.AuthorizationServiceConfiguration;
 
 import java.net.MalformedURLException;
 
-import androidx.core.util.Consumer;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * AppAuth Integrate, https://github.com/openid/AppAuth-Android
+ * AppAuth Integration, https://github.com/openid/AppAuth-Android
  * this class provides AppAuth integration and customization
  */
 @RequiredArgsConstructor
@@ -55,7 +54,7 @@ public class AppAuthConfigurer {
     };
 
     /**
-     * Override the default OAuth2 endpoint from the Authorization Server defined under the String.xml
+     * Override the default OAuth2 endpoint defined under the String.xml
      * forgerock_url
      */
     public AppAuthConfigurer authorizationServiceConfiguration(@NonNull Supplier<AuthorizationServiceConfiguration> authorizationServiceConfiguration) {
@@ -83,7 +82,7 @@ public class AppAuthConfigurer {
     }
 
     /**
-     * Override the {@link AppAuthConfiguration} that prepared by the SDK.
+     * Override the {@link CustomTabsIntent} that prepared by the SDK.
      */
     public AppAuthConfigurer customTabsIntent(@NonNull Consumer<CustomTabsIntent.Builder> customTabsIntent) {
         this.customTabsIntentBuilder = customTabsIntent;
