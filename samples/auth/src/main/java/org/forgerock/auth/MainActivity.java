@@ -299,12 +299,6 @@ public class MainActivity extends AppCompatActivity {
                     //r.setLoginHint("login");
                     //r.setPrompt("login");
                 })
-                .authorizationServiceConfiguration(new Supplier<AuthorizationServiceConfiguration>() {
-                    @Override
-                    public AuthorizationServiceConfiguration get() {
-                        return null;
-                    }
-                })
                 .customTabsIntent(t -> {
                     t.setShowTitle(false);
                     t.setToolbarColor(getResources().getColor(R.color.colorAccent));
