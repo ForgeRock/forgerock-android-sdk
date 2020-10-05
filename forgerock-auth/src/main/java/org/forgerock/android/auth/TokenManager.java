@@ -26,9 +26,9 @@ public interface TokenManager {
     /**
      * Sends an authorization request to the authorization service.
      *
-     * @param token    The SSO Token received with the result of {@link AuthService}
-     *
-     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     * @param token                The SSO Token received with the result of {@link AuthService}
+     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     * @param listener             Listener that listens to changes resulting from OAuth endpoints .
      */
     void exchangeToken(SSOToken token, final Map<String, String> additionalParameters, final FRListener<AccessToken> listener);
 
@@ -37,7 +37,7 @@ public interface TokenManager {
      *
      * @param code                 The Authorization Code
      * @param pkce                 The Proof Key for Code Exchange
-     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     * @param additionalParameters Additional parameters for inclusion in the token endpoint
      *                             request
      * @param listener             Listener that listens to changes resulting from OAuth endpoints .
      */

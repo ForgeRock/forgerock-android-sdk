@@ -16,6 +16,7 @@ import androidx.core.util.Consumer;
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.browser.CustomTabManager;
 
 import java.net.MalformedURLException;
 
@@ -54,19 +55,28 @@ public class AppAuthConfigurer {
     };
 
     /**
-     * Override the default OAuth2 endpoint defined under the String.xml
-     * forgerock_url
+     * Override the default OAuth2 endpoint defined under the String.xml forgerock_url.
+     *
+     * @param authorizationServiceConfiguration {@link Supplier} that provide the {@link AuthorizationServiceConfiguration},
+     *                                          oauth2 endpoint.
+     * @return This AppAuthConfigurer
      */
+
     public AppAuthConfigurer authorizationServiceConfiguration(@NonNull Supplier<AuthorizationServiceConfiguration> authorizationServiceConfiguration) {
         this.authorizationServiceConfigurationSupplier = authorizationServiceConfiguration;
         return this;
     }
 
     /**
-     * Override the {@link AuthorizationRequest} that prepared by the SDK.
+     * Override the {@link AuthorizationRequest} that was prepared by the SDK.
      * The client_id, response type (code), redirect uri, scope are populated by the configuration defined under
      * string.xml forgerock_oauth_client_id, forgerock_oauth_redirect_uri, forgerock_oauth_scope. Developer can provide more
      * customization on the {@link AuthorizationRequest} object, for example {@link AuthorizationRequest.Builder#setPrompt(String)}
+     *
+     * @param authorizationRequest {@link java.util.function.Consumer} that override the {@link AuthorizationRequest},
+     *                             some attributes are pre-populated by the provided
+     *                             {@link AuthorizationRequest}
+     * @return This AppAuthConfigurer
      */
     public AppAuthConfigurer authorizationRequest(@NonNull Consumer<AuthorizationRequest.Builder> authorizationRequest) {
         this.authorizationRequestBuilder = authorizationRequest;
@@ -74,15 +84,21 @@ public class AppAuthConfigurer {
     }
 
     /**
-     * Override the {@link AppAuthConfiguration} that prepared by the SDK.
+     * Override the {@link AppAuthConfiguration} that was prepared by the SDK.
+     *
+     * @param appAuthConfiguration {@link java.util.function.Consumer} that override the {@link AppAuthConfiguration}
      */
-    public AppAuthConfigurer appAuthConfiguration(@NonNull Consumer<AppAuthConfiguration.Builder> authorizationService) {
-        this.appAuthConfigurationBuilder = authorizationService;
+    public AppAuthConfigurer appAuthConfiguration(@NonNull Consumer<AppAuthConfiguration.Builder> appAuthConfiguration) {
+        this.appAuthConfigurationBuilder = appAuthConfiguration;
         return this;
     }
 
     /**
-     * Override the {@link CustomTabsIntent} that prepared by the SDK.
+     * Override the {@link CustomTabsIntent} that was prepared by the SDK.
+     *
+     * @param customTabsIntent {@link java.util.function.Consumer} that override the {@link CustomTabsIntent},
+     *                         possibleUris ({@link CustomTabManager#createTabBuilder(android.net.Uri...)}) is
+     *                         pre-populated by the provided {@link CustomTabsIntent}
      */
     public AppAuthConfigurer customTabsIntent(@NonNull Consumer<CustomTabsIntent.Builder> customTabsIntent) {
         this.customTabsIntentBuilder = customTabsIntent;
@@ -95,6 +111,5 @@ public class AppAuthConfigurer {
     public FRUser.Browser done() {
         return parent;
     }
-
 
 }

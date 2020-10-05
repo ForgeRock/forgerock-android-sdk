@@ -36,6 +36,9 @@ import okhttp3.Response;
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
+/**
+ * Class to handle OAuth2 related endpoint
+ */
 @Getter
 public class OAuth2Client {
 
@@ -132,7 +135,14 @@ public class OAuth2Client {
         }
     }
 
-    public void refresh(@NonNull SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
+    /**
+     * Refresh the Access Token with the provided Refresh Token
+     *
+     * @param sessionToken The Session Token that bind to existing AccessToken
+     * @param refreshToken The Refresh Token that use to refresh the Access Token
+     * @param listener     Listen for endpoint event
+     */
+    public void refresh(@Nullable SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Refreshing Access Token");
 
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -176,6 +186,13 @@ public class OAuth2Client {
         }
     }
 
+    /**
+     * Revoke the AccessToken, to revoke the access token, first look for refresh token to revoke, if
+     * not provided, will revoke with the access token.
+     *
+     * @param accessToken The AccessToken to be revoked
+     * @param listener    Listener to listen for revoke event
+     */
     public void revoke(@NonNull AccessToken accessToken, final FRListener<Void> listener) {
         Logger.debug(TAG, "Revoking Access Token & Refresh Token");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -216,6 +233,12 @@ public class OAuth2Client {
         }
     }
 
+    /**
+     * End the user session with end session endpoint.
+     *
+     * @param idToken  The ID_TOKEN which associated with the user session.
+     * @param listener Listener to listen for end session event.
+     */
     public void endSession(@NonNull String idToken, FRListener<Void> listener) {
 
         okhttp3.Request request = null;
@@ -258,7 +281,7 @@ public class OAuth2Client {
      * @param sessionToken         The Session Token
      * @param code                 The Authorization code.
      * @param pkce                 The Proof Key for Code Exchange
-     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     * @param additionalParameters Additional parameters for inclusion in the token endpoint
      *                             request
      * @param handler              Handle changes resulting from OAuth endpoints.
      */

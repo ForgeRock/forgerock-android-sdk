@@ -24,14 +24,16 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import net.openid.appauth.AuthorizationServiceConfiguration;
+
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
-import org.forgerock.android.auth.RequestInterceptorRegistry;
 import org.forgerock.android.auth.SecureCookieJar;
+import org.forgerock.android.auth.Supplier;
 import org.forgerock.android.auth.UserInfo;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.forgerock.android.auth.interceptor.AdviceHandler;
@@ -75,12 +77,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        /*
         RequestInterceptorRegistry.getInstance().register(
-                //new IDTokenRequestInterceptor(),
-                //new ForceAuthRequestInterceptor(),
-                //new NoSessionRequestInterceptor()
-                //new InjectHeaderAuthRequestInterceptor()
+                new IDTokenRequestInterceptor(),
+                new ForceAuthRequestInterceptor(),
+                new NoSessionRequestInterceptor()
         );
+         */
 
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
         FRAuth.start(this);
@@ -295,6 +298,12 @@ public class MainActivity extends AppCompatActivity {
                     additionalParameters.put("KEY2", "VALUE2");
                     //r.setLoginHint("login");
                     //r.setPrompt("login");
+                })
+                .authorizationServiceConfiguration(new Supplier<AuthorizationServiceConfiguration>() {
+                    @Override
+                    public AuthorizationServiceConfiguration get() {
+                        return null;
+                    }
                 })
                 .customTabsIntent(t -> {
                     t.setShowTitle(false);
