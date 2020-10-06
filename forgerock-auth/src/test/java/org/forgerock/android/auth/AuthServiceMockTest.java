@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -28,9 +28,11 @@ import org.robolectric.RobolectricTestRunner;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
@@ -75,7 +77,7 @@ public class AuthServiceMockTest extends BaseTest {
 
         authService.next(context, nodeListenerFuture);
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(nodeListenerFuture.get(), oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(nodeListenerFuture.get(), emptyMap(), oAuth2TokenListenerFuture);
 
         RecordedRequest recordedRequest = server.takeRequest();
         //Assert OAuth Token
@@ -107,7 +109,7 @@ public class AuthServiceMockTest extends BaseTest {
         assertEquals("andy_app", uri.getQueryParameter("client_id"));
         assertEquals("openid email address", uri.getQueryParameter("scope"));
         assertEquals("code", uri.getQueryParameter("response_type"));
-        assertEquals("http://www.example.com:8080/callback", uri.getQueryParameter("redirect_uri"));
+        assertEquals("https://www.example.com:8080/callback", uri.getQueryParameter("redirect_uri"));
         assertNotNull(uri.getQueryParameter("code_challenge"));
         assertEquals("S256", uri.getQueryParameter("code_challenge_method"));
 

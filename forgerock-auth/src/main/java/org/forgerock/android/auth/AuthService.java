@@ -162,7 +162,8 @@ public class AuthService {
                     interceptors = Collections.unmodifiableList(new ArrayList<>(this.interceptors));
             }
 
-            AuthService authService = new AuthService(name, advice, resumeURI, serverConfig, interceptors);
+            AuthService authService = new AuthService(name,
+                    advice, resumeURI, serverConfig, interceptors);
             authServices.put(authService.authServiceId, authService);
             return authService;
 

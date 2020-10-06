@@ -44,6 +44,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -59,7 +61,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 
-public class MainActivity extends AppCompatActivity implements FRListener<String> {
+public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
@@ -74,9 +76,10 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
 
         /*
         RequestInterceptorRegistry.getInstance().register(
+                new IDTokenRequestInterceptor(),
                 new ForceAuthRequestInterceptor(),
-                new NoSessionRequestInterceptor(),
-                new InjectHeaderAuthRequestInterceptor());
+                new NoSessionRequestInterceptor()
+        );
          */
 
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
@@ -102,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        userinfo();
     }
 
     @Override
@@ -278,14 +280,40 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     }
 
 
-    @Override
-    public void onSuccess(String result) {
+    public void launchTree(String result) {
         Intent loginIntent = new Intent(this, SimpleLoginActivity.class);
         loginIntent.putExtra(LoginFragment.TREE_NAME, result);
         startActivityForResult(loginIntent, AUTH_REQUEST_CODE);
     }
 
-    @Override
-    public void onException(Exception e) {
+    public void launchBrowser() {
+
+        FRUser.browser().appAuthConfigurer()
+                .authorizationRequest(r -> {
+                    Map<String, String> additionalParameters = new HashMap<>();
+                    additionalParameters.put("KEY1", "VALUE1");
+                    additionalParameters.put("KEY2", "VALUE2");
+                    //r.setLoginHint("login");
+                    //r.setPrompt("login");
+                })
+                .customTabsIntent(t -> {
+                    t.setShowTitle(false);
+                    t.setToolbarColor(getResources().getColor(R.color.colorAccent));
+                }).done()
+                .login(this, new FRListener<FRUser>() {
+                    @Override
+                    public void onSuccess(FRUser result) {
+                        userinfo();
+                    }
+
+                    @Override
+                    public void onException(Exception e) {
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(INVISIBLE);
+                            content.setText(e.getMessage());
+                        });
+
+                    }
+                });
     }
 }

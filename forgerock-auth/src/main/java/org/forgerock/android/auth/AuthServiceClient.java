@@ -60,7 +60,7 @@ class AuthServiceClient {
 
             if (authService.isResume()) {
                 action = new Action(Action.RESUME_AUTHENTICATE);
-           } else {
+            } else {
                 action = new Action(Action.START_AUTHENTICATE,
                         new JSONObject()
                                 .put(TREE, authService.getAuthIndexValue())

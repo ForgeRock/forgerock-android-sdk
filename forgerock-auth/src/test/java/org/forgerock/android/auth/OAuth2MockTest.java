@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,7 +21,11 @@ import org.robolectric.RobolectricTestRunner;
 import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static java.util.Collections.emptyMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class OAuth2MockTest extends BaseTest {
@@ -36,7 +40,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         assertNotNull(oAuth2TokenListenerFuture.get());
         AccessToken accessToken = oAuth2TokenListenerFuture.get();
@@ -64,7 +68,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             assertNotNull(oAuth2TokenListenerFuture.get());
@@ -86,7 +90,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             assertNotNull(oAuth2TokenListenerFuture.get());
@@ -118,7 +122,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             oAuth2TokenListenerFuture.get();

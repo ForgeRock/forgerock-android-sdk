@@ -27,13 +27,11 @@ public class NoSessionRequestInterceptor implements FRRequestInterceptor<Action>
     @Override
     public Request intercept(@NonNull Request request, Action tag) {
         if (tag.getType().equals(AUTHENTICATE)) {
-            if (tag.getPayload().optString("tree", "").equals("Test")) {
-                return request.newBuilder()
-                        .url(Uri.parse(request.url().toString())
-                                .buildUpon()
-                                .appendQueryParameter("noSession", "true").toString())
-                        .build();
-            }
+            return request.newBuilder()
+                    .url(Uri.parse(request.url().toString())
+                            .buildUpon()
+                            .appendQueryParameter("noSession", "true").toString())
+                    .build();
         }
         return request;
     }
