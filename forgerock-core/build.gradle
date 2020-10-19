@@ -15,7 +15,6 @@ apply plugin: "com.adarshr.test-logger"
 android {
     compileSdkVersion 30
 
-    useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
@@ -24,6 +23,7 @@ android {
         targetSdkVersion 30
         versionCode 4
         versionName "2.1.0"
+        buildConfigField 'String', 'VERSION_NAME', "\"2.1.0\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'

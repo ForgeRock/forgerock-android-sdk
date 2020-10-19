@@ -280,7 +280,6 @@ public class FRUserMockTest extends BaseTest {
                 .addHeader("Content-Type", "application/json")
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
         enqueue("/userinfo_failed.json", HttpURLConnection.HTTP_UNAUTHORIZED);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
@@ -381,8 +380,6 @@ public class FRUserMockTest extends BaseTest {
                 .addHeader("Content-Type", "application/json")
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
 
         RecordedRequest rr = server.takeRequest(); //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=Test HTTP/1.1
         Assertions.assertThat(rr.getPath()).isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=Test");
@@ -406,12 +403,10 @@ public class FRUserMockTest extends BaseTest {
 
         RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
         RecordedRequest revoke2 = server.takeRequest(); //Post to /sessions?_action=logout endpoint
-        RecordedRequest revoke3 = server.takeRequest(); //Post to /endSession
 
         //revoke Refresh Token and SSO Token are performed async
-        RecordedRequest ssoTokenRevoke = findRequest("/json/realms/root/sessions?_action=logout", revoke1, revoke2, revoke3);
-        RecordedRequest refreshTokenRevoke = findRequest("/oauth2/realms/root/token/revoke", revoke1, revoke2, revoke3);
-        RecordedRequest endSession = findRequest("/oauth2/realms/root/connect/endSession", revoke1, revoke2, revoke3);
+        RecordedRequest ssoTokenRevoke = findRequest("/json/realms/root/sessions?_action=logout", revoke1, revoke2);
+        RecordedRequest refreshTokenRevoke = findRequest("/oauth2/realms/root/token/revoke", revoke1, revoke2);
 
         assertNotNull(ssoTokenRevoke.getHeader(serverConfig.getCookieName()));
         assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
@@ -420,7 +415,6 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.TOKEN));
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
-        Assertions.assertThat(Uri.parse(endSession.getPath()).getQueryParameter("id_token_hint")).isNotNull();
 
     }
 
@@ -460,9 +454,8 @@ public class FRUserMockTest extends BaseTest {
         assertFalse(Config.getInstance().getSessionManager().hasSession());
         RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
         RecordedRequest revoke2 = server.takeRequest(); //Post to /sessions?_action=logout endpoint
-        RecordedRequest revoke3 = server.takeRequest(); //Post to /endSession endpoint
 
-        rr = findRequest("/json/realms/root/sessions?_action=logout", revoke1, revoke2, revoke3);
+        rr = findRequest("/json/realms/root/sessions?_action=logout", revoke1, revoke2);
         assertNotNull(rr.getHeader(serverConfig.getCookieName()));
         assertEquals(ServerConfig.API_VERSION_3_1, rr.getHeader(ServerConfig.ACCEPT_API_VERSION));
     }
@@ -784,8 +777,6 @@ public class FRUserMockTest extends BaseTest {
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .addHeader("Content-Type", "application/json")
                 .setBody("{}"));
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
 
         //Using new Session Token to get AccessToken
         server.enqueue(new MockResponse()
@@ -907,11 +898,9 @@ public class FRUserMockTest extends BaseTest {
 
         RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
         RecordedRequest revoke2 = server.takeRequest(); //Post to /sessions?_action=logout endpoint
-        RecordedRequest revoke3 = server.takeRequest(); //Post to /endSession endpoint
 
-        RecordedRequest ssoTokenRevoke = findRequest("/dummy/logout?_action=logout", revoke1, revoke2, revoke3);
-        RecordedRequest refreshTokenRevoke = findRequest("/dummy/revoke", revoke1, revoke2, revoke3);
-        RecordedRequest endSession = findRequest("/dummy/endSession", revoke1, revoke2, revoke3);
+        RecordedRequest ssoTokenRevoke = findRequest("/dummy/logout?_action=logout", revoke1, revoke2);
+        RecordedRequest refreshTokenRevoke = findRequest("/dummy/revoke", revoke1, revoke2);
 
         Assertions.assertThat(ssoTokenRevoke.getHeader("testCookieName")).isNotNull();
         assertEquals(ServerConfig.API_VERSION_3_1, ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION));
@@ -921,7 +910,6 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
 
-        Assertions.assertThat(Uri.parse(endSession.getPath()).getQueryParameter("id_token_hint")).isNotNull();
 
     }
 
@@ -973,7 +961,7 @@ public class FRUserMockTest extends BaseTest {
         Assertions.assertThat(result.get("EXCHANGE_TOKEN").second).isEqualTo(1);
         Assertions.assertThat(result.get("REVOKE_TOKEN").second).isEqualTo(1);
         Assertions.assertThat(result.get("LOGOUT").second).isEqualTo(1);
-        Assertions.assertThat(result.get("END_SESSION").second).isEqualTo(1);
+        //Assertions.assertThat(result.get("END_SESSION").second).isEqualTo(1);
         Assertions.assertThat(result.get("USER_INFO").second).isEqualTo(1);
 
     }
