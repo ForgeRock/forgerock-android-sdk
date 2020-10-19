@@ -23,7 +23,7 @@ public class NameCallbackTest extends TreeTest {
 
     @Override
     protected String getTreeName() {
-        return "Simple";
+        return "NamePasswordCallbackTest";
     }
 
     @Override

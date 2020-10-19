@@ -36,11 +36,11 @@ public class ConsentMappingCallbackTest extends TreeTest {
                     ConsentMappingCallback callback = node.getCallback(ConsentMappingCallback.class);
                     callback.setAccept(true);
                     assertThat(callback.getAccessLevel()).isEqualTo("Actual Profile");
-                    assertThat(callback.getDisplayName()).isEqualTo("Identity Cloud");
+                    assertThat(callback.getDisplayName()).isEqualTo("Identity Mapping");
                     assertThat(callback.getIcon()).isNotNull();
                     assertThat(callback.isRequired()).isTrue();
                     assertThat(callback.getMessage()).isEqualTo("Test");
-                    assertThat(callback.getName()).isNotNull();
+                    assertThat(callback.getName()).isEqualTo("managedUser_managedUser");
                     node.next(context, this);
                     hit++;
                 }
