@@ -13,10 +13,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Pair;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import net.openid.appauth.AuthorizationException;
@@ -24,9 +26,11 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.BrowserAuthenticationException;
+import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -34,12 +38,15 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
@@ -88,6 +95,65 @@ public class BrowserLoginTest extends BaseTest {
         assertThat(body.get("code_verifier")).isEqualTo("qvCFoo3tqB-89lYOFjX2ZAMalkKgW_KIcc1tN3hmx3ygOHyYbWT9hKU7rhky6ivB-33exlhyyHHeSJtuVfOobg");
         assertThat(body.get("grant_type")).isEqualTo("authorization_code");
         assertThat(body.get("code")).isEqualTo("roxwkG0TtooR2vzA6z0MT9xyJSQ");
+
+    }
+
+    @Test
+    public void testLogout() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+        testHappyPath();
+        //Access Token Revoke
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        //ID Token endsession
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
+
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /endSession
+
+        //revoke Refresh Token and SSO Token are performed async
+        RecordedRequest refreshTokenRevoke = findRequest("/oauth2/realms/root/token/revoke", revoke1, revoke2);
+        RecordedRequest endSession = findRequest("/oauth2/realms/root/connect/endSession", revoke1, revoke2);
+
+        assertThat(refreshTokenRevoke).isNotNull();
+        assertThat(Uri.parse(endSession.getPath()).getQueryParameter("id_token_hint")).isNotNull();
+
+    }
+
+    @Test
+    public void testRevokeTokenFailed() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+        testHappyPath();
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{\n" +
+                        "    \"error_description\": \"Client authentication failed\",\n" +
+                        "    \"error\": \"invalid_client\"\n" +
+                        "}"));
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /endSession
+
+        //revoke Refresh Token and SSO Token are performed async
+        RecordedRequest refreshTokenRevoke = findRequest("/oauth2/realms/root/token/revoke", revoke1, revoke2);
+        RecordedRequest endSession = findRequest("/oauth2/realms/root/connect/endSession", revoke1, revoke2);
+
+        assertThat(refreshTokenRevoke).isNotNull();
+
+        //Make sure we still invoke the endSession
+        assertThat(Uri.parse(endSession.getPath()).getQueryParameter("id_token_hint")).isNotNull();
 
     }
 
@@ -198,6 +264,53 @@ public class BrowserLoginTest extends BaseTest {
             assertThat((e.getCause()).getMessage()).isEqualTo(INVALID_SCOPE);
         }
     }
+
+    @Test
+    public void testRequestInterceptor() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+
+        final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
+        RequestInterceptorRegistry.getInstance().register(request -> {
+            String action = ((Action) request.tag()).getType();
+            Pair<Action, Integer> pair = result.get(action);
+            if (pair == null) {
+                result.put(action, new Pair<>((Action) request.tag(), 1));
+            } else {
+                result.put(action, new Pair<>((Action) request.tag(), pair.second + 1));
+            }
+            return request;
+        });
+
+        testHappyPath();
+        //Access Token Revoke
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        //ID Token endsession
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
+
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /endSession
+
+        Assertions.assertThat(result.get("END_SESSION").second).isEqualTo(1);
+
+    }
+
+    private RecordedRequest findRequest(String path, RecordedRequest... recordedRequests) {
+        for (RecordedRequest r : recordedRequests) {
+            if (r.getPath().startsWith(path)) {
+                return r;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
+
 
 
 }

@@ -229,9 +229,7 @@ class DefaultTokenManager implements TokenManager {
         oAuth2Client.revoke(accessToken, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                if (isNotEmpty(accessToken.getIdToken())) {
-                    oAuth2Client.endSession(accessToken.getIdToken(), listener);
-                } else {
+                if (!endSession(true)) {
                     Listener.onSuccess(listener, result);
                 }
             }
@@ -239,10 +237,25 @@ class DefaultTokenManager implements TokenManager {
             @Override
             public void onException(Exception e) {
                 //Try best to end the session
-                if (isNotEmpty(accessToken.getIdToken())) {
-                    oAuth2Client.endSession(accessToken.getIdToken(), null);
-                }
+                endSession(false);
                 Listener.onException(listener, e);
+            }
+
+            /**
+             * End the user session only when the token is not bind to existing session
+             * @param notifyListener To notify the caller or not
+             * @return True if endSession is performed.
+             */
+            private boolean endSession(boolean notifyListener) {
+                if (accessToken.getSessionToken() == null && isNotEmpty(accessToken.getIdToken())) {
+                    if (notifyListener) {
+                        oAuth2Client.endSession(accessToken.getIdToken(), listener);
+                    } else {
+                        oAuth2Client.endSession(accessToken.getIdToken(), null);
+                    }
+                    return true;
+                }
+                return false;
             }
         });
     }
