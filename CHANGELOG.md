@@ -1,7 +1,11 @@
 # Version 2.2.0
 
 ## [2.2.0]
+#### Added
 - Centralize Login (`AppAuth` Integration) [SDKS-330]
+
+#### Fixed
+- Refresh Token is not persisted when refresh_token grant is not issuing new Refresh Token [SDKS-649]
 
 ## [2.1.0]
 
