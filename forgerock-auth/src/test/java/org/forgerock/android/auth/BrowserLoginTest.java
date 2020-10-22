@@ -13,6 +13,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Pair;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -25,9 +26,11 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.BrowserAuthenticationException;
+import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -35,6 +38,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -260,6 +264,44 @@ public class BrowserLoginTest extends BaseTest {
             assertThat((e.getCause()).getMessage()).isEqualTo(INVALID_SCOPE);
         }
     }
+
+    @Test
+    public void testRequestInterceptor() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+
+        final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
+        RequestInterceptorRegistry.getInstance().register(request -> {
+            String action = ((Action) request.tag()).getType();
+            Pair<Action, Integer> pair = result.get(action);
+            if (pair == null) {
+                result.put(action, new Pair<>((Action) request.tag(), 1));
+            } else {
+                result.put(action, new Pair<>((Action) request.tag(), pair.second + 1));
+            }
+            return request;
+        });
+
+        testHappyPath();
+        //Access Token Revoke
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        //ID Token endsession
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
+
+        FRUser.getCurrentUser().logout();
+        assertNull(FRUser.getCurrentUser());
+
+        assertFalse(Config.getInstance().getSessionManager().hasSession());
+
+        RecordedRequest revoke1 = server.takeRequest(); //Post to oauth2/realms/root/token/revoke
+        RecordedRequest revoke2 = server.takeRequest(); //Post to /endSession
+
+        Assertions.assertThat(result.get("END_SESSION").second).isEqualTo(1);
+
+    }
+
     private RecordedRequest findRequest(String path, RecordedRequest... recordedRequests) {
         for (RecordedRequest r : recordedRequests) {
             if (r.getPath().startsWith(path)) {

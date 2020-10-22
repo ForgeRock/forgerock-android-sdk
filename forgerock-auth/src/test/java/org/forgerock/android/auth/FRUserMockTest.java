@@ -936,8 +936,6 @@ public class FRUserMockTest extends BaseTest {
                 .addHeader("Content-Type", "application/json")
                 .setBody("{}"));
         enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT));
 
 
         FRUser.getCurrentUser().logout();
