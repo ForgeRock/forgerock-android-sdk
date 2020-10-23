@@ -39,14 +39,10 @@ public class BooleanAttributeInputCallbackTest extends TreeTest {
                     List<Callback> callbacks = node.getCallbacks();
                     assertThat(callbacks).hasSize(1);
                     BooleanAttributeInputCallback callback = (BooleanAttributeInputCallback) node.getCallback(BooleanAttributeInputCallback.class);
-                    assertThat(callback.getName()).isEqualTo("happy");
-                    assertThat(callback.getPrompt()).isEqualTo("Happy");
+                    assertThat(callback.getName()).isEqualTo("preferences/marketing");
+                    assertThat(callback.getPrompt()).isEqualTo("Send me special offers and services");
                     assertThat(callback.isRequired()).isTrue();
-                    try {
-                        assertThat(callback.getPolicies().getString("name")).isEqualTo("happy");
-                    } catch (JSONException e) {
-                        Assertions.fail(e.getMessage());
-                    }
+                    assertThat(callback.getPolicies()).asString().isEqualTo("{}");
                     assertThat(callback.getFailedPolicies()).isEmpty();
                     assertThat(callback.getValidateOnly()).isFalse();
                     assertThat(callback.getValue()).isFalse();

@@ -38,12 +38,12 @@ public class KbaCreateCallbackTest extends TreeTest {
                     KbaCreateCallback firstQuestion = (KbaCreateCallback) callbacks.get(0);
                     firstQuestion.setSelectedQuestion(firstQuestion.getPredefinedQuestions().get(0));
                     firstQuestion.setSelectedAnswer("Test");
-                    assertThat(firstQuestion.getPrompt()).isEqualTo("Test");
+                    assertThat(firstQuestion.getPrompt()).isEqualTo("Security questions");
 
                     KbaCreateCallback secondQuestion = (KbaCreateCallback) callbacks.get(1);
                     secondQuestion.setSelectedQuestion(secondQuestion.getPredefinedQuestions().get(1));
                     secondQuestion.setSelectedAnswer("Test");
-                    assertThat(secondQuestion.getPrompt()).isEqualTo("Test");
+                    assertThat(secondQuestion.getPrompt()).isEqualTo("Security questions");
 
                     node.next(context, this );
                     hit++;

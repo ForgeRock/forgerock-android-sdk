@@ -30,6 +30,8 @@ public class PageCallbackTest extends TreeTest {
             @Override
             public void onCallbackReceived(Node node) {
                 assertThat(node.getStage()).isEqualTo("Test");
+                assertThat(node.getHeader()).isEqualTo("Page Header Test");
+                assertThat(node.getDescription()).isEqualTo("Page Description Test");
                 super.onCallbackReceived(node);
             }
         };

@@ -37,13 +37,13 @@ public class NumberAttributeInputCallbackTest extends TreeTest {
                 if (node.getCallback(NumberAttributeInputCallback.class) != null) {
                     NumberAttributeInputCallback callback = node.getCallback(NumberAttributeInputCallback.class);
                     assertThat(callback.getName()).isEqualTo("age");
-                    assertThat(callback.getPrompt()).isEqualTo("Age");
+                    assertThat(callback.getPrompt()).isEqualTo("How old are you?");
                     assertThat(callback.isRequired()).isTrue();
-                    try {
-                        assertThat(callback.getPolicies().getString("name")).isEqualTo("age");
-                    } catch (JSONException e) {
-                        Assertions.fail(e.getMessage());
-                    }
+//                    try {
+//                        assertThat(callback.getPolicies().getString("name")).isEqualTo("age");
+//                    } catch (JSONException e) {
+//                        Assertions.fail(e.getMessage());
+//                    }
                     assertThat(callback.getFailedPolicies()).isEmpty();
                     assertThat(callback.getValidateOnly()).isFalse();
                     assertThat(callback.getValue()).isNull();
