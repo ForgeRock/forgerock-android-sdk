@@ -104,15 +104,9 @@ public class AddMechanismActivity extends AppCompatActivity {
                         if(exception instanceof DuplicateMechanismException)  {
                             final Mechanism duplicate = ((DuplicateMechanismException) exception).getCausingMechanism();
                             AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-                            builder.setTitle(R.string.duplicate_title)
-                                    .setMessage(R.string.duplicate_message)
-                                    .setPositiveButton(R.string.duplicate_yes, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            AuthenticatorModel.getInstance().removeMechanism(duplicate);
-                                            createMechanismFromScan(scanResult);
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.duplicate_no, new DialogInterface.OnClickListener() {
+                            builder.setTitle(R.string.duplicate_title_noreplace)
+                                    .setMessage(R.string.duplicate_message_noreplace)
+                                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             finish();
                                             return;
