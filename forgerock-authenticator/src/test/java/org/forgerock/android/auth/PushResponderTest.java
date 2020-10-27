@@ -9,7 +9,7 @@ package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.PushMechanismException;
-import org.hamcrest.Matchers;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,9 +18,13 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -31,7 +35,6 @@ import okhttp3.mockwebserver.SocketPolicy;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -223,6 +226,7 @@ public class PushResponderTest extends FRABaseTest {
 
     @Test
     public void testShouldSignJWTCorrectly() throws Exception {
+        final String base64Secret = "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=";
         server.enqueue(new MockResponse());
         HttpUrl baseUrl = server.url("/");
 
@@ -233,14 +237,32 @@ public class PushResponderTest extends FRABaseTest {
         payload.put("mechanismUid", "testMechanismUid");
         payload.put("response", "Df02AwA3Ra+sTGkL5+QvkEtN3eLdZiFmL5nxAV1m0k8=");
 
-        PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", "b3uYLkQ7dRPjBaIzV0t/aijoXRgMq+NP5AwVAvRfa/E=",
+        PushResponder.getInstance(storageClient).registration(baseUrl.toString(), "testCookie", base64Secret,
                 "testMessageId", payload, pushListenerFuture);
         RecordedRequest request = server.takeRequest();
         String body = request.getBody().readUtf8();
 
         assertEquals("resource=1.0, protocol=1.0", request.getHeader("Accept-API-Version"));
         assertEquals("testCookie", request.getHeader("Cookie"));
-        assertThat(body, Matchers.containsString("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkZXZpY2VUeXBlIjoiYW5kcm9pZCIsIm1lY2hhbmlzbVVpZCI6InRlc3RNZWNoYW5pc21VaWQiLCJyZXNwb25zZSI6IkRmMDJBd0EzUmErc1RHa0w1K1F2a0V0TjNlTGRaaUZtTDVueEFWMW0wazg9IiwiY29tbXVuaWNhdGlvblR5cGUiOiJnY20iLCJkZXZpY2VJZCI6InRlc3RGY21Ub2tlbiJ9.UimglbtcwK6vD0mYZW_B3Yge6chPR--5mPmyHB0maas"));
+
+        // Extract the JWT from the request body
+        JSONObject json = new JSONObject(body);
+        String jwt = json.getString("jwt");
+        String[] splitJwt = jwt.split("\\.");
+        String jwtHeader = splitJwt[0];
+        String jwtPayload = splitJwt[1];
+        String jwtSignature = splitJwt[2];
+
+        // Calculate signature...
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        byte[] secretBytes = Base64.getDecoder().decode(base64Secret);
+        SecretKeySpec secret_key = new SecretKeySpec(secretBytes, "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+
+        String hash = new String(Base64.getEncoder().withoutPadding().encode(sha256_HMAC.doFinal((jwtHeader + "." + jwtPayload).getBytes())));
+
+        // Verify that the signature is correct.
+        assertEquals(hash, jwtSignature);
     }
 
     private PushNotification newPushNotification() {
