@@ -52,14 +52,14 @@ class OAuth2ResponseHandler implements ResponseHandler {
      *
      * @param response The response from /token endpoint
      */
-    void handleTokenResponse(SSOToken sessionToken, Response response, FRListener<AccessToken> listener) {
+    void handleTokenResponse(SSOToken sessionToken, Response response, String origRefreshToken, FRListener<AccessToken> listener) {
         if (response.isSuccessful()) {
             try {
                 JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.body()).string());
                 Listener.onSuccess(listener, AccessToken.builder()
                         .idToken(jsonObject.optString(ID_TOKEN, null))
                         .value(jsonObject.getString(ACCESS_TOKEN))
-                        .refreshToken(jsonObject.optString(REFRESH_TOKEN, null))
+                        .refreshToken(jsonObject.optString(REFRESH_TOKEN, origRefreshToken))
                         .scope(AccessToken.Scope.parse(jsonObject.optString(SCOPE, null)))
                         .tokenType(jsonObject.optString(TOKEN_TYPE, null))
                         .expiresIn(jsonObject.optLong(EXPIRES_IN, 0))

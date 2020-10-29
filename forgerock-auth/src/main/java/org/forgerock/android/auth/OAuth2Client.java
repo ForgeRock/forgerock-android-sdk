@@ -177,7 +177,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(sessionToken, response, listener);
+                    handler.handleTokenResponse(sessionToken, response, refreshToken, listener);
                 }
             });
 
@@ -323,7 +323,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(sessionToken, response, listener);
+                    handler.handleTokenResponse(sessionToken, response, null, listener);
                 }
 
             });

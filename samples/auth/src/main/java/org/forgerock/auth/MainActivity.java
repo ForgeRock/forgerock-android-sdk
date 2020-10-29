@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
         /*
         RequestInterceptorRegistry.getInstance().register(
-                new IDTokenRequestInterceptor(),
                 new ForceAuthRequestInterceptor(),
                 new NoSessionRequestInterceptor()
         );
