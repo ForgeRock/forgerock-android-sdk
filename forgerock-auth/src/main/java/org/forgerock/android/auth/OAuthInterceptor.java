@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.forgerock.android.auth.exception.AuthorizeException;
 
 import java.util.Collections;
 
@@ -19,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class OAuthInterceptor implements Interceptor<SSOToken> {
 
-    private final TokenManager tokenManager;
+    private final SessionManager sessionManager;
 
     @Override
     public void intercept(final Chain chain, SSOToken token) {
@@ -27,7 +28,7 @@ class OAuthInterceptor implements Interceptor<SSOToken> {
             Listener.onException(chain.getListener(), new AuthenticationRequiredException("Authentication Required."));
             return;
         }
-        tokenManager.exchangeToken(token, Collections.emptyMap(), new FRListener<AccessToken>() {
+        sessionManager.getTokenManager().exchangeToken(token, Collections.emptyMap(), new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken accessToken) {
                 chain.proceed(accessToken);
@@ -35,7 +36,13 @@ class OAuthInterceptor implements Interceptor<SSOToken> {
 
             @Override
             public void onException(Exception e) {
-                Listener.onException(chain.getListener(), e);
+                if (e instanceof AuthorizeException) {
+                    //We clean up the SSOToken if we are not able to use the SSOToken to exchange authorization code.
+                    sessionManager.getSingleSignOnManager().clear();
+                   Listener.onException(chain.getListener(), new AuthenticationRequiredException(e));
+                } else {
+                    Listener.onException(chain.getListener(), e);
+                }
             }
         });
     }

@@ -77,6 +77,8 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     @Override
     public void clear() {
         singleSignOnManager.clear();
+        //Broadcast Token removed event
+        EventDispatcher.TOKEN_REMOVED.notifyObservers();
     }
 
     @Override

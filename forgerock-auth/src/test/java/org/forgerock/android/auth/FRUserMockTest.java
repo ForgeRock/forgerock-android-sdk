@@ -10,7 +10,6 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.util.Pair;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
@@ -24,9 +23,9 @@ import org.forgerock.android.auth.callback.StringAttributeInputCallback;
 import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
 import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
+import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
-import org.hamcrest.collection.IsIn;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -35,13 +34,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +52,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -362,7 +362,8 @@ public class FRUserMockTest extends BaseTest {
 
         //AppB
 
-        setFinalStatic(FRUser.class.getDeclaredField("current"), null);
+        //setFinalStatic(FRUser.class.getDeclaredField("current"), null);
+        EventDispatcher.TOKEN_REMOVED.notifyObservers();
         Config.getInstance().getTokenManager().clear();
         assertNotNull(FRUser.getCurrentUser());
     }
@@ -373,7 +374,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testLogout() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+    public void testLogout() throws InterruptedException, ExecutionException, IOException, JSONException, ParseException, AuthenticationRequiredException, ApiException {
         frUserHappyPath();
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_OK)
@@ -461,7 +462,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testRevokeWithAccessToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+    public void testRevokeWithAccessToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException, IOException, ApiException {
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -524,7 +525,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testAccessTokenAndSSOTokenRefreshWithSSOToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+    public void testAccessTokenAndSSOTokenRefreshWithSSOToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException, IOException, ApiException {
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -593,7 +594,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testSSOEnabled() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+    public void testSSOEnabled() throws ExecutionException, InterruptedException, AuthenticationRequiredException, IOException, ApiException {
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -770,7 +771,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testSessionTokenUpdated() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+    public void testSessionTokenUpdated() throws InterruptedException, ExecutionException, IOException, JSONException, ParseException, AuthenticationRequiredException, ApiException {
         frUserHappyPath();
         //Revoke Refresh Token
         server.enqueue(new MockResponse()
@@ -801,7 +802,7 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
-    public void testCustomEndpointAndCookieName() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException, AuthenticationRequiredException {
+    public void testCustomEndpointAndCookieName() throws InterruptedException, ExecutionException, IOException, JSONException, ParseException, AuthenticationRequiredException, ApiException {
 
         when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn(context.getString(R.string.forgerock_oauth_client_id));
         when(mockContext.getString(R.string.forgerock_oauth_redirect_uri)).thenReturn(context.getString(R.string.forgerock_oauth_redirect_uri));
@@ -910,7 +911,6 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
 
-
     }
 
     @Test
@@ -961,6 +961,244 @@ public class FRUserMockTest extends BaseTest {
         Assertions.assertThat(result.get("LOGOUT").second).isEqualTo(1);
         //Assertions.assertThat(result.get("END_SESSION").second).isEqualTo(1);
         Assertions.assertThat(result.get("USER_INFO").second).isEqualTo(1);
+
+    }
+
+    @Test
+    public void testAccessTokenWithExpiredRefreshToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException, ApiException, IOException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken_shortlife.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        //Refresh failed due to invalid grant (Assumption that invalid grant = refresh token expired)
+        server.enqueue(new MockResponse()
+                .setBody("{\n" +
+                        "    \"error_description\": \"grant is invalid\",\n" +
+                        "    \"error\": \"invalid_grant\"\n" +
+                        "}")
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
+        //Let the token expire, so that we use the refresh token flow
+        Thread.sleep(1000);
+
+        //Use the session token to retrieve the Access token
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        //Assert that we retrieve the new token
+        Assertions.assertThat(FRUser.getCurrentUser().getAccessToken().getExpiresIn()).isEqualTo(3599);
+        Assertions.assertThat(FRSession.getCurrentSession()).isNotNull();
+
+    }
+
+    @Test
+    public void testAccessTokenWithExpiredRefreshTokenFailedToRefreshWithSSOToken() throws ExecutionException, InterruptedException, ApiException, IOException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken_shortlife.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        //Refresh failed due to invalid grant (Assumption that invalid grant = refresh token expired)
+        server.enqueue(new MockResponse()
+                .setBody("{\n" +
+                        "    \"error_description\": \"grant is invalid\",\n" +
+                        "    \"error\": \"invalid_grant\"\n" +
+                        "}")
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
+        //Let the token expire, so that we use the refresh token flow
+        Thread.sleep(1000);
+
+        //Use the session token to retrieve the Access token
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
+
+        try {
+            FRUser.getCurrentUser().getAccessToken();
+            fail();
+        } catch (AuthenticationRequiredException e) {
+        }
+
+        Assertions.assertThat(FRUser.getCurrentUser()).isNull();
+        Assertions.assertThat(FRSession.getCurrentSession()).isNull();
+
+    }
+
+    @Ignore("For 3.0")
+    @Test
+    public void testAccessTokenWithInvalidClientDuringRefresh() throws ExecutionException, InterruptedException, ApiException, IOException, AuthenticationRequiredException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken_shortlife.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        String error = "{\n" +
+                "    \"error_description\": \"client is invalid\",\n" +
+                "    \"error\": \"invalid_client\"\n" +
+                "}";
+        //Refresh failed due to invalid client
+        server.enqueue(new MockResponse()
+                .setBody(error)
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
+        //Let the token expire, so that we use the refresh token flow
+        Thread.sleep(1000);
+
+        try {
+            FRUser.getCurrentUser().getAccessToken();
+            fail();
+        } catch (Exception e) {
+            ApiException exception = (ApiException) e;
+            Assertions.assertThat(exception.getStatusCode()).isEqualTo(HttpURLConnection.HTTP_BAD_REQUEST);
+            Assertions.assertThat(exception.getMessage()).isEqualTo(error);
+        }
+
+        Assertions.assertThat(FRUser.getCurrentUser()).isNotNull();
+        Assertions.assertThat(FRSession.getCurrentSession()).isNotNull();
+    }
+
+    @Test
+    public void testAccessTokenWithoutRefresh() throws ExecutionException, InterruptedException, ApiException, IOException, AuthenticationRequiredException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken_no_RefreshToken_shortlife.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+
+        //Let the token expire, so that we use the refresh token flow
+        Thread.sleep(1000);
+
+        //Use the session token to retrieve the Access token
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST));
+
+        try {
+            FRUser.getCurrentUser().getAccessToken();
+            fail();
+        } catch (AuthenticationRequiredException e) {
+        }
+
+        Assertions.assertThat(FRUser.getCurrentUser()).isNull();
+        Assertions.assertThat(FRSession.getCurrentSession()).isNull();
 
     }
 }

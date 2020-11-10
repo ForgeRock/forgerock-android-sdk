@@ -12,6 +12,8 @@ import android.util.Base64;
 
 import androidx.annotation.Nullable;
 
+import org.forgerock.android.auth.exception.ApiException;
+import org.forgerock.android.auth.exception.AuthorizeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -118,7 +120,7 @@ public class OAuth2Client {
                     handler.handleAuthorizeResponse(response, new FRListener<String>() {
                         @Override
                         public void onException(Exception e) {
-                            listener.onException(e);
+                            listener.onException(new AuthorizeException("Failed to exchange authorization code with sso token", e));
                         }
 
                         @Override

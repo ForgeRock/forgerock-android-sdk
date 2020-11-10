@@ -28,6 +28,7 @@ import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidRedirectUriException;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,9 +37,13 @@ import lombok.RequiredArgsConstructor;
 public class FRUser {
 
     //Hold the current login user.
-    private static FRUser current;
+    private static AtomicReference<FRUser> current = new AtomicReference<>();
 
     private SessionManager sessionManager;
+
+    static {
+        EventDispatcher.TOKEN_REMOVED.addObserver((o, arg) -> current.set(null));
+    }
 
     private FRUser() {
         sessionManager = Config.getInstance().getSessionManager();
@@ -53,22 +58,24 @@ public class FRUser {
      * @return The existing FRUser instance, or null if there is no user session.
      */
     public static FRUser getCurrentUser() {
-        if (current != null) {
-            return current;
+        if (current.get() != null) {
+            return current.get();
         }
 
         FRUser user = new FRUser();
         if (user.sessionManager.hasSession()) {
-            current = user;
+            current.set(user);
+            return current.get();
+        } else {
+            return null;
         }
-        return current;
     }
 
     /**
      * Logout the user
      */
     public void logout() {
-        current = null;
+        current.set(null);
         sessionManager.close();
     }
 
@@ -142,7 +149,7 @@ public class FRUser {
                 .context(context)
                 .serverConfig(Config.getInstance().getServerConfig())
                 .sessionManager(sessionManager)
-                .interceptor(new OAuthInterceptor(sessionManager.getTokenManager()))
+                .interceptor(new OAuthInterceptor(sessionManager))
                 .interceptor(new AccessTokenStoreInterceptor(sessionManager.getTokenManager()))
                 .interceptor(new UserInterceptor())
                 .build();
@@ -173,8 +180,8 @@ public class FRUser {
 
         @Override
         public void intercept(Chain chain, Object any) {
-            current = new FRUser();
-            chain.proceed(current);
+            current.set(new FRUser());
+            chain.proceed(current.get());
         }
     }
 

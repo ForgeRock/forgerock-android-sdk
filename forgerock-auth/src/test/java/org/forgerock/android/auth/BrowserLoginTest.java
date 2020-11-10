@@ -28,17 +28,17 @@ import net.openid.appauth.AuthorizationServiceConfiguration;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
+import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.BrowserAuthenticationException;
-import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -66,7 +66,7 @@ public class BrowserLoginTest extends BaseTest {
     }
 
     @Test
-    public void testHappyPath() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+    public void testHappyPath() throws InterruptedException, ExecutionException, AuthenticationRequiredException, IOException, ApiException {
         enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
@@ -99,7 +99,7 @@ public class BrowserLoginTest extends BaseTest {
     }
 
     @Test
-    public void testLogout() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+    public void testLogout() throws InterruptedException, ExecutionException, AuthenticationRequiredException,IOException, ApiException {
         testHappyPath();
         //Access Token Revoke
         server.enqueue(new MockResponse()
@@ -128,7 +128,7 @@ public class BrowserLoginTest extends BaseTest {
     }
 
     @Test
-    public void testRevokeTokenFailed() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+    public void testRevokeTokenFailed() throws InterruptedException, ExecutionException, AuthenticationRequiredException, IOException, ApiException {
         testHappyPath();
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
@@ -266,7 +266,7 @@ public class BrowserLoginTest extends BaseTest {
     }
 
     @Test
-    public void testRequestInterceptor() throws InterruptedException, ExecutionException, AuthenticationRequiredException {
+    public void testRequestInterceptor() throws InterruptedException, ExecutionException, AuthenticationRequiredException, IOException, ApiException {
 
         final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
         RequestInterceptorRegistry.getInstance().register(request -> {

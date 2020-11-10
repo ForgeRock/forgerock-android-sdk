@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.forgerock.android.auth.exception.InvalidGrantException;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -38,8 +41,14 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
             @Override
             public void onException(Exception e) {
-                //If cannot get the AccessToken, process to next interceptor in the chain.
-                chain.proceed(sessionToken);
+                //If cannot get the AccessToken, process to next interceptor in the chain only if
+                //we know we not able to refresh.
+                //AccessToken or Refresh token does not exists, or current access token are not valid due to SSO binding
+                if (e instanceof InvalidGrantException || e instanceof AuthenticationRequiredException) {
+                    chain.proceed(sessionToken);
+                } else {
+                    Listener.onException(chain.getListener(), e);
+                }
             }
         });
     }
