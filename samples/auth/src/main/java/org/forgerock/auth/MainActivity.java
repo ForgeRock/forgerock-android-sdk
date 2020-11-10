@@ -23,10 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.nimbusds.jwt.JWTParser;
 
+import org.forgerock.android.auth.AccessToken;
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
@@ -230,8 +233,65 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 return true;
+
+            case R.id.token:
+                JSONObject output = new JSONObject();
+                if (FRUser.getCurrentUser() != null) {
+                    FRUser.getCurrentUser().getAccessToken(new FRListener<AccessToken>() {
+                        @Override
+                        public void onSuccess(AccessToken result) {
+                            try {
+                                put(output, "ACCESS_TOKEN_RAW", new JSONObject(result.toJson()));
+                            } catch (JSONException e) {
+                                //ignore
+                            }
+                            try {
+                                put(output, "ACCESS_TOKEN", new JSONObject(JWTParser.parse(result.getValue()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                put(output, "REFRESH_TOKEN", new JSONObject(JWTParser.parse(result.getRefreshToken()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                            }
+                            try {
+                                put(output, "ID_TOKEN", new JSONObject(JWTParser.parse(result.getIdToken()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                                //ignore
+                            }
+
+                            runOnUiThread(() -> {
+                                try {
+                                    success.setVisibility(View.GONE);
+                                    content.setText(output.toString(2));
+                                } catch (JSONException e) {
+                                    //ignore
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            put(output, "ERROR", e.getMessage());
+                        }
+                    });
+
+                    if (FRSession.getCurrentSession() != null) {
+                        put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
+                    }
+                }
+
+
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void put(JSONObject object, String key, Object value) {
+        try {
+            object.put(key, value);
+        } catch (JSONException e) {
+            //ignore
         }
     }
 

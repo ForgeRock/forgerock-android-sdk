@@ -38,4 +38,10 @@
         android:title="@string/invoke"
         app:showAsAction="collapseActionView"/>
 
+    <item android:id="@+id/token"
+        android:icon="@android:drawable/ic_menu_crop"
+        android:title="@string/token"
+        app:showAsAction="collapseActionView"/>
+
+
 </menu>
