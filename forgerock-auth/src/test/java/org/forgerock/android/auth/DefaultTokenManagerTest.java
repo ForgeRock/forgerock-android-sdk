@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,6 +11,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.forgerock.android.auth.exception.InvalidGrantException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -267,7 +268,7 @@ public class DefaultTokenManagerTest extends BaseTest {
         assertNotEquals(accessToken.getValue(), storedAccessToken2.getValue());
     }
 
-    @Test(expected = AuthenticationRequiredException.class)
+    @Test(expected = InvalidGrantException.class)
     public void testTokenRefreshWithException() throws Throwable {
 
         server.enqueue(new MockResponse()

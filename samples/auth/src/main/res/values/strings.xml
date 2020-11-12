@@ -12,6 +12,7 @@
     <string name="userinfo">UserInfo</string>
     <string name="browser">Launch Browser</string>
     <string name="invoke">Invoke</string>
+    <string name="token">Show Tokens</string>
     <string name="register">Register</string>
     <string name="authenticate">Authenticate</string>
 

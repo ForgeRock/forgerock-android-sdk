@@ -10,6 +10,8 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.net.Uri;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -18,7 +20,11 @@ import lombok.RequiredArgsConstructor;
 public class FRSession {
 
     //Hold the current user session.
-    private static FRSession current;
+    private static AtomicReference<FRSession> current = new AtomicReference<>();
+
+    static {
+        EventDispatcher.TOKEN_REMOVED.addObserver((o, arg) -> current.set(null));
+    }
 
     private SessionManager sessionManager;
 
@@ -30,7 +36,7 @@ public class FRSession {
      * Logout the user
      */
     public void logout() {
-        current = null;
+        current.set(null);
         sessionManager.close();
     }
 
@@ -43,15 +49,17 @@ public class FRSession {
      * @return The existing FRSession instance, or null if there is no user session.
      */
     public static FRSession getCurrentSession() {
-        if (current != null) {
-            return current;
+        if (current.get() != null) {
+            return current.get();
         }
 
         FRSession session = new FRSession();
         if (session.sessionManager.hasSession()) {
-            current = session;
+            current.set(session);
+            return current.get();
+        } else {
+            return null;
         }
-        return current;
     }
 
 
@@ -126,8 +134,8 @@ public class FRSession {
                 //We do not set the static session
                 chain.proceed(null);
             } else {
-                current = new FRSession();
-                chain.proceed(current);
+                current.set(new FRSession());
+                chain.proceed(current.get());
             }
         }
     }

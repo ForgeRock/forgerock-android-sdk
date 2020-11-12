@@ -14,6 +14,7 @@ import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.ApiException;
+import org.forgerock.android.auth.exception.AuthorizeException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -74,8 +75,8 @@ public class OAuth2MockTest extends BaseTest {
             assertNotNull(oAuth2TokenListenerFuture.get());
             fail();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof ApiException);
-            assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, ((ApiException)e.getCause()).getStatusCode());
+            AuthorizeException authorizeException = (AuthorizeException) e.getCause();
+            assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, ((ApiException)authorizeException.getCause()).getStatusCode());
         } catch (InterruptedException e) {
             fail();
         }
@@ -96,9 +97,9 @@ public class OAuth2MockTest extends BaseTest {
             assertNotNull(oAuth2TokenListenerFuture.get());
             fail();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof ApiException);
-            assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, ((ApiException)e.getCause()).getStatusCode());
-            assertEquals("Failed to get resource owner session from request", ((ApiException)e.getCause()).getMessage());
+            AuthorizeException authorizeException = (AuthorizeException) e.getCause();
+            assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, ((ApiException)authorizeException.getCause()).getStatusCode());
+            assertEquals("Failed to get resource owner session from request", ((ApiException)authorizeException.getCause()).getMessage());
         } catch (InterruptedException e) {
             fail();
         }

@@ -13,10 +13,14 @@ import androidx.annotation.WorkerThread;
 import lombok.Builder;
 import lombok.Getter;
 
+import org.forgerock.android.auth.exception.ApiException;
+import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Manage the user session
@@ -30,7 +34,7 @@ class SessionManager {
     private List<Interceptor<?>> interceptors;
 
     @Builder
-    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager)  {
+    public SessionManager(TokenManager tokenManager, SingleSignOnManager singleSignOnManager) {
 
         this.tokenManager = tokenManager;
         this.singleSignOnManager = singleSignOnManager;
@@ -38,7 +42,7 @@ class SessionManager {
         this.interceptors = Arrays.asList(
                 new RetrieveSSOTokenInterceptor(this.singleSignOnManager),
                 new RetrieveAccessTokenInterceptor(this.tokenManager),
-                new OAuthInterceptor(this.tokenManager),
+                new OAuthInterceptor(this),
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }
 
@@ -48,8 +52,20 @@ class SessionManager {
         getAccessToken(listener);
         try {
             return listener.get();
-        } catch (Exception e1) {
-            throw new AuthenticationRequiredException(e1);
+        } catch (Exception e) {
+            if (e instanceof ExecutionException) {
+                /* TODO 3.0
+                try {
+                    throw ((ExecutionException) e).getCause();
+                } catch (AuthenticationRequiredException | IOException | ApiException e1) {
+                    throw e1;
+                } catch (Throwable throwable) {
+                    throw new RuntimeException(throwable);
+                }
+                 */
+                throw new AuthenticationRequiredException(e.getCause());
+            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -87,7 +103,7 @@ class SessionManager {
             @Override
             public void onSuccess(Void result) {
                 closeSession(listener);
-           }
+            }
 
             @Override
             public void onException(Exception e) {

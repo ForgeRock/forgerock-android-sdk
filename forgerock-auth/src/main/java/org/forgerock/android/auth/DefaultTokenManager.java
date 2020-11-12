@@ -11,8 +11,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.forgerock.android.auth.exception.InvalidGrantException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -155,10 +160,10 @@ class DefaultTokenManager implements TokenManager {
 
         String refreshToken = accessToken.getRefreshToken();
         if (refreshToken == null) {
+            clear();
             Listener.onException(listener, new AuthenticationRequiredException("Refresh Token does not exists."));
             return;
         }
-        clear();
         oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken token) {
@@ -169,7 +174,23 @@ class DefaultTokenManager implements TokenManager {
 
             @Override
             public void onException(Exception e) {
-                Listener.onException(listener, new AuthenticationRequiredException(e));
+                if (e instanceof ApiException && e.getMessage() != null) {
+                    //We clear the tokens if failed to refresh.
+                    ApiException apiException = (ApiException) e;
+                    if (apiException.getStatusCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                        try {
+                            JSONObject error = new JSONObject(e.getMessage());
+                            if (error.getString("error").equals("invalid_grant")) {
+                                clear();
+                                Listener.onException(listener, new InvalidGrantException("Failed to refresh, due to invalid grant", e));
+                                return;
+                            }
+                        } catch (JSONException jsonException) {
+                            //ignore
+                        }
+                    }
+                }
+                Listener.onException(listener, e);
             }
         });
     }
@@ -214,6 +235,8 @@ class DefaultTokenManager implements TokenManager {
     public void clear() {
         accessTokenRef.set(null);
         sharedPreferences.edit().clear().commit();
+        //Broadcast Token removed event
+        EventDispatcher.TOKEN_REMOVED.notifyObservers();
     }
 
     @Override
