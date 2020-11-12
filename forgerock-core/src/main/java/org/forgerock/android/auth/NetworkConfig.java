@@ -25,6 +25,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Getter
 class NetworkConfig {
 
+    private String identifier;
+
     private String host;
 
     private Integer timeout;
@@ -38,15 +40,16 @@ class NetworkConfig {
     private Supplier<List<Interceptor>> interceptorSupplier;
 
     @Builder(builderMethodName = "networkBuilder")
-    NetworkConfig(@NonNull String host,
-                         Integer timeout,
-                         TimeUnit timeUnit,
-                         Supplier<CookieJar> cookieJarSupplier,
-                         @Singular List<String> pins,
-                         Supplier<List<Interceptor>> interceptorSupplier) {
+    NetworkConfig(String identifier,
+                  @NonNull String host,
+                  Integer timeout,
+                  TimeUnit timeUnit,
+                  Supplier<CookieJar> cookieJarSupplier,
+                  @Singular List<String> pins,
+                  Supplier<List<Interceptor>> interceptorSupplier) {
 
+        this.identifier = identifier;
         this.host = host;
-
         this.timeout = timeout == null ? 30 : timeout;
         this.timeUnit = timeUnit == null ? SECONDS : timeUnit;
         this.pins = pins;
@@ -59,6 +62,14 @@ class NetworkConfig {
             return cookieJarSupplier.get();
         } else {
             return CookieJar.NO_COOKIES;
+        }
+    }
+
+    public String getIdentifier() {
+        if (identifier == null) {
+            return getHost();
+        } else {
+            return identifier;
         }
     }
 }

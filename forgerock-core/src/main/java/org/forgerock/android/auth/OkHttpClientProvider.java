@@ -39,7 +39,7 @@ class OkHttpClientProvider {
      * @return The OkHttpClient
      */
     OkHttpClient lookup(NetworkConfig networkConfig) {
-        OkHttpClient client = cache.get(networkConfig);
+        OkHttpClient client = cache.get(networkConfig.getIdentifier());
 
         if (client != null) {
             return client;
@@ -79,7 +79,7 @@ class OkHttpClientProvider {
         }
 
         client = builder.build();
-        cache.put(networkConfig.getHost(), client);
+        cache.put(networkConfig.getIdentifier(), client);
         return client;
 
     }

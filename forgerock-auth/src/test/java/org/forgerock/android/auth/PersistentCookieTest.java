@@ -27,9 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PersistentCookieTest extends BaseTest {
 
     @Before
-    public void setUpCookieStore() {
-        Config.getInstance().setCookieJar(SecureCookieJar.builder().context(context)
-                .build());
+    public void setupConfig() throws Exception {
+        //Since the application context changed for each test, we cannot cache the storage in SecureCookieJar.
+        OkHttpClientProvider.getInstance().clear();
     }
 
     @Test
@@ -248,13 +248,13 @@ public class PersistentCookieTest extends BaseTest {
         assertThat(toMap(rr.getHeader("Cookie")).get("iPlanetDirectoryPro")).isEqualTo("iPlanetDirectoryProCookie");
         //The cookie is stored, but not sent
         assertThat(Config.getInstance().getSingleSignOnManager().getCookies()).hasSize(2);
-
     }
+
+
 
     @Test
     public void cookieCache() throws InterruptedException, ExecutionException {
 
-        OkHttpClientProvider.getInstance().clear();
         Config.getInstance().setCookieJar(SecureCookieJar.builder()
                 .context(context)
                 .cacheIntervalMillis(1000L)
@@ -295,7 +295,6 @@ public class PersistentCookieTest extends BaseTest {
     @Test
     public void cookieCacheRemovedWithLogout() throws InterruptedException, ExecutionException {
 
-        OkHttpClientProvider.getInstance().clear();
         server.enqueue(new MockResponse()
                 .setResponseCode(HTTP_OK)
                 .addHeader("Content-Type", "application/json")

@@ -20,15 +20,10 @@ import okhttp3.Response;
  */
 class OkHttpRequestInterceptor implements Interceptor {
 
-    private final RequestInterceptor[] interceptors;
-
-    OkHttpRequestInterceptor(RequestInterceptor... interceptors) {
-        this.interceptors = interceptors;
-    }
-
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
+        RequestInterceptor[] interceptors = RequestInterceptorRegistry.getInstance().getRequestInterceptors() ;
         if (interceptors == null || interceptors.length == 0) {
             //If no interceptors, continue the chain
             return chain.proceed(chain.request());

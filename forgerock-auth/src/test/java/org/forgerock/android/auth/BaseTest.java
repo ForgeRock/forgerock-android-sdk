@@ -59,6 +59,8 @@ public class BaseTest {
     public void shutdown() throws IOException {
         server.shutdown();
         RequestInterceptorRegistry.getInstance().register(null);
+        Config.getInstance().getTokenManager().clear();
+        Config.getInstance().getSingleSignOnManager().clear();
         Config.reset();
     }
 
