@@ -65,7 +65,13 @@ class NetworkConfig {
         }
     }
 
-    public String getIdentifier() {
+    /**
+     * Unique identifier for the Network config, the identifier will be used as the key to cache the
+     * {@link okhttp3.OkHttpClient} inside {@link OkHttpClientProvider}
+     *
+     * @return The unique identifier to represent this configuration.
+     */
+    String getIdentifier() {
         if (identifier == null) {
             return getHost();
         } else {
