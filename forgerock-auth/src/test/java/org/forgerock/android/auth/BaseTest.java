@@ -56,13 +56,18 @@ public class BaseTest {
     }
 
     @After
-    public void shutdown() throws IOException {
-        server.shutdown();
-        RequestInterceptorRegistry.getInstance().register(null);
-        Config.getInstance().getTokenManager().clear();
-        Config.getInstance().getSingleSignOnManager().clear();
-        Config.reset();
-    }
+    public void shutdown() {
+        try {
+            server.shutdown();
+        } catch (IOException e) {
+            //Ignore
+        } finally {
+            RequestInterceptorRegistry.getInstance().register(null);
+            Config.getInstance().getTokenManager().clear();
+            Config.getInstance().getSingleSignOnManager().clear();
+            Config.reset();
+        }
+   }
 
     protected String getUrl() {
         return "http://" + server.getHostName() + ":" + server.getPort();
