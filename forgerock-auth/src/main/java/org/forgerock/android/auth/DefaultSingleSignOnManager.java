@@ -140,10 +140,6 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                 }
             }
         });
-
-        //Cleanup the cached cookies
-        OkHttpClientProvider.getInstance().clear();
-
     }
 
     private URL getLogoutUrl() throws MalformedURLException {

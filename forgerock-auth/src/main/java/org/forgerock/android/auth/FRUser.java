@@ -37,9 +37,9 @@ import lombok.RequiredArgsConstructor;
 public class FRUser {
 
     //Hold the current login user.
-    private static AtomicReference<FRUser> current = new AtomicReference<>();
+    private static final AtomicReference<FRUser> current = new AtomicReference<>();
 
-    private SessionManager sessionManager;
+    private final SessionManager sessionManager;
 
     static {
         EventDispatcher.TOKEN_REMOVED.addObserver((o, arg) -> current.set(null));
@@ -223,12 +223,12 @@ public class FRUser {
                 return;
             }
 
-                try {
-                    validateRedirectUri(context);
-                } catch (InvalidRedirectUriException e) {
-                    Listener.onException(listener, e);
-                    return;
-                }
+            try {
+                validateRedirectUri(context);
+            } catch (InvalidRedirectUriException e) {
+                Listener.onException(listener, e);
+                return;
+            }
 
             this.listener = new FRListener<AuthorizationResponse>() {
                 @Override

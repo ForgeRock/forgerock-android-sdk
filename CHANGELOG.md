@@ -9,6 +9,7 @@
 - org.forgerock.android.auth.FRUser.getAccessToken() clean up tokens in the following conditions: [SDKS-701]
 -- When Refresh Token Grant Types is used, Server returns invalid_grant (Refresh Token expired), and failed to acquire OAuth2 Tokens with Session Token
 -- When Refresh Token Grant Types is not used, and failed to acquire OAuth2 Tokens with Session Token
+- Properly cache and reuse OKHttpClient [SDKS-770]
 
 ## [2.1.0]
 

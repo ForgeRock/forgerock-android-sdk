@@ -14,6 +14,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +37,7 @@ public class Config {
     private String oAuthUrl;
 
     //Server
+    private String identifier;
     private String url;
     private String realm;
     private int timeout;
@@ -110,6 +112,7 @@ public class Config {
             userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
             logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
             endSessionEndpoint = context.getString(R.string.forgerock_endsession_endpoint);
+            identifier = UUID.randomUUID().toString();
         }
         initialized = true;
     }
@@ -127,6 +130,7 @@ public class Config {
     ServerConfig getServerConfig() {
         return ServerConfig.builder()
                 .context(context)
+                .identifier(identifier)
                 .url(url)
                 .realm(realm)
                 .timeout(timeout)
@@ -204,6 +208,7 @@ public class Config {
         this.cookieJar = cookieJar;
     }
 
+    @VisibleForTesting
     public static void reset() {
         mInstance = new Config();
     }

@@ -20,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 public class FRSession {
 
     //Hold the current user session.
-    private static AtomicReference<FRSession> current = new AtomicReference<>();
+    private static final AtomicReference<FRSession> current = new AtomicReference<>();
 
     static {
         EventDispatcher.TOKEN_REMOVED.addObserver((o, arg) -> current.set(null));
     }
 
-    private SessionManager sessionManager;
+    private final SessionManager sessionManager;
 
     private FRSession() {
         sessionManager = Config.getInstance().getSessionManager();
