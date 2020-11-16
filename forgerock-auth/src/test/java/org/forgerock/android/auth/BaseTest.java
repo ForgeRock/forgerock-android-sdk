@@ -60,7 +60,7 @@ public class BaseTest {
         try {
             server.shutdown();
         } catch (IOException e) {
-            //Ignore
+            Logger.warn(BaseTest.class.getName(), "Failed to shutdown server", e);
         } finally {
             RequestInterceptorRegistry.getInstance().register(null);
             Config.getInstance().getTokenManager().clear();
