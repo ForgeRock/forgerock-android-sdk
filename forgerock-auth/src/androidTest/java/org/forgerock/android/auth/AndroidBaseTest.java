@@ -18,6 +18,7 @@ public abstract class AndroidBaseTest {
     protected Context context = ApplicationProvider.getApplicationContext();
     public static String USERNAME = "sdkuser";
     public static String PASSWORD = "password";
+    public static String USER_EMAIL = "sdkuser@example.com";
 
     protected String TREE = "UsernamePassword";
 
