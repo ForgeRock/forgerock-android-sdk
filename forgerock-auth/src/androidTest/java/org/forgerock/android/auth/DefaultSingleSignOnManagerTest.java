@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 
@@ -17,6 +20,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -107,7 +112,7 @@ public class DefaultSingleSignOnManagerTest {
     }
 
     @Test
-    public void testAccountNotCreatedBySDK() {
+    public void testAccountNotCreatedBySDK() throws AuthenticatorException, OperationCanceledException, IOException {
         SSOToken token = new SSOToken("MyTokenValue");
         tokenManager.persist(token);
 
@@ -122,22 +127,20 @@ public class DefaultSingleSignOnManagerTest {
         accounts = accountManager.getAccountsByType("org.forgerock");
         Assertions.assertThat(accounts).hasSize(1);
         Assertions.assertThat(accounts[0].name).isEqualTo("Dummy");
-        accountManager.removeAccount(accounts[0], null, null);
+        //cleanup
+        AccountManagerFuture<Boolean> future = accountManager.removeAccount(accounts[0], null, null);
+        future.getResult();
 
     }
 
     @Test
     public void testPersistEmptyData() {
-        AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
-        for (Account account : accounts) {
-            accountManager.removeAccount(account, null, null);
-        }
 
         SSOToken ssoToken = new SSOToken("");
         tokenManager.persist(ssoToken);
 
-        accounts = accountManager.getAccountsByType("org.forgerock");
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
         //Account should not be created
         Assertions.assertThat(accounts).hasSize(0);
 
