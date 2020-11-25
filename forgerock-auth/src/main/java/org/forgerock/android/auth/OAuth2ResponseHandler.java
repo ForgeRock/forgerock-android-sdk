@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -42,6 +42,7 @@ class OAuth2ResponseHandler implements ResponseHandler {
                 String errorDescription = redirect.getQueryParameter("error_description");
                 Listener.onException(listener, new ApiException(response.code(), response.message(), errorDescription));
             }
+            close(response);
         } else {
             handleError(response, listener);
         }
@@ -55,7 +56,7 @@ class OAuth2ResponseHandler implements ResponseHandler {
     void handleTokenResponse(SSOToken sessionToken, Response response, String origRefreshToken, FRListener<AccessToken> listener) {
         if (response.isSuccessful()) {
             try {
-                JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.body()).string());
+                JSONObject jsonObject = new JSONObject(response.body().string());
                 Listener.onSuccess(listener, AccessToken.builder()
                         .idToken(jsonObject.optString(ID_TOKEN, null))
                         .value(jsonObject.getString(ACCESS_TOKEN))
@@ -82,6 +83,7 @@ class OAuth2ResponseHandler implements ResponseHandler {
     void handleRevokeResponse(Response response, FRListener<Void> listener) {
         if (response.isSuccessful()) {
             Listener.onSuccess(listener, null);
+            close(response);
         } else {
             handleError(response, listener);
         }

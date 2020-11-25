@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import okhttp3.Response;
+
 import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationException;
 
@@ -37,5 +38,19 @@ interface ResponseHandler {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Close the response body stream.
+     *
+     * @param response API Response
+     */
+    default void close(Response response) {
+        try {
+            response.close();
+        } catch (Exception e) {
+            //ignore
+        }
+
     }
 }

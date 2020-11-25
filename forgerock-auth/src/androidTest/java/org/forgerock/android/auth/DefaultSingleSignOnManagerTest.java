@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNull;
 public class DefaultSingleSignOnManagerTest {
 
     private SingleSignOnManager tokenManager;
-    private Context context = ApplicationProvider.getApplicationContext();
+    private final Context context = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUp() {
@@ -128,11 +128,16 @@ public class DefaultSingleSignOnManagerTest {
 
     @Test
     public void testPersistEmptyData() {
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        for (Account account : accounts) {
+            accountManager.removeAccount(account, null, null);
+        }
+
         SSOToken ssoToken = new SSOToken("");
         tokenManager.persist(ssoToken);
 
-        AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        accounts = accountManager.getAccountsByType("org.forgerock");
         //Account should not be created
         Assertions.assertThat(accounts).hasSize(0);
 

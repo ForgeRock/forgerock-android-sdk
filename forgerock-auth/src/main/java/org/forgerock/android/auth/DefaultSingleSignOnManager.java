@@ -135,6 +135,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
+                    close(response);
                 } else {
                     handleError(response, listener);
                 }
