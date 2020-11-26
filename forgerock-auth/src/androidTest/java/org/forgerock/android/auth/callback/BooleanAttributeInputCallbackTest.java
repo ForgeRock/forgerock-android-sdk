@@ -42,7 +42,7 @@ public class BooleanAttributeInputCallbackTest extends TreeTest {
                     assertThat(callback.getName()).isEqualTo("preferences/marketing");
                     assertThat(callback.getPrompt()).isEqualTo("Send me special offers and services");
                     assertThat(callback.isRequired()).isTrue();
-                    assertThat(callback.getPolicies()).asString().isEqualTo("{}");
+                    assertThat(callback.getPolicies().toString()).isEqualTo("{}");
                     assertThat(callback.getFailedPolicies()).isEmpty();
                     assertThat(callback.getValidateOnly()).isFalse();
                     assertThat(callback.getValue()).isFalse();
