@@ -190,6 +190,7 @@ class PushResponder {
                         listener.onException(new PushMechanismException("Communication with " +
                                 "server returned " + response.code() + " code."));
                     }
+                    response.close();
                 }
 
                 @Override
@@ -240,6 +241,7 @@ class PushResponder {
                         listener.onException(new PushMechanismException("Communication with " +
                                 "server returned " + response.code() + " code."));
                     }
+                    response.close();
                 }
 
                 @Override

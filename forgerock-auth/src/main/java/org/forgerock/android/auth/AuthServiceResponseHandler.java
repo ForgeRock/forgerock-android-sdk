@@ -50,7 +50,7 @@ class AuthServiceResponseHandler implements ResponseHandler {
         try {
             if (response.isSuccessful()) {
                 //Proceed to next Node in the tree
-                JSONObject jsonObject = new JSONObject(Objects.requireNonNull(response.body()).string());
+                JSONObject jsonObject = new JSONObject(response.body().string());
                 if (jsonObject.has(Node.AUTH_ID)) {
                     if (listener != null) {
                         Node node = listener.onCallbackReceived(authService.getAuthServiceId(), jsonObject);
