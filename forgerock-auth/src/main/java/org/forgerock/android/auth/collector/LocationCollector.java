@@ -13,8 +13,10 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Process;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Listener;
 import org.json.JSONException;
@@ -26,7 +28,10 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 /**
- * Collector to collect Location information
+ * Collector to collect Last Known Location information, this collector will first try to use {@link FusedLocationProviderClient}
+ * to collect last location data, if {@link FusedLocationProviderClient} class not found or failed to retrieve the location, it fallbacks to
+ * Android framework Location API to retrieve the last known location. You may need to override this LocationCollector to collect more recent
+ * location.
  */
 public class LocationCollector implements DeviceCollector {
 
@@ -105,7 +110,7 @@ public class LocationCollector implements DeviceCollector {
      * @param location The location
      * @return The JSONObject which represent the {@link Location}
      */
-    private JSONObject result(Location location) {
+    protected JSONObject result(Location location) {
 
         if (location == null) return null;
 
