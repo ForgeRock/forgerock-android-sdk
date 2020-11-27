@@ -66,7 +66,7 @@ To try out the ForgeRock Android SDK sample, perform these steps:
 
 Documentation for the SDKs is provided at **<https://sdks.forgerock.com>**, and includes topics such as:
 
-* Introducting the SDK Features
+* Introducing the SDK Features
 * Preparing AM for use with the SDKS
 * API Reference documentation
 
