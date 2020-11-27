@@ -30,7 +30,7 @@
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">http://openam.example.com:8081/openam</string>
+    <string name="forgerock_url" translatable="false">http://192.168.1.83:8081/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>

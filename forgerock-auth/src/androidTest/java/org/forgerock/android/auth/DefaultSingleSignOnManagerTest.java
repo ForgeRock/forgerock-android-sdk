@@ -13,6 +13,8 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
+import android.os.Build;
+
 import androidx.test.core.app.ApplicationProvider;
 
 import org.assertj.core.api.Assertions;
@@ -40,8 +42,18 @@ public class DefaultSingleSignOnManagerTest {
 
     @After
     public void cleanup() throws Exception {
-        tokenManager.clear();
         new AsymmetricEncryptor(context, "org.forgerock.v1.SSO_TOKEN").reset();
+
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        for (Account acc : accounts) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                accountManager.removeAccountExplicitly(acc);
+            } else {
+                AccountManagerFuture<Boolean> future = accountManager.removeAccount(acc, null, null);
+                future.getResult();
+            }
+        }
     }
 
     @Test

@@ -13,6 +13,7 @@ import android.os.Bundle;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,6 +25,7 @@ public class AccountManagerTest {
     private Context context = ApplicationProvider.getApplicationContext();
 
     @Test
+    @Ignore("For AccountManager interface testing, not SDK function")
     public void name() throws AuthenticatorException, OperationCanceledException, IOException {
         Account account = new Account("testuser", "org.forgerock");
         AccountManager am = AccountManager.get(context);

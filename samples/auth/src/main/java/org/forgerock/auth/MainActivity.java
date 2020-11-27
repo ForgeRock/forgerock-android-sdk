@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         .build());
 
                 OkHttpClient client = builder.build();
-                Request request = new Request.Builder().url("http://openig.example.com:8080/products").build();
+                Request request = new Request.Builder().url("http://192.168.1.83:9090/products").build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
