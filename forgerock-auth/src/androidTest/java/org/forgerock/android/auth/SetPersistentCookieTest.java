@@ -41,7 +41,8 @@ public class SetPersistentCookieTest extends TreeTest {
 
         boolean found = false;
         for (String cookie : cookies) {
-            Cookie cookie1 = Cookie.parse(HttpUrl.parse(Config.getInstance().getUrl()), cookie);
+            //Cookie cookie1 = Cookie.parse(HttpUrl.parse(Config.getInstance().getUrl()), cookie);
+            Cookie cookie1 = new CookieMarshaller().unmarshal(cookie);
             if (cookie1.name().equals("session-jwt") && cookie1.httpOnly() && cookie1.secure()) {
                 found = true;
             }
