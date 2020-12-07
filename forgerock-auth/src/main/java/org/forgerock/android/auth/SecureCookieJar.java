@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,6 +34,7 @@ public class SecureCookieJar implements CookieJar {
     private final long cacheIntervalMillis;
     private static final ScheduledExecutorService worker =
             Executors.newSingleThreadScheduledExecutor();
+    private final CookieMarshaller cookieMarshaller = new CookieMarshaller();
 
     @Builder
     public SecureCookieJar(Context context, SingleSignOnManager singleSignOnManager, Long cacheIntervalMillis) {
@@ -55,7 +56,7 @@ public class SecureCookieJar implements CookieJar {
                 Set<String> updatedCookies = new HashSet<>(storedCookies);
                 Iterator<String> iterator = updatedCookies.iterator();
                 while (iterator.hasNext()) {
-                    Cookie cookie = Cookie.parse(httpUrl, iterator.next());
+                    Cookie cookie = cookieMarshaller.unmarshal(iterator.next());
                     if (cookie != null) {
                         if (!isExpired(cookie)) {
                             cookies.add(cookie);
@@ -63,10 +64,13 @@ public class SecureCookieJar implements CookieJar {
                             //Remove expired cookies
                             iterator.remove();
                         }
+                    } else {
+                        //Failed to parse it
+                        iterator.remove();
                     }
                 }
 
-                // Some cookies are expired, remove it
+                // Some cookies are expired, or failed to parse, remove it
                 if (storedCookies.size() != updatedCookies.size()) {
                     cache(cookies);
                     singleSignOnManager.persist(updatedCookies);
@@ -82,7 +86,7 @@ public class SecureCookieJar implements CookieJar {
 
         Set<Cookie> cookies = new HashSet<>();
         for (String c : singleSignOnManager.getCookies()) {
-            Cookie cookie = Cookie.parse(httpUrl, c);
+            Cookie cookie = cookieMarshaller.unmarshal(c);
             //Remove the same stored cookies
             if (cookie != null && !contains(cookie, list)) {
                 cookies.add(cookie);
@@ -99,7 +103,7 @@ public class SecureCookieJar implements CookieJar {
 
         Set<String> updatedCookies = new HashSet<>();
         for (Cookie cookie : cookies) {
-            updatedCookies.add(cookie.toString());
+            updatedCookies.add(cookieMarshaller.marshal(cookie));
         }
 
         singleSignOnManager.persist(updatedCookies);
