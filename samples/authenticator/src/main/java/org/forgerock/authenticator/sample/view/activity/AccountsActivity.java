@@ -164,7 +164,6 @@ public class AccountsActivity extends AppCompatActivity {
                                         .setMessage(R.string.duplicate_message_noreplace)
                                         .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-                                                AuthenticatorModel.getInstance().removeMechanism(duplicate);
                                                 finish();
                                                 return;
                                             }

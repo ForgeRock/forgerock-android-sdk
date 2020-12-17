@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,6 +14,7 @@ import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.exception.ApiException;
+import org.forgerock.android.auth.exception.AuthorizeException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -21,7 +22,11 @@ import org.robolectric.RobolectricTestRunner;
 import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static java.util.Collections.emptyMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class OAuth2MockTest extends BaseTest {
@@ -36,7 +41,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         assertNotNull(oAuth2TokenListenerFuture.get());
         AccessToken accessToken = oAuth2TokenListenerFuture.get();
@@ -64,14 +69,14 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             assertNotNull(oAuth2TokenListenerFuture.get());
             fail();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof ApiException);
-            assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, ((ApiException)e.getCause()).getStatusCode());
+            AuthorizeException authorizeException = (AuthorizeException) e.getCause();
+            assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, ((ApiException)authorizeException.getCause()).getStatusCode());
         } catch (InterruptedException e) {
             fail();
         }
@@ -86,15 +91,15 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             assertNotNull(oAuth2TokenListenerFuture.get());
             fail();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof ApiException);
-            assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, ((ApiException)e.getCause()).getStatusCode());
-            assertEquals("Failed to get resource owner session from request", ((ApiException)e.getCause()).getMessage());
+            AuthorizeException authorizeException = (AuthorizeException) e.getCause();
+            assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, ((ApiException)authorizeException.getCause()).getStatusCode());
+            assertEquals("Failed to get resource owner session from request", ((ApiException)authorizeException.getCause()).getMessage());
         } catch (InterruptedException e) {
             fail();
         }
@@ -118,7 +123,7 @@ public class OAuth2MockTest extends BaseTest {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, oAuth2TokenListenerFuture);
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
 
         try {
             oAuth2TokenListenerFuture.get();

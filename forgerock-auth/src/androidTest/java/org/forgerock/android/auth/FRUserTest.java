@@ -73,8 +73,7 @@ public class FRUserTest extends AndroidBaseTest {
         FRListenerFuture<UserInfo> future = new FRListenerFuture<>();
         FRUser.getCurrentUser().getUserInfo(future);
         UserInfo userinfo = future.get();
-        assertEquals(USERNAME, userinfo.getSub());
-
+        assertEquals(USER_EMAIL, userinfo.getEmail());
     }
 
     @Test

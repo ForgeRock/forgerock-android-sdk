@@ -1,4 +1,16 @@
-# Version 2.1.0
+# Version 2.2.0
+
+## [2.2.0]
+#### Added
+- Centralize Login (`AppAuth` Integration) [SDKS-330]
+
+#### Fixed
+- Refresh Token is not persisted when refresh_token grant is not issuing new Refresh Token [SDKS-649]
+- org.forgerock.android.auth.FRUser.getAccessToken() clean up tokens in the following conditions: [SDKS-701]
+-- When Refresh Token Grant Types is used, Server returns invalid_grant (Refresh Token expired), and failed to acquire OAuth2 Tokens with Session Token
+-- When Refresh Token Grant Types is not used, and failed to acquire OAuth2 Tokens with Session Token
+- Properly cache and reuse OKHttpClient [SDKS-770]
+- Fix HostOnly Cookie handling [SDKS-808]
 
 ## [2.1.0]
 

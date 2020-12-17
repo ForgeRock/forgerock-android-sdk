@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -16,6 +16,7 @@ import androidx.test.rule.GrantPermissionRule;
 import org.forgerock.android.auth.collector.*;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +36,14 @@ public class FRDeviceProfileTest {
             Manifest.permission.BLUETOOTH
     );
 
+    @Before
+    public void setUp() throws Exception {
+        Config.getInstance().init(context);
+    }
+
     @Test
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
 
-        Config.getInstance().init(context);
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
         FRDevice.getInstance().getProfile(future);
         JSONObject result = future.get();

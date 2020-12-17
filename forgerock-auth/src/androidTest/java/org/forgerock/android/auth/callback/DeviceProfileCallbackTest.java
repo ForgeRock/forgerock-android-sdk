@@ -36,7 +36,7 @@ public class DeviceProfileCallbackTest extends TreeTest {
             public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceProfileCallback.class) != null) {
                     DeviceProfileCallback callback = node.getCallback(DeviceProfileCallback.class);
-                    assertThat(callback.getMessage()).isEqualTo("Device");
+                    assertThat(callback.getMessage()).isEqualTo("Collecting profile ...");
                     assertThat(callback.isLocation()).isTrue();
                     assertThat(callback.isMetadata()).isTrue();
 

@@ -77,6 +77,8 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     @Override
     public void clear() {
         singleSignOnManager.clear();
+        //Broadcast Token removed event
+        EventDispatcher.TOKEN_REMOVED.notifyObservers();
     }
 
     @Override
@@ -133,15 +135,12 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
                     Listener.onSuccess(listener, null);
+                    close(response);
                 } else {
                     handleError(response, listener);
                 }
             }
         });
-
-        //Cleanup the cached cookies
-        OkHttpClientProvider.getInstance().clear();
-
     }
 
     private URL getLogoutUrl() throws MalformedURLException {

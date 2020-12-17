@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,6 +11,7 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,6 +41,28 @@ public class ServerConfigTest {
     public void testMissingContext() {
         ServerConfig.builder().build();
     }
+
+    @Test
+    public void testCachedOkHttpClient() {
+        Config.getInstance().init(context);
+        ServerConfig serverConfig = Config.getInstance().getServerConfig();
+        OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
+        OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig);
+        Assertions.assertThat(client1 == client2).isTrue();
+    }
+
+    @Test
+    public void testOkHttpCachedWithDifferentIdentifier() {
+        Config.getInstance().init(context);
+        ServerConfig serverConfig = Config.getInstance().getServerConfig();
+        OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
+        Config.reset();
+        Config.getInstance().init(context);
+        ServerConfig serverConfig2 = Config.getInstance().getServerConfig();
+        OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig2);
+        Assertions.assertThat(client1 != client2).isTrue();
+    }
+
 
     /**
      * Generate PEM file

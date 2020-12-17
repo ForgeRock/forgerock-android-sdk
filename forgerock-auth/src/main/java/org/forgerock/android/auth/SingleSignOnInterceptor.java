@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -26,15 +26,10 @@ class SingleSignOnInterceptor implements Interceptor<SSOToken> {
         }
         Token storedToken = sessionManager.getSingleSignOnManager().getToken();
         //If token changed, we need to revoke Access Token
-        if (storedToken != null ) {
-            if (storedToken.equals(token)) {
-                chain.proceed(token);
-                return;
-            } else {
-                sessionManager.getTokenManager().revoke(null);
-            }
+        if (!token.equals(storedToken)) {
+            sessionManager.getTokenManager().revoke(null);
+            sessionManager.getSingleSignOnManager().persist(token);
         }
-        sessionManager.getSingleSignOnManager().persist(token);
         chain.proceed(token);
     }
 

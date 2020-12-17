@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,6 +14,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +37,7 @@ public class Config {
     private String oAuthUrl;
 
     //Server
+    private String identifier;
     private String url;
     private String realm;
     private int timeout;
@@ -49,6 +51,7 @@ public class Config {
     private String revokeEndpoint;
     private String userinfoEndpoint;
     private String logoutEndpoint;
+    private String endSessionEndpoint;
 
     //SSO Token Manager
     private Encryptor encryptor;
@@ -108,6 +111,8 @@ public class Config {
             revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
             userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
             logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
+            endSessionEndpoint = context.getString(R.string.forgerock_endsession_endpoint);
+            identifier = UUID.randomUUID().toString();
         }
         initialized = true;
     }
@@ -125,6 +130,7 @@ public class Config {
     ServerConfig getServerConfig() {
         return ServerConfig.builder()
                 .context(context)
+                .identifier(identifier)
                 .url(url)
                 .realm(realm)
                 .timeout(timeout)
@@ -136,10 +142,11 @@ public class Config {
                 .revokeEndpoint(revokeEndpoint)
                 .userInfoEndpoint(userinfoEndpoint)
                 .logoutEndpoint(logoutEndpoint)
+                .endSessionEndpoint(endSessionEndpoint)
                 .build();
     }
 
-    private OAuth2Client getOAuth2Client() {
+   OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
                 .clientId(clientId)
                 .scope(scope)
@@ -201,6 +208,7 @@ public class Config {
         this.cookieJar = cookieJar;
     }
 
+    @VisibleForTesting
     public static void reset() {
         mInstance = new Config();
     }

@@ -23,10 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.nimbusds.jwt.JWTParser;
 
+import org.forgerock.android.auth.AccessToken;
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUser;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
@@ -44,6 +47,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -59,7 +64,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 
-public class MainActivity extends AppCompatActivity implements FRListener<String> {
+public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
@@ -75,8 +80,8 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
         /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
-                new NoSessionRequestInterceptor(),
-                new InjectHeaderAuthRequestInterceptor());
+                new NoSessionRequestInterceptor()
+        );
          */
 
         //CallbackFactory.getInstance().register(MyCustomDeviceProfile.class);
@@ -102,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        userinfo();
     }
 
     @Override
@@ -206,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                         .build());
 
                 OkHttpClient client = builder.build();
-                Request request = new Request.Builder().url("http://openig.example.com:8080/products").build();
+                Request request = new Request.Builder().url("http://openig.example.com:9090/products").build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -229,8 +233,65 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
                     }
                 });
                 return true;
+
+            case R.id.token:
+                JSONObject output = new JSONObject();
+                if (FRUser.getCurrentUser() != null) {
+                    FRUser.getCurrentUser().getAccessToken(new FRListener<AccessToken>() {
+                        @Override
+                        public void onSuccess(AccessToken result) {
+                            try {
+                                put(output, "ACCESS_TOKEN_RAW", new JSONObject(result.toJson()));
+                            } catch (JSONException e) {
+                                //ignore
+                            }
+                            try {
+                                put(output, "ACCESS_TOKEN", new JSONObject(JWTParser.parse(result.getValue()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                put(output, "REFRESH_TOKEN", new JSONObject(JWTParser.parse(result.getRefreshToken()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                            }
+                            try {
+                                put(output, "ID_TOKEN", new JSONObject(JWTParser.parse(result.getIdToken()).getJWTClaimsSet().toString()));
+                            } catch (Exception e) {
+                                //ignore
+                            }
+
+                            runOnUiThread(() -> {
+                                try {
+                                    success.setVisibility(View.GONE);
+                                    content.setText(output.toString(2));
+                                } catch (JSONException e) {
+                                    //ignore
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            put(output, "ERROR", e.getMessage());
+                        }
+                    });
+
+                    if (FRSession.getCurrentSession() != null) {
+                        put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
+                    }
+                }
+
+
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void put(JSONObject object, String key, Object value) {
+        try {
+            object.put(key, value);
+        } catch (JSONException e) {
+            //ignore
         }
     }
 
@@ -278,14 +339,40 @@ public class MainActivity extends AppCompatActivity implements FRListener<String
     }
 
 
-    @Override
-    public void onSuccess(String result) {
+    public void launchTree(String result) {
         Intent loginIntent = new Intent(this, SimpleLoginActivity.class);
         loginIntent.putExtra(LoginFragment.TREE_NAME, result);
         startActivityForResult(loginIntent, AUTH_REQUEST_CODE);
     }
 
-    @Override
-    public void onException(Exception e) {
+    public void launchBrowser() {
+
+        FRUser.browser().appAuthConfigurer()
+                .authorizationRequest(r -> {
+                    Map<String, String> additionalParameters = new HashMap<>();
+                    additionalParameters.put("acr_values", "exampletree");
+                    additionalParameters.put("KEY2", "VALUE2");
+                    //r.setLoginHint("login");
+                    //r.setPrompt("login");
+                })
+                .customTabsIntent(t -> {
+                    t.setShowTitle(false);
+                    t.setToolbarColor(getResources().getColor(R.color.colorAccent));
+                }).done()
+                .login(this, new FRListener<FRUser>() {
+                    @Override
+                    public void onSuccess(FRUser result) {
+                        userinfo();
+                    }
+
+                    @Override
+                    public void onException(Exception e) {
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(INVISIBLE);
+                            content.setText(e.getMessage());
+                        });
+
+                    }
+                });
     }
 }

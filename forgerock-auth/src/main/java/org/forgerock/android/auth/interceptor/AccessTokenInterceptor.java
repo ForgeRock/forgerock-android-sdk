@@ -38,7 +38,7 @@ public class AccessTokenInterceptor implements Interceptor {
                             .header("Authorization", "Bearer " + accessToken.getValue())
                             .build());
                 }
-            } catch (AuthenticationRequiredException e) {
+            } catch (Exception e) {
                 Logger.warn(TAG, e, "Failed to inject a valid access token");
            }
         return chain.proceed(chain.request());

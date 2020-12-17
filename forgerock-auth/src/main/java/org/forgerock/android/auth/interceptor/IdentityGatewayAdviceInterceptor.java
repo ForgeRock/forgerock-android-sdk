@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -47,6 +47,12 @@ public abstract class IdentityGatewayAdviceInterceptor<T> implements Interceptor
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return response;
+                }
+                //Discard the existing response
+                try {
+                    response.close();
+                } catch (Exception e) {
+                    //ignore
                 }
                 //Retry the request
                 return chain.proceed(decorateRequest(chain.request(), advice));

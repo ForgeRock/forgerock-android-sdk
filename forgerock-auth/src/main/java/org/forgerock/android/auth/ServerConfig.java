@@ -45,9 +45,11 @@ public class ServerConfig extends NetworkConfig {
     private String revokeEndpoint;
     private String userInfoEndpoint;
     private String logoutEndpoint;
+    private String endSessionEndpoint;
 
     @lombok.Builder
     private ServerConfig(@NonNull Context context,
+                         String identifier,
                          String url,
                          String realm,
                          Integer timeout,
@@ -60,13 +62,14 @@ public class ServerConfig extends NetworkConfig {
                          String tokenEndpoint,
                          String revokeEndpoint,
                          String userInfoEndpoint,
-                         String logoutEndpoint) {
-        super(getHost(context, url),
+                         String logoutEndpoint,
+                         String endSessionEndpoint) {
+        super(identifier,
+                getHost(context, url),
                 getTimeOut(context, timeout),
                 timeUnit, cookieJarSupplier,
                 getPins(context, pins),
-                () -> singletonList(new OkHttpRequestInterceptor( //support dynamic change of RequestInterceptor
-                                RequestInterceptorRegistry.getInstance().getRequestInterceptors()))
+                () -> singletonList(new OkHttpRequestInterceptor())
         );
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
@@ -77,6 +80,7 @@ public class ServerConfig extends NetworkConfig {
         this.revokeEndpoint = revokeEndpoint;
         this.userInfoEndpoint = userInfoEndpoint;
         this.logoutEndpoint = logoutEndpoint;
+        this.endSessionEndpoint = endSessionEndpoint;
 
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -56,11 +56,18 @@ public class BaseTest {
     }
 
     @After
-    public void shutdown() throws IOException {
-        server.shutdown();
-        RequestInterceptorRegistry.getInstance().register(null);
-        Config.reset();
-    }
+    public void shutdown() {
+        try {
+            server.shutdown();
+        } catch (IOException e) {
+            Logger.warn(BaseTest.class.getName(), "Failed to shutdown server", e);
+        } finally {
+            RequestInterceptorRegistry.getInstance().register(null);
+            Config.getInstance().getTokenManager().clear();
+            Config.getInstance().getSingleSignOnManager().clear();
+            Config.reset();
+        }
+   }
 
     protected String getUrl() {
         return "http://" + server.getHostName() + ":" + server.getPort();
@@ -77,9 +84,9 @@ public class BaseTest {
 
     protected OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
-                .clientId("andy_app")
-                .scope("openid email address")
-                .redirectUri("http://www.example.com:8080/callback")
+                .clientId(Config.getInstance().getClientId())
+                .scope(Config.getInstance().getScope())
+                .redirectUri(Config.getInstance().getRedirectUri())
                 .serverConfig(serverConfig)
                 .build();
     }

@@ -16,10 +16,11 @@ import org.junit.Before;
 public abstract class AndroidBaseTest {
 
     protected Context context = ApplicationProvider.getApplicationContext();
-    public static String USERNAME = "username";
+    public static String USERNAME = "sdkuser";
     public static String PASSWORD = "password";
+    public static String USER_EMAIL = "sdkuser@example.com";
 
-    protected String TREE = "Simple";
+    protected String TREE = "UsernamePassword";
 
     @Before
     public void setUpSDK() {

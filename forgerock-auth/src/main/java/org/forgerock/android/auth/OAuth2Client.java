@@ -10,10 +10,10 @@ package org.forgerock.android.auth;
 import android.net.Uri;
 import android.util.Base64;
 
-import lombok.Getter;
-import lombok.NonNull;
-import okhttp3.*;
+import androidx.annotation.Nullable;
 
+import org.forgerock.android.auth.exception.ApiException;
+import org.forgerock.android.auth.exception.AuthorizeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,10 +24,24 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Map;
+
+import lombok.Getter;
+import lombok.NonNull;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
+/**
+ * Class to handle OAuth2 related endpoint
+ */
+@Getter
 public class OAuth2Client {
 
     private static final String TAG = "OAuth2Client";
@@ -37,6 +51,7 @@ public class OAuth2Client {
     private static final Action EXCHANGE_TOKEN = new Action(Action.EXCHANGE_TOKEN);
     private static final Action REFRESH_TOKEN = new Action(Action.REFRESH_TOKEN);
     private static final Action REVOKE_TOKEN = new Action(Action.REVOKE_TOKEN);
+    private static final Action END_SESSION = new Action(Action.END_SESSION);
 
     /**
      * The registered client identifier
@@ -67,10 +82,14 @@ public class OAuth2Client {
     /**
      * Sends an authorization request to the authorization service.
      *
-     * @param token    The SSO Token received with the result of {@link AuthService}
-     * @param listener Listener that listens to changes resulting from OAuth endpoints .
+     * @param token                The SSO Token received with the result of {@link AuthService}
+     * @param additionalParameters Additional parameters for inclusion in the authorization endpoint
+     *                             request
+     * @param listener             Listener that listens to changes resulting from OAuth endpoints .
      */
-    public void exchangeToken(@NonNull SSOToken token, final FRListener<AccessToken> listener) {
+    public void exchangeToken(@NonNull SSOToken token,
+                              @NonNull Map<String, String> additionalParameters,
+                              final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchanging Access Token with SSO Token.");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
         try {
@@ -83,7 +102,7 @@ public class OAuth2Client {
             final PKCE pkce = generateCodeChallenge();
 
             okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(getAuthorizeUrl(token, pkce))
+                    .url(getAuthorizeUrl(token, pkce, additionalParameters))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .tag(AUTHORIZE)
@@ -101,12 +120,12 @@ public class OAuth2Client {
                     handler.handleAuthorizeResponse(response, new FRListener<String>() {
                         @Override
                         public void onException(Exception e) {
-                            listener.onException(e);
+                            listener.onException(new AuthorizeException("Failed to exchange authorization code with sso token", e));
                         }
 
                         @Override
                         public void onSuccess(String code) {
-                            token(token, code, pkce, handler, listener);
+                            token(token, code, pkce, additionalParameters, handler, listener);
                         }
                     });
                 }
@@ -118,7 +137,14 @@ public class OAuth2Client {
         }
     }
 
-    public void refresh(@NonNull SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
+    /**
+     * Refresh the Access Token with the provided Refresh Token
+     *
+     * @param sessionToken The Session Token that bind to existing AccessToken
+     * @param refreshToken The Refresh Token that use to refresh the Access Token
+     * @param listener     Listen for endpoint event
+     */
+    public void refresh(@Nullable SSOToken sessionToken, @NonNull String refreshToken, final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Refreshing Access Token");
 
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -153,7 +179,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(sessionToken, response, listener);
+                    handler.handleTokenResponse(sessionToken, response, refreshToken, listener);
                 }
             });
 
@@ -162,6 +188,13 @@ public class OAuth2Client {
         }
     }
 
+    /**
+     * Revoke the AccessToken, to revoke the access token, first look for refresh token to revoke, if
+     * not provided, will revoke with the access token.
+     *
+     * @param accessToken The AccessToken to be revoked
+     * @param listener    Listener to listen for revoke event
+     */
     public void revoke(@NonNull AccessToken accessToken, final FRListener<Void> listener) {
         Logger.debug(TAG, "Revoking Access Token & Refresh Token");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
@@ -202,6 +235,41 @@ public class OAuth2Client {
         }
     }
 
+    /**
+     * End the user session with end session endpoint.
+     *
+     * @param idToken  The ID_TOKEN which associated with the user session.
+     * @param listener Listener to listen for end session event.
+     */
+    public void endSession(@NonNull String idToken, FRListener<Void> listener) {
+
+        okhttp3.Request request = null;
+        try {
+            request = new okhttp3.Request.Builder()
+                    .url(getEndSessionUrl(clientId, idToken))
+                    .get()
+                    .tag(END_SESSION)
+                    .build();
+        } catch (MalformedURLException e) {
+            Listener.onException(listener, e);
+            return;
+        }
+
+        final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
+        getOkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Listener.onException(listener, e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                handler.handleRevokeResponse(response, listener);
+            }
+        });
+    }
+
     private OkHttpClient getOkHttpClient() {
         if (okHttpClient == null) {
             okHttpClient = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -212,15 +280,26 @@ public class OAuth2Client {
     /**
      * Sends an token request to the authorization service.
      *
-     * @param sessionToken The Session Token
-     * @param code         The Authorization code.
-     * @param pkce         The Proof Key for Code Exchange
-     * @param handler      Handle changes resulting from OAuth endpoints.
+     * @param sessionToken         The Session Token
+     * @param code                 The Authorization code.
+     * @param pkce                 The Proof Key for Code Exchange
+     * @param additionalParameters Additional parameters for inclusion in the token endpoint
+     *                             request
+     * @param handler              Handle changes resulting from OAuth endpoints.
      */
-    private void token(@NonNull SSOToken sessionToken, @NonNull String code, final PKCE pkce, final OAuth2ResponseHandler handler, final FRListener<AccessToken> listener) {
+    public void token(@Nullable SSOToken sessionToken,
+                      @NonNull String code,
+                      final PKCE pkce,
+                      final Map<String, String> additionalParameters,
+                      final OAuth2ResponseHandler handler,
+                      final FRListener<AccessToken> listener) {
         Logger.debug(TAG, "Exchange Access Token with Authorization Code");
         try {
             FormBody.Builder builder = new FormBody.Builder();
+
+            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+                builder.add(entry.getKey(), entry.getValue());
+            }
 
             RequestBody body = builder
                     .add(OAuth2.CLIENT_ID, clientId)
@@ -246,7 +325,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleTokenResponse(sessionToken, response, listener);
+                    handler.handleTokenResponse(sessionToken, response, null, listener);
                 }
 
             });
@@ -256,15 +335,10 @@ public class OAuth2Client {
         }
     }
 
-    private URL getAuthorizeUrl(Token token, PKCE pkce) throws MalformedURLException, UnsupportedEncodingException {
-        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
-        if (isNotEmpty(serverConfig.getAuthorizeEndpoint())) {
-            builder.appendEncodedPath(serverConfig.getAuthorizeEndpoint());
-        } else {
-            builder.appendPath("oauth2")
-                    .appendPath("realms")
-                    .appendPath(serverConfig.getRealm())
-                    .appendPath("authorize");
+    private URL getAuthorizeUrl(Token token, PKCE pkce, Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
+        Uri.Builder builder = Uri.parse(getAuthorizeUrl().toString()).buildUpon();
+        for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+            builder.appendQueryParameter(entry.getKey(), entry.getValue());
         }
         return new URL(builder
                 .appendQueryParameter(serverConfig.getCookieName(), token.getValue())
@@ -277,7 +351,20 @@ public class OAuth2Client {
                 .build().toString());
     }
 
-    private URL getTokenUrl() throws MalformedURLException {
+    URL getAuthorizeUrl() throws MalformedURLException {
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getAuthorizeEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getAuthorizeEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("authorize");
+        }
+        return new URL(builder.build().toString());
+    }
+
+    URL getTokenUrl() throws MalformedURLException {
         Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
         if (isNotEmpty(serverConfig.getTokenEndpoint())) {
             builder.appendEncodedPath(serverConfig.getTokenEndpoint());
@@ -290,7 +377,7 @@ public class OAuth2Client {
         return new URL(builder.build().toString());
     }
 
-    private URL getRevokeUrl() throws MalformedURLException {
+    URL getRevokeUrl() throws MalformedURLException {
 
         Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
         if (isNotEmpty(serverConfig.getRevokeEndpoint())) {
@@ -304,6 +391,24 @@ public class OAuth2Client {
         }
         return new URL(builder.build().toString());
     }
+
+    URL getEndSessionUrl(String clientId, String idToken) throws MalformedURLException {
+
+        Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
+        if (isNotEmpty(serverConfig.getEndSessionEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getEndSessionEndpoint());
+        } else {
+            builder.appendPath("oauth2")
+                    .appendPath("realms")
+                    .appendPath(serverConfig.getRealm())
+                    .appendPath("connect")
+                    .appendPath("endSession");
+        }
+        builder.appendQueryParameter("id_token_hint", idToken);
+        builder.appendQueryParameter("client_id", clientId);
+        return new URL(builder.build().toString());
+    }
+
 
     private PKCE generateCodeChallenge() throws UnsupportedEncodingException {
         int encodeFlags = Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE;

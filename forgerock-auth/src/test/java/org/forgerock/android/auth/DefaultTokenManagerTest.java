@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,6 +11,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.forgerock.android.auth.exception.InvalidGrantException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -199,6 +200,40 @@ public class DefaultTokenManagerTest extends BaseTest {
     }
 
     @Test
+    public void testTokenRefreshWithNotIssueNewRefreshToken() throws Throwable {
+
+        enqueue("/authenticate_without_refreshToken.json", HttpURLConnection.HTTP_OK);
+
+        TokenManager tokenManager = DefaultTokenManager.builder()
+                .sharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE))
+                .oAuth2Client(oAuth2Client)
+                .threshold(0L)
+                .context(context).build();
+
+        //Existing access token with refresh token
+        AccessToken accessToken = AccessToken.builder()
+                .value("access token")
+                .idToken("id token")
+                .scope(AccessToken.Scope.parse("openid test"))
+                .tokenType("Bearer")
+                .refreshToken("refresh token")
+                .expiresIn(1)
+                .sessionToken(new SSOToken("dummy"))
+                .build();
+
+        tokenManager.persist(accessToken);
+
+        AccessToken storedAccessToken1 = getAccessToken(tokenManager);
+        Thread.sleep(1000);
+        AccessToken storedAccessToken2 = getAccessToken(tokenManager);
+
+        assertNotEquals(storedAccessToken1.getValue(), storedAccessToken2.getValue());
+        assertEquals("Refreshed Token", storedAccessToken2.getValue());
+        assertEquals("refresh token", storedAccessToken2.getRefreshToken());
+    }
+
+
+    @Test
     public void testTokenRefreshWithThreshold() throws Throwable {
 
         enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK);
@@ -233,7 +268,7 @@ public class DefaultTokenManagerTest extends BaseTest {
         assertNotEquals(accessToken.getValue(), storedAccessToken2.getValue());
     }
 
-    @Test(expected = AuthenticationRequiredException.class)
+    @Test(expected = InvalidGrantException.class)
     public void testTokenRefreshWithException() throws Throwable {
 
         server.enqueue(new MockResponse()

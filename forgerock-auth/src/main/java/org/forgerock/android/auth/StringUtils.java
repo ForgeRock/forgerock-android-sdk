@@ -19,9 +19,20 @@ class StringUtils {
      * Determines if the string is not empty.
      *
      * @param s string to test
-     * @return test if the specified string is not null and not empty (i.e. is greater than zero length).
+     * @return test if the specified string is not null and not empty.
      */
     static boolean isNotEmpty(final String s) {
         return (s != null && s.length() > 0);
     }
+
+    /**
+     * Determines if the string is empty.
+     *
+     * @param s string to test
+     * @return true if the specified string is null or zero length.
+     */
+    public static boolean isEmpty(final String s) {
+        return (s == null || s.length() == 0);
+    }
+
 }

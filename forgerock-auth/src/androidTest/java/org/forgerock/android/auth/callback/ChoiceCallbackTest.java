@@ -34,6 +34,8 @@ public class ChoiceCallbackTest extends TreeTest {
                 if (node.getCallback(ChoiceCallback.class) != null) {
                     ChoiceCallback callback = node.getCallback(ChoiceCallback.class);
                     assertThat(callback.getPrompt()).isEqualTo("Choice");
+                    assertThat(callback.getChoices()).containsExactly("Yes", "No");
+                    assertThat(callback.getDefaultChoice()).isEqualTo(0);
                     callback.setSelectedIndex(0);
                     node.next(context, this );
                     hit++;

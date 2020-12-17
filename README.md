@@ -1,4 +1,5 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ForgeRock/forgerock-android-sdk?color=%23f46200&label=Version&style=flat-square)](CHANGELOG.md)
+[![Build Status](https://jenkins.petrov.ca/buildStatus/icon?job=Android-SDK&style=flat-square)](https://jenkins.petrov.ca/job/Android-SDK/)
 
 <p align="center">
   <a href="https://github.com/ForgeRock">
@@ -28,7 +29,7 @@ Use the SDKs to leverage _[Intelligent Authentication](https://www.forgerock.com
     * Access Management (AM) 6.5.2+
 
 * Android API level 21+
-    * Android 5.0 (Lollipop), 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0
+    * Android 5.0 (Lollipop), 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- INSTALLATION - If you want to start quickly with minimal assistance. -->
@@ -65,7 +66,7 @@ To try out the ForgeRock Android SDK sample, perform these steps:
 
 Documentation for the SDKs is provided at **<https://sdks.forgerock.com>**, and includes topics such as:
 
-* Introducting the SDK Features
+* Introducing the SDK Features
 * Preparing AM for use with the SDKS
 * API Reference documentation
 
@@ -100,15 +101,14 @@ Be sure to check out our [Coding Style and Guidelines](https://wikis.forgerock.o
 
 ## Disclaimer
 
-> This code is provided on an “as is” basis, without warranty of any kind, to the fullest extent permitted by law.
->
-> ForgeRock does not warrant or guarantee the individual success developers may have in implementing the code on their development platforms or in production configurations.
->
-> ForgeRock does not warrant, guarantee or make any representations regarding the use, results of use, accuracy, timeliness or completeness of any data or information relating to this code.
->
-> ForgeRock disclaims all warranties, expressed or implied, and in particular, disclaims all warranties of merchantability, and warranties related to the code, or any service or software related thereto.
->
-> ForgeRock shall not be liable for any direct, indirect or consequential damages or costs of any type arising out of any action taken by you or others related to the code.
+> **This code is provided by ForgeRock on an “as is” basis, without warranty of any kind, to the fullest extent permitted by law. 
+>ForgeRock does not represent or warrant or make any guarantee regarding the use of this code or the accuracy, 
+>timeliness or completeness of any data or information relating to this code, and ForgeRock hereby disclaims all warranties whether express, 
+>or implied or statutory, including without limitation the implied warranties of merchantability, fitness for a particular purpose, 
+>and any warranty of non-infringement. ForgeRock shall not have any liability arising out of or related to any use, 
+>implementation or configuration of this code, including but not limited to use for any commercial purpose. 
+>Any action or suit relating to the use of the code may be brought only in the courts of a jurisdiction wherein 
+>ForgeRock resides or in which ForgeRock conducts its primary business, and under the laws of that jurisdiction excluding its conflict-of-law provisions.**
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- LICENSE - Links to the MIT LICENSE file in each repo. -->
