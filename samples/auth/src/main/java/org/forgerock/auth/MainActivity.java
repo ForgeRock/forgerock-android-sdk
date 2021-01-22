@@ -277,7 +277,9 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     if (FRSession.getCurrentSession() != null) {
-                        put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
+                        if (FRSession.getCurrentSession().getSessionToken() != null) {
+                            put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
+                        }
                     }
                 }
 
