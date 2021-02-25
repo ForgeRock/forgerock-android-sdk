@@ -20,7 +20,6 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         release {
@@ -29,6 +28,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
+        }
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('../debug.jks')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
         }
     }
 
@@ -57,10 +65,11 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.google.android.gms:play-services-location:17.1.0'
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'com.google.android.gms:play-services-safetynet:17.0.0'
     implementation 'net.openid:appauth:0.7.1'
+    implementation 'com.google.android.gms:play-services-fido:18.1.0'
+
     // JWT
     implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 

@@ -1,0 +1,43 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IndlYmF1dGhuIiwib3RrIjoicXN1dTA0anNxZ2hmcGpubjFiM2IxdDh0NTQiLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU214aWJVMXBUMmxLUWsxVVNUUlJNRXBFVEZWb1ZFMXFWVEpKYVhkcFdWZDRia2xxYjJsYVIyeDVTVzR3TGk0M01qbDZSRXhsU0hwM1pXbFVPRll6VDB4cFgycEJMbGxpV1Y5WVl6WTJPVWxJU0MxT01VTk5Va05MZVROdFZFaHliVlJSVDJoV2VVSTBUVUUzYUVoRmFISjFTRU5SVWpWeWVsQnRZVzFpYlRNeFFqQlhSMlZxVEU5allUWllWMEUwTVROSlozRnVXV2gwV0hadlRHaE9VMkpDYUdkUlJFaGFSV1pLVmxaeWNsOTBTRUpJU1Y5elIyMVhNMEZYWm5wTk9WZElXblJMTm10ZmFITm9hemRNUTBkSVkwbzVhVGQ2Wnpob2FUbFROVm8wTVVkbk1rZFpXSFJJTnpoWlRGOVVaVTl5VWtOc1ozTlBkbDlWTWpGRFJ6STBReTFMWVRJNVMxRm9ibFYwTTNCVlozWldiamRCVUhWdWRFdEdaR2h6VERselJ6QlBTVnAwYzNoV1NqTXRPVmc1TmpSM2VrVldSV2w2Vnprek9XNTRlVm94VjNWVVgzWmpTRzFFV2t4eE0yWTJXamswVlVWTU5VNDJjMjVMTWs5U01XeDBOR3BrVld3eWVVMVRaVXR6YzJkb2VIRmlNMnhoZW1WQlVtMDBWM3BUVld4c1JFUTRVVVJuWDNoSFozSktlVmhQZWxCa1RWUnZYeTB0U1c0MFkxVjBTeloxTVdWSVkxOWhZbkZLTlhsRVpWcEpaM04yYkU5eE5qVTJkVU5KV0dzNU9GbElWMHBEWkhSR1MzcGtWV1k1ZG0xNlJIWk9iMmxXTlZnd2RXd3hiRzlTV0dOaFZtTkhVMDlaTlVGNFdITkJkSGd5UVhkVlVXUnViR0pmYTJodWN5MUhXblowZUVOM1lYRldlR2h1T1RsdVVWY3ljWFphUjNCTk1raFVPRzFMYUU5SVIyOVJOQzFWVkZrNVVWbDBNbGcwZGpaZlQzSk5kemxUZEdwSVl6RnRjMTkxVTI1VWVtVmpUR2RYUkVZdFVFNXNVM0J1Ymkxc1EyRlljRXREVmxsS1FVeDVUbWhoWDBJeGQwNTRSRzV0WW5vNVdYVjFXakZMYzFWTkxVZHJjVlJZYkY5c2JqUlBMVEpXVUhoTVFYSjFVblZOZW0xaVgxQndRMjlqY1d4T1Z6Sm1jWHBPV25seVlteE9RVEZXUkdaM04yYzJNMnhmTkhvd05UWkhlRXhOVjBOck5rOTZVQzFMY1RJMVlXTmxSa0ZQWWpGd1JtMXBkVGgzWW5kUGVITmtZa0ZLVW0xSWMxVlJWVzlQWm5aQlpURldORmcyUW5veGNFeG9SV3d0UzNGblkwMDBjMjluYTFab1YyRkhZWFpyVFUxSVFTNVlWRVpOV1d4R2F6bHFSV1V5VG5CamFIZDVZVzVuLmYyS2t1RlhnM05MUU1NbGNnMU1HU2Y2YTZQVmdJalhtUC1wcmJhQTNtTnciLCJleHAiOjE2MTM0OTc0OTksImlhdCI6MTYxMzQ5NzE5OX0.EuDmsY3C6I6vc_x7KlkW4rSQJY1FWevbGGmxkSu4HVU",
+  "callbacks": [
+    {
+      "type": "MetadataCallback",
+      "output": [
+        {
+          "name": "data",
+          "value": {
+            "_action": "webauthn_authentication",
+            "challenge": "qnMsxgya8h6mUc6OyRu8jJ6Oq16tHV3cgE7juXGMDbg=",
+            "allowCredentials": "",
+            "_allowCredentials": [],
+            "timeout": "60000",
+            "userVerification": "preferred",
+            "relyingPartyId": "rpId: \"humorous-cuddly-carrot.glitch.me\",",
+            "_relyingPartyId": "humorous-cuddly-carrot.glitch.me",
+            "_type": "WebAuthn"
+          }
+        }
+      ]
+    },
+    {
+      "type": "HiddenValueCallback",
+      "output": [
+        {
+          "name": "value",
+          "value": "false"
+        },
+        {
+          "name": "id",
+          "value": "webAuthnOutcome"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken2",
+          "value": "webAuthnOutcome"
+        }
+      ]
+    }
+  ]
+}

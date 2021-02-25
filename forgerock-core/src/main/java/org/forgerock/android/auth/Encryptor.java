@@ -61,4 +61,20 @@ public interface Encryptor {
         }
     }
 
+    @SuppressLint("NewApi")
+    static Encryptor getEncryptor(Context context, String keyAlias, KeyUpdatedListener listener) {
+        switch (Build.VERSION.SDK_INT) {
+            case Build.VERSION_CODES.M:
+                return new AndroidMEncryptor(keyAlias, listener);
+            case Build.VERSION_CODES.N:
+            case Build.VERSION_CODES.N_MR1:
+            case Build.VERSION_CODES.O:
+            case Build.VERSION_CODES.O_MR1:
+                return new AndroidNEncryptor(keyAlias, listener);
+            default:
+                return new AndroidPEncryptor(context, keyAlias, listener);
+        }
+    }
+
+
 }

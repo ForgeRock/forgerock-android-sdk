@@ -352,8 +352,9 @@ public class MainActivity extends AppCompatActivity {
         FRUser.browser().appAuthConfigurer()
                 .authorizationRequest(r -> {
                     Map<String, String> additionalParameters = new HashMap<>();
-                    additionalParameters.put("acr_values", "exampletree");
+                    additionalParameters.put("service", "Simple");
                     additionalParameters.put("KEY2", "VALUE2");
+                    r.setAdditionalParameters(additionalParameters);
                     //r.setLoginHint("login");
                     //r.setPrompt("login");
                 })

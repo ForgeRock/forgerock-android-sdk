@@ -59,6 +59,8 @@ public class CallbackFragmentFactory {
         register(ReCaptchaCallback.class, ReCaptchaCallbackFragment.class);
         register(ConsentMappingCallback.class, ConsentMappingCallbackFragment.class);
         register(DeviceProfileCallback.class, DeviceProfileCallbackFragment.class);
+        register(WebAuthnRegistrationCallback.class, WebAuthnRegistrationCallbackFragment.class);
+        register(WebAuthnAuthenticationCallback.class, WebAuthnAuthenticationCallbackFragment.class);
     }
 
     public static CallbackFragmentFactory getInstance() {

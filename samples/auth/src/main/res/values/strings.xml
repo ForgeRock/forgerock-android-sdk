@@ -16,7 +16,6 @@
     <string name="register">Register</string>
     <string name="authenticate">Authenticate</string>
 
-
     <!--  ForgeRock SDK Configuration -->
 
     <!-- OAuth -->
@@ -30,7 +29,7 @@
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">http://openam.example.com:8081/openam</string>
+    <string name="forgerock_url" translatable="false">http://192.168.1.83:8081/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
@@ -40,8 +39,12 @@
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
 
     <!-- Service -->
-    <string name="forgerock_auth_service" translatable="false">Test</string>
+    <string name="forgerock_auth_service" translatable="false">webauthn</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
+
+    <string name="asset_statements" translatable="false">           [{
+             "include": "https://your-host/.well-known/assetlinks.json"
+           }]</string>
 
     <!-- End of SDK Configuration -->
 

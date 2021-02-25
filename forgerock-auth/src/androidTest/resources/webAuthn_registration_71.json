@@ -1,0 +1,64 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IndlYmF1dGhuIiwib3RrIjoiZ2IyOWE2ZWN2M3BrZWNpcTdmcWp0c3BjdW0iLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU214aWJVMXBUMmxLUWsxVVNUUlJNRXBFVEZWb1ZFMXFWVEpKYVhkcFdWZDRia2xxYjJsYVIyeDVTVzR3TGk1ZmVXZFlNVXh6YzI1M1NXVlVOR2xUU1d0T01VOVJMbkpoWVRSWGJuaFlRMWd4WDBseExYQnhZV1JrWWxkRlExUXhTWFpxV1ZoemFXdFBRbDk1WVhOZldsWTNVa3RCWTFGQ1RWSlRZbGwzYXpKMWJFUlllVEJSYVhoeFR6TlZabTFKVDFkc1REVXlTRVJHVUdsbFZqRlllbmxpZVc1VlpXMVpWSEkxTlVGVVZuSnZla2hPVjFGZlZrNVlaMWR3UkZGZk5YVlRPRlZ5TjIxUU0wVmxlakZFVVZkRU5tNXRWVTV5Y3pseWRDMWtZVEUyT1U1WFVXUjFhbTlQZW5jNVgxRlJjMU5ZWjNVM1lubEhRbFJUYVZoa2RGVmFURkp1VlhkcVIzWnpOMnhCTFZKalZFaEdORmxUWkV0a05tNUlVV1JCYzJaZlUwUjNSMlZQY3poMldqRkNRbkV4ZFhGUlVFNUhaekpmUjBSR1RIcEJSVE5xZVhodVFVaFZUMHh1UTJoa1l6RnhkRmhPTWxKSGNHNUxjRUZRVkRoaWJuaDJiVkppYkROV1gwSlpVblpzWm5kb1VIb3lNVTVrYWpGVWMwcFBTbUo2Um05R2VtZDRNR2ROYVdWTFJYSlhZbkozYzFSVmQydG9jRkZNVEVaWmR5MDRkRTl1TkZBeVNXMUdUbmxUYW5wRE9XOTVXbEU0TUVkSVRUSkJhak0xUmxOMkxXZE5aVXQyY0ZCYVZYTk9XbDkxUkhSQldUWTNjMU5vU1dGQlZXeHFWRVZhVlVaalIzYzFNa3BoVkRGSGRHZHlUMVl5VkZSM2VHdFNUREV6TFd0QldWRTVlbE0yTTJveU0wODViWGhXZW1kd01qaGljVXBHT0dZME1sSlZjbDkyYVU5all6UXhSMVptWTNsclRUWnVhV1ZsUjNKb01UaDRXWFpWYldNM05URnZTRXQxZWpSMUxYUlFkREZ2YTBZdGIxcGpkWEI0YWxKemRsTmphRUZpZFRScVRWZHpNemxZUzNWSWQzTjNjRk54VVhBMmQyTmpibkJTTkVGcmVYaGFkUzFoVFdVNFowd3lkbVZJVVZCUldtSlFNMU5TUjBwMmNHNVJTVlZ5VERsTE1uTjBkVVpNWDNFMk9HNXdVWEYxWm5GdE9YaGljSHBJWVROclkwWkNZMTgwU21aTmVtcHNVRGRXVm0xaVYxQXplR2RPUkVWak1sRk5ka1pPYWxkMldrWmthVzlhY0Vod2FFUmtWMk5ST1dGWk0ydHVSRVJoTFV4T2RHVTJlbk51V0ZsS1kwZzVRVTl1Umt0UFdtOU9Rak5pWVV0QmRGSTRhSEEyUWxaQ1ZGRTVSRmxXVVhsUmIxTndaeTQ1VERaNWVGQmllR2RQTXpjeWVWaDVYMk5GWkUxbi5VQ2RWZ242TFVOV1Ayd3NERjFmcjRycGlBT2xhMlU4UnZnUEJwNlk2MjNFIiwiZXhwIjoxNjEzMDAxNjc5LCJpYXQiOjE2MTMwMDEzNzl9.k0v9vBdNIXtqSCxfyq69BQZKE4-cqJ3GJNXhuUwxV-g",
+  "callbacks": [
+    {
+      "type": "MetadataCallback",
+      "output": [
+        {
+          "name": "data",
+          "value": {
+            "_action": "webauthn_registration",
+            "challenge": "xBfeBPjRV09Suy4eoY5rCpsCFp+6mZX0J0N83Ar+Xpc=",
+            "attestationPreference": "none",
+            "userName": "e24f0d7c-a9d5-4a3f-a002-6f808210a8a3",
+            "userId": "ZTI0ZjBkN2MtYTlkNS00YTNmLWEwMDItNmY4MDgyMTBhOGEz",
+            "relyingPartyName": "ForgeRock",
+            "authenticatorSelection": "{\"userVerification\":\"preferred\",\"authenticatorAttachment\":\"platform\",\"requireResidentKey\":true}",
+            "_authenticatorSelection": {
+              "userVerification": "preferred",
+              "authenticatorAttachment": "platform",
+              "requireResidentKey": true
+            },
+            "pubKeyCredParams": "[ { \"type\": \"public-key\", \"alg\": -7 }, { \"type\": \"public-key\", \"alg\": -257 } ]",
+            "_pubKeyCredParams": [
+              {
+                "type": "public-key",
+                "alg": -7
+              },
+              {
+                "type": "public-key",
+                "alg": -257
+              }
+            ],
+            "timeout": "60000",
+            "excludeCredentials": "",
+            "_excludeCredentials": [],
+            "displayName": "e24f0d7c-a9d5-4a3f-a002-6f808210a8a3",
+            "relyingPartyId": "id: \"humorous-cuddly-carrot.glitch.me\",",
+            "_relyingPartyId": "humorous-cuddly-carrot.glitch.me",
+            "_type": "WebAuthn"
+          }
+        }
+      ]
+    },
+    {
+      "type": "HiddenValueCallback",
+      "output": [
+        {
+          "name": "value",
+          "value": "false"
+        },
+        {
+          "name": "id",
+          "value": "webAuthnOutcome"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken2",
+          "value": "webAuthnOutcome"
+        }
+      ]
+    }
+  ]
+}
