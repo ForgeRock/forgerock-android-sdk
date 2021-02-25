@@ -15,7 +15,7 @@ import org.forgerock.android.auth.FRListener;
 import java.util.List;
 
 /**
- * A Selector credential key selection.
+ * A Selector for credential key selection.
  */
 public interface WebAuthnKeySelector {
 

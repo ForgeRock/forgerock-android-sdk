@@ -12,6 +12,7 @@ import android.content.Context;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -185,22 +186,33 @@ public class WebAuthnAuthenticationCallback extends MetadataCallback {
 
     /**
      * Perform WebAuthn Authentication
-     * @param fragment The current Fragment
-     * @param node The Node returned from AM
+     *
+     * @param fragment The current Fragment that handle this callback.
+     * @param node     The Node returned from AM.
+     * @param selector The selector to select which credential key to use. Apply to Username-less only.
      * @param listener Listener
      */
-    public void authenticate(@NonNull Fragment fragment, Node node,
+    public void authenticate(@NonNull Fragment fragment, @NonNull Node node,
+                             @Nullable WebAuthnKeySelector selector,
                              FRListener<Void> listener) {
-        authenticate(fragment.getContext(), fragment.getFragmentManager(), node, listener);
+        authenticate(fragment.getContext(),
+                fragment.getFragmentManager(), node, selector, listener);
     }
 
-    public void authenticate(@NonNull FragmentActivity fragmentActivity, Node node,
+    /**
+     * Perform WebAuthn Authentication
+     *
+     * @param fragmentActivity The current FragmentActivity that handle this callback
+     * @param node             The Node returned from AM
+     * @param selector         The selector to select which credential key to use. Apply to Username-less only.
+     * @param listener         Listener
+     */
+    public void authenticate(@NonNull FragmentActivity fragmentActivity,
+                             @NonNull Node node,
+                             @Nullable WebAuthnKeySelector selector,
                              FRListener<Void> listener) {
-        authenticate(fragmentActivity.getApplicationContext(), fragmentActivity.getSupportFragmentManager(), node, listener);
-    }
-
-    protected WebAuthnKeySelector getWebAuthnKeySelector() {
-        return WebAuthnKeySelector.DEFAULT;
+        authenticate(fragmentActivity.getApplicationContext(),
+                fragmentActivity.getSupportFragmentManager(), node, selector, listener);
     }
 
     protected WebAuthnAuthentication getWebAuthnAuthentication() throws JSONException {
@@ -208,36 +220,41 @@ public class WebAuthnAuthenticationCallback extends MetadataCallback {
     }
 
     private void authenticate(@NonNull Context context, @NonNull FragmentManager fragmentManager,
-                              @NonNull Node node, FRListener<Void> listener) {
+                              @NonNull Node node, WebAuthnKeySelector selector,
+                              FRListener<Void> listener) {
         try {
             HiddenValueCallback hiddenValueCallback = findHiddenValueCallback(node);
 
+            if (selector == null) {
+                selector = WebAuthnKeySelector.DEFAULT;
+            }
+
             getWebAuthnAuthentication().authenticate(context, fragmentManager,
-                    getWebAuthnKeySelector(), new WebAuthnListener() {
-                @Override
-                public void onSuccess(String result) {
-                    hiddenValueCallback.setValue(result);
-                    Listener.onSuccess(listener, null);
-                }
+                    selector, new WebAuthnListener() {
+                        @Override
+                        public void onSuccess(String result) {
+                            hiddenValueCallback.setValue(result);
+                            Listener.onSuccess(listener, null);
+                        }
 
-                @Override
-                public void onException(WebAuthnResponseException e) {
-                    hiddenValueCallback.setValue(e.toServerError());
-                    Listener.onException(listener, e);
-                }
+                        @Override
+                        public void onException(WebAuthnResponseException e) {
+                            hiddenValueCallback.setValue(e.toServerError());
+                            Listener.onException(listener, e);
+                        }
 
-                @Override
-                public void onUnsupported(WebAuthnResponseException e) {
-                    hiddenValueCallback.setValue("unsupported");
-                    Listener.onException(listener, e);
-                }
+                        @Override
+                        public void onUnsupported(WebAuthnResponseException e) {
+                            hiddenValueCallback.setValue("unsupported");
+                            Listener.onException(listener, e);
+                        }
 
-                @Override
-                public void onException(Exception e) {
-                    hiddenValueCallback.setValue("ERROR::UnknownError:" + e.getMessage());
-                    Listener.onException(listener, e);
-                }
-            });
+                        @Override
+                        public void onException(Exception e) {
+                            hiddenValueCallback.setValue("ERROR::UnknownError:" + e.getMessage());
+                            Listener.onException(listener, e);
+                        }
+                    });
         } catch (Exception e) {
             Listener.onException(listener, e);
         }

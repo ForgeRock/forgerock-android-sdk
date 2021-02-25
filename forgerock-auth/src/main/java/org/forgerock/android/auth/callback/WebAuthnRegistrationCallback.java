@@ -131,11 +131,25 @@ public class WebAuthnRegistrationCallback extends MetadataCallback {
         return "WebAuthnRegistrationCallback";
     }
 
+    /**
+     * Perform WebAuthn Registration.
+     *
+     * @param fragment The current {@link Fragment} that handle this callback
+     * @param node     The Node returned from AM
+     * @param listener Listener to listen for WebAuthn Registration Event
+     */
     public void register(@NonNull Fragment fragment, Node node,
                          FRListener<Void> listener) {
         register(fragment.getContext(), fragment.getFragmentManager(), node, listener);
     }
 
+    /**
+     * Perform WebAuthn Registration.
+     *
+     * @param fragmentActivity The current {@link FragmentActivity} that handle this callback
+     * @param node     The Node returned from AM
+     * @param listener Listener to listen for WebAuthn Registration Event
+     */
     public void register(@NonNull FragmentActivity fragmentActivity, Node node,
                          FRListener<Void> listener) {
         register(fragmentActivity.getApplicationContext(), fragmentActivity.getSupportFragmentManager(), node, listener);
@@ -153,30 +167,30 @@ public class WebAuthnRegistrationCallback extends MetadataCallback {
             getWebAuthnRegistration().register(context,
                     fragmentManager,
                     new WebAuthnListener() {
-                @Override
-                public void onSuccess(String result) {
-                    hiddenValueCallback.setValue(result);
-                    Listener.onSuccess(listener, null);
-                }
+                        @Override
+                        public void onSuccess(String result) {
+                            hiddenValueCallback.setValue(result);
+                            Listener.onSuccess(listener, null);
+                        }
 
-                @Override
-                public void onException(WebAuthnResponseException e) {
-                    hiddenValueCallback.setValue(e.toServerError());
-                    Listener.onException(listener, e);
-                }
+                        @Override
+                        public void onException(WebAuthnResponseException e) {
+                            hiddenValueCallback.setValue(e.toServerError());
+                            Listener.onException(listener, e);
+                        }
 
-                @Override
-                public void onUnsupported(WebAuthnResponseException e) {
-                    hiddenValueCallback.setValue("unsupported");
-                    Listener.onException(listener, e);
-                }
+                        @Override
+                        public void onUnsupported(WebAuthnResponseException e) {
+                            hiddenValueCallback.setValue("unsupported");
+                            Listener.onException(listener, e);
+                        }
 
-                @Override
-                public void onException(Exception e) {
-                    hiddenValueCallback.setValue("ERROR::UnknownError:" + e.getMessage());
-                    Listener.onException(listener, e);
-                }
-            });
+                        @Override
+                        public void onException(Exception e) {
+                            hiddenValueCallback.setValue("ERROR::UnknownError:" + e.getMessage());
+                            Listener.onException(listener, e);
+                        }
+                    });
         } catch (Exception e) {
             Listener.onException(listener, e);
         }
