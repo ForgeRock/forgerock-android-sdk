@@ -34,7 +34,7 @@ public class WebAuthnAuthenticationCallbackFragment extends CallbackFragment<Web
         View view = inflater.inflate(R.layout.fragment_webauthn_authentication_callback, container, false);
         progressBar = view.findViewById(R.id.progress);
 
-        callback.authenticate(this, node, null, new FRListener<Void>() {
+        callback.authenticate(node, null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 progressBar.setVisibility(View.GONE);

@@ -37,7 +37,7 @@ public class WebAuthnRegistrationCallbackFragment extends CallbackFragment<WebAu
         View view = inflater.inflate(R.layout.fragment_webauthn_registration_callback, container, false);
         progressBar = view.findViewById(R.id.progress);
 
-        callback.register(this, node, new FRListener<Void>() {
+        callback.register(node, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 progressBar.setVisibility(GONE);

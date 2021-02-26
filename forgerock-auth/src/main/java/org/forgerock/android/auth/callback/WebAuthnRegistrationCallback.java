@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.InitProvider;
 import org.forgerock.android.auth.Listener;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.exception.WebAuthnResponseException;
@@ -144,14 +145,15 @@ public class WebAuthnRegistrationCallback extends MetadataCallback {
     }
 
     /**
-     * Perform WebAuthn Registration.
+     * Perform WebAuthn Registration with the current Activity, the Activity has to be of type
+     * {@link FragmentActivity}
      *
-     * @param fragmentActivity The current {@link FragmentActivity} that handle this callback
      * @param node     The Node returned from AM
      * @param listener Listener to listen for WebAuthn Registration Event
      */
-    public void register(@NonNull FragmentActivity fragmentActivity, Node node,
+    public void register(Node node,
                          FRListener<Void> listener) {
+        FragmentActivity fragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity();
         register(fragmentActivity.getApplicationContext(), fragmentActivity.getSupportFragmentManager(), node, listener);
     }
 

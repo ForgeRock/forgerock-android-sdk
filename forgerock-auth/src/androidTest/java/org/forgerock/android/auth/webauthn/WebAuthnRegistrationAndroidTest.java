@@ -86,7 +86,7 @@ public class WebAuthnRegistrationAndroidTest extends WebAuthnTest {
         FRSession.authenticate(context, "", nodeListenerFuture);
         latch.await();
 
-        callback[0].register(activityRule.getActivity(), node[0], new FRListener<Void>() {
+        callback[0].register(node[0], new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 node[0].next(context, nodeListenerFuture);
@@ -144,7 +144,7 @@ public class WebAuthnRegistrationAndroidTest extends WebAuthnTest {
         latch.await();
 
         CountDownLatch registerlatch = new CountDownLatch(1);
-        callback[0].register(activityRule.getActivity(), node[0], new FRListener<Void>() {
+        callback[0].register(node[0], new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 registerlatch.countDown();
@@ -205,7 +205,7 @@ public class WebAuthnRegistrationAndroidTest extends WebAuthnTest {
         latch.await();
 
         CountDownLatch registerlatch = new CountDownLatch(1);
-        callback[0].register(activityRule.getActivity(), node[0], new FRListener<Void>() {
+        callback[0].register(node[0], new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 registerlatch.countDown();

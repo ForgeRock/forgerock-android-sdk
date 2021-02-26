@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.InitProvider;
 import org.forgerock.android.auth.Listener;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.exception.WebAuthnResponseException;
@@ -200,17 +201,17 @@ public class WebAuthnAuthenticationCallback extends MetadataCallback {
     }
 
     /**
-     * Perform WebAuthn Authentication
+     * Perform WebAuthn Authentication with the current Activity, the Activity has to be of type
+     * {@link FragmentActivity}
      *
-     * @param fragmentActivity The current FragmentActivity that handle this callback
      * @param node             The Node returned from AM
      * @param selector         The selector to select which credential key to use. Apply to Username-less only.
      * @param listener         Listener
      */
-    public void authenticate(@NonNull FragmentActivity fragmentActivity,
-                             @NonNull Node node,
+    public void authenticate(@NonNull Node node,
                              @Nullable WebAuthnKeySelector selector,
                              FRListener<Void> listener) {
+        FragmentActivity fragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity();
         authenticate(fragmentActivity.getApplicationContext(),
                 fragmentActivity.getSupportFragmentManager(), node, selector, listener);
     }
