@@ -11,6 +11,10 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
 
+
+/**
+ * Dummy activity for Testing
+ */
 public class DummyActivity extends FragmentActivity {
 
     @Override

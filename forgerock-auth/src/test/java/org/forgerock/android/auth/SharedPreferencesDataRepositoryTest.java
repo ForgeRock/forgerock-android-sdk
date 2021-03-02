@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import android.content.SharedPreferences;
 
+/**
+ * Test class for SharedPreferenceDataRepository
+ */
 public class SharedPreferencesDataRepositoryTest extends DataRepositoryTest {
 
     @Override

@@ -12,14 +12,32 @@ package org.forgerock.android.auth.exception;
  */
 public class WebAuthnException extends Exception {
 
+    /**
+     * Constructs a new exception with the specified detail message.
+     *
+     * @param message the detail message.
+     */
     public WebAuthnException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new exception with the specified detail message and
+     * cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     * @since 1.4
+     */
     public WebAuthnException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param cause the cause
+     */
     public WebAuthnException(Throwable cause) {
         super(cause);
     }

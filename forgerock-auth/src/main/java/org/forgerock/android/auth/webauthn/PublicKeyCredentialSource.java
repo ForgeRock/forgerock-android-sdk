@@ -25,6 +25,9 @@ import lombok.Getter;
 
 import static com.google.android.gms.fido.common.Transport.INTERNAL;
 
+/**
+ * Representation of Public Key Credential Source that received after WebAuthn registration.
+ */
 @Getter
 public class PublicKeyCredentialSource implements Parcelable {
 
@@ -71,6 +74,11 @@ public class PublicKeyCredentialSource implements Parcelable {
         }
     };
 
+    /**
+     * Convert {@link PublicKeyCredentialSource} to {@link JSONObject}
+     *
+     * @return The result JSONObject
+     */
     public JSONObject toJson() {
         JSONObject result = new JSONObject();
         try {
@@ -87,6 +95,11 @@ public class PublicKeyCredentialSource implements Parcelable {
         }
     }
 
+    /**
+     * Convert {@link PublicKeyCredentialSource} to {@link PublicKeyCredentialDescriptor}
+     *
+     * @return The result {@link PublicKeyCredentialDescriptor}
+     */
     public PublicKeyCredentialDescriptor toDescriptor() {
         try {
             return new PublicKeyCredentialDescriptor(
@@ -98,7 +111,12 @@ public class PublicKeyCredentialSource implements Parcelable {
         }
     }
 
-
+    /**
+     * Convert {@link JSONObject} to {@link PublicKeyCredentialSource}
+     *
+     * @param jsonObject The json object to be converted
+     * @return The result PublicKeyCredentialSource
+     */
     public static PublicKeyCredentialSource fromJson(JSONObject jsonObject) {
         try {
             return PublicKeyCredentialSource.builder()

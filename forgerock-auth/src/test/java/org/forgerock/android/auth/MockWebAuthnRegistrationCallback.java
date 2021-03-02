@@ -21,6 +21,9 @@ import org.forgerock.android.auth.webauthn.WebAuthnRegistration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * For WebAuthnRegistration Testing
+ */
 public class MockWebAuthnRegistrationCallback extends WebAuthnRegistrationCallback {
 
     public MockWebAuthnRegistrationCallback() {

@@ -21,12 +21,23 @@ public class WebAuthnResponseException extends Exception {
     private final ErrorCode errorCode;
     private final int errorCodeAsInt;
 
+    /**
+     * Constructs a new exception with the specified {@link AuthenticatorErrorResponse}
+     *
+     * @param authenticatorErrorResponse the AuthenticatorErrorResponse
+     */
     public WebAuthnResponseException(AuthenticatorErrorResponse authenticatorErrorResponse) {
         super(authenticatorErrorResponse.getErrorMessage());
         this.errorCode = authenticatorErrorResponse.getErrorCode();
         this.errorCodeAsInt = authenticatorErrorResponse.getErrorCodeAsInt();
     }
 
+    /**
+     * Constructs a new exception with the specified {@link AuthenticatorErrorResponse}
+     *
+     * @param errorCode the ErrorCode
+     * @param message the detail message
+     */
     public WebAuthnResponseException(ErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;

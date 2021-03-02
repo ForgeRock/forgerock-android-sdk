@@ -40,6 +40,9 @@ public class WebAuthKeySelectionDialogFragment extends DialogFragment {
     private List<PublicKeyCredentialSource> sources;
     private FRListener<PublicKeyCredentialSource> listener;
 
+    /**
+     * Default Constructor to construct WebAuthKeySelectionDialogFragment
+     */
     public WebAuthKeySelectionDialogFragment() {
         // Required empty public constructor
     }

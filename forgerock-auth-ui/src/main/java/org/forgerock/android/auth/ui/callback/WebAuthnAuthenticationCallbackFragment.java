@@ -23,6 +23,9 @@ import org.forgerock.android.auth.ui.R;
 public class WebAuthnAuthenticationCallbackFragment extends CallbackFragment<WebAuthnAuthenticationCallback> {
     private ProgressBar progressBar;
 
+    /**
+     * Default constructor for WebAuthnAuthenticationCallbackFragment
+     */
     public WebAuthnAuthenticationCallbackFragment() {
         // Required empty public constructor
     }

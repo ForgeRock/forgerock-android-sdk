@@ -21,6 +21,9 @@ import org.junit.Before;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Mock of AM Server
+ */
 public abstract class MockServer {
 
     protected MockWebServer server;
@@ -38,7 +41,6 @@ public abstract class MockServer {
 
         Config.getInstance().init(context);
         Config.getInstance().setUrl(getUrl());
-
     }
 
     @After

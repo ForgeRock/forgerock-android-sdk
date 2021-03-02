@@ -26,6 +26,9 @@ public class WebAuthnRegistrationCallbackFragment extends CallbackFragment<WebAu
 
     private ProgressBar progressBar;
 
+    /**
+     * Default constructor for WebAuthnRegistrationCallbackFragment
+     */
     public WebAuthnRegistrationCallbackFragment() {
         // Required empty public constructor
     }

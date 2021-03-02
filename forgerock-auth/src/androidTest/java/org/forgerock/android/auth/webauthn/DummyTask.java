@@ -20,7 +20,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.concurrent.Executor;
 
 /**
- * Dummy Task for testing
+ * DummyTask that represent the result of {@link com.google.android.gms.fido.fido2.Fido2ApiClient}
  */
 public class DummyTask extends Task<PendingIntent> {
 

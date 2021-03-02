@@ -154,7 +154,6 @@ public class WebAuthnAuthentication extends WebAuthn {
         } else {
             authenticate(context, fragmentManager, listener, allowCredentials, null);
         }
-
     }
 
     @VisibleForTesting
@@ -207,8 +206,6 @@ public class WebAuthnAuthentication extends WebAuthn {
                 public void onException(Exception e) {
                     onWebAuthnException(listener, e);
                 }
-
-
             });
         }).addOnFailureListener(e -> onWebAuthnException(listener, e));
     }

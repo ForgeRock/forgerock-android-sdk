@@ -75,6 +75,11 @@ public class WebAuthnHeadlessRegistrationFragment extends Fragment {
         }
     }
 
+    /**
+     * Set the listener to listen for result event.
+     *
+     * @param listener The listener
+     */
     public void setListener(FRListener<AuthenticatorAttestationResponse> listener) {
         this.listener = listener;
     }
