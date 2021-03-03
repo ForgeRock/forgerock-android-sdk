@@ -146,7 +146,7 @@ import static org.forgerock.android.auth.webauthn.WebAuthn._TYPE;
 @NoArgsConstructor
 @Getter
 @TargetApi(24)
-public class WebAuthnAuthenticationCallback extends MetadataCallback {
+public class WebAuthnAuthenticationCallback extends MetadataCallback implements WebAuthnCallback {
 
     @Keep
     public WebAuthnAuthenticationCallback(JSONObject jsonObject, int index) {
@@ -224,38 +224,38 @@ public class WebAuthnAuthenticationCallback extends MetadataCallback {
                               @NonNull Node node, WebAuthnKeySelector selector,
                               FRListener<Void> listener) {
         try {
-            HiddenValueCallback hiddenValueCallback = findHiddenValueCallback(node);
-
             if (selector == null) {
                 selector = WebAuthnKeySelector.DEFAULT;
             }
-
             getWebAuthnAuthentication().authenticate(context, fragmentManager,
                     selector, new WebAuthnListener() {
                         @Override
                         public void onSuccess(String result) {
-                            hiddenValueCallback.setValue(result);
+                            setHiddenCallbackValue(node, result);
                             Listener.onSuccess(listener, null);
                         }
 
                         @Override
                         public void onException(WebAuthnResponseException e) {
-                            hiddenValueCallback.setValue(e.toServerError());
+                            setHiddenCallbackValue(node, e.toServerError());
                             Listener.onException(listener, e);
                         }
 
                         @Override
                         public void onUnsupported(WebAuthnResponseException e) {
-                            hiddenValueCallback.setValue("unsupported");
+                            setHiddenCallbackValue(node, "unsupported");
                             Listener.onException(listener, e);
                         }
 
                         @Override
                         public void onException(Exception e) {
-                            hiddenValueCallback.setValue("ERROR::UnknownError:" + e.getMessage());
+                            setHiddenCallbackValue(node, "ERROR::UnknownError:" + e.getMessage());
                             Listener.onException(listener, e);
                         }
                     });
+        } catch (UnsupportedOperationException e) {
+            setHiddenCallbackValue(node, "unsupported");
+            Listener.onException(listener, e);
         } catch (Exception e) {
             Listener.onException(listener, e);
         }

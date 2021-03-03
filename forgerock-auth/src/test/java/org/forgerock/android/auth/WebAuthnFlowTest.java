@@ -7,17 +7,28 @@
 
 package org.forgerock.android.auth;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.testing.FragmentScenario;
+
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
+
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback;
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 @RunWith(RobolectricTestRunner.class)
 public class WebAuthnFlowTest extends BaseTest {
@@ -54,8 +65,6 @@ public class WebAuthnFlowTest extends BaseTest {
             public void onCallbackReceived(Node state) {
                 try {
                     assertThat(state.getCallback(WebAuthnRegistrationCallback.class)).isNotNull();
-                    assertThat(state.getCallback(WebAuthnRegistrationCallback.class)
-                            .findHiddenValueCallback(state)).isNotNull();
                 } catch (Error e) {
                     throw new RuntimeException(e);
                 }
@@ -64,6 +73,46 @@ public class WebAuthnFlowTest extends BaseTest {
         };
         frAuth.next(context, nodeListenerFuture);
         nodeListenerFuture.get();
+    }
+
+    @Test
+    public void testAttachmentNotPlatform() throws InterruptedException, JSONException {
+        enqueue("/webAuthn_registration_71_not_platform.json", HttpURLConnection.HTTP_OK);
+        FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
+        InitProvider.setCurrentActivity(fragmentActivity);
+
+        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
+            @Override
+            public void onCallbackReceived(Node state) {
+                try {
+                    assertThat(state.getCallback(WebAuthnRegistrationCallback.class)).isNotNull();
+                    state.getCallback(WebAuthnRegistrationCallback.class).register(state, this);
+                } catch (Error e) {
+                    throw new RuntimeException(e);
+                }
+                state.next(context, this);
+            }
+        };
+        frAuth.next(context, nodeListenerFuture);
+        try {
+            nodeListenerFuture.get();
+            failBecauseExceptionWasNotThrown(ExecutionException.class);
+        } catch (ExecutionException e) {
+            //Make sure the caller receive the correct exception
+            assertThat(e.getCause()).isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        //Make sure the server receive unsupported in HiddenValueCallback
+        server.takeRequest(); //trigger the tree
+        RecordedRequest request = server.takeRequest();
+        String body = request.getBody().readUtf8();
+        JSONObject result = new JSONObject(body);
+        assertThat(result.getJSONArray("callbacks").length()).isEqualTo(2);
+        JSONObject hiddenValueCallback = result.getJSONArray("callbacks").getJSONObject(1);
+        assertThat(hiddenValueCallback.getString("type")).isEqualTo("HiddenValueCallback");
+        assertThat(hiddenValueCallback.getJSONArray("input").length()).isEqualTo(1);
+        String value = hiddenValueCallback.getJSONArray("input").getJSONObject(0).getString("value");
+        assertThat(value).isEqualTo("unsupported");
     }
 
     @Test
@@ -76,8 +125,6 @@ public class WebAuthnFlowTest extends BaseTest {
             public void onCallbackReceived(Node state) {
                 try {
                     assertThat(state.getCallback(WebAuthnAuthenticationCallback.class)).isNotNull();
-                    assertThat(state.getCallback(WebAuthnAuthenticationCallback.class)
-                            .findHiddenValueCallback(state)).isNotNull();
                 } catch (Error e) {
                     throw new RuntimeException(e);
                 }
@@ -87,4 +134,5 @@ public class WebAuthnFlowTest extends BaseTest {
         frAuth.next(context, nodeListenerFuture);
         nodeListenerFuture.get();
     }
+
 }

@@ -18,6 +18,7 @@ import android.os.Bundle;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;
@@ -45,6 +46,11 @@ public class InitProvider extends ContentProvider {
      */
     public static FragmentActivity getCurrentActivityAsFragmentActivity() {
         return (FragmentActivity) currentActivity.get();
+    }
+
+    @VisibleForTesting
+    static void setCurrentActivity(Activity activity) {
+        currentActivity = new WeakReference<>(activity);
     }
 
     public InitProvider() {

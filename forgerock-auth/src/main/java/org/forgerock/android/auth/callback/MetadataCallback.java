@@ -90,22 +90,4 @@ public class MetadataCallback extends AbstractCallback implements DerivableCallb
         }
         return null;
     }
-
-    /**
-     * Find the {@link HiddenValueCallback} from the {@link Node}
-     *
-     * @param node The Node
-     * @return The first {@link HiddenValueCallback} found from the Node,
-     * or {@link IllegalStateException} when not found.
-     */
-    public HiddenValueCallback findHiddenValueCallback(Node node) {
-        for (Callback callback : node.getCallbacks()) {
-            if (callback instanceof HiddenValueCallback) {
-                if (((HiddenValueCallback) callback).getId().equals("webAuthnOutcome")) {
-                    return (HiddenValueCallback) callback;
-                }
-            }
-        }
-        throw new IllegalStateException("webAuthnOutcome HiddenValueCallback not found.");
-    }
 }

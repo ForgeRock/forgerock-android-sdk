@@ -146,14 +146,20 @@ public class WebAuthnRegistration extends WebAuthn {
 
         if (authenticatorSelection.has(AUTHENTICATOR_ATTACHMENT)) {
             try {
+                Attachment attachment = Attachment.fromString(authenticatorSelection.getString(AUTHENTICATOR_ATTACHMENT));
+                if (attachment == Attachment.CROSS_PLATFORM) {
+                    throw new UnsupportedOperationException("Cross Platform attachment is not supported");
+                }
                 return new AuthenticatorSelectionCriteria.Builder()
-                        .setAttachment(Attachment.fromString(authenticatorSelection.getString(AUTHENTICATOR_ATTACHMENT)))
+                        .setAttachment(attachment)
                         .build();
             } catch (Attachment.UnsupportedAttachmentException e) {
                 throw new UnsupportedOperationException(e);
             }
         } else {
-            return new AuthenticatorSelectionCriteria.Builder().build();
+            return new AuthenticatorSelectionCriteria.Builder()
+                    .setAttachment(Attachment.PLATFORM)
+                    .build();
         }
     }
 
