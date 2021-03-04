@@ -43,6 +43,12 @@ public class WebAuthnHeadlessAuthenticateFragment extends Fragment {
      * @return The Fragment to handle the Biometric Authentication
      */
     public static WebAuthnHeadlessAuthenticateFragment init(FragmentManager fragmentManager, PendingIntent pendingIntent) {
+
+        WebAuthnHeadlessAuthenticateFragment existing = (WebAuthnHeadlessAuthenticateFragment) fragmentManager.findFragmentByTag(TAG);
+        if (existing != null) {
+            return existing;
+        }
+
         WebAuthnHeadlessAuthenticateFragment fragment = newInstance(pendingIntent);
         fragmentManager.beginTransaction().add(fragment, WebAuthnHeadlessAuthenticateFragment.TAG).commit();
         return fragment;
@@ -59,6 +65,7 @@ public class WebAuthnHeadlessAuthenticateFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
             PendingIntent pendingIntent = getArguments().getParcelable("PENDING_INTENT");
             if (pendingIntent != null) {
