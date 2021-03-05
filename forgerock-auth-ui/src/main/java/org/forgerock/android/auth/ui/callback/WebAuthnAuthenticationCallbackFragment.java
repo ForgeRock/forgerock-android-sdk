@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.callback.ConfirmationCallback;
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback;
 import org.forgerock.android.auth.ui.R;
 
@@ -47,7 +48,10 @@ public class WebAuthnAuthenticationCallbackFragment extends CallbackFragment<Web
             @Override
             public void onException(Exception e) {
                 progressBar.setVisibility(View.GONE);
-                next();
+                //When there recovery code is enable to don't proceed the authentication.
+                if (node.getCallback(ConfirmationCallback.class) == null) {
+                    next();
+                }
             }
         });
 
