@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
 
+import org.forgerock.android.auth.Node;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,7 +45,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Getter
-public class MetadataCallback extends AbstractCallback {
+public class MetadataCallback extends AbstractCallback implements DerivableCallback {
 
     private String value;
 
@@ -76,5 +77,17 @@ public class MetadataCallback extends AbstractCallback {
     @Override
     public String getType() {
         return "MetadataCallback";
+    }
+
+    @Override
+    public Class<? extends Callback> getDerivedCallback() {
+        JSONObject value = getValue();
+        if (WebAuthnRegistrationCallback.instanceOf(value)) {
+            return CallbackFactory.getInstance().getCallbacks().get("WebAuthnRegistrationCallback");
+        }
+        if (WebAuthnAuthenticationCallback.instanceOf(value)) {
+            return CallbackFactory.getInstance().getCallbacks().get("WebAuthnAuthenticationCallback");
+        }
+        return null;
     }
 }

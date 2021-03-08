@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.callback.*;
+import org.forgerock.android.auth.webauthn.WebAuthnAuthenticationTest;
+import org.forgerock.android.auth.webauthn.WebAuthnRegistrationTest;
 import org.junit.experimental.categories.Categories;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -50,7 +52,15 @@ import org.junit.runners.Suite;
         PersistentCookieTest.class,
         PolicyAdviceTest.class,
 
-        BrowserLoginTest.class
+        BrowserLoginTest.class,
+
+        //WebAuthn
+        WebAuthnFlowTest.class,
+        WebAuthnRegistrationTest.class,
+        WebAuthnAuthenticationTest.class,
+        AccountDataRepositoryTest.class,
+        SharedPreferencesDataRepositoryTest.class,
+        WebAuthnDataRepositoryTest.class
 
 })
 public class AuthTestSuite {

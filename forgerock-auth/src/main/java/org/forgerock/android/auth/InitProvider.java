@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,6 +18,8 @@ import android.os.Bundle;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.fragment.app.FragmentActivity;
 
 import java.lang.ref.WeakReference;
 
@@ -28,8 +30,27 @@ public class InitProvider extends ContentProvider {
 
     private static WeakReference<Activity> currentActivity = new WeakReference<>(null);
 
+    /**
+     * Retrieve the current active {@link Activity}
+     *
+     * @return The current active {@link Activity}
+     */
     public static Activity getCurrentActivity() {
         return currentActivity.get();
+    }
+
+    /**
+     * Retrieve the current active activity as {@link FragmentActivity}
+     *
+     * @return The current active activity as {@link FragmentActivity}
+     */
+    public static FragmentActivity getCurrentActivityAsFragmentActivity() {
+        return (FragmentActivity) currentActivity.get();
+    }
+
+    @VisibleForTesting
+    static void setCurrentActivity(Activity activity) {
+        currentActivity = new WeakReference<>(activity);
     }
 
     public InitProvider() {
@@ -53,7 +74,7 @@ public class InitProvider extends ContentProvider {
     @MainThread
     @Override
     public boolean onCreate() {
-        Application app = (Application)getContext().getApplicationContext();
+        Application app = (Application) getContext().getApplicationContext();
         app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {

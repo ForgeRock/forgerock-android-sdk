@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -31,6 +31,7 @@ import static org.junit.Assert.assertNull;
 @RunWith(AndroidVersionAwareTestRunner.class)
 public class DefaultSingleSignOnManagerTest {
 
+    public static final String ORG_FORGEROCK = "org.forgerock.test";
     private SingleSignOnManager tokenManager;
     private final Context context = ApplicationProvider.getApplicationContext();
 
@@ -45,7 +46,7 @@ public class DefaultSingleSignOnManagerTest {
         new AsymmetricEncryptor(context, "org.forgerock.v1.SSO_TOKEN").reset();
 
         AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        Account[] accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         for (Account acc : accounts) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 accountManager.removeAccountExplicitly(acc);
@@ -112,13 +113,13 @@ public class DefaultSingleSignOnManagerTest {
         tokenManager.persist(token);
 
         AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        Account[] accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         //Only one account Created
         Assertions.assertThat(accounts).hasSize(1);
         Assertions.assertThat(accounts[0].name).isEqualTo("ForgeRock");
 
         tokenManager.clear();
-        accounts = accountManager.getAccountsByType("org.forgerock");
+        accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         Assertions.assertThat(accounts).hasSize(0);
 
     }
@@ -129,14 +130,14 @@ public class DefaultSingleSignOnManagerTest {
         tokenManager.persist(token);
 
         AccountManager accountManager = AccountManager.get(context);
-        Account account = new Account("Dummy", "org.forgerock");
+        Account account = new Account("Dummy", ORG_FORGEROCK);
         accountManager.addAccountExplicitly(account, null, null);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        Account[] accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         Assertions.assertThat(accounts).hasSize(2);
 
         //Assert that TokenManager has successfully remove the account
         tokenManager.clear();
-        accounts = accountManager.getAccountsByType("org.forgerock");
+        accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         Assertions.assertThat(accounts).hasSize(1);
         Assertions.assertThat(accounts[0].name).isEqualTo("Dummy");
         //cleanup
@@ -152,7 +153,7 @@ public class DefaultSingleSignOnManagerTest {
         tokenManager.persist(ssoToken);
 
         AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType("org.forgerock");
+        Account[] accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         //Account should not be created
         Assertions.assertThat(accounts).hasSize(0);
 

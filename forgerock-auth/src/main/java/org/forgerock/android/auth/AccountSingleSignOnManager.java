@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -41,10 +41,9 @@ import static org.forgerock.android.auth.Encryptor.getEncryptor;
  * be stored as user's password using {@link AccountManager#setPassword(Account, String)},
  * for Android M+ the SecretKey will be store in the KeyChain.
  */
-class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListener, SecretKeyStore {
+class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListener, SecretKeyStore, AccountAware {
 
     private static final String TAG = AccountSingleSignOnManager.class.getSimpleName();
-    private static final String ACCOUNT_TYPE = "accountType";
     private static final String ORG_FORGEROCK_V_1_SSO_KEYS = "org.forgerock.v1.SSO_KEYS";
     private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
     private static final String COOKIES = "org.forgerock.v1.COOKIES";
@@ -91,7 +90,8 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
     }
 
     private void persist(String alias, byte[] data, boolean retry) {
-        if ((data == null || data.length == 0) && !isAccountExists()) {
+        if ((data == null || data.length == 0) &&
+                !isAccountExists(accountManager, accountType, account)) {
             //Account does not exist and nothing to persist
             return;
         }
@@ -116,17 +116,6 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             }
         }
     }
-
-    private boolean isAccountExists() {
-        Account[] accounts = accountManager.getAccountsByType(accountType);
-        for (Account acc : accounts) {
-            if (acc.name.equals(account.name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     @Override
     public void clear() {
@@ -190,35 +179,6 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
     @Override
     public void revoke(FRListener<Void> listener) {
         clear();
-    }
-
-    private String getAccountType(Context context) throws PackageManager.NameNotFoundException, IOException, XmlPullParserException {
-        // Get the authenticator XML file from AndroidManifest.xml
-        ComponentName cn = new ComponentName(context, AuthenticatorService.class);
-        ServiceInfo info = context.getPackageManager().getServiceInfo(cn, PackageManager.GET_META_DATA);
-        int resourceId = info.metaData.getInt("android.accounts.AccountAuthenticator");
-
-        // Parse the authenticator XML file to get the accountType
-        return parse(context, resourceId);
-    }
-
-    private String parse(Context context, int resourceId) throws IOException, XmlPullParserException {
-        XmlResourceParser xrp = context.getResources().getXml(resourceId);
-        xrp.next();
-        int eventType = xrp.getEventType();
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            if (eventType == XmlPullParser.START_TAG || eventType == XmlPullParser.END_TAG) {
-                for (int i = 0; i < xrp.getAttributeCount(); i++) {
-                    String name = xrp.getAttributeName(i);
-                    if (ACCOUNT_TYPE.equals(name)) {
-                        return xrp.getAttributeValue(i);
-                    }
-                }
-            }
-            eventType = xrp.next();
-        }
-        throw new IllegalArgumentException("AccountType is not defined under forgerock_authenticator.xml");
-
     }
 
     @Override
