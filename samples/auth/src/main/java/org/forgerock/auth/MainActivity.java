@@ -63,6 +63,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
+import static org.forgerock.android.auth.ui.SimpleLoginActivity.ERROR_EXTRA;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -117,16 +118,14 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == AUTH_REQUEST_CODE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                success.setVisibility(VISIBLE);
-                userinfo();
-            } else {
-                Exception exception = null;
-                if (data != null) {
-                    exception = (Exception) data.getSerializableExtra(SimpleLoginActivity.EXCEPTION);
+                if (data!= null && data.getStringExtra(ERROR_EXTRA) != null) {
+                    Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed:" +
+                            data.getStringExtra(ERROR_EXTRA) , LENGTH_LONG).show();
+                } else {
+                    success.setVisibility(VISIBLE);
+                    userinfo();
                 }
-                Snackbar.make(findViewById(org.forgerock.auth.R.id.success), "Login Failed:" +
-                        exception != null ? exception.getMessage() : "", LENGTH_LONG).show();
-            }
+           }
         }
     }
 
@@ -354,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                     Map<String, String> additionalParameters = new HashMap<>();
                     additionalParameters.put("service", "Simple");
                     additionalParameters.put("KEY2", "VALUE2");
-                    r.setAdditionalParameters(additionalParameters);
+                    //r.setAdditionalParameters(additionalParameters);
                     //r.setLoginHint("login");
                     //r.setPrompt("login");
                 })

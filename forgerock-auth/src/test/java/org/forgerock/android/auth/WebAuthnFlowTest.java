@@ -7,9 +7,7 @@
 
 package org.forgerock.android.auth;
 
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.testing.FragmentScenario;
 
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
@@ -27,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 @RunWith(RobolectricTestRunner.class)

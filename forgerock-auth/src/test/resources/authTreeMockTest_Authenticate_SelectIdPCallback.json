@@ -1,0 +1,56 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IlNvY2lhbExvZ2luIiwib3RrIjoiaHVmMG1rdG1taXFlYzQ1MWk2N2RyMXRvZ24iLCJhdXRoSW5kZXhUeXBlIjoic2VydmljZSIsInJlYWxtIjoiLyIsInNlc3Npb25JZCI6IipBQUpUU1FBQ01ERUFCSFI1Y0dVQUNFcFhWRjlCVlZSSUFBSlRNUUFBKmV5SjBlWEFpT2lKS1YxUWlMQ0pqZEhraU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuWlhsS01HVllRV2xQYVVwTFZqRlJhVXhEU214aWJVMXBUMmxLUWsxVVNUUlJNRXBFVEZWb1ZFMXFWVEpKYVhkcFdWZDRia2xxYjJsYVIyeDVTVzR3TGk1TWVIZG9NbFJvTjNWRVEycE1MVVY0UzFwRGVGQlJMbW8wVmxoUlFYcHJPRWM1UVY4M1pVWnVkalF4YTAxbFIwOVVWRWRwU1hsdldIVkNabkJ1YlMxaWVtRnhXRTlXZG1aeVUwVm5SMFJUVVZkWlYyUjNURVZUZDNkck5sRTVWRVZKUlU1WFNrRnNVSGxzYm5ndFZYcHZTekEwUTA1bE5rNDBRelZtUkUxd1pVSmhiM2xDWm1GUE1WaFZRMnRuVGt4UmJFZFZXREp6U0hWTVpVWk1MVmxhVVRKblJVVkhNWFUxVkZSTlQxa3RTSFptT0ROQ2VrZFFUMGhuWTFGVVVUTnJaM0pKUVRGRGJuVkNWVFYwVlMxWlJ6QkdTV2t5TTJ0cFNHNXZXbWxFTlRoSFRtdG5TMFZNWlhGS1IxWjVVa1JIVHpOQ1ZYQnpPVnBqYzJsWGExaHlUMmd3V0RoZk1WTTBPVGgyVDFWSE1VdzRhVzVtVldGblkzZzBZVTk0VjA1eGFqRk9RbTVPVG5kalV6SkhkMFZ3U205bVIwbFRPVFl5YUUwemFETTFRWGR3YVVaRFp6VmtWRFpmWWpNemFHSnlaWFo2U2xOMVpXUjJOazVDY3paRlRYVkNaV2R5YjJGWVFXWmlhelozY0c4NWRFWXlaVkY2VHpCVVVrdExVMVZ6UW5NMVMyRlVXWGxyWkc5SVQxTklibTlFWmpKVWRteHNXazlGZVdOeE5qWjBTek0yWjNGU1gwcDNUMkpzWVVaWmRqQlhWemQ0TW1sRVpEVlBUVTFQVEV0clNGbG5iemRwUVhsT0xXSnplVkZwTWtGUFJqSjNUMDFPTTNGck9FOWtiMVF5TmxjeE9FbE1kRlF6YUVSNU1XTm1SR1J6VkhRelpYSnhZemhFZUhaTFdXaDJYMmRNWW5GaExXaHVXRE10TUhkdVJUVktiMHRITmtwRVZXRjNVRWx5WW14VlpsZDJZV2RHV2tJeFpHWjBhalU0U0dWNmJHSkNWalZwTWtWR01UQXRhQzFvVm1SaE5IVllVMHRIVEhaTVVrUllTbGc1VEhCVGVtZFVOM0p4ZUZKWWFGb3dXVlpWZERSUlF6QlNOVlV3UkhGc2VXWmhTVTR3TFY5SmJ6QXVUMGN5WVhKUVVGaGZhV3huU0ZORGFYVjRZMWhTWncuWFUyb0RnVURSMmpfUlNYaGJwcDl1bzNQUWtYTzRjTzhPcFlxeTl5OFlYRSIsImV4cCI6MTYxNTgyODY4OCwiaWF0IjoxNjE1ODI4Mzg4fQ.5By98lBKMJt8gXbb1-lEgrbKS2Hr6akciEBzoHzaFt0",
+  "callbacks": [
+    {
+      "type": "SelectIdPCallback",
+      "output": [
+        {
+          "name": "providers",
+          "value": [
+            {
+              "provider": "google",
+              "uiConfig": {
+                "buttonImage": "images/g-logo.png",
+                "buttonCustomStyle": "background-color: #fff; color: #757575; border-color: #ddd;",
+                "abc": "test",
+                "buttonClass": "",
+                "buttonDisplayName": "Google",
+                "buttonCustomStyleHover": "color: #6d6d6d; background-color: #eee; border-color: #ccc;",
+                "iconClass": "fa-google",
+                "userinfo": "https://www.googleapis.com/oauth2/v3/userinfo",
+                "iconFontColor": "white",
+                "iconBackground": "#4184f3"
+              }
+            },
+            {
+              "provider": "facebook",
+              "uiConfig": {
+                "buttonImage": "",
+                "buttonCustomStyle": "background-color: #3b5998;border-color: #3b5998; color: white;",
+                "buttonClass": "fa-facebook-official",
+                "buttonDisplayName": "Facebook",
+                "buttonCustomStyleHover": "background-color: #334b7d;border-color: #334b7d; color: white;",
+                "iconFontColor": "white",
+                "iconClass": "fa-facebook",
+                "iconBackground": "#3b5998"
+              }
+            },
+            {
+              "provider": "localAuthentication"
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "value": ""
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}
