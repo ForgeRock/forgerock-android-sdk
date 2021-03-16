@@ -245,7 +245,7 @@ dependencies {
 
     implementation('androidx.lifecycle:lifecycle-common') {
         version {
-            strictly '2.1.0'
+            strictly '2.2.0'
         }
     }
 
