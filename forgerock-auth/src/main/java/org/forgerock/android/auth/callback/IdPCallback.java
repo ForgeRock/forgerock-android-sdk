@@ -127,6 +127,10 @@ public class IdPCallback extends AbstractCallback implements IdPClient {
      */
     public void signIn(Fragment fragment, FRListener<Void> listener) {
         IdPHandler idPHandler = getIdPHandler();
+        if (idPHandler == null) {
+            Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
+            return;
+        }
         idPHandler.signIn(fragment, this, getResultListener(idPHandler, listener));
     }
 
@@ -138,6 +142,10 @@ public class IdPCallback extends AbstractCallback implements IdPClient {
      */
     public void signIn(FRListener<Void> listener) {
         IdPHandler idPHandler = getIdPHandler();
+        if (idPHandler == null) {
+            Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
+            return;
+        }
         idPHandler.signIn(this, getResultListener(idPHandler, listener));
     }
 

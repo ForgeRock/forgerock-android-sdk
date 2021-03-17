@@ -257,4 +257,54 @@ public class SocialLoginTest extends BaseTest {
         getGoogleSignInHandler(fragmentActivity).onActivityResult(GoogleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, null);
         countDownLatch.await();
     }
+
+    @Test
+    public void testUnsupportedHandler() throws InterruptedException {
+        enqueue("/authTreeMockTest_Authenticate_SelectIdPCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_IdPCallback_unsupport_provider.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setUrl(getUrl());
+
+        //Create a dummy Fragment
+        FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
+        InitProvider.setCurrentActivity(fragmentActivity);
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(SelectIdPCallback.class) != null) {
+                    state.getCallback(SelectIdPCallback.class).setValue("dummy");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(IdPCallback.class) != null) {
+
+                    NodeListenerFuture<FRSession> nodeListener = this;
+                    IdPCallback idPCallback = state.getCallback(IdPCallback.class);
+                    idPCallback.signIn(new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            fail();
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            nodeListener.onException(e);
+                        }
+                    });
+                }
+            }
+        };
+
+        FRSession.authenticate(context, "", nodeListenerFuture);
+
+        try {
+            nodeListenerFuture.get();
+            fail();
+        } catch (ExecutionException e) {
+            assertThat(e.getCause()).isInstanceOf(UnsupportedOperationException.class);
+        }
+    }
 }
