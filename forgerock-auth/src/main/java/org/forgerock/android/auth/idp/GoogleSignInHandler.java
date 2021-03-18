@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RestrictTo;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -29,7 +28,6 @@ import org.forgerock.android.auth.Listener;
 /**
  * {@link IdPHandler} to handle Google login
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 public class GoogleSignInHandler extends Fragment implements IdPHandler {
 
     public static final int RC_SIGN_IN = 1000;
