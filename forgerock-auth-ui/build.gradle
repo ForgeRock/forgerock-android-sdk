@@ -143,6 +143,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     compileOnly 'com.google.android.gms:play-services-fido:18.1.0'
+    compileOnly 'com.google.android.gms:play-services-auth:19.0.0'
+    compileOnly 'com.facebook.android:facebook-login:7.1.0'
 
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

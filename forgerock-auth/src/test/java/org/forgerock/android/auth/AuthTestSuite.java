@@ -32,6 +32,9 @@ import org.junit.runners.Suite;
         StringAttributeInputCallbackTest.class,
         BooleanAttributeInputCallbackTest.class,
         NumberAttributeInputCallbackTest.class,
+        SelectIdPCallbackTest.class,
+        IdPCallbackTest.class,
+
 
         AuthServiceMockTest.class,
         AuthServiceTest.class,
@@ -60,7 +63,10 @@ import org.junit.runners.Suite;
         WebAuthnAuthenticationTest.class,
         AccountDataRepositoryTest.class,
         SharedPreferencesDataRepositoryTest.class,
-        WebAuthnDataRepositoryTest.class
+        WebAuthnDataRepositoryTest.class,
+
+        //SocialLogin
+        SocialLoginTest.class,
 
 })
 public class AuthTestSuite {

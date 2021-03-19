@@ -47,6 +47,8 @@ public class CallbackFactory {
         register(MetadataCallback.class);
         register(WebAuthnRegistrationCallback.class);
         register(WebAuthnAuthenticationCallback.class);
+        register(SelectIdPCallback.class);
+        register(IdPCallback.class);
     }
 
     /**

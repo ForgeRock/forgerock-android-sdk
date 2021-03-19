@@ -1,3 +1,9 @@
+## [Unreleased]
+
+#### Added
+- Social Login support for Google and Facebook
+- Biometric Authentication with WebAuthn
+
 # Version 2.2.0
 
 ## [2.2.0]
