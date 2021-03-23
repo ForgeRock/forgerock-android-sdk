@@ -34,12 +34,19 @@ import java.util.List;
 public class FacebookSignInHandler extends Fragment implements IdPHandler {
 
     public static final String TAG = FacebookSignInHandler.class.getName();
+    public static final String IDP_CLIENT = "IDP_CLIENT";
     public FRListener<String> listener;
     private CallbackManager callbackManager;
+    private IdPClient idPClient;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            idPClient = (IdPClient) getArguments().getSerializable(IDP_CLIENT);
+        }
+
         LoginManager.getInstance().logOut();
 
         callbackManager = CallbackManager.Factory.create();
@@ -61,7 +68,7 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
                 Listener.onException(listener, exception);
             }
         });
-        LoginManager.getInstance().logInWithReadPermissions(this, getPermissions());
+        LoginManager.getInstance().logInWithReadPermissions(this, getPermissions(idPClient));
     }
 
     @Override
@@ -95,6 +102,7 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
         }
 
         Bundle args = new Bundle();
+        args.putSerializable(IDP_CLIENT, idPClient);
         setArguments(args);
         this.listener = listener;
         fragmentManager.beginTransaction().add(this, TAG)
@@ -106,8 +114,8 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
      *
      * @return The Request permissions
      */
-    protected List<String> getPermissions() {
-        return Arrays.asList("email", "public_profile");
+    protected List<String> getPermissions(IdPClient idPClient) {
+        return idPClient.getScopes();
     }
 
 
