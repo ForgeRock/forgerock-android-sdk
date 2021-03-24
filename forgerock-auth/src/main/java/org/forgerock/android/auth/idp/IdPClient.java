@@ -7,12 +7,13 @@
 
 package org.forgerock.android.auth.idp;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Interface for Identity Provider Configuration
  */
-public interface IdPClient {
+public interface IdPClient extends Serializable {
 
     String getProvider();
 
