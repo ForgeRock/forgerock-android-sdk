@@ -46,9 +46,11 @@ ext["ossrhUsername"] = ''
 ext["ossrhPassword"] = ''
 
 File secretPropsFile = project.rootProject.file('local.properties')
-Properties p = new Properties()
-p.load(new FileInputStream(secretPropsFile))
-p.each { name, value ->
-    ext[name] = value
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    p.load(new FileInputStream(secretPropsFile))
+    p.each { name, value ->
+        ext[name] = value
+    }
 }
 
