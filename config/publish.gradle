@@ -1,0 +1,85 @@
+/*
+ * Copyright (c) 2021 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+/**
+ * Maven Publish
+ */
+version = VERSION
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId GROUP
+            artifactId POM_ARTIFACT_ID
+            version rootProject.versionName
+
+            artifact("$buildDir/outputs/aar/${POM_ARTIFACT_ID}-release.aar")
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = POM_NAME
+                description = POM_DESCRIPTION
+                packaging = POM_PACKAGING
+                url = POM_URL
+                licenses {
+                    license {
+                        name = POM_LICENCE_NAME
+                        url = POM_LICENCE_URL
+                        distribution = POM_LICENCE_DIST
+                    }
+                }
+                developers {
+                    developer {
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        url = POM_DEVELOPER_URL
+                    }
+                }
+                scm {
+                    url = POM_SCM_URL
+                    connection = POM_SCM_CONNECTION
+                    developerConnection = POM_SCM_DEV_CONNECTION
+                }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        if (it.group != null && (it.name != null || "unspecified".equals(it.name)) && it.version != null) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            if ("forgerock-android-sdk".equals(it.group)) {
+                                dependencyNode.appendNode('groupId', 'org.forgerock')
+                            } else {
+                                dependencyNode.appendNode('groupId', it.group)
+                            }
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "sonatype"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    required { hasProperty('signing.keyId') }
+    sign publishing.publications
+}

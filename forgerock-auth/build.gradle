@@ -6,12 +6,9 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: "com.adarshr.test-logger"
-
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 android {
     compileSdkVersion 30
@@ -22,9 +19,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 5
-        versionName "2.2.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -72,127 +66,10 @@ android {
     }
 
 }
-/**
- * Generate Javadoc, delombok then generate Javadoc
- */
-configurations {
-    delombok
-}
 
-task delombok {
-    def srcJava = 'src/main/java'
-    doLast {
-        ant.echo('Delomboking...')
-        ant.taskdef(name: 'delombok',
-                classname: 'lombok.delombok.ant.Tasks$Delombok',
-                classpath: configurations.delombok.asPath)
-        ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
-    }
-}
-
-task javadoc(type: Javadoc, dependsOn: delombok) {
-    source = "$buildDir/src-delomboked"
-    destinationDir = new File("$buildDir/generated-javadoc")
-    failOnError = false
-    ext.androidDoc = "${android.sdkDirectory}/docs/reference"
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    options.linksOffline("http://d.android.com/reference", ext.androidDoc)
-    options.links("http://docs.oracle.com/javase/7/docs/api/")
-    options.links("http://d.android.com/reference/")
-}
-
-/**
- * JCenter Dependency Manager
- */
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-javadoc.failOnError = false
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-group 'org.forgerock'
-
-project.version = System.getProperty("bintray.version")
-
-bintray {
-    user = System.getProperty("bintray.user")
-    key = System.getProperty("bintray.apiKey")
-
-    configurations = ['archives']
-
-    pkg {
-        repo = 'maven'
-        name = 'forgerock-auth'
-        userOrg = 'forgerock-sdk'
-        desc = 'ForgeRock SDK is a toolkit that allows developers communicate efficiently with ForgeRock OpenAM and ForgeRock Identity Cloud.'
-        licenses = ['MIT']
-        labels = ['aar', 'android', 'oauth', 'security', 'forgerock']
-        publicDownloadNumbers = true
-        vcsUrl = gitUrl
-        issueTrackerUrl = issueUrl
-        websiteUrl = siteUrl
-        version {
-            name = project.version
-            desc = 'Forgerock Android SDK'
-            released = new Date()
-        }
-    }
-}
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'Forgerock Auth SDK'
-                url siteUrl
-                licenses {
-                    license {
-                        name 'MIT'
-                        url 'https://opensource.org/licenses/MIT'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-
-                }
-            }
-        }
-    }
-}
-
-
-testlogger {
-    theme 'mocha'
-    showExceptions true
-    showStackTraces true
-    showFullStackTraces false
-    showCauses true
-    slowThreshold 2000
-    showSummary true
-    showSimpleNames false
-    showPassed true
-    showSkipped true
-    showFailed true
-    showStandardStreams false
-    showPassedStandardStreams true
-    showSkippedStandardStreams true
-    showFailedStandardStreams true
-}
-
+apply from: '../config/logger.gradle'
+apply from: '../config/javadoc.gradle'
+apply from: '../config/publish.gradle'
 
 /**
  * Dependencies
@@ -253,12 +130,10 @@ dependencies {
     delombok "org.projectlombok:lombok:1.18.8"
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 }
 repositories {
     mavenCentral()
-
 }
 
 
