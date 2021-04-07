@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2021 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+/**
+ * Generate Javadoc, delombok then generate Javadoc
+ */
+configurations {
+    delombok
+}
+
+task delombok {
+    def srcJava = 'src/main/java'
+    doLast {
+        ant.echo('Delomboking...')
+        ant.taskdef(name: 'delombok',
+                classname: 'lombok.delombok.ant.Tasks$Delombok',
+                classpath: configurations.delombok.asPath)
+        ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
+    }
+}
+
+task javadoc(type: Javadoc, dependsOn: delombok) {
+    source = "$buildDir/src-delomboked"
+    destinationDir = new File("$buildDir/generated-javadoc")
+    failOnError = false
+    ext.androidDoc = "${android.sdkDirectory}/docs/reference"
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.linksOffline("http://d.android.com/reference", ext.androidDoc)
+    options.links("http://docs.oracle.com/javase/7/docs/api/")
+    options.links("http://d.android.com/reference/")
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
