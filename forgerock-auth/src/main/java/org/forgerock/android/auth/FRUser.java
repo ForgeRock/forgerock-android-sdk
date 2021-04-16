@@ -79,6 +79,15 @@ public class FRUser {
         sessionManager.close();
     }
 
+    /**
+     * Revoke the {@link AccessToken} asynchronously,
+     *
+     *
+     * @param listener Listener to listen for token revocation event.
+     */
+    public void revokeAccessToken(FRListener<Void> listener) {
+        sessionManager.revokeAccessToken(listener);
+    }
 
     /**
      * Retrieve the {@link AccessToken} asynchronously,

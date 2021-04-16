@@ -97,6 +97,10 @@ class SessionManager {
         singleSignOnManager.revoke(null);
     }
 
+    void revokeAccessToken(FRListener<Void> listener) {
+        tokenManager.revoke(listener);
+    }
+
     @VisibleForTesting
     void close(FRListener<Void> listener) {
         tokenManager.revoke(new FRListener<Void>() {

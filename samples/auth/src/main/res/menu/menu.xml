@@ -43,5 +43,10 @@
         android:title="@string/token"
         app:showAsAction="collapseActionView"/>
 
+    <item android:id="@+id/revokeToken"
+        android:icon="@android:drawable/ic_menu_crop"
+        android:title="@string/revokeToken"
+        app:showAsAction="collapseActionView"/>
+
 
 </menu>

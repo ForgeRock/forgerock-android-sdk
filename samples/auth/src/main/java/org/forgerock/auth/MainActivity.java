@@ -282,7 +282,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-
+            case R.id.revokeToken:
+                progressBar.setVisibility(VISIBLE);
+                revokeAccessToken();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -320,6 +323,30 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
+            content.setText("No User Session");
+        }
+    }
+
+    private void revokeAccessToken() {
+        if (FRUser.getCurrentUser() != null) {
+            FRUser.getCurrentUser().revokeAccessToken(new FRListener<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    progressBar.setVisibility(INVISIBLE);
+                    content.setText("Access token revoked");
+                    content.setText(result.toString());
+                }
+
+                @Override
+                public void onException(Exception e) {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        content.setText(e.getMessage());
+                    });
+                }
+            });
+        } else {
+            progressBar.setVisibility(INVISIBLE);
             content.setText("No User Session");
         }
     }
