@@ -208,6 +208,36 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
+    public void testRevokeAccessToken() throws Exception {
+        frUserHappyPath();
+        
+        //Revoke the token and check the listener onSuccess and onFailure methods
+        FRUser.getCurrentUser().revokeAccessToken(new FRListener<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                assertNotNull(FRUser.getCurrentUser());
+                assertTokenRevoked();
+            }
+
+            @Override
+            public void onException(Exception e) {
+                assertNotNull(FRUser.getCurrentUser());
+                assertTokenRevoked();
+            }
+        });
+    }
+
+    private void assertTokenRevoked() {
+        try {
+            AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
+            assertNull(accessToken.getValue());
+        }catch(AuthenticationRequiredException cEx) {
+            fail(cEx.getMessage());
+        }
+    }
+
+
+    @Test
     public void testAccessTokenAsync() throws Exception {
         frUserHappyPath();
         FRListenerFuture<AccessToken> future = new FRListenerFuture<>();

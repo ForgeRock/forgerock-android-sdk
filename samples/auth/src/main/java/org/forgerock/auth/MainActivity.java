@@ -281,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
+                return true;
 
             case R.id.revokeToken:
                 progressBar.setVisibility(VISIBLE);
@@ -332,15 +333,17 @@ public class MainActivity extends AppCompatActivity {
             FRUser.getCurrentUser().revokeAccessToken(new FRListener<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    progressBar.setVisibility(INVISIBLE);
-                    content.setText("Access token revoked");
-                    content.setText(result.toString());
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(INVISIBLE);
+                        content.setText("Access token revoked");
+                    });
                 }
 
                 @Override
                 public void onException(Exception e) {
                     runOnUiThread(() -> {
                         progressBar.setVisibility(INVISIBLE);
+                        content.setText("Access token revoked locally");
                         content.setText(e.getMessage());
                     });
                 }
