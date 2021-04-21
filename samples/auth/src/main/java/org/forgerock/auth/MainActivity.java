@@ -343,8 +343,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onException(Exception e) {
                     runOnUiThread(() -> {
                         progressBar.setVisibility(INVISIBLE);
-                        content.setText("Access token revoked locally");
-                        content.setText(e.getMessage());
+                        content.setText("Access token revoked locally only!\n");
+                        content.append("Error message: " + e.getMessage());
                     });
                 }
             });
