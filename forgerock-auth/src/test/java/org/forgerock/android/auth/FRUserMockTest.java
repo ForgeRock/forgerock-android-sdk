@@ -217,6 +217,12 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(Config.getInstance().getTokenManager().hasToken());
         //Revoke the token
         FRUser.getCurrentUser().revokeAccessToken(future);
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            //Timeout exception expected
+            assertEquals("java.net.SocketTimeoutException: timeout", e.getMessage());
+        }
         //Check that the token has been cleared
         assertFalse(Config.getInstance().getTokenManager().hasToken());
     }
