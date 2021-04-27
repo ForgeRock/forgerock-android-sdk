@@ -9,12 +9,14 @@ package org.forgerock.android.auth;
 
 import android.net.Uri;
 
+import org.forgerock.android.auth.callback.AdditionalParameterCallback;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -111,8 +113,20 @@ class AuthServiceClient {
                                 .put(TYPE, authService.getAuthIndexType()));
             }
 
+            Uri.Builder builder = Uri.parse(getUrl().toString())
+                    .buildUpon();
+
+            for (org.forgerock.android.auth.callback.Callback callback: node.getCallbacks()) {
+                if (callback instanceof AdditionalParameterCallback) {
+                    Map<String, String> additionalParameters = ((AdditionalParameterCallback) callback).getAdditionalParameters();
+                    for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+                        builder.appendQueryParameter(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
             okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(getUrl())
+                    .url(new URL(builder.build().toString()))
                     .post(RequestBody.create(node.toJsonObject().toString(), JSON))
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .tag(action)

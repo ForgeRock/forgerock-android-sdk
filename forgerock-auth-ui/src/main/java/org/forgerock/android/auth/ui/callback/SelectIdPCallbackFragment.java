@@ -115,6 +115,16 @@ public class SelectIdPCallbackFragment extends CallbackFragment<SelectIdPCallbac
             return google;
         }
 
+        if (idp.getProvider().toLowerCase().contains("apple")) {
+            ImageView apple = new ImageView(getContext());
+            apple.setMaxWidth(100);
+            apple.setMinimumWidth(100);
+            apple.setMaxHeight(100);
+            apple.setMinimumHeight(100);
+            apple.setImageResource(R.drawable.apple_black);
+            return apple;
+        }
+
         if (idp.getUiConfig() != null) {
             try {
                 JSONObject uiConfig = new JSONObject(idp.getUiConfig());
