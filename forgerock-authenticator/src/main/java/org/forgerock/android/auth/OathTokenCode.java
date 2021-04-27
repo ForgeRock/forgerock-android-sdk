@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.util.TimeKeeper;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Represents a currently active OTP token.
@@ -20,6 +22,7 @@ public class OathTokenCode {
     private OathMechanism.TokenType oathType;
 
     private static final int MAX_VALUE = 1000;
+    private static final String TAG = OathTokenCode.class.getSimpleName();
 
     /**
      * Creates a OathTokenCode wrap with given data
@@ -95,6 +98,24 @@ public class OathTokenCode {
         long state = cur - start;
         int progress = (int) (state * MAX_VALUE / total);
         return progress < MAX_VALUE ? progress : MAX_VALUE;
+    }
+
+    /**
+     * Creates a JSON string representation of {@link OathTokenCode} object.
+     * @return a JSON string object
+     */
+    public String toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("code", code);
+            jsonObject.put("start", start);
+            jsonObject.put("until", until);
+            jsonObject.put("oathType", oathType.toString());
+        } catch (JSONException e) {
+            Logger.warn(TAG, e, "Error parsing OathTokenCode object to JSON");
+            throw new RuntimeException("Error parsing OathTokenCode object to JSON string representation.", e);
+        }
+        return jsonObject.toString();
     }
 
 }
