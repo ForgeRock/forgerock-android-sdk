@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.fragment.app.Fragment;
@@ -81,7 +82,14 @@ public class AppleSignInHandler extends Fragment implements IdPHandler {
         startActivityForResult(intent, RC_SIGN_IN);
     }
 
-    public CustomTabsIntent.Builder getIntentBuilder(AuthorizationService service, Uri uri) {
+    /**
+     * Retrieve the Custom tab builder.
+     *
+     * @param service The authorization service that handle request to an OAuth2 authorization service
+     * @param uri The uri to launch
+     * @return The Custom T
+     */
+    public CustomTabsIntent.Builder getIntentBuilder(@NonNull AuthorizationService service, @NonNull Uri uri) {
         return service.createCustomTabsIntentBuilder(uri);
     }
 
