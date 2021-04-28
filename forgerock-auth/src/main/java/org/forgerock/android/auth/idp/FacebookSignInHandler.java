@@ -81,7 +81,6 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
         return ACCESS_TOKEN;
     }
 
-
     @Override
     public void signIn(IdPClient idPClient, FRListener<IdPResult> listener) {
         FragmentManager fragmentManager = InitProvider.getCurrentActivityAsFragmentActivity().getSupportFragmentManager();
