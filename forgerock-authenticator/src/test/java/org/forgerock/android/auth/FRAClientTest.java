@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -539,6 +539,37 @@ public class FRAClientTest extends FRABaseTest {
 
         assertNotNull(mechanismFromStorage);
         assertEquals(push, mechanismFromStorage);
+    }
+
+    @Test
+    public void testShouldGetAllNotifications() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(createPushNotification(MESSAGE_ID, push));
+        notificationList.add(createPushNotification(OTHER_MESSAGE_ID, push));
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+        given(storageClient.getAllNotifications()).willReturn(notificationList);
+
+        List<PushNotification> notificationListFromStorage = fraClient.getAllNotifications();
+
+        assertNotNull(notificationListFromStorage);
+        assertEquals(notificationList.size(), notificationListFromStorage.size());
     }
 
     @Test
