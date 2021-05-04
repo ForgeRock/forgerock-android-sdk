@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -214,83 +214,4 @@ public class FRAuthMockTest extends BaseTest {
 
     }
 
-    @Test
-    public void testStart() throws ExecutionException, InterruptedException {
-        //Trigger the first request
-        frAuthHappyPath();
-
-        final int[] count = {0};
-
-        server.setDispatcher(new Dispatcher() {
-            @Override
-            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                if (request.getPath().endsWith("/sessions?_action=logout")) {
-                    return response("/sessions_logout.json", HttpURLConnection.HTTP_OK);
-                }
-
-                if (count[0] == 0) {
-                    count[0]++;
-                    return response("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
-                }
-                if (count[0] == 1) {
-                    count[0]++;
-                    return response("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
-                }
-                if (count[0] == 2) {
-                    count[0]++;
-                    return response("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-                }
-                throw new IllegalArgumentException("Not expected Request");
-            }
-        });
-
-        final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
-                .serverConfig(serverConfig)
-                .context(context)
-                .encryptor(new MockEncryptor())
-                .build();
-
-        final FRAuth frAuth = FRAuth.builder()
-                .serviceName("Example")
-                .context(context)
-                .sessionManager(SessionManager.builder()
-                        .tokenManager(Config.getInstance().getTokenManager())
-                        .singleSignOnManager(singleSignOnManager)
-                        .build())
-                .serverConfig(serverConfig)
-                .build();
-
-        NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
-
-            @Override
-            public void onCallbackReceived(Node state) {
-                if (state.getCallback(NameCallback.class) != null) {
-                    state.getCallback(NameCallback.class).setName("tester");
-                    state.next(context, this);
-                    return;
-                }
-
-                if (state.getCallback(PasswordCallback.class) != null) {
-                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
-                    state.next(context, this);
-                }
-            }
-        };
-
-        frAuth.start(context, nodeListenerFuture);
-
-        RecordedRequest recordedRequest = server.takeRequest(); //username
-        recordedRequest = server.takeRequest(); //password
-        recordedRequest = server.takeRequest(); //session
-        //calling start
-        recordedRequest = server.takeRequest(); //logout
-        recordedRequest = server.takeRequest(); //username
-        recordedRequest = server.takeRequest(); //password
-        recordedRequest = server.takeRequest(); //session
-
-        Assert.assertTrue(nodeListenerFuture.get() instanceof SSOToken);
-
-
-
-    }
 }

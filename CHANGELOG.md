@@ -5,7 +5,7 @@
 - Biometric Authentication with WebAuthn
 - Exposed Revoke access token method [SDKS-980] - 'FRUser.getCurrentUser().revokeAccessToken(Listener)'
 - Support Apple SignIn
-
+- Remove deprecated methods (Config.getInstance(Context), FRAuth Builder, FRUserViewModel)
 
 # Version 2.2.0
 
