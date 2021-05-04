@@ -20,11 +20,23 @@ public class IdPResult {
     private final String token;
     private final Map<String, String> additionalParameters;
 
+    /**
+     * Constructor to create {@link IdPResult} with Token and additional parameters
+     *
+     * @param token                The Token after authentication with Identity Provider
+     * @param additionalParameters Addition parameters to inject to following /authenticate request
+     *                             for the authentication tree
+     */
     public IdPResult(String token, Map<String, String> additionalParameters) {
         this.token = token;
         this.additionalParameters = additionalParameters;
     }
 
+    /**
+     * Constructor to create {@link IdPResult} with Token and additional parameters
+     *
+     * @param token The Token after authentication with Identity Provider
+     */
     public IdPResult(String token) {
         this.token = token;
         this.additionalParameters = null;
