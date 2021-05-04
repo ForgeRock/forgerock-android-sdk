@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -19,7 +19,12 @@ public class RootAppDetector extends PackageDetector {
             "com.koushikdutta.superuser",
             "com.thirdparty.superuser",
             "com.yellowes.su",
-            "com.topjohnwu.magisk"
+            "com.topjohnwu.magisk",
+            "com.kingroot.kinguser",
+            "com.kingo.root",
+            "com.smedialink.oneclickroot",
+            "com.zhiqupk.root.global",
+            "com.alephzain.framaroot"
     };
 
     @Override

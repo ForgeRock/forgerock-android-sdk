@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,6 +15,8 @@ import org.forgerock.android.auth.detector.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static android.os.Build.VERSION.SDK_INT;
 
 @RunWith(AndroidJUnit4.class)
 public class RootDeviceTest {
@@ -35,7 +37,7 @@ public class RootDeviceTest {
                 .detector(new DangerousPropertyDetector())
                 .build();
         //Expect 1.0 on emulator
-        if (isEmulator()) {
+        if (isEmulator() && SDK_INT < 30) {
             Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
         } else {
             Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);
@@ -88,7 +90,7 @@ public class RootDeviceTest {
                 .detector(new RootProgramFileDetector())
                 .build();
         //expect 1.0 on emulator
-        if (isEmulator()) {
+        if (isEmulator() && SDK_INT < 30) {
             Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
         } else {
             Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);
@@ -139,7 +141,6 @@ public class RootDeviceTest {
         if (!isEmulator()) {
             Assert.assertEquals(0.0, FRRootDetector.DEFAULT.isRooted(context), 0.0001);
         }
-
     }
 
     private boolean isEmulator() {
