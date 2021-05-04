@@ -34,8 +34,7 @@ import java.util.List;
 public class FacebookSignInHandler extends Fragment implements IdPHandler {
 
     public static final String TAG = FacebookSignInHandler.class.getName();
-    public static final String IDP_CLIENT = "IDP_CLIENT";
-    public FRListener<String> listener;
+    public FRListener<IdPResult> listener;
     private CallbackManager callbackManager;
     private IdPClient idPClient;
 
@@ -55,7 +54,7 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Listener.onSuccess(listener, loginResult.getAccessToken().getToken());
+                Listener.onSuccess(listener, new IdPResult(loginResult.getAccessToken().getToken()));
             }
 
             @Override
@@ -79,22 +78,21 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
 
     @Override
     public String getTokenType() {
-        return "access_token";
+        return ACCESS_TOKEN;
     }
 
-
     @Override
-    public void signIn(IdPClient idPClient, FRListener<String> listener) {
+    public void signIn(IdPClient idPClient, FRListener<IdPResult> listener) {
         FragmentManager fragmentManager = InitProvider.getCurrentActivityAsFragmentActivity().getSupportFragmentManager();
         signIn(fragmentManager, idPClient, listener);
     }
 
     @Override
-    public void signIn(Fragment fragment, IdPClient idPClient, FRListener<String> listener) {
+    public void signIn(Fragment fragment, IdPClient idPClient, FRListener<IdPResult> listener) {
         signIn(fragment.getFragmentManager(), idPClient, listener);
     }
 
-    private void signIn(FragmentManager fragmentManager, IdPClient idPClient, FRListener<String> listener) {
+    private void signIn(FragmentManager fragmentManager, IdPClient idPClient, FRListener<IdPResult> listener) {
         FacebookSignInHandler existing = (FacebookSignInHandler) fragmentManager.findFragmentByTag(TAG);
         if (existing != null) {
             existing.listener = null;

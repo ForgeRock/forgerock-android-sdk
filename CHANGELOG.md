@@ -4,6 +4,7 @@
 - Social Login support for Google and Facebook
 - Biometric Authentication with WebAuthn
 - Exposed Revoke access token method [SDKS-980] - 'FRUser.getCurrentUser().revokeAccessToken(Listener)'
+- Support Apple SignIn
 
 
 # Version 2.2.0

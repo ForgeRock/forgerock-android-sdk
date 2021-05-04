@@ -12,16 +12,20 @@ import androidx.fragment.app.Fragment;
 
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Listener;
+import org.forgerock.android.auth.idp.AppleSignInHandler;
 import org.forgerock.android.auth.idp.FacebookSignInHandler;
 import org.forgerock.android.auth.idp.GoogleSignInHandler;
 import org.forgerock.android.auth.idp.IdPClient;
 import org.forgerock.android.auth.idp.IdPHandler;
+import org.forgerock.android.auth.idp.IdPResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +35,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Getter
-public class IdPCallback extends AbstractCallback implements IdPClient {
+public class IdPCallback extends AbstractCallback implements IdPClient, AdditionalParameterCallback {
 
     private String provider;
     private String clientId;
@@ -41,6 +45,7 @@ public class IdPCallback extends AbstractCallback implements IdPClient {
     private List<String> acrValues;
     private String request;
     private String requestUri;
+    private final Map<String, String> additionalParameters = new HashMap<>();
 
     @Keep
     public IdPCallback(JSONObject jsonObject, int index) {
@@ -150,12 +155,15 @@ public class IdPCallback extends AbstractCallback implements IdPClient {
     }
 
 
-    private FRListener<String> getResultListener(IdPHandler idPHandler, FRListener<Void> listener) {
-        return new FRListener<String>() {
+    private FRListener<IdPResult> getResultListener(IdPHandler idPHandler, FRListener<Void> listener) {
+        return new FRListener<IdPResult>() {
             @Override
-            public void onSuccess(String result) {
-                setToken(result);
+            public void onSuccess(IdPResult result) {
+                if (result.getAdditionalParameters() != null) {
+                    additionalParameters.putAll(result.getAdditionalParameters());
+                }
                 setTokenType(idPHandler.getTokenType());
+                setToken(result.getToken());
                 Listener.onSuccess(listener, null);
             }
 
@@ -177,10 +185,16 @@ public class IdPCallback extends AbstractCallback implements IdPClient {
             idPHandler = new GoogleSignInHandler();
         } else if (provider.toLowerCase().contains("facebook")) {
             idPHandler = new FacebookSignInHandler();
+        } else if (provider.toLowerCase().contains("apple")) {
+            idPHandler = new AppleSignInHandler();
         }
         return idPHandler;
     }
 
 
+    @Override
+    public Map<String, String> getAdditionalParameters() {
+        return additionalParameters;
+    }
 }
 

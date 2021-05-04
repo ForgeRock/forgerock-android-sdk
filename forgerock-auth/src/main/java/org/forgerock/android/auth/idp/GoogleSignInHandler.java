@@ -31,18 +31,18 @@ import org.forgerock.android.auth.Listener;
 public class GoogleSignInHandler extends Fragment implements IdPHandler {
 
     public static final int RC_SIGN_IN = 1000;
-    public static final String CLIENT_ID = "CLIENT_ID";
     public static final String ENABLE_SERVER_SIDE_ACCESS = "ENABLE_SERVER_SIDE_ACCESS";
     public static final String TAG = GoogleSignInHandler.class.getName();
-    private String clientId;
-    private FRListener<String> listener;
+    private FRListener<IdPResult> listener;
     private boolean enableServerSideAccess;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String clientId = null;
         if (getArguments() != null) {
-            clientId = getArguments().getString(CLIENT_ID);
+            IdPClient idPClient = ((IdPClient) getArguments().getSerializable(IDP_CLIENT));
+            clientId = idPClient.getClientId();
             enableServerSideAccess = getArguments().getBoolean(ENABLE_SERVER_SIDE_ACCESS);
         }
         GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -68,7 +68,7 @@ public class GoogleSignInHandler extends Fragment implements IdPHandler {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Listener.onSuccess(listener, account.getIdToken());
+                Listener.onSuccess(listener, new IdPResult(account.getIdToken()));
             } catch (ApiException e) {
                 Listener.onException(listener, e);
             }
@@ -78,23 +78,23 @@ public class GoogleSignInHandler extends Fragment implements IdPHandler {
     @Override
     public String getTokenType() {
         if (enableServerSideAccess) {
-            return "authorization_code";
+            return AUTHORIZATION_CODE;
         }
-        return "id_token";
+        return ID_TOKEN;
     }
 
     @Override
-    public void signIn(IdPClient idPClient, FRListener<String> listener) {
+    public void signIn(IdPClient idPClient, FRListener<IdPResult> listener) {
         FragmentManager fragmentManager = InitProvider.getCurrentActivityAsFragmentActivity().getSupportFragmentManager();
         signIn(fragmentManager, idPClient, listener);
     }
 
     @Override
-    public void signIn(Fragment fragment, IdPClient idPClient, FRListener<String> listener) {
+    public void signIn(Fragment fragment, IdPClient idPClient, FRListener<IdPResult> listener) {
         signIn(fragment.getFragmentManager(), idPClient, listener);
     }
 
-    private void signIn(FragmentManager fragmentManager, IdPClient idPClient, FRListener<String> listener) {
+    private void signIn(FragmentManager fragmentManager, IdPClient idPClient, FRListener<IdPResult> listener) {
         GoogleSignInHandler existing = (GoogleSignInHandler) fragmentManager.findFragmentByTag(TAG);
         if (existing != null) {
             existing.listener = null;
@@ -102,7 +102,7 @@ public class GoogleSignInHandler extends Fragment implements IdPHandler {
         }
 
         Bundle args = new Bundle();
-        args.putString(CLIENT_ID, idPClient.getClientId());
+        args.putSerializable(IDP_CLIENT, idPClient);
         args.putBoolean(ENABLE_SERVER_SIDE_ACCESS, false);
         setArguments(args);
         this.listener = listener;

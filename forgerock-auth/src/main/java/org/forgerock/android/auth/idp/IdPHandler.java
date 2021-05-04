@@ -16,6 +16,11 @@ import org.forgerock.android.auth.FRListener;
  */
 public interface IdPHandler {
 
+    String ID_TOKEN = "id_token";
+    String AUTHORIZATION_CODE = "authorization_code";
+    String ACCESS_TOKEN = "access_token";
+    String IDP_CLIENT = "IDP_CLIENT";
+
     /**
      * Retrieve the result token type (access_token, id_token, authorization_code)
      *
@@ -30,7 +35,7 @@ public interface IdPHandler {
      * @param idPClient The Idp configuration.
      * @param listener  Listener to listen for the result.
      */
-    void signIn(IdPClient idPClient, FRListener<String> listener);
+    void signIn(IdPClient idPClient, FRListener<IdPResult> listener);
 
     /**
      * Perform the Identity Provider sign in with the current active Fragment
@@ -39,5 +44,5 @@ public interface IdPHandler {
      * @param idPClient The Idp configuration.
      * @param listener  Listener to listen for the result.
      */
-    void signIn(Fragment fragment, IdPClient idPClient, FRListener<String> listener);
+    void signIn(Fragment fragment, IdPClient idPClient, FRListener<IdPResult> listener);
 }
