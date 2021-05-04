@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,8 +34,9 @@ public class RootDeviceTest {
         RootDetector rootDetector = FRRootDetector.builder()
                 .detector(new DangerousPropertyDetector())
                 .build();
+        int sdkVersion = android.os.Build.VERSION.SDK_INT;
         //Expect 1.0 on emulator
-        if (isEmulator()) {
+        if (isEmulator() && sdkVersion < 30) {
             Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
         } else {
             Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);
@@ -88,7 +89,8 @@ public class RootDeviceTest {
                 .detector(new RootProgramFileDetector())
                 .build();
         //expect 1.0 on emulator
-        if (isEmulator()) {
+        int sdkVersion = android.os.Build.VERSION.SDK_INT;
+        if (isEmulator() && sdkVersion < 30) {
             Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
         } else {
             Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);

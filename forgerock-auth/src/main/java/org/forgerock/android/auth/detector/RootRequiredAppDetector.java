@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -22,7 +22,26 @@ public class RootRequiredAppDetector extends PackageDetector {
             "com.ramdroid.appquarantine",
             "com.ramdroid.appquarantinepro",
             "com.android.vending.billing.InAppBillingService.COIN",
-            "com.chelpus.luckypatcher"
+            "com.android.vending.billing.InAppBillingService.LUCK",
+            "com.chelpus.luckypatcher",
+            "com.blackmartalpha",
+            "org.blackmart.market",
+            "com.allinone.free",
+            "com.repodroid.app",
+            "org.creeplays.hack",
+            "com.baseappfull.fwd",
+            "com.zmapp",
+            "com.dv.marketmod.installer",
+            "org.mobilism.android",
+            "com.android.wp.net.log",
+            "com.android.camera.update",
+            "cc.madkite.freedom",
+            "com.solohsu.android.edxp.manager",
+            "org.meowcat.edxposed.manager",
+            "com.xmodgame",
+            "com.cih.game_cih",
+            "com.charles.lpoqasert",
+            "catch_.me_.if_.you_.can_"
     };
 
     @Override
