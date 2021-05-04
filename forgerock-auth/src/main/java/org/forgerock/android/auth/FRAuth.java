@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -54,10 +54,6 @@ public class FRAuth {
         }
     }
 
-    /**
-     * @deprecated As of release 1.1, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
-     */
-    @Deprecated
     @Builder
     private FRAuth(@NonNull Context context,
                    String serviceName,
@@ -86,19 +82,6 @@ public class FRAuth {
         authService = builder.build();
     }
 
-    /**
-     * Discard the existing user session and trigger the Authentication Tree flow process.
-     *
-     * @param context  The Application Context
-     * @param listener Listener for receiving {@link FRAuth} related changes
-     * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
-     */
-    @Deprecated
-    public void start(final Context context, final NodeListener<?> listener) {
-        sessionManager.close();
-        authService.next(context, listener);
-    }
-
     static FRAuthBuilder builder() {
         return new FRAuthBuilder();
     }
@@ -108,10 +91,8 @@ public class FRAuth {
      *
      * @param context  The Application Context
      * @param listener Listener for receiving {@link FRAuth} related changes
-     * @deprecated As of release 2.0, replaced by {@link FRSession#authenticate(Context, String, NodeListener)} ()}
      */
-    @Deprecated
-    public void next(final Context context, final NodeListener<?> listener) {
+    void next(final Context context, final NodeListener<?> listener) {
         authService.next(context, listener);
     }
 
