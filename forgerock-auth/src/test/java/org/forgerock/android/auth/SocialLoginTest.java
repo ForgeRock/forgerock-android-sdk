@@ -157,7 +157,7 @@ public class SocialLoginTest extends BaseTest {
         //Wait for the idPCallback to finish
         executeTree.await();
 
-        idPCallback[0].signIn(new FRListener<Void>() {
+        idPCallback[0].signIn(null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 finalState[0].next(context, nodeListenerFuture);
@@ -259,7 +259,7 @@ public class SocialLoginTest extends BaseTest {
         executeTree.await();
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        idPCallback[0].signIn(new FRListener<Void>() {
+        idPCallback[0].signIn(null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 countDownLatch.countDown();
@@ -324,7 +324,7 @@ public class SocialLoginTest extends BaseTest {
         //Wait for the idPCallback to finish
         executeTree.await();
 
-        idPCallback[0].signIn(new FRListener<Void>() {
+        idPCallback[0].signIn(null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 finalState[0].next(context, nodeListenerFuture);
@@ -420,7 +420,7 @@ public class SocialLoginTest extends BaseTest {
 
         final boolean[] result = {false};
         CountDownLatch signInCountDownLatch = new CountDownLatch(1);
-        idPCallback[0].signIn(new FRListener<Void>() {
+        idPCallback[0].signIn(null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 fail("Expect fail when no nonce");
@@ -464,7 +464,7 @@ public class SocialLoginTest extends BaseTest {
 
                     NodeListenerFuture<FRSession> nodeListener = this;
                     IdPCallback idPCallback = state.getCallback(IdPCallback.class);
-                    idPCallback.signIn(new FRListener<Void>() {
+                    idPCallback.signIn(null, new FRListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             fail();
