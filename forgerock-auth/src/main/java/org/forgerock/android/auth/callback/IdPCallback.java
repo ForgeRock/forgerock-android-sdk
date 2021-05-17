@@ -8,6 +8,7 @@
 package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import org.forgerock.android.auth.FRListener;
@@ -127,14 +128,18 @@ public class IdPCallback extends AbstractCallback implements IdPClient, Addition
     /**
      * Perform the Identity Provider sign in with the current active Fragment
      *
-     * @param fragment The Active Fragment
-     * @param listener Listener to listen for the result.
+     * @param fragment   The Active Fragment
+     * @param idPHandler Optional {@link IdPHandler} to perform sign in, if not provided,
+     *                   SDK automatically selects the default implementation
+     * @param listener   Listener to listen for the result.
      */
-    public void signIn(Fragment fragment, FRListener<Void> listener) {
-        IdPHandler idPHandler = getIdPHandler();
+    public void signIn(Fragment fragment, @Nullable IdPHandler idPHandler, FRListener<Void> listener) {
         if (idPHandler == null) {
-            Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
-            return;
+            idPHandler = getIdPHandler();
+            if (idPHandler == null) {
+                Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
+                return;
+            }
         }
         idPHandler.signIn(fragment, this, getResultListener(idPHandler, listener));
     }
@@ -143,13 +148,17 @@ public class IdPCallback extends AbstractCallback implements IdPClient, Addition
      * Perform the Identity Provider sign in with the current active
      * {@link androidx.fragment.app.FragmentActivity}
      *
-     * @param listener Listener to listen for the result.
+     * @param idPHandler Optional {@link IdPHandler} to perform sign in, if not provided,
+     *                   SDK automatically selects the default implementation
+     * @param listener   Listener to listen for the result.
      */
-    public void signIn(FRListener<Void> listener) {
-        IdPHandler idPHandler = getIdPHandler();
+    public void signIn(@Nullable IdPHandler idPHandler, FRListener<Void> listener) {
         if (idPHandler == null) {
-            Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
-            return;
+            idPHandler = getIdPHandler();
+            if (idPHandler == null) {
+                Listener.onException(listener, new UnsupportedOperationException("Unsupported provider: " + provider));
+                return;
+            }
         }
         idPHandler.signIn(this, getResultListener(idPHandler, listener));
     }

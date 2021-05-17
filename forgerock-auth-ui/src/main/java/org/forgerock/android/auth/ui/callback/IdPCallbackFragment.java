@@ -49,7 +49,7 @@ public class IdPCallbackFragment extends CallbackFragment<IdPCallback> {
     }
 
     private void proceed() {
-        callback.signIn(this, new FRListener<Void>() {
+        callback.signIn(this, null, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 message.setVisibility(GONE);
