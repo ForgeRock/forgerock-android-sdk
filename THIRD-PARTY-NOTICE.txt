@@ -1,0 +1,114 @@
+This project uses the following third party libraries:
+
+OkHttp
+------
+OkHttp is an HTTP client
+
+Project: https://square.github.io/okhttp/
+License: https://square.github.io/okhttp/#license
+
+OKHttp Logging Interceptor
+--------------------------
+An OkHttp interceptor which logs HTTP request and response data.
+
+Project: https://square.github.io/okhttp/interceptors/
+License: https://square.github.io/okhttp/#license
+
+Lombok
+------
+Project Lombok is a java library that automatically plugs into your editor and build tools, spicing up your java.
+
+Project: https://projectlombok.org/
+License: https://github.com/projectlombok/lombok/blob/master/LICENSE
+
+Nimbus JOSE
+-----------
+The most popular and robust Java and Android library for JSON Web Tokens (JWT)
+
+Project: https://connect2id.com/products/nimbus-jose-jwt
+License: https://www.apache.org/licenses/LICENSE-2.0.html
+
+Google
+------
+Google libraries for location, reCAPTCHA, fido, google sign in, and push notification
+
+Project: play-service-location, play-services-safetynet, play-services-fido, play-services-auth, firebase-messaging
+License: https://developer.android.com/studio/terms.html
+
+Androidx
+--------
+The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs.
+
+Project: http://developer.android.com/tools/extras/support-library.html
+License: http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Robolectric (Test)
+------------------
+Robolectric is the industry-standard unit testing framework for Android. With Robolectric, your tests run in a simulated Android environment inside a JVM, without the overhead of an emulator.
+
+Project: https://github.com/robolectric/robolectric
+License: https://github.com/robolectric/robolectric/blob/master/LICENSE
+
+Common-io (Test)
+----------------
+Commons IO is a library of utilities to assist with developing IO functionality.
+
+Project: https://commons.apache.org/proper/commons-io/
+License: https://www.apache.org/licenses/LICENSE-2.0
+
+AssertJ (Test)
+--------------
+AssertJ is a Java library that provides a rich set of assertions and truly helpful error messages, improves test code readability, and is designed to be super easy to use within your favorite IDE.
+
+Project: https://assertj.github.io/doc/#assertj-core
+License: https://www.apache.org/licenses/LICENSE-2.0
+
+JUnit (Test)
+------------
+JUnit is a unit testing framework for Java,
+
+Project: https://junit.org/
+License: https://opensource.org/licenses/EPL-2.0
+
+Mockito (Test)
+--------------
+Mocking framework for Java
+
+Project: https://site.mockito.org/
+License: https://github.com/mockito/mockito/blob/main/LICENSE
+
+PowerMock (Test)
+----------------
+PowerMock is a framework that extends other mock libraries such as EasyMock with more powerful capabilities.
+
+Project: https://github.com/powermock/powermock
+License: https://github.com/powermock/powermock/blob/release/2.x/LICENSE.txt
+
+MockWebServer (Test)
+--------------------
+A scriptable web server for testing HTTP clients
+
+Project: https://github.com/square/okhttp/tree/master/mockwebserver
+License: https://github.com/square/okhttp/tree/master/mockwebserver#license
+
+Facebook Login (Optional)
+-------------------------
+A convenient way for Facebook’s billions of global users to log into your app or website.
+
+Project: https://developers.facebook.com/
+License: http://developers.facebook.com/policy/
+
+AppAuth (Optional)
+------------------
+AppAuth for Android is a client SDK for communicating with OAuth 2.0 and OpenID Connect providers.
+
+Project: https://github.com/openid/AppAuth-Android
+License: https://github.com/openid/AppAuth-Android/blob/master/LICENSE
+
+RootBeer (Implementation Reference)
+-----------------------------------
+Root Detection library
+
+Project: https://github.com/scottyab/rootbeer
+License: https://github.com/scottyab/rootbeer#licence
+
