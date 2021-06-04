@@ -55,6 +55,4 @@ dependencies {
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
-
-    implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
 }
