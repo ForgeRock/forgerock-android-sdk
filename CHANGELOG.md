@@ -1,13 +1,12 @@
-## [Unreleased]
+# Version 3.0.0
 
+## [3.0.0]
 #### Added
 - Social Login support for Google and Facebook
 - Biometric Authentication with WebAuthn
 - Exposed Revoke access token method [SDKS-980] - 'FRUser.getCurrentUser().revokeAccessToken(Listener)'
 - Support Apple SignIn
 - Remove deprecated methods (Config.getInstance(Context), FRAuth Builder, FRUserViewModel)
-
-# Version 2.2.0
 
 ## [2.2.0]
 #### Added
