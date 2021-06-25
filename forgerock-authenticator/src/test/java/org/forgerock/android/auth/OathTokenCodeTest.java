@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,10 +10,13 @@ package org.forgerock.android.auth;
 import org.forgerock.android.auth.util.TimeKeeper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@RunWith(RobolectricTestRunner.class)
 public class OathTokenCodeTest {
 
     private final String CODE = "CODE";
@@ -89,6 +92,27 @@ public class OathTokenCodeTest {
     public void testShouldReportFullProgressAfterExpiry() {
         timeKeeper.timeTravel(EXPIRY_DELAY * 2);
         assertEquals(oathTokenCode.getProgress(), 1000);
+    }
+
+    @Test
+    public void testShouldParseToJsonSuccessfully() {
+        long now = System.currentTimeMillis();
+
+        String json = "{" +
+                "\"code\":\"" + CODE + "\"," +
+                "\"start\":" + now + "," +
+                "\"until\":" + (now + EXPIRY_DELAY) + "," +
+                "\"oathType\":\"" + OathMechanism.TokenType.HOTP.toString() + "\"}";
+
+        OathTokenCode oathTokenCode = new OathTokenCode(timeKeeper,
+                CODE, now,
+                now + EXPIRY_DELAY,
+                OathMechanism.TokenType.HOTP);
+
+        String oathTokenCodeAsJson = oathTokenCode.toJson();
+
+        assertNotNull(oathTokenCodeAsJson);
+        assertEquals(json, oathTokenCodeAsJson);
     }
 
 }

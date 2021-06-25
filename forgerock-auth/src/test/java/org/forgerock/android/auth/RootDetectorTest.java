@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -81,7 +81,7 @@ public class RootDetectorTest {
         RootDetector rootDetector = FRRootDetector.builder()
                 .detector(new RootProgramFileDetector())
                 .build();
-        Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);
+        Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
     }
 
     @Test
@@ -117,7 +117,6 @@ public class RootDetectorTest {
                 .detector(new RootApkDetector())
                 .detector(new RootAppDetector())
                 .detector(new RootCloakingAppDetector())
-                .detector(new RootProgramFileDetector())
                 .detector(new RootRequiredAppDetector())
                 .detector(new BusyBoxProgramFileDetector())
                 .build();

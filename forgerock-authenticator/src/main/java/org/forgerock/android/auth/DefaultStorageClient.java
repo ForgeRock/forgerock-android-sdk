@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -151,12 +151,8 @@ class DefaultStorageClient implements StorageClient {
                 .commit();
     }
 
-    /**
-     * Get all notifications stored in the system.
-     *
-     * @return The complete list of notifications.
-     */
-    private List<PushNotification> getAllNotifications() {
+    @Override
+    public List<PushNotification> getAllNotifications() {
         List<PushNotification> pushNotificationList = new ArrayList<>();
 
         Map<String,?> keys = notificationData.getAll();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -205,6 +205,26 @@ public class FRUserMockTest extends BaseTest {
         frUserHappyPath();
         AccessToken accessToken = FRUser.getCurrentUser().getAccessToken();
         assertNotNull(accessToken.getValue());
+    }
+
+    @Test
+    public void testRevokeAccessToken() throws Exception {
+        frUserHappyPath();
+
+        FRListenerFuture<Void> future = new FRListenerFuture<>();
+        assertNotNull(FRUser.getCurrentUser());
+        //Check if the token exists
+        assertTrue(Config.getInstance().getTokenManager().hasToken());
+        //Revoke the token
+        FRUser.getCurrentUser().revokeAccessToken(future);
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            //Timeout exception expected
+            assertEquals("java.net.SocketTimeoutException: timeout", e.getMessage());
+        }
+        //Check that the token has been cleared
+        assertFalse(Config.getInstance().getTokenManager().hasToken());
     }
 
     @Test

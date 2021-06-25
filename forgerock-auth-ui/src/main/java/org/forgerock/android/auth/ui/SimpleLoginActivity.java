@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,7 +20,7 @@ import org.forgerock.android.auth.Logger;
 public class SimpleLoginActivity extends AppCompatActivity implements FRListener<Void> {
 
     private static final String TAG = SimpleLoginActivity.class.getSimpleName();
-    public static final String EXCEPTION = "EXCEPTION";
+    public static final String ERROR_EXTRA = "ERROR_EXTRA";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +38,8 @@ public class SimpleLoginActivity extends AppCompatActivity implements FRListener
     public void onException(Exception e) {
         Logger.error(TAG, e, e.getMessage());
         Intent intent = new Intent();
-        intent.putExtra(EXCEPTION, e);
-        setResult(Activity.RESULT_CANCELED, intent);
+        intent.putExtra(ERROR_EXTRA, e.getMessage());
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,6 +10,8 @@ package org.forgerock.android.auth.detector;
 import android.content.Context;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Check file exists in predefined path
@@ -38,7 +40,7 @@ public abstract class FileDetector implements RootDetector {
 
         boolean result = false;
 
-        for (String path : PATHS) {
+        for (String path : getPaths()) {
             File f = new File(path, filename);
             boolean fileExists = f.exists();
             if (fileExists) {
@@ -48,6 +50,32 @@ public abstract class FileDetector implements RootDetector {
 
         return result;
     }
+
+    private String[] getPaths() {
+        ArrayList<String> paths = new ArrayList<>(Arrays.asList(PATHS));
+
+        String sysPaths = System.getenv("PATH");
+
+        if (sysPaths == null || "".equals(sysPaths)){
+            return paths.toArray(new String[0]);
+        }
+
+        for (String path : sysPaths.split(":")){
+
+            if (!path.endsWith("/")){
+                path = path + '/';
+            }
+
+            if (!paths.contains(path)){
+                paths.add(path);
+            }
+        }
+
+        return paths.toArray(new String[0]);
+    }
+
+
+
 
     @Override
     public double isRooted(Context context) {

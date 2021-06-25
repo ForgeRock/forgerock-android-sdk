@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 android {
     compileSdkVersion 30
@@ -15,11 +15,7 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 5
-        versionName "2.2.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -33,121 +29,28 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    configurations {
-        delombok
-    }
-
-    task delombok {
-        def srcJava = 'src/main/java'
-        doLast {
-            ant.echo('Delomboking...')
-            ant.taskdef(name: 'delombok',
-                    classname: 'lombok.delombok.ant.Tasks$Delombok',
-                    classpath: configurations.delombok.asPath)
-            ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
-        }
-    }
-
-    task javadoc(type: Javadoc, dependsOn: delombok) {
-        source = "$buildDir/src-delomboked"
-        destinationDir = new File("$buildDir/generated-javadoc")
-        failOnError = false
-        ext.androidDoc = "${android.sdkDirectory}/docs/reference"
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-        options.linksOffline("http://d.android.com/reference", ext.androidDoc)
-        options.links("http://docs.oracle.com/javase/7/docs/api/")
-        options.links("http://d.android.com/reference/")
-    }
 }
 
-/**
- * JCenter Dependency Manager
- */
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-javadoc.failOnError = false
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-group 'org.forgerock'
-
-project.version = System.getProperty("bintray.version")
-
-bintray {
-    user = System.getProperty("bintray.user")
-    key = System.getProperty("bintray.apiKey")
-
-    configurations = ['archives']
-
-    pkg {
-        repo = 'maven'
-        name = 'forgerock-auth-ui'
-        userOrg = 'forgerock-sdk'
-        desc = 'ForgeRock SDK is a toolkit that allows developers communicate efficiently with ForgeRock OpenAM and ForgeRock Identity Cloud.'
-        licenses = ['MIT']
-        labels = ['aar', 'android', 'oauth', 'security', 'forgerock']
-        publicDownloadNumbers = true
-        vcsUrl = gitUrl
-        issueTrackerUrl = issueUrl
-        websiteUrl = siteUrl
-        version {
-            name = project.version
-            desc = 'Forgerock Android SDK'
-            released = new Date()
-        }
-    }
-}
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'Forgerock Auth UI SDK'
-                url siteUrl
-                licenses {
-                    license {
-                        name 'MIT'
-                        url 'https://opensource.org/licenses/MIT'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-
-                }
-            }
-        }
-    }
-}
+apply from: '../config/javadoc.gradle'
+apply from: '../config/publish.gradle'
 
 dependencies {
 
     api project(':forgerock-auth')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    compileOnly 'com.google.android.gms:play-services-fido:18.1.0'
+    compileOnly 'com.google.android.gms:play-services-auth:19.0.0'
+    compileOnly 'com.facebook.android:facebook-login:7.1.0'
 
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"

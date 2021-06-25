@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.CallbackFactory;
+import org.forgerock.android.auth.callback.DerivableCallback;
 import org.forgerock.android.auth.callback.MetadataCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +30,8 @@ import static org.forgerock.android.auth.Node.STAGE;
  */
 public interface NodeListener<T> extends FRListener<T> {
 
+
+    String TAG = NodeListener.class.getSimpleName();
 
     /**
      * Notify the listener that the {@link AuthService} has been started and moved to the first node.
@@ -76,7 +79,16 @@ public interface NodeListener<T> extends FRListener<T> {
                 //When Callback is not registered to the SDK
                 throw new UnsupportedCallbackException(null, "Callback Type Not Supported: " + cb.getString("type"));
             }
-            callbacks.add(clazz.getConstructor(JSONObject.class, int.class).newInstance(cb, i));
+            Callback callback = clazz.getConstructor(JSONObject.class, int.class).newInstance(cb, i);
+            if (callback instanceof DerivableCallback) {
+                Class<? extends Callback> derivedClass = ((DerivableCallback) callback).getDerivedCallback();
+                if (derivedClass != null) {
+                    callback = derivedClass.getConstructor(JSONObject.class, int.class).newInstance(cb, i);
+                } else {
+                    Logger.debug(TAG, "Derive class not found.");
+                }
+            }
+            callbacks.add(callback);
         }
         return callbacks;
     }

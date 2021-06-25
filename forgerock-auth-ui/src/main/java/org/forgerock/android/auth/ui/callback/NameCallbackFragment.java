@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -32,6 +32,9 @@ public class NameCallbackFragment extends CallbackFragment<NameCallback> {
         final View view = inflater.inflate(R.layout.fragment_name_callback, container, false);
 
         EditText text = view.findViewById(R.id.username);
+        if (callback.getInputValue() != null) {
+            text.setText(callback.getInputValue().toString());
+        }
         TextInputLayout textInputLayout = view.findViewById(R.id.usernameInputLayout);
         textInputLayout.setHint(callback.getPrompt());
         text.addTextChangedListener(new TextWatcher() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -214,6 +214,10 @@ class AuthenticatorManager {
             throw new InvalidNotificationException("Cannot process Push notification. " +
                     "FCM token was not provided during SDK initialization.");
         }
+    }
+
+    List<PushNotification> getAllNotifications() {
+        return storageClient.getAllNotifications();
     }
 
     List<PushNotification> getAllNotifications(@NonNull Mechanism mechanism) {

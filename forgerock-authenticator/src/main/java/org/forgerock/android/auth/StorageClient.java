@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -71,6 +71,12 @@ public interface StorageClient {
      * @return boolean as result of the operation
      */
     boolean setMechanism(Mechanism mechanism);
+
+    /**
+     * Get all notifications from the storage system.
+     * @return The complete list of notifications.
+     */
+    List<PushNotification> getAllNotifications();
 
     /**
      * Get all notifications for within the mechanism.
