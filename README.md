@@ -7,7 +7,7 @@
   </a>
   <h2 align="center">ForgeRock SDK for Android</h2>
   <p align="center">
-    <a href="./blob/master/CHANGELOG.md">Change Log</a>
+    <a href="CHANGELOG.md">Change Log</a>
     ·
     <a href="#support">Support</a>
     ·
