@@ -79,9 +79,15 @@
             android:configChanges="orientation|screenSize"
             android:label="Notifications"
             tools:ignore="LockedOrientationActivity" />
-<!--        <meta-data-->
-<!--            android:name="com.google.mlkit.vision.DEPENDENCIES"-->
-<!--            android:value="barcode" />-->
+
+        <!--
+         This optional, but recommended setting automatically download the ML model to the device
+         after this app is installed from the Play Store. If you remove this meta-data, the model
+         will be downloaded the first time the user try to scan the QRCode.
+        -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
 
         <service
             android:name=".controller.FcmService"
