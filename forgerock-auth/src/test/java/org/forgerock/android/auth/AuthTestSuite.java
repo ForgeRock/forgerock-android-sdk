@@ -68,6 +68,8 @@ import org.junit.runners.Suite;
         //SocialLogin
         SocialLoginTest.class,
 
+        FRLifeCycleListenerTest.class
+
 })
 public class AuthTestSuite {
 }

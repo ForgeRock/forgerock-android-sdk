@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,10 +7,15 @@
 
 package org.forgerock.android.auth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Matchers.anyString;
+
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Base64;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,14 +24,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Matchers.anyString;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({KeyStoreManager.class, Settings.Secure.class, Base64.class})
@@ -55,9 +58,9 @@ public class KeyStoreManagerTest {
         PowerMockito.mockStatic(Base64.class);
         PowerMockito.when(Base64.encodeToString(any(), anyInt())).thenReturn("data");
 
-
         PowerMockito.mockStatic(KeyPairGenerator.class);
         keyStoreManager = PowerMockito.spy(new KeyStoreManager(context));
+
     }
 
     @Test
@@ -65,4 +68,11 @@ public class KeyStoreManagerTest {
         String identifier = new String(keyStoreManager.getIdentifierKey("test").getEncoded());
         Assert.assertEquals("public key", identifier);
     }
+
+    @Test
+    public void testGetCertificate() throws GeneralSecurityException, IOException {
+        Certificate certificate = keyStoreManager.getCertificate("test");
+        Assertions.assertThat(certificate).isNotNull();
+    }
+
 }

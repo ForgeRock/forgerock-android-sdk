@@ -38,12 +38,12 @@ import java.util.List;
  */
 public class WebAuthnAuthentication extends WebAuthn {
 
-    private final List<PublicKeyCredentialDescriptor> allowCredentials;
-    private final String relayingPartyId;
-    private final Double timeout;
-    private final byte[] challenge;
+    protected final List<PublicKeyCredentialDescriptor> allowCredentials;
+    protected final String relayingPartyId;
+    protected final Double timeout;
+    protected final byte[] challenge;
     //Keep it just for completeness, current user verification is required
-    private final String userVerification;
+    protected final String userVerification;
 
     /**
      * Constructor to create WebAuthnAuthentication
@@ -94,31 +94,10 @@ public class WebAuthnAuthentication extends WebAuthn {
                              @NonNull FragmentManager fragmentManager,
                              @Nullable WebAuthnKeySelector webAuthnKeySelector,
                              @NonNull WebAuthnListener listener) {
-        authenticate(context, fragmentManager, webAuthnKeySelector,
-                WebAuthnDataRepository.builder().context(context).build(),
-                listener);
-    }
-
-
-    /**
-     * Perform WebAuthn Authentication
-     *
-     * @param context             The Application Context
-     * @param fragmentManager     The FragmentManager to manage the lifecycle of Fido API Callback
-     * @param webAuthnKeySelector The Selector for user to select which credential to use (UsernameLess)
-     * @param repository          The repository to store key credential (UsernameLess)
-     * @param listener            The Listener for the result event.
-     */
-    @VisibleForTesting
-    public void authenticate(@NonNull Context context,
-                             @NonNull FragmentManager fragmentManager,
-                             @Nullable WebAuthnKeySelector webAuthnKeySelector,
-                             @NonNull WebAuthnDataRepository repository,
-                             @NonNull WebAuthnListener listener) {
 
         //username less when allowCredentials is empty
         if (allowCredentials.isEmpty()) {
-            List<PublicKeyCredentialSource> publicKeyCredentialSources = repository.getPublicKeyCredentialSource(relayingPartyId);
+            List<PublicKeyCredentialSource> publicKeyCredentialSources = getPublicKeyCredentialSource(context);
             if (publicKeyCredentialSources.isEmpty()) {
                 authenticate(context, fragmentManager, listener, allowCredentials, null);
                 return;
@@ -156,12 +135,22 @@ public class WebAuthnAuthentication extends WebAuthn {
         }
     }
 
-    @VisibleForTesting
+    /**
+     * Retrieve the {@link PublicKeyCredentialSource}
+     *
+     * @param context The Application Context
+     * @return The stored {@link PublicKeyCredentialSource}
+     */
+    protected List<PublicKeyCredentialSource> getPublicKeyCredentialSource(Context context) {
+        return WebAuthnDataRepository.builder()
+                .context(context).build()
+                .getPublicKeyCredentialSource(relayingPartyId);
+    }
+
     protected Task<PendingIntent> getSignPendingIntent(Fido2ApiClient fido2ApiClient, PublicKeyCredentialRequestOptions options) {
         return fido2ApiClient.getSignPendingIntent(options);
     }
 
-    @VisibleForTesting
     protected void authenticate(Context context, FragmentManager fragmentManager,
                                 WebAuthnListener listener,
                                 List<PublicKeyCredentialDescriptor> allowCredentials,

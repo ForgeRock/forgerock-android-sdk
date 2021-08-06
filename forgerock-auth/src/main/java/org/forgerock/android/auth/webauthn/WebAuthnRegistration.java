@@ -43,18 +43,18 @@ import java.util.List;
  */
 public class WebAuthnRegistration extends WebAuthn {
 
-    private final String relyingPartyName;
-    private final AttestationConveyancePreference attestationPreference;
-    private final String displayName;
-    private final String relyingPartyId;
-    private final String userName;
-    private final AuthenticatorSelectionCriteria authenticatorSelection;
-    private final boolean requireResidentKey;
-    private final String userId;
-    private final Double timeout;
-    private final List<PublicKeyCredentialDescriptor> excludeCredentials;
-    private final List<PublicKeyCredentialParameters> pubKeyCredParams;
-    private final byte[] challenge;
+    protected final String relyingPartyName;
+    protected final AttestationConveyancePreference attestationPreference;
+    protected final String displayName;
+    protected final String relyingPartyId;
+    protected final String userName;
+    protected final AuthenticatorSelectionCriteria authenticatorSelection;
+    protected final boolean requireResidentKey;
+    protected final String userId;
+    protected final Double timeout;
+    protected final List<PublicKeyCredentialDescriptor> excludeCredentials;
+    protected final List<PublicKeyCredentialParameters> pubKeyCredParams;
+    protected final byte[] challenge;
 
     /**
      * Constructor to create WebAuthnRegistration
@@ -185,21 +185,6 @@ public class WebAuthnRegistration extends WebAuthn {
 
     }
 
-    /**
-     * Perform WebAuthn Registration
-     *
-     * @param context         The Application Context
-     * @param fragmentManager The FragmentManager to manage the lifecycle of Fido API Callback
-     * @param listener        The Listener for the result event.
-     */
-    public void register(@NonNull Context context,
-                         @NonNull FragmentManager fragmentManager,
-                         @NonNull WebAuthnListener listener) {
-        register(context, fragmentManager,
-                WebAuthnDataRepository.builder().context(context).build(),
-                listener);
-    }
-
     @VisibleForTesting
     protected Task<PendingIntent> getRegisterPendingIntent(Fido2ApiClient fido2ApiClient,
                                                            PublicKeyCredentialCreationOptions options) {
@@ -212,14 +197,11 @@ public class WebAuthnRegistration extends WebAuthn {
      *
      * @param context         The Application Context
      * @param fragmentManager The FragmentManager to manage the lifecycle of Fido API Callback
-     * @param repository      The repository to store key credential (UsernameLess)
      * @param listener        The Listener for the result event.
      */
-    @VisibleForTesting
-    void register(@NonNull Context context,
-                  @NonNull FragmentManager fragmentManager,
-                  @NonNull WebAuthnDataRepository repository,
-                  @NonNull WebAuthnListener listener) {
+    public void register(@NonNull Context context,
+                         @NonNull FragmentManager fragmentManager,
+                         @NonNull WebAuthnListener listener) {
 
         Fido2ApiClient fido2ApiClient = Fido.getFido2ApiClient(context);
         PublicKeyCredentialCreationOptions options = null;
@@ -254,7 +236,7 @@ public class WebAuthnRegistration extends WebAuthn {
                                 .rpid(relyingPartyId)
                                 .userHandle(Base64.decode(userId, Base64.URL_SAFE | Base64.NO_WRAP))
                                 .otherUI(displayName).build();
-                        repository.persist(source);
+                        persist(context, source);
                     }
 
                     Listener.onSuccess(listener, sb.toString());
@@ -266,6 +248,16 @@ public class WebAuthnRegistration extends WebAuthn {
                 }
             });
         }).addOnFailureListener(e -> onWebAuthnException(listener, e));
+    }
+
+    /**
+     * Persist the {@link PublicKeyCredentialSource}
+     *
+     * @param context The Application context
+     * @param source  The {@link PublicKeyCredentialSource} to persist
+     */
+    protected void persist(Context context, PublicKeyCredentialSource source) {
+        WebAuthnDataRepository.builder().context(context).build().persist(source);
     }
 
 }
