@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import static androidx.annotation.RestrictTo.Scope.LIBRARY;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 
 import android.content.Context;
@@ -38,7 +39,7 @@ import lombok.Builder;
 /**
  * Manage Device Identifier Keys in the KeyStore.
  */
-@RestrictTo(LIBRARY)
+@RestrictTo(LIBRARY_GROUP_PREFIX)
 public class KeyStoreManager {
 
     private Context context;
