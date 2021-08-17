@@ -142,23 +142,9 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case org.forgerock.auth.R.id.login:
-
-                FRDeviceCollector.DEFAULT.collect(this, new FRListener<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject result) {
-                        System.out.println(result);
-                    }
-
-                    @Override
-                    public void onException(Exception e) {
-                        System.out.println(e);
-                    }
-                });
-                /*
                 success.setVisibility(INVISIBLE);
                 content.setText("");
                 TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
-                 */
                 return true;
 
             case org.forgerock.auth.R.id.register:
