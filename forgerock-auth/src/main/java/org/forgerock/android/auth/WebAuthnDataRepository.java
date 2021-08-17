@@ -117,7 +117,7 @@ public class WebAuthnDataRepository {
                 JSONArray array = new JSONArray(credentials);
                 for (int i = 0; i < array.length(); i++) {
                     PublicKeyCredentialSource source = PublicKeyCredentialSource.fromJson(array.getJSONObject(i));
-                    if (rpId.equals(source.getRpid())) {
+                    if (rpId == null || rpId.equals(source.getRpid())) {
                         result.add(PublicKeyCredentialSource.fromJson(array.getJSONObject(i)));
                     }
                 }
@@ -127,5 +127,14 @@ public class WebAuthnDataRepository {
         }
         return result;
 
+    }
+
+    /**
+     * Retrieve all stored {@link PublicKeyCredentialSource}
+     *
+     * @return All {@link PublicKeyCredentialSource}
+     */
+    public List<PublicKeyCredentialSource> getPublicKeyCredentialSource() {
+        return getPublicKeyCredentialSource(null);
     }
 }

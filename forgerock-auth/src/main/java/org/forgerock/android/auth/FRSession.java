@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.net.Uri;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class FRSession {
     public void logout() {
         current.set(null);
         sessionManager.close();
+        FRLifecycle.dispatchLogout();
     }
 
     /**
@@ -71,6 +73,12 @@ public class FRSession {
     public SSOToken getSessionToken() {
         return sessionManager.getSingleSignOnManager().getToken();
     }
+
+    public Collection<String> getSessionCookies() {
+        return sessionManager.getSingleSignOnManager().getCookies();
+    }
+
+
 
     /**
      * Trigger the Authentication Tree flow process with the {@link PolicyAdvice}

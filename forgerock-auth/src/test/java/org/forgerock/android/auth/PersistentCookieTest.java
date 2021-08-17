@@ -57,6 +57,7 @@ public class PersistentCookieTest extends BaseTest {
         assertThat(nodeListenerFuture.get()).isInstanceOf(FRSession.class);
         assertThat(FRSession.getCurrentSession()).isNotNull();
         assertThat(FRSession.getCurrentSession().getSessionToken()).isNotNull();
+        assertThat(FRSession.getCurrentSession().getSessionCookies()).hasSize(3);
 
         nodeListenerFuture.reset();
         FRSession.authenticate(context, "Example", nodeListenerFuture);
