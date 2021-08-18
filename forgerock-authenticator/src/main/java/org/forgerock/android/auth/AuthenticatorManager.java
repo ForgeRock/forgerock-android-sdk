@@ -178,9 +178,10 @@ class AuthenticatorManager {
         PushNotification notification = storageClient.getNotification(notificationId);
 
         // Sets mechanism associated with this push notification
-        PushMechanism mechanism = (PushMechanism) getMechanism(notification);
-        notification.setPushMechanism(mechanism);
-
+        if(notification != null) {
+            PushMechanism mechanism = (PushMechanism) getMechanism(notification);
+            notification.setPushMechanism(mechanism);
+        }
         return notification;
     }
 
