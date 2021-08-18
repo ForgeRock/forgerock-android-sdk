@@ -9,7 +9,6 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
