@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -194,6 +195,12 @@ class DefaultStorageClient implements StorageClient {
         return notificationData.edit()
                 .putString(pushNotification.getId(), notificationJson)
                 .commit();
+    }
+
+    @Override
+    public PushNotification getNotification(String notificationId) {
+        String json = notificationData.getString(notificationId, null);
+        return PushNotification.deserialize(json);
     }
 
     @Override

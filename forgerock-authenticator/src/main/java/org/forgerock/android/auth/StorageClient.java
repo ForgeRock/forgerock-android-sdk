@@ -99,6 +99,13 @@ public interface StorageClient {
     boolean setNotification(PushNotification pushNotification);
 
     /**
+     * Get the PushNotification object with its id
+     * @param notificationId The PushNotification unique ID
+     * @return The PushNotification object.
+     */
+    PushNotification getNotification(String notificationId);
+
+    /**
      * Whether the storage system currently contains any data.
      * @return True if the storage system is empty, false otherwise.
      */

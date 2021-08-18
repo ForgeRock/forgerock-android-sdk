@@ -212,6 +212,18 @@ public class FRAClient {
     }
 
     /**
+     * Get the PushNotification object with its id.  Returns {@code null} if PushNotification could
+     * not be found.
+     * This method also sets the {@link Mechanism} object
+     * associated with the PushNotification.
+     * @param notificationId The notification unique ID
+     * @return The account object
+     */
+    public PushNotification getNotification(@NonNull String notificationId) {
+        return this.authenticatorManager.getNotification(notificationId);
+    }
+
+    /**
      * Remove from the storage the {@link PushNotification} that was passed in.
      * @param notification The PushNotification object to delete
      * @return boolean as result of the operation

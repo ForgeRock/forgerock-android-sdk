@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -19,6 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -361,20 +362,25 @@ public class PushNotificationTest extends FRABaseTest {
     @Test
     public void testShouldParseToJsonSuccessfully() {
         String json = "{" +
-                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
                 "\"challenge\":\"REMOVED\"," +
                 "\"amlbCookie\":\"REMOVED\"," +
+                "\"timeAdded\":1629261902660," +
                 "\"ttl\":120," +
                 "\"approved\":false," +
                 "\"pending\":true}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setMessageId(MESSAGE_ID)
                 .setChallenge(CHALLENGE)
                 .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
                 .setTtl(TTL)
                 .build();
 
@@ -387,20 +393,25 @@ public class PushNotificationTest extends FRABaseTest {
     @Test
     public void testShouldSerializeSuccessfully() {
         String json = "{" +
-                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
                 "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
                 "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"timeAdded\":1629261902660," +
                 "\"ttl\":120," +
                 "\"approved\":false," +
                 "\"pending\":true}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setMessageId(MESSAGE_ID)
                 .setChallenge(CHALLENGE)
                 .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
                 .setTtl(TTL)
                 .build();
 
@@ -413,7 +424,7 @@ public class PushNotificationTest extends FRABaseTest {
     @Test
     public void testShouldDeserializeSuccessfully() {
         String json = "{" +
-                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-null\"," +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
                 "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +

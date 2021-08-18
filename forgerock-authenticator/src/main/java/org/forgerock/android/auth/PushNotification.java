@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -61,7 +61,7 @@ public class PushNotification extends ModelObject<PushNotification> {
     private PushNotification(String mechanismUID, String messageId, String challenge, String amlbCookie,
                                Calendar timeAdded, Calendar timeExpired, long ttl, boolean approved,
                                boolean pending) {
-        this.id = mechanismUID + "-" + timeAdded;
+        this.id = mechanismUID + "-" + timeAdded.getTimeInMillis();
         this.mechanismUID = mechanismUID;
         this.messageId = messageId;
         this.challenge = challenge;
@@ -262,7 +262,7 @@ public class PushNotification extends ModelObject<PushNotification> {
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
                     .setMessageId(jsonObject.getString("messageId"))
                     .setChallenge(jsonObject.getString("challenge"))
-                    .setAmlbCookie(jsonObject.has("amlbCookie") ? jsonObject.getString("amlbCookie"): null)
+                    .setAmlbCookie(jsonObject.has("amlbCookie") ? jsonObject.getString("amlbCookie") : null)
                     .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .setTimeExpired(jsonObject.has("timeExpired") ? getDate(jsonObject.optLong("timeExpired")) : null)
                     .setTtl(jsonObject.optLong("ttl", -1))
@@ -433,6 +433,10 @@ public class PushNotification extends ModelObject<PushNotification> {
          * @return The final notification.
          */
         protected PushNotification build() {
+            if(timeAdded == null) {
+                timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            }
+
             return new PushNotification(mechanismUID, messageId, challenge, amlbCookie, timeAdded,
                     timeExpired, ttl, approved, pending);
         }
