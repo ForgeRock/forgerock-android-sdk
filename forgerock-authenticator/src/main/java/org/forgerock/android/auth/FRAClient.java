@@ -135,9 +135,9 @@ public class FRAClient {
     }
 
     /**
-     * Get the Account object with its id.  Returns {@code null} if Account could not be found.
-     * This method full initialize the {@link Mechanism} and/or {@link PushNotification} objects
-     * associated with the account.
+     * Get the Account object with its id. Identifier of Account object is "<issuer>-<accountName>"
+     * Returns {@code null} if Account could not be found.
+     * This method full initialize the {@link Mechanism} objects associated with the account.
      * @param accountId The account unique ID
      * @return The account object
      */
@@ -212,12 +212,11 @@ public class FRAClient {
     }
 
     /**
-     * Get the PushNotification object with its id.  Returns {@code null} if PushNotification could
-     * not be found.
-     * This method also sets the {@link Mechanism} object
-     * associated with the PushNotification.
+     * Get the PushNotification object with its id. Identifier of PushNotification object is "<mechanismUUID>-<timeAdded>"
+     * Returns {@code null} if PushNotification could not be found.
+     * This method also sets the {@link Mechanism} object associated with the PushNotification.
      * @param notificationId The notification unique ID
-     * @return The account object
+     * @return The PushNotification object
      */
     public PushNotification getNotification(@NonNull String notificationId) {
         return this.authenticatorManager.getNotification(notificationId);
