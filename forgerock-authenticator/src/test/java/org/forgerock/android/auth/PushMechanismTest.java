@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,12 +7,16 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 public class PushMechanismTest extends FRABaseTest {
 
     @Test
-    public void testCreatePushMechanismSuccessfuly() {
+    public void testCreatePushMechanismSuccessfuly() throws MechanismCreationException {
         PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -43,8 +47,30 @@ public class PushMechanismTest extends FRABaseTest {
         assertEquals(mechanism.getSecret(), SECRET);
     }
 
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreatePushMechanismMissingIssuer() throws MechanismCreationException {
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+    }
+
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreatePushMechanismMissingAccountName() throws MechanismCreationException {
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .build();
+    }
+
     @Test
-    public void testShouldEqualEquivalentPushMechanism() {
+    public void testShouldEqualEquivalentPushMechanism() throws MechanismCreationException {
         Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -68,7 +94,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotEqualDifferentPushMechanismWithAccountName() {
+    public void testShouldNotEqualDifferentPushMechanismWithAccountName() throws MechanismCreationException {
         Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -91,7 +117,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotEqualDifferentPushMechanismWithAccountIssuer() {
+    public void testShouldNotEqualDifferentPushMechanismWithAccountIssuer() throws MechanismCreationException {
         Mechanism mechanism1 = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -114,7 +140,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldReturnAllNotifications() {
+    public void testShouldReturnAllNotifications() throws MechanismCreationException {
         PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -136,7 +162,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldReturnOnlyPendingNotifications() {
+    public void testShouldReturnOnlyPendingNotifications() throws MechanismCreationException, InvalidNotificationException {
         PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -146,6 +172,7 @@ public class PushMechanismTest extends FRABaseTest {
                 .setSecret(SECRET)
                 .build();
 
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         PushNotification pushNotification1 = createPushNotification(MESSAGE_ID, mechanism);
         PushNotification pushNotification2 = createPushNotification(OTHER_MESSAGE_ID, mechanism);
         PushNotification pushNotification3 = PushNotification.builder()
@@ -153,6 +180,7 @@ public class PushMechanismTest extends FRABaseTest {
                 .setMessageId("s-o-m-e-i-d")
                 .setChallenge(CHALLENGE)
                 .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
                 .setPending(false)
                 .setApproved(true)
                 .setTtl(TTL)
@@ -168,7 +196,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseToJsonSuccessfully() {
+    public void testShouldParseToJsonSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-pushauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -196,7 +224,7 @@ public class PushMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldSerializeSuccessfully() {
+    public void testShouldSerializeSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-pushauth\"," +
                 "\"issuer\":\"issuer1\"," +

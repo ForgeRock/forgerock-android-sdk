@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -269,7 +270,7 @@ public class PushNotification extends ModelObject<PushNotification> {
                     .setApproved(jsonObject.getBoolean("approved"))
                     .setPending(jsonObject.getBoolean("pending"))
                     .build();
-        } catch (JSONException e) {
+        } catch (JSONException | InvalidNotificationException e) {
             return null;
         }
     }
@@ -431,10 +432,14 @@ public class PushNotification extends ModelObject<PushNotification> {
         /**
          * Build the notification.
          * @return The final notification.
+         * @throws InvalidNotificationException if timeAdded or mechanismUID are not provided
          */
-        protected PushNotification build() {
+        protected PushNotification build() throws InvalidNotificationException {
             if(timeAdded == null) {
-                timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                throw new InvalidNotificationException("timeAdded cannot be null.");
+            }
+            if(mechanismUID == null) {
+                throw new InvalidNotificationException("mechanismUID cannot be null.");
             }
 
             return new PushNotification(mechanismUID, messageId, challenge, amlbCookie, timeAdded,

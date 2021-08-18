@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.ChallengeResponseException;
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -265,7 +267,7 @@ public class PushResponderTest extends FRABaseTest {
         assertEquals(hash, jwtSignature);
     }
 
-    private PushNotification newPushNotification() {
+    private PushNotification newPushNotification() throws InvalidNotificationException, MechanismCreationException {
         Calendar time = Calendar.getInstance();
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -284,7 +286,7 @@ public class PushResponderTest extends FRABaseTest {
         return pushNotification;
     }
 
-    private PushMechanism newPushMechanism() {
+    private PushMechanism newPushMechanism() throws MechanismCreationException {
         HttpUrl baseUrl = server.url("/");
         PushMechanism push = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)

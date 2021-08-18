@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.VisibleForTesting;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
 import org.json.JSONException;
@@ -200,8 +202,15 @@ public abstract class OathMechanism extends Mechanism {
         /**
          * Produce the described OathMechanism Token.
          * @return The built Token
+         * @throws MechanismCreationException If an issuer or accountName were not provided.
          */
-        protected OathMechanism build() {
+        protected OathMechanism build() throws MechanismCreationException {
+            if(issuer == null || issuer.isEmpty()) {
+                throw new MechanismCreationException("issuer cannot be empty or null.");
+            }
+            if(accountName == null || accountName.isEmpty()) {
+                throw new MechanismCreationException("accountName cannot be empty or null.");
+            }
             return buildOath();
         }
 

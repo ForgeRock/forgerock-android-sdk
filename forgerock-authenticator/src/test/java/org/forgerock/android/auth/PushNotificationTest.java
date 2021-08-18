@@ -9,6 +9,8 @@ package org.forgerock.android.auth;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.junit.After;
 import org.junit.Assert;
@@ -52,7 +54,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateNotificationSuccessfuly() {
+    public void testCreateNotificationSuccessfuly() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
 
@@ -76,7 +78,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateNotificationWithOptionalParametersSuccessfuly() {
+    public void testCreateNotificationWithOptionalParametersSuccessfuly() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
         long time = timeExpired.getTimeInMillis();
@@ -107,8 +109,31 @@ public class PushNotificationTest extends FRABaseTest {
         assertEquals(pushNotification.isExpired(), false);
     }
 
+    @Test (expected = InvalidNotificationException.class)
+    public void testShouldFailToCreateNotificationTimeAddedMissing() throws InvalidNotificationException {
+        PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTtl(TTL)
+                .build();
+    }
+
+    @Test (expected = InvalidNotificationException.class)
+    public void testShouldFailToCreateNotificationMechanismUIDMissing() throws InvalidNotificationException {
+        Calendar timeAdded = Calendar.getInstance();
+        PushNotification.builder()
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .build();
+    }
+
     @Test
-    public void testShouldBeEqualEquivalentNotification() {
+    public void testShouldBeEqualEquivalentNotification() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         PushNotification pushNotification1 = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -133,7 +158,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualNotificationWithDifferentMechanismUID() {
+    public void testShouldNotBeEqualNotificationWithDifferentMechanismUID() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         PushNotification pushNotification1 = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
@@ -157,7 +182,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualNotificationWithDifferentTimeAdded() {
+    public void testShouldNotBeEqualNotificationWithDifferentTimeAdded() throws InvalidNotificationException {
         Calendar timeAdded1 = Calendar.getInstance();
 
         long time = timeAdded1.getTimeInMillis();
@@ -360,7 +385,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseToJsonSuccessfully() {
+    public void testShouldParseToJsonSuccessfully() throws InvalidNotificationException {
         String json = "{" +
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
@@ -391,7 +416,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldSerializeSuccessfully() {
+    public void testShouldSerializeSuccessfully() throws InvalidNotificationException {
         String json = "{" +
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
@@ -429,6 +454,7 @@ public class PushNotificationTest extends FRABaseTest {
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
                 "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
                 "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"timeAdded\":1629261902660," +
                 "\"ttl\":120," +
                 "\"approved\":false," +
                 "\"pending\":true}";

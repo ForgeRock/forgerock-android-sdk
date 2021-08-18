@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateTOTPMechanism() {
+    public void testCreateTOTPMechanism() throws MechanismCreationException {
         OathMechanism mechanism = TOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -54,8 +55,32 @@ public class TOTPMechanismTest extends FRABaseTest {
         assertEquals(((TOTPMechanism)mechanism).getPeriod(), PERIOD);
     }
 
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreateTOTPMechanismMissingIssuer() throws MechanismCreationException {
+        TOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setPeriod(PERIOD)
+                .build();
+    }
+
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreateTOTPMechanismMissingAccountName() throws MechanismCreationException {
+        TOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setPeriod(PERIOD)
+                .build();
+    }
+
     @Test
-    public void testShouldBeEqualEquivalentTOTPMechanism() {
+    public void testShouldBeEqualEquivalentTOTPMechanism() throws MechanismCreationException {
         Mechanism mechanism1 = TOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -81,7 +106,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualDifferentTOTPMechanismWithAccountName() {
+    public void testShouldNotBeEqualDifferentTOTPMechanismWithAccountName() throws MechanismCreationException {
         Mechanism mechanism1 = TOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -106,7 +131,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualDifferentTOTPMechanismWithAccountIssuer() {
+    public void testShouldNotBeEqualDifferentTOTPMechanismWithAccountIssuer() throws MechanismCreationException {
         Mechanism mechanism1 = TOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -131,7 +156,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleTOTPCorrectly() throws OathMechanismException {
+    public void shouldHandleTOTPCorrectly() throws OathMechanismException, MechanismCreationException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -164,7 +189,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseToJsonSuccessfully() {
+    public void testShouldParseToJsonSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -195,7 +220,7 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldSerializeSuccessfully() {
+    public void testShouldSerializeSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
