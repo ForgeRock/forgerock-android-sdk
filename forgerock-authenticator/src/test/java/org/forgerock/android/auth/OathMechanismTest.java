@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.mock;
 public class OathMechanismTest extends FRABaseTest {
 
     @Test
-    public void testShouldParseHOTPToJsonSuccessfully() {
+    public void testShouldParseHOTPToJsonSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
@@ -52,7 +53,7 @@ public class OathMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseTOTPToJsonSuccessfully() {
+    public void testShouldParseTOTPToJsonSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +

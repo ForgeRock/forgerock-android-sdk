@@ -100,7 +100,7 @@ class AuthenticatorManager {
         // Retrieve account from StorageClient
         Account account = storageClient.getAccount(accountId);
 
-        // Sets mechanisms and/or notifications associated with this account
+        // Sets mechanisms associated with this account
         initializeAccount(account);
 
         return account;
@@ -171,6 +171,20 @@ class AuthenticatorManager {
         return storageClient.removeNotification(notification);
     }
 
+    PushNotification getNotification(String notificationId) {
+        Logger.debug(TAG, "Retrieving PushNotification with ID '%s' from the StorageClient.", notificationId);
+
+        // Retrieve notification from StorageClient
+        PushNotification notification = storageClient.getNotification(notificationId);
+
+        // Sets mechanism associated with this push notification
+        if(notification != null) {
+            PushMechanism mechanism = (PushMechanism) getMechanism(notification);
+            notification.setPushMechanism(mechanism);
+        }
+        return notification;
+    }
+
     void registerForRemoteNotifications(String newDeviceToken) throws AuthenticatorException {
         if(this.deviceToken == null) {
             this.deviceToken = newDeviceToken;
@@ -217,7 +231,9 @@ class AuthenticatorManager {
     }
 
     List<PushNotification> getAllNotifications() {
-        return storageClient.getAllNotifications();
+        List<PushNotification> notificationList =  storageClient.getAllNotifications();
+        Collections.sort(notificationList);
+        return notificationList;
     }
 
     List<PushNotification> getAllNotifications(@NonNull Mechanism mechanism) {
@@ -239,14 +255,6 @@ class AuthenticatorManager {
             account.setMechanismList(mechanismList);
             for (Mechanism mechanism : mechanismList) {
                 mechanism.setAccount(account);
-                if(mechanism.getType().equals(Mechanism.PUSH)) {
-                    List<PushNotification> notificationList = storageClient.getAllNotificationsForMechanism(mechanism);
-                    for (PushNotification notification : notificationList) {
-                        notification.setPushMechanism(mechanism);
-                    }
-                    Collections.sort(notificationList);
-                    ((PushMechanism) mechanism).setPushNotificationList(notificationList);
-                }
             }
         }
     }

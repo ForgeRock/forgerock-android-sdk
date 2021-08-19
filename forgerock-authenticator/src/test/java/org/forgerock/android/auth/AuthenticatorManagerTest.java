@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -359,6 +360,30 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         assertNotNull(notificationListFromStorage);
         assertEquals(notificationList.size(), notificationListFromStorage.size());
+    }
+
+    @Test
+    public void testShouldGetStoredNotificationByID() {
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        PushNotification notification = createPushNotification(MESSAGE_ID, push);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(createPushNotification(MESSAGE_ID, push));
+        notificationList.add(createPushNotification(OTHER_MESSAGE_ID, push));
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+        given(storageClient.getAllNotificationsForMechanism(any(Mechanism.class))).willReturn(notificationList);
+        given(storageClient.getNotification(anyString())).willReturn(notification);
+
+        PushNotification notificationFromStorage = authenticatorManager.getNotification(notification.getId());
+
+        assertNotNull(notificationFromStorage);
+        assertEquals(notification, notificationFromStorage);
     }
 
     @Test

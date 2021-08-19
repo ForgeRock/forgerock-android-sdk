@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -50,7 +50,11 @@ class OathFactory extends MechanismFactory {
     protected void createFromUriParameters(int version, @NonNull String mechanismUID, @NonNull Map<String, String> map,
                                            @NonNull FRAListener<Mechanism> listener) {
         if (version == 1) {
-            this.buildOathMechanism(mechanismUID, map, listener);
+            try {
+                this.buildOathMechanism(mechanismUID, map, listener);
+            } catch (MechanismCreationException e) {
+                listener.onException(e);
+            }
         } else {
             Logger.warn(TAG, "Unknown version: %s", version);
             listener.onException(new MechanismCreationException("Unknown version: " + version));
@@ -58,7 +62,7 @@ class OathFactory extends MechanismFactory {
     }
 
     private void buildOathMechanism(String mechanismUID, Map<String, String> map,
-                                    FRAListener<Mechanism> listener) {
+                                    FRAListener<Mechanism> listener) throws MechanismCreationException {
         String issuer = map.get(MechanismParser.ISSUER);
         String accountName = map.get(MechanismParser.ACCOUNT_NAME);
 

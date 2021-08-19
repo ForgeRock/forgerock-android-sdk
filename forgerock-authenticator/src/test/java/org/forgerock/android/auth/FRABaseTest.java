@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,6 +20,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,6 +62,7 @@ public abstract class FRABaseTest {
     public static final String CHALLENGE = "fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=";
     public static final String AMLB_COOKIE = "ZnJfc3NvX2FtbGJfcHJvZD0wMQ==";
     public static final long TTL = 120;
+    public static final long TIME_ADDED = 1629261902660L;
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
@@ -132,69 +135,95 @@ public abstract class FRABaseTest {
     }
 
     public static Mechanism createOathMechanism(String accountName, String issuer, String mechanismUid) {
-        OathMechanism mechanism = HOTPMechanism.builder()
-                .setMechanismUID(mechanismUid)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setAlgorithm(ALGORITHM)
-                .setSecret(SECRET)
-                .setDigits(DIGITS)
-                .setCounter(COUNTER)
-                .build();
+        OathMechanism mechanism = null;
+        try {
+            mechanism = HOTPMechanism.builder()
+                    .setMechanismUID(mechanismUid)
+                    .setIssuer(issuer)
+                    .setAccountName(accountName)
+                    .setAlgorithm(ALGORITHM)
+                    .setSecret(SECRET)
+                    .setDigits(DIGITS)
+                    .setCounter(COUNTER)
+                    .build();
+        } catch (MechanismCreationException e) {
+            e.printStackTrace();
+        }
         return mechanism;
     }
 
     public static OathMechanism createOathMechanism(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
                                                     String algorithm, String secret, int digits, long counter, int period) {
-        OathMechanism oath = HOTPMechanism.builder()
-                .setMechanismUID(mechanismUID)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setAlgorithm(algorithm)
-                .setSecret(secret)
-                .setDigits(digits)
-                .setCounter(counter)
-                .build();
+        OathMechanism oath = null;
+        try {
+            oath = HOTPMechanism.builder()
+                    .setMechanismUID(mechanismUID)
+                    .setIssuer(issuer)
+                    .setAccountName(accountName)
+                    .setAlgorithm(algorithm)
+                    .setSecret(secret)
+                    .setDigits(digits)
+                    .setCounter(counter)
+                    .build();
+        } catch (MechanismCreationException e) {
+            e.printStackTrace();
+        }
 
         return oath;
     }
 
     public static PushMechanism createPushMechanism(String mechanismUID, String issuer, String accountName, String secret,
                                                     String registrationEndpoint, String authenticationEndpoint) {
-        PushMechanism push = PushMechanism.builder()
-                .setMechanismUID(mechanismUID)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setAuthenticationEndpoint(authenticationEndpoint)
-                .setRegistrationEndpoint(registrationEndpoint)
-                .setSecret(secret)
-                .build();
+        PushMechanism push = null;
+        try {
+            push = PushMechanism.builder()
+                    .setMechanismUID(mechanismUID)
+                    .setIssuer(issuer)
+                    .setAccountName(accountName)
+                    .setAuthenticationEndpoint(authenticationEndpoint)
+                    .setRegistrationEndpoint(registrationEndpoint)
+                    .setSecret(secret)
+                    .build();
+        } catch (MechanismCreationException e) {
+            e.printStackTrace();
+        }
 
         return push;
     }
 
     public static Mechanism createPushMechanism(String accountName, String issuer, String mechanismUid) {
-        PushMechanism mechanism = PushMechanism.builder()
-                .setMechanismUID(mechanismUid)
-                .setIssuer(issuer)
-                .setAccountName(accountName)
-                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
-                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
-                .setSecret(SECRET)
-                .build();
+        PushMechanism mechanism = null;
+        try {
+            mechanism = PushMechanism.builder()
+                    .setMechanismUID(mechanismUid)
+                    .setIssuer(issuer)
+                    .setAccountName(accountName)
+                    .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                    .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                    .setSecret(SECRET)
+                    .build();
+        } catch (MechanismCreationException e) {
+            e.printStackTrace();
+        }
         return mechanism;
     }
 
     public static PushNotification createPushNotification(String messageId, Mechanism push) {
         Calendar timeAdded = Calendar.getInstance();
-        PushNotification pushNotification = PushNotification.builder()
-                .setMechanismUID(MECHANISM_UID)
-                .setMessageId(messageId)
-                .setChallenge(CHALLENGE)
-                .setAmlbCookie(AMLB_COOKIE)
-                .setTimeAdded(timeAdded)
-                .setTtl(TTL)
-                .build();
+        timeAdded.setTimeInMillis(1629261902660L);
+        PushNotification pushNotification = null;
+        try {
+            pushNotification = PushNotification.builder()
+                    .setMechanismUID(MECHANISM_UID)
+                    .setMessageId(messageId)
+                    .setChallenge(CHALLENGE)
+                    .setAmlbCookie(AMLB_COOKIE)
+                    .setTimeAdded(timeAdded)
+                    .setTtl(TTL)
+                    .build();
+        } catch (InvalidNotificationException e) {
+            e.printStackTrace();
+        }
         pushNotification.setPushMechanism(push);
         return pushNotification;
     }
@@ -205,17 +234,22 @@ public abstract class FRABaseTest {
                                                       long ttl, boolean approved,
                                                       boolean pending) {
 
-        PushNotification pushNotification = PushNotification.builder()
-                .setMechanismUID(mechanismUID)
-                .setMessageId(messageId)
-                .setChallenge(challenge)
-                .setAmlbCookie(amlbCookie)
-                .setTimeAdded(timeAdded)
-                .setTimeExpired(timeExpired)
-                .setTtl(ttl)
-                .setApproved(approved)
-                .setPending(pending)
-                .build();
+        PushNotification pushNotification = null;
+        try {
+            pushNotification = PushNotification.builder()
+                    .setMechanismUID(mechanismUID)
+                    .setMessageId(messageId)
+                    .setChallenge(challenge)
+                    .setAmlbCookie(amlbCookie)
+                    .setTimeAdded(timeAdded)
+                    .setTimeExpired(timeExpired)
+                    .setTtl(ttl)
+                    .setApproved(approved)
+                    .setPending(pending)
+                    .build();
+        } catch (InvalidNotificationException e) {
+            e.printStackTrace();
+        }
 
         return pushNotification;
     }
@@ -224,14 +258,19 @@ public abstract class FRABaseTest {
                                                       String challenge, String amlbCookie,
                                                       Calendar timeAdded, long ttl) {
 
-        PushNotification pushNotification = PushNotification.builder()
-                .setMechanismUID(mechanismUID)
-                .setMessageId(messageId)
-                .setChallenge(challenge)
-                .setAmlbCookie(amlbCookie)
-                .setTimeAdded(timeAdded)
-                .setTtl(ttl)
-                .build();
+        PushNotification pushNotification = null;
+        try {
+            pushNotification = PushNotification.builder()
+                    .setMechanismUID(mechanismUID)
+                    .setMessageId(messageId)
+                    .setChallenge(challenge)
+                    .setAmlbCookie(amlbCookie)
+                    .setTimeAdded(timeAdded)
+                    .setTtl(ttl)
+                    .build();
+        } catch (InvalidNotificationException e) {
+            e.printStackTrace();
+        }
 
         return pushNotification;
     }

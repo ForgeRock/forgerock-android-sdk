@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
+
 import java.util.Calendar;
 
 /**
@@ -36,7 +39,7 @@ public class MockModelBuilder {
     }
 
     public static OathMechanism createOath(String mechanismUID, String issuer, String accountName, OathMechanism.TokenType oathType,
-                                           String algorithm, String secret, int digits, long counter, int period) {
+                                           String algorithm, String secret, int digits, long counter, int period) throws MechanismCreationException {
 
         switch (oathType) {
             case TOTP:
@@ -65,7 +68,7 @@ public class MockModelBuilder {
     }
 
     public static PushMechanism createPush(String mechanismUID, String issuer, String accountName, String secret,
-                                           String registrationEndpoint, String authenticationEndpoint) {
+                                           String registrationEndpoint, String authenticationEndpoint) throws MechanismCreationException {
         PushMechanism push = PushMechanism.builder()
                 .setMechanismUID(mechanismUID)
                 .setIssuer(issuer)
@@ -82,7 +85,7 @@ public class MockModelBuilder {
                                                       String challenge, String amlbCookie,
                                                       Calendar timeAdded, Calendar timeExpired,
                                                       long ttl, boolean approved,
-                                                      boolean pending) {
+                                                      boolean pending) throws InvalidNotificationException {
 
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(mechanismUID)
@@ -101,7 +104,7 @@ public class MockModelBuilder {
 
     public static PushNotification createNotification(String mechanismUID, String messageId,
                                                       String challenge, String amlbCookie,
-                                                      Calendar timeAdded, long ttl) {
+                                                      Calendar timeAdded, long ttl) throws InvalidNotificationException {
 
         PushNotification pushNotification = PushNotification.builder()
                 .setMechanismUID(mechanismUID)

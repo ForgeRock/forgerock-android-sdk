@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -134,7 +135,7 @@ public class PushMechanism extends Mechanism {
                     .setRegistrationEndpoint(jsonObject.getString("registrationEndpoint"))
                     .setAuthenticationEndpoint(jsonObject.getString("authenticationEndpoint"))
                     .build();
-        } catch (JSONException e) {
+        } catch (JSONException | MechanismCreationException e) {
             return null;
         }
     }
@@ -228,9 +229,17 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Produce the described Mechanism.
-         * @return The built Token
+         * @return The built Mechanism
+         * @throws MechanismCreationException If an issuer or accountName were not provided.
          */
-        protected PushMechanism build() {
+        protected PushMechanism build() throws MechanismCreationException {
+            if(issuer == null || issuer.isEmpty()) {
+                throw new MechanismCreationException("issuer cannot be empty or null.");
+            }
+            if(accountName == null || accountName.isEmpty()) {
+                throw new MechanismCreationException("accountName cannot be empty or null.");
+            }
+
             return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
                     registrationEndpoint, authenticationEndpoint, timeCreated);
         }

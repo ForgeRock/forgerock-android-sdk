@@ -90,6 +90,11 @@ public class CustomStorageClient implements StorageClient {
     }
 
     @Override
+    public PushNotification getNotification(String notificationId) {
+        return null;
+    }
+
+    @Override
     public boolean isEmpty() {
         return false;
     }
