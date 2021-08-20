@@ -121,7 +121,7 @@ public abstract class OathMechanism extends Mechanism {
         protected String algorithm;
         protected String secret;
         protected int digits;
-        protected Calendar timeCreated;
+        protected Calendar timeAdded;
 
         protected abstract T getThis();
 
@@ -191,10 +191,10 @@ public abstract class OathMechanism extends Mechanism {
 
         /**
          * Sets the Date and Time this mechanism was stored.
-         * @param timeCreated when this mechanism was stored.
+         * @param timeAdded when this mechanism was stored.
          */
-        public T setTimeCreated(Calendar timeCreated) {
-            this.timeCreated = timeCreated;
+        public T setTimeAdded(Calendar timeAdded) {
+            this.timeAdded = timeAdded;
             return getThis();
         }
 

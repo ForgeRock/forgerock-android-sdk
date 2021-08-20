@@ -23,9 +23,9 @@ public class TOTPMechanism extends OathMechanism {
     private int period;
 
     private TOTPMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                          String algorithm, String secret, int digits, int period, Calendar timeCreated) {
+                          String algorithm, String secret, int digits, int period, Calendar timeAdded) {
         super(mechanismUID, issuer, accountName, type, oathType, algorithm,
-                secret, digits, timeCreated);
+                secret, digits, timeAdded);
         this.period = period;
     }
 
@@ -65,7 +65,7 @@ public class TOTPMechanism extends OathMechanism {
             jsonObject.put("algorithm", getAlgorithm());
             jsonObject.put("digits", getDigits());
             jsonObject.put("period", getPeriod());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
@@ -92,7 +92,7 @@ public class TOTPMechanism extends OathMechanism {
                     .setAlgorithm(jsonObject.getString("algorithm"))
                     .setDigits(jsonObject.getInt("digits"))
                     .setPeriod(jsonObject.getInt("period"))
-                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
         } catch (JSONException | MechanismCreationException e) {
             return null;
@@ -135,7 +135,7 @@ public class TOTPMechanism extends OathMechanism {
         @Override
         TOTPMechanism buildOath() {
             return new TOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH, TokenType.TOTP, algorithm,
-                    secret, digits, period, timeCreated);
+                    secret, digits, period, timeAdded);
         }
 
     }

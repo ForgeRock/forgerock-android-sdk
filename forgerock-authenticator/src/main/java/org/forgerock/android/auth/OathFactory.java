@@ -155,7 +155,7 @@ class OathFactory extends MechanismFactory {
                         .setSecret(secretStr)
                         .setDigits(digits)
                         .setCounter(counter)
-                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                        .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                         .build();
                 break;
             case TOTP:
@@ -167,7 +167,7 @@ class OathFactory extends MechanismFactory {
                         .setSecret(secretStr)
                         .setDigits(digits)
                         .setPeriod(period)
-                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                        .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                         .build();
                 break;
             default:

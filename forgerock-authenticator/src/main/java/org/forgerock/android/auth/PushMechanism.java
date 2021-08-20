@@ -108,7 +108,7 @@ public class PushMechanism extends Mechanism {
             jsonObject.put("type", getType());
             jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
             jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
@@ -158,7 +158,7 @@ public class PushMechanism extends Mechanism {
         private String registrationEndpoint;
         private String authenticationEndpoint;
         private String secret;
-        private Calendar timeCreated;
+        private Calendar timeAdded;
 
         /**
          * Sets the mechanism unique Id.
@@ -220,10 +220,10 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Sets the Date and Time this mechanism was stored.
-         * @param timeCreated when this mechanism was stored.
+         * @param timeAdded when this mechanism was stored.
          */
-        public PushBuilder setTimeCreated(Calendar timeCreated) {
-            this.timeCreated = timeCreated;
+        public PushBuilder setTimeAdded(Calendar timeAdded) {
+            this.timeAdded = timeAdded;
             return this;
         }
 
@@ -241,7 +241,7 @@ public class PushMechanism extends Mechanism {
             }
 
             return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
-                    registrationEndpoint, authenticationEndpoint, timeCreated);
+                    registrationEndpoint, authenticationEndpoint, timeAdded);
         }
 
     }
