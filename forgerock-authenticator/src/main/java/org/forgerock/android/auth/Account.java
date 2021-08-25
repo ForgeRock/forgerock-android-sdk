@@ -135,7 +135,7 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("imageURL", getImageURL());
             jsonObject.put("backgroundColor", getBackgroundColor());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }
@@ -159,7 +159,7 @@ public class Account extends ModelObject<Account> {
                     .setAccountName(jsonObject.getString("accountName"))
                     .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL"): null)
                     .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor"): null)
-                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
         } catch (JSONException e) {
             return null;
@@ -259,7 +259,7 @@ public class Account extends ModelObject<Account> {
          * Sets the Date and Time this Account was stored.
          * @param timeCreated when this account was stored.
          */
-        public AccountBuilder setTimeCreated(Calendar timeCreated) {
+        public AccountBuilder setTimeAdded(Calendar timeCreated) {
             this.timeCreated = timeCreated;
             return this;
         }

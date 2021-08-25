@@ -108,7 +108,7 @@ public class PushMechanism extends Mechanism {
             jsonObject.put("type", getType());
             jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
             jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
-            jsonObject.put("timeAdded", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
@@ -134,6 +134,7 @@ public class PushMechanism extends Mechanism {
                     .setSecret(jsonObject.getString("secret"))
                     .setRegistrationEndpoint(jsonObject.getString("registrationEndpoint"))
                     .setAuthenticationEndpoint(jsonObject.getString("authenticationEndpoint"))
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
         } catch (JSONException | MechanismCreationException e) {
             return null;
