@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -85,15 +85,13 @@ class PushResponder {
      *
      * @return PushResponder instance
      */
-    static synchronized PushResponder getInstance(@NonNull StorageClient storageClient) {
-        if (INSTANCE == null) {
-            synchronized (PushResponder.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new PushResponder(storageClient);
-                }
+    static PushResponder getInstance(@NonNull StorageClient storageClient) {
+        synchronized (PushResponder.class) {
+            if (INSTANCE == null) {
+                INSTANCE = new PushResponder(storageClient);
             }
+            return INSTANCE;
         }
-        return INSTANCE;
     }
 
     /**
