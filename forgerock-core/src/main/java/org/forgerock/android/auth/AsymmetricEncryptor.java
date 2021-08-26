@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 -2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -58,7 +58,7 @@ class AsymmetricEncryptor implements Encryptor {
 
             return cipher.doFinal(data);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new EncryptionException(e);
         }
     }
 
@@ -78,7 +78,7 @@ class AsymmetricEncryptor implements Encryptor {
 
             return cipher.doFinal(encryptedData);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new EncryptionException(e);
         }
     }
 
@@ -137,7 +137,7 @@ class AsymmetricEncryptor implements Encryptor {
         Intent authIntent = km.createConfirmDeviceCredentialIntent(null, null);
         boolean keyguardEnabled = km.isKeyguardSecure() && authIntent != null;
         if (keyguardEnabled) {
-            //key pair should bebe encrypted at rest
+            //key pair should be encrypted at rest
             builder.setEncryptionRequired();
         }
         return builder.build();
