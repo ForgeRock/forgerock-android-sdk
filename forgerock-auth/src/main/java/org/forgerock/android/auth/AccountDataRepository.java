@@ -7,18 +7,17 @@
 
 package org.forgerock.android.auth;
 
+import static org.forgerock.android.auth.Encryptor.getEncryptor;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
 import lombok.Builder;
-
-import static org.forgerock.android.auth.Encryptor.getEncryptor;
 
 /**
  * A Repository that store data in {@link AccountManager}
@@ -67,13 +66,13 @@ class AccountDataRepository implements DataRepository, AccountAware, KeyUpdatedL
             String encryptedData = accountManager.getUserData(account, key);
             if (encryptedData != null) {
                 return new String(encryptor.decrypt(Base64.decode(encryptedData, Base64.DEFAULT)));
-            } else {
-                return null;
             }
-        } catch (Exception e) {
+        } catch (EncryptionException e) {
             Logger.warn(TAG, e, "Failed to decrypt data");
-            return null;
+            //The data are not valid.
+            deleteAll();
         }
+        return null;
     }
 
     @Override
