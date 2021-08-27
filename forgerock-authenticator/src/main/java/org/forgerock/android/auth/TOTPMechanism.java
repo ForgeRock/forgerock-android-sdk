@@ -44,22 +44,13 @@ public class TOTPMechanism extends OathMechanism {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
+            jsonObject.put("secret", getSecret());
             jsonObject.put("type", getType());
             jsonObject.put("oathType", getOathType());
             jsonObject.put("algorithm", getAlgorithm());
@@ -72,13 +63,18 @@ public class TOTPMechanism extends OathMechanism {
         return jsonObject.toString();
     }
 
+    @Override
+    String serialize() {
+        return this.toJson();
+    }
+
     /**
      * Deserializes the specified Json into an object of the {@link TOTPMechanism} object.
      * @param jsonString the json string representing the object to be deserialized
      * @return an {@link TOTPMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static TOTPMechanism deserialize(String jsonString) {
+    public static TOTPMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }

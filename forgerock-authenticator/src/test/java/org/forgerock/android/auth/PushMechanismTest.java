@@ -202,10 +202,10 @@ public class PushMechanismTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"REMOVED\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
                 "\"type\":\"pushauth\"," +
-                "\"registrationEndpoint\":\"REMOVED\"," +
-                "\"authenticationEndpoint\":\"REMOVED\"" +
+                "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
                 "}";
 
         PushMechanism mechanism = PushMechanism.builder()

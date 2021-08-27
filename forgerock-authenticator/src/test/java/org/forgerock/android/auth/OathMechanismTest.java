@@ -28,12 +28,12 @@ public class OathMechanismTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"REMOVED\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
                 "\"type\":\"otpauth\"," +
                 "\"oathType\":\"HOTP\"," +
                 "\"algorithm\":\"sha1\"," +
                 "\"digits\":6," +
-                "\"counter\":\"REMOVED\"" +
+                "\"counter\":0" +
                 "}";
 
         OathMechanism mechanism = HOTPMechanism.builder()
@@ -59,7 +59,7 @@ public class OathMechanismTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"REMOVED\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
                 "\"type\":\"otpauth\"," +
                 "\"oathType\":\"TOTP\"," +
                 "\"algorithm\":\"sha1\"," +

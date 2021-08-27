@@ -92,7 +92,7 @@ public abstract class OathMechanism extends Mechanism {
      * @return an {@link OathMechanism} object from the string. Returns {@code null} if
      * {@code jsonString} is {@code null}, if {@code jsonString} is empty or not able to parse it
      */
-    static OathMechanism deserialize(String jsonString) {
+    public static OathMechanism deserialize(String jsonString) {
         OathMechanism oath = null;
         if (jsonString == null || jsonString.length() == 0) {
             return null;

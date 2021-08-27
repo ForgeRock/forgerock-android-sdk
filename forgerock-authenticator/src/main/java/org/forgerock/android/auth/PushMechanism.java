@@ -89,30 +89,26 @@ public class PushMechanism extends Mechanism {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
+            jsonObject.put("secret", getSecret());
             jsonObject.put("type", getType());
-            jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
-            jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
+            jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
+            jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
             jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
         return jsonObject.toString();
+    }
+
+    @Override
+    String serialize() {
+        return this.toJson();
     }
 
     /**
@@ -121,7 +117,7 @@ public class PushMechanism extends Mechanism {
      * @return an {@link PushMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static PushMechanism deserialize(String jsonString) {
+    public static PushMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
