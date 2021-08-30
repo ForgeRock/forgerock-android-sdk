@@ -53,6 +53,7 @@ public class NetworkCollector implements DeviceCollector {
         return null;
     }
 
+    /*
     private String getMacAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiManager != null) {
@@ -64,6 +65,7 @@ public class NetworkCollector implements DeviceCollector {
         }
         return null;
     }
+     */
 
 
 
