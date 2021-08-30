@@ -12,6 +12,7 @@ import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.PlatformUsernamePasswordNodeListener;
 import org.forgerock.android.auth.TreeTest;
+import org.forgerock.android.auth.UsernamePasswordNodeListener;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +30,7 @@ public class KbaCreateCallbackTest extends TreeTest {
 
     @Override
     protected NodeListenerFuture<FRSession> getNodeListenerFuture() {
-        return new PlatformUsernamePasswordNodeListener(context) {
+        return new UsernamePasswordNodeListener(context) {
             @Override
             public void onCallbackReceived(Node node) {
                 if (node.getCallback(KbaCreateCallback.class) != null) {
