@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -53,6 +53,7 @@ public class NetworkCollector implements DeviceCollector {
         return null;
     }
 
+    /*
     private String getMacAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiManager != null) {
@@ -64,6 +65,7 @@ public class NetworkCollector implements DeviceCollector {
         }
         return null;
     }
+     */
 
 
 
