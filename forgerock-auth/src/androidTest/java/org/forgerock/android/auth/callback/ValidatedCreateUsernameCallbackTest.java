@@ -31,8 +31,8 @@ public class ValidatedCreateUsernameCallbackTest extends TreeTest {
             @Override
             public void onCallbackReceived(Node node) {
                 boolean moveToNext = false;
-                if (node.getCallback(ValidatedUsernameCallback.class) != null) {
-                    node.getCallback(ValidatedUsernameCallback.class).setUsername(USERNAME);
+                if (node.getCallback(NameCallback.class) != null) {
+                    node.getCallback(NameCallback.class).setName(USERNAME);
                     moveToNext = true;
                     hit++;
                 }
