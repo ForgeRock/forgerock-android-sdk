@@ -195,22 +195,13 @@ public class PushNotification extends ModelObject<PushNotification> {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("messageId", getMessageId());
-            jsonObject.put("challenge", excludeSensitiveData ? "REMOVED" : getChallenge());
-            jsonObject.put("amlbCookie", excludeSensitiveData ? "REMOVED" : getAmlbCookie());
+            jsonObject.put("challenge", getChallenge());
+            jsonObject.put("amlbCookie", getAmlbCookie());
             jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
             jsonObject.put("timeExpired", getTimeExpired() != null ? getTimeExpired().getTimeInMillis() : null);
             jsonObject.put("ttl", getTtl());
@@ -222,6 +213,11 @@ public class PushNotification extends ModelObject<PushNotification> {
             throw new RuntimeException("Error parsing PushNotification object to JSON string representation.", e);
         }
         return jsonObject.toString();
+    }
+
+    @Override
+    String serialize() {
+        return this.toJson();
     }
 
     /**
@@ -252,7 +248,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @return a {@link PushNotification} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
      * or if {@code jsonString} is empty.
      */
-    static PushNotification deserialize(String jsonString) {
+    public static PushNotification deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }

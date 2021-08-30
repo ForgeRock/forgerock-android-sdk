@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static java.net.HttpURLConnection.HTTP_OK;
-
 /**
  * Responsible for generating instances of {@link PushMechanism}.
  *
@@ -125,7 +123,7 @@ class PushFactory extends MechanismFactory {
                             .setAuthenticationEndpoint(authenticationEndpoint)
                             .setRegistrationEndpoint(registrationEndpoint)
                             .setSecret(base64Secret)
-                            .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                            .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                             .build();
                     listener.onSuccess(push);
                 } catch (MechanismCreationException e) {

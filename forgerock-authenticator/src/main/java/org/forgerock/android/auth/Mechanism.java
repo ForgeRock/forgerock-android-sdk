@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -143,7 +143,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * @return an {@link Mechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static Mechanism deserialize(String jsonString) {
+    public static Mechanism deserialize(String jsonString) {
         Mechanism mechanism = null;
         if (jsonString == null || jsonString.length() == 0) {
             return null;

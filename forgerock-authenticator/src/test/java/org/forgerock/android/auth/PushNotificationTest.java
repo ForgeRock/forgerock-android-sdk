@@ -390,8 +390,8 @@ public class PushNotificationTest extends FRABaseTest {
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
                 "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
-                "\"challenge\":\"REMOVED\"," +
-                "\"amlbCookie\":\"REMOVED\"," +
+                "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
+                "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
                 "\"timeAdded\":1629261902660," +
                 "\"ttl\":120," +
                 "\"approved\":false," +
