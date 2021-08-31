@@ -8,11 +8,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "org.forgerock.auth"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,8 +55,8 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:3.0.0-SNAPSHOT'
-    implementation 'org.forgerock:forgerock-auth-ui:3.0.0-SNAPSHOT'
+    implementation 'org.forgerock:forgerock-auth:3.1.0'
+    implementation 'org.forgerock:forgerock-auth-ui:3.1.0'
      */
 
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'

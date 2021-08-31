@@ -3,6 +3,7 @@
 #### Added
 - Introduce `FRLifecycle` and exposed interfaces to allow custom Native SSO implementation. [SDKS-1140]
 - Unlock device is not required for data decryption. [SDKS-1141]
+- Support Android 12. [SDKS-1141]
 
 # Version 3.0.0
 
