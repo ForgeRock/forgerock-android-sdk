@@ -50,6 +50,31 @@ public class AccountTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldReturnDefaultAccountNameAndIssuer() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
+
+        assertEquals(account.getDisplayIssuer(), ISSUER);
+        assertEquals(account.getDisplayAccountName(), ACCOUNT_NAME);
+    }
+
+    @Test
+    public void testShouldReturnAlternativeAccountNameAndIssuer() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .build();
+
+        account.setDisplayAccountName(OTHER_ACCOUNT_NAME);
+        account.setDisplayIssuer(OTHER_ISSUER);
+
+        assertEquals(account.getDisplayIssuer(), OTHER_ISSUER);
+        assertEquals(account.getDisplayAccountName(), OTHER_ACCOUNT_NAME);
+    }
+
+    @Test
     public void testShouldBeEqualEquivalentAccount() {
         Account account1 = Account.builder()
                 .setAccountName(ACCOUNT_NAME)

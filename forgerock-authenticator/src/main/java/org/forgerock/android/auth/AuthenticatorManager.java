@@ -121,6 +121,18 @@ class AuthenticatorManager {
         return account;
     }
 
+    boolean updateAccount(Account account) {
+        Logger.debug(TAG, "Updating Account with ID '%s'", account.getId());
+
+        // Update the account object if it already exist, otherwise return false
+        Account oldAccount = storageClient.getAccount(account.getId());
+        if (oldAccount != null)  {
+            return storageClient.setAccount(account);
+        } else {
+            return false;
+        }
+    }
+
     Mechanism getMechanism(PushNotification notification) {
         String mechanismUID = notification.getMechanismUID();
         Logger.debug(TAG, "Retrieving Mechanism with ID '%s' from the StorageClient.", mechanismUID);
