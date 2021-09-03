@@ -163,7 +163,7 @@ public class FRAClient {
      * @param account The Account to update.
      * @return boolean as result of the operation
      */
-    public boolean updateAccount(Account account) {
+    public boolean updateAccount(@NonNull Account account) {
         return this.authenticatorManager.updateAccount(account);
     }
 
