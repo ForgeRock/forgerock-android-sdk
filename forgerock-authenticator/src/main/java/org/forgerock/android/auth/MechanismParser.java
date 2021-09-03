@@ -38,6 +38,8 @@ abstract class MechanismParser {
     public static final String IMAGE = "image";
     /** The identity color */
     public static final String BG_COLOR = "b";
+    /** Unknown identity **/
+    public static final String UNTITLED = "Untitled";
 
     private static final String SLASH = "/";
 
@@ -77,6 +79,7 @@ abstract class MechanismParser {
         String path = stripSlash(uri.getPath());
         String[] pathParts = split(path, ":");
         if (pathParts == null) {
+            r.put(ISSUER, path);
             r.put(ACCOUNT_NAME, path);
         } else {
             r.put(ISSUER, pathParts[0]);
@@ -97,6 +100,14 @@ abstract class MechanismParser {
         if (r.containsKey(BG_COLOR) && !r.get(BG_COLOR).startsWith("#")) {
             r.put(BG_COLOR, "#" + r.get(BG_COLOR));
         }
+
+        // Check identity
+        if (r.get(ISSUER).isEmpty() && r.get(ACCOUNT_NAME).isEmpty()) {
+            throw new MechanismParsingException("No identity is associated with this MFA account. Missing account name and issuer.");
+        } else if (r.get(ACCOUNT_NAME).isEmpty()) {
+            r.put(ACCOUNT_NAME, UNTITLED);
+        }
+
         return r;
     }
 

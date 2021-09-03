@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class OathParserTest {
 
@@ -45,10 +46,11 @@ public class OathParserTest {
     public void testShouldParseAccountName() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/example?secret=ABC");
         assertEquals(result.get(OathParser.ACCOUNT_NAME), "example");
+        assertEquals(result.get(OathParser.ISSUER), "example");
     }
 
-    @Test
-    public void testShouldFailMissingAccountName() throws MechanismParsingException {
+    @Test (expected = MechanismParsingException.class)
+    public void testShouldFailMissingAccountNameAndIssuer() throws MechanismParsingException {
         oathParser.map("otpauth://totp/?secret=ABC");
     }
 
@@ -59,9 +61,17 @@ public class OathParserTest {
     }
 
     @Test
+    public void testShouldParseIssuerFromParameters() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/?issuer=Stoat&secret=ABC");
+        assertEquals(result.get(OathParser.ISSUER), "Stoat");
+        assertEquals(result.get(OathParser.ACCOUNT_NAME), OathParser.UNTITLED);
+    }
+
+    @Test
     public void testShouldOverwriteIssuerFromParameters() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/Badger:ferret?issuer=Stoat&secret=ABC");
         assertEquals(result.get(OathParser.ISSUER), "Stoat");
+        assertEquals(result.get(OathParser.ACCOUNT_NAME), "ferret");
     }
 
     @Test
