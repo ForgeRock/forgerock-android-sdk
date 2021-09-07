@@ -158,15 +158,13 @@ public class FRAClient {
     }
 
     /**
-     * Get the Mechanism object associated with the PushNotification object.  Returns {@code null}
-     * if Mechanism could not be found.
-     * This method full initialize the {@link PushNotification} objects associated with.
-     * {@link PushMechanism} type
-     * @param notification The uniquely identifiable UUID for the mechanism
-     * @return The Mechanism object
+     * Update the {@link Account} object the storage system. Returns {@code false} if it could
+     * not be found or updated.
+     * @param account The Account to update.
+     * @return boolean as result of the operation
      */
-    public Mechanism getMechanism(@NonNull PushNotification notification) {
-        return this.authenticatorManager.getMechanism(notification);
+    public boolean updateAccount(@NonNull Account account) {
+        return this.authenticatorManager.updateAccount(account);
     }
 
     /**
@@ -177,6 +175,18 @@ public class FRAClient {
      */
     public boolean removeAccount(@NonNull Account account) {
         return this.authenticatorManager.removeAccount(account);
+    }
+
+    /**
+     * Get the Mechanism object associated with the PushNotification object.  Returns {@code null}
+     * if Mechanism could not be found.
+     * This method full initialize the {@link PushNotification} objects associated with.
+     * {@link PushMechanism} type
+     * @param notification The uniquely identifiable UUID for the mechanism
+     * @return The Mechanism object
+     */
+    public Mechanism getMechanism(@NonNull PushNotification notification) {
+        return this.authenticatorManager.getMechanism(notification);
     }
 
     /**

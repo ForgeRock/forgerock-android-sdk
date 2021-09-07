@@ -317,6 +317,29 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldUpdateStoredAccount() throws Exception {
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(oath);
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+
+        account.setDisplayAccountName(OTHER_ACCOUNT_NAME);
+        account.setDisplayIssuer(OTHER_ISSUER);
+
+        boolean result = authenticatorManager.updateAccount(account);
+
+        assertTrue(result);
+        assertEquals(account.getAccountName(), ACCOUNT_NAME);
+        assertEquals(account.getDisplayAccountName(), OTHER_ACCOUNT_NAME);
+        assertEquals(account.getIssuer(), ISSUER);
+        assertEquals(account.getDisplayIssuer(), OTHER_ISSUER);
+    }
+
+    @Test
     public void testShouldGetStoredMechanismByPushNotification() throws Exception {
         Account account = createAccount(ACCOUNT_NAME, ISSUER);
         Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);

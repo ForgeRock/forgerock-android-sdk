@@ -510,6 +510,38 @@ public class FRAClientTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldUpdateStoredAccount() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(oath);
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+
+        account.setDisplayAccountName(OTHER_ACCOUNT_NAME);
+        account.setDisplayIssuer(OTHER_ISSUER);
+
+        boolean result = fraClient.updateAccount(account);
+
+        assertTrue(result);
+        assertEquals(account.getAccountName(), ACCOUNT_NAME);
+        assertEquals(account.getDisplayAccountName(), OTHER_ACCOUNT_NAME);
+        assertEquals(account.getIssuer(), ISSUER);
+        assertEquals(account.getDisplayIssuer(), OTHER_ISSUER);
+    }
+
+    @Test
     public void testShouldGetStoredMechanismByPushNotification() throws Exception {
         FRAClient fraClient = FRAClient.builder()
                 .withContext(context)
