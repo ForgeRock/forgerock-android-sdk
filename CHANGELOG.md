@@ -1,5 +1,5 @@
-# Version 3.1.0
-## [3.1.0]
+# Version 3.1.1
+## [3.1.1]
 
 #### Added
 - Introduce `FRLifecycle` and exposed interfaces to allow custom Native SSO implementation. [SDKS-1140]
