@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateHOTPMechanism() {
+    public void testCreateHOTPMechanism() throws MechanismCreationException {
         OathMechanism mechanism = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -53,8 +54,32 @@ public class HOTPMechanismTest extends FRABaseTest {
         assertEquals(((HOTPMechanism)mechanism).getCounter(), COUNTER);
     }
 
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreateHOTPMechanismMissingIssuer() throws MechanismCreationException {
+        HOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .build();
+    }
+
+    @Test (expected = MechanismCreationException.class)
+    public void testShouldFailToCreateHOTPMechanismMissingAccountName() throws MechanismCreationException {
+        HOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .build();
+    }
+
     @Test
-    public void testShouldBeEqualEquivalentHOTPMechanism() {
+    public void testShouldBeEqualEquivalentHOTPMechanism() throws MechanismCreationException {
         Mechanism mechanism1 = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -80,7 +105,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualDifferentHOTPMechanismWithAccountName() {
+    public void testShouldNotBeEqualDifferentHOTPMechanismWithAccountName() throws MechanismCreationException {
         Mechanism mechanism1 = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -105,7 +130,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldNotBeEqualDifferentHOTPMechanismWithAccountIssuer() {
+    public void testShouldNotBeEqualDifferentHOTPMechanismWithAccountIssuer() throws MechanismCreationException {
         Mechanism mechanism1 = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -130,7 +155,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleHOTPCorrectlyWith6Digits() throws OathMechanismException {
+    public void shouldHandleHOTPCorrectlyWith6Digits() throws OathMechanismException, MechanismCreationException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -149,7 +174,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleHOTPCorrectlyWith8Digits() throws OathMechanismException {
+    public void shouldHandleHOTPCorrectlyWith8Digits() throws OathMechanismException, MechanismCreationException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -168,18 +193,18 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldParseToJsonSuccessfully() {
+    public void testShouldParseToJsonSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
-                "\"secret\":\"REMOVED\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
                 "\"type\":\"otpauth\"," +
                 "\"oathType\":\"HOTP\"," +
                 "\"algorithm\":\"sha1\"," +
                 "\"digits\":6," +
-                "\"counter\":\"REMOVED\"" +
+                "\"counter\":0" +
                 "}";
 
         HOTPMechanism mechanism = (HOTPMechanism) HOTPMechanism.builder()
@@ -199,7 +224,7 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldSerializeSuccessfully() {
+    public void testShouldSerializeSuccessfully() throws MechanismCreationException {
         String json = "{" +
                 "\"id\":\"issuer1-user1-otpauth\"," +
                 "\"issuer\":\"issuer1\"," +

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,7 +62,7 @@ public class PushNotification extends ModelObject<PushNotification> {
     private PushNotification(String mechanismUID, String messageId, String challenge, String amlbCookie,
                                Calendar timeAdded, Calendar timeExpired, long ttl, boolean approved,
                                boolean pending) {
-        this.id = mechanismUID + "-" + timeAdded;
+        this.id = mechanismUID + "-" + timeAdded.getTimeInMillis();
         this.mechanismUID = mechanismUID;
         this.messageId = messageId;
         this.challenge = challenge;
@@ -194,22 +195,13 @@ public class PushNotification extends ModelObject<PushNotification> {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("messageId", getMessageId());
-            jsonObject.put("challenge", excludeSensitiveData ? "REMOVED" : getChallenge());
-            jsonObject.put("amlbCookie", excludeSensitiveData ? "REMOVED" : getAmlbCookie());
+            jsonObject.put("challenge", getChallenge());
+            jsonObject.put("amlbCookie", getAmlbCookie());
             jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
             jsonObject.put("timeExpired", getTimeExpired() != null ? getTimeExpired().getTimeInMillis() : null);
             jsonObject.put("ttl", getTtl());
@@ -221,6 +213,11 @@ public class PushNotification extends ModelObject<PushNotification> {
             throw new RuntimeException("Error parsing PushNotification object to JSON string representation.", e);
         }
         return jsonObject.toString();
+    }
+
+    @Override
+    String serialize() {
+        return this.toJson();
     }
 
     /**
@@ -251,7 +248,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @return a {@link PushNotification} object from the string. Returns {@code null} if {@code jsonString} is {@code null}
      * or if {@code jsonString} is empty.
      */
-    static PushNotification deserialize(String jsonString) {
+    public static PushNotification deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -262,14 +259,14 @@ public class PushNotification extends ModelObject<PushNotification> {
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
                     .setMessageId(jsonObject.getString("messageId"))
                     .setChallenge(jsonObject.getString("challenge"))
-                    .setAmlbCookie(jsonObject.has("amlbCookie") ? jsonObject.getString("amlbCookie"): null)
+                    .setAmlbCookie(jsonObject.has("amlbCookie") ? jsonObject.getString("amlbCookie") : null)
                     .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .setTimeExpired(jsonObject.has("timeExpired") ? getDate(jsonObject.optLong("timeExpired")) : null)
                     .setTtl(jsonObject.optLong("ttl", -1))
                     .setApproved(jsonObject.getBoolean("approved"))
                     .setPending(jsonObject.getBoolean("pending"))
                     .build();
-        } catch (JSONException e) {
+        } catch (JSONException | InvalidNotificationException e) {
             return null;
         }
     }
@@ -431,8 +428,16 @@ public class PushNotification extends ModelObject<PushNotification> {
         /**
          * Build the notification.
          * @return The final notification.
+         * @throws InvalidNotificationException if timeAdded or mechanismUID are not provided
          */
-        protected PushNotification build() {
+        protected PushNotification build() throws InvalidNotificationException {
+            if(timeAdded == null) {
+                throw new InvalidNotificationException("timeAdded cannot be null.");
+            }
+            if(mechanismUID == null) {
+                throw new InvalidNotificationException("mechanismUID cannot be null.");
+            }
+
             return new PushNotification(mechanismUID, messageId, challenge, amlbCookie, timeAdded,
                     timeExpired, ttl, approved, pending);
         }

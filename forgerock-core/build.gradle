@@ -11,14 +11,14 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         buildConfigField 'String', 'VERSION_NAME', "\"" + VERSION + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

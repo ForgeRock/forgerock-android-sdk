@@ -35,6 +35,7 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
 import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
+import org.forgerock.android.auth.collector.FRDeviceCollector;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.forgerock.android.auth.interceptor.AdviceHandler;
 import org.forgerock.android.auth.interceptor.IdentityGatewayAdviceInterceptor;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -50,7 +50,7 @@ abstract class AbstractSymmetricEncryptor implements Encryptor {
             byte[] mac = computeMac(keyAlias, encryptedData);
             encryptedData = concatArrays(mac, iv, encryptedData);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new EncryptionException(e);
         }
         return encryptedData;
     }
@@ -61,7 +61,7 @@ abstract class AbstractSymmetricEncryptor implements Encryptor {
         try {
             cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("Error while getting an cipher instance", e);
+            throw new EncryptionException("Error while getting an cipher instance", e);
         }
 
         int ivLength = IV_LENGTH;
@@ -89,7 +89,7 @@ abstract class AbstractSymmetricEncryptor implements Encryptor {
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), ivParams);
             return cipher.doFinal(encryptedData);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new EncryptionException(e.getMessage(), e);
         }
     }
 
@@ -100,7 +100,7 @@ abstract class AbstractSymmetricEncryptor implements Encryptor {
             mac.init(sk);
             return mac.doFinal(cipherText);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException(e);
+            throw new EncryptionException(e);
         }
     }
 

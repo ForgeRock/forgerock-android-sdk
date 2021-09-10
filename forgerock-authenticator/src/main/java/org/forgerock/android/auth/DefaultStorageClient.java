@@ -197,6 +197,12 @@ class DefaultStorageClient implements StorageClient {
     }
 
     @Override
+    public PushNotification getNotification(String notificationId) {
+        String json = notificationData.getString(notificationId, null);
+        return PushNotification.deserialize(json);
+    }
+
+    @Override
     public boolean isEmpty() {
         return accountData.getAll().isEmpty() &&
                 mechanismData.getAll().isEmpty() &&

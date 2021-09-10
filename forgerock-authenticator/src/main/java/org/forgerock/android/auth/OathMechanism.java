@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.VisibleForTesting;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
 import org.json.JSONException;
@@ -91,7 +92,7 @@ public abstract class OathMechanism extends Mechanism {
      * @return an {@link OathMechanism} object from the string. Returns {@code null} if
      * {@code jsonString} is {@code null}, if {@code jsonString} is empty or not able to parse it
      */
-    static OathMechanism deserialize(String jsonString) {
+    public static OathMechanism deserialize(String jsonString) {
         OathMechanism oath = null;
         if (jsonString == null || jsonString.length() == 0) {
             return null;
@@ -120,7 +121,7 @@ public abstract class OathMechanism extends Mechanism {
         protected String algorithm;
         protected String secret;
         protected int digits;
-        protected Calendar timeCreated;
+        protected Calendar timeAdded;
 
         protected abstract T getThis();
 
@@ -190,18 +191,25 @@ public abstract class OathMechanism extends Mechanism {
 
         /**
          * Sets the Date and Time this mechanism was stored.
-         * @param timeCreated when this mechanism was stored.
+         * @param timeAdded when this mechanism was stored.
          */
-        public T setTimeCreated(Calendar timeCreated) {
-            this.timeCreated = timeCreated;
+        public T setTimeAdded(Calendar timeAdded) {
+            this.timeAdded = timeAdded;
             return getThis();
         }
 
         /**
          * Produce the described OathMechanism Token.
          * @return The built Token
+         * @throws MechanismCreationException If an issuer or accountName were not provided.
          */
-        protected OathMechanism build() {
+        protected OathMechanism build() throws MechanismCreationException {
+            if(issuer == null || issuer.isEmpty()) {
+                throw new MechanismCreationException("issuer cannot be empty or null.");
+            }
+            if(accountName == null || accountName.isEmpty()) {
+                throw new MechanismCreationException("accountName cannot be empty or null.");
+            }
             return buildOath();
         }
 

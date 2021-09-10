@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -88,30 +89,26 @@ public class PushMechanism extends Mechanism {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
+            jsonObject.put("secret", getSecret());
             jsonObject.put("type", getType());
-            jsonObject.put("registrationEndpoint", excludeSensitiveData ? "REMOVED" : getRegistrationEndpoint());
-            jsonObject.put("authenticationEndpoint", excludeSensitiveData ? "REMOVED" : getAuthenticationEndpoint());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
+            jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
+            jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
         return jsonObject.toString();
+    }
+
+    @Override
+    String serialize() {
+        return this.toJson();
     }
 
     /**
@@ -120,7 +117,7 @@ public class PushMechanism extends Mechanism {
      * @return an {@link PushMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static PushMechanism deserialize(String jsonString) {
+    public static PushMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -133,8 +130,9 @@ public class PushMechanism extends Mechanism {
                     .setSecret(jsonObject.getString("secret"))
                     .setRegistrationEndpoint(jsonObject.getString("registrationEndpoint"))
                     .setAuthenticationEndpoint(jsonObject.getString("authenticationEndpoint"))
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
-        } catch (JSONException e) {
+        } catch (JSONException | MechanismCreationException e) {
             return null;
         }
     }
@@ -157,7 +155,7 @@ public class PushMechanism extends Mechanism {
         private String registrationEndpoint;
         private String authenticationEndpoint;
         private String secret;
-        private Calendar timeCreated;
+        private Calendar timeAdded;
 
         /**
          * Sets the mechanism unique Id.
@@ -219,20 +217,28 @@ public class PushMechanism extends Mechanism {
 
         /**
          * Sets the Date and Time this mechanism was stored.
-         * @param timeCreated when this mechanism was stored.
+         * @param timeAdded when this mechanism was stored.
          */
-        public PushBuilder setTimeCreated(Calendar timeCreated) {
-            this.timeCreated = timeCreated;
+        public PushBuilder setTimeAdded(Calendar timeAdded) {
+            this.timeAdded = timeAdded;
             return this;
         }
 
         /**
          * Produce the described Mechanism.
-         * @return The built Token
+         * @return The built Mechanism
+         * @throws MechanismCreationException If an issuer or accountName were not provided.
          */
-        protected PushMechanism build() {
+        protected PushMechanism build() throws MechanismCreationException {
+            if(issuer == null || issuer.isEmpty()) {
+                throw new MechanismCreationException("issuer cannot be empty or null.");
+            }
+            if(accountName == null || accountName.isEmpty()) {
+                throw new MechanismCreationException("accountName cannot be empty or null.");
+            }
+
             return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
-                    registrationEndpoint, authenticationEndpoint, timeCreated);
+                    registrationEndpoint, authenticationEndpoint, timeAdded);
         }
 
     }

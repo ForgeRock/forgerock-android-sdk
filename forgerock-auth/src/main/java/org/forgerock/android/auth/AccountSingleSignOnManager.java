@@ -7,32 +7,24 @@
 
 package org.forgerock.android.auth;
 
+import static org.forgerock.android.auth.Encryptor.getEncryptor;
+import static java.util.Collections.emptySet;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
-import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.util.Base64;
 
-import org.forgerock.android.auth.authenticator.AuthenticatorService;
 import org.json.JSONArray;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import lombok.Builder;
 import lombok.NonNull;
-
-import static java.util.Collections.emptySet;
-import static org.forgerock.android.auth.Encryptor.getEncryptor;
 
 /**
  * Manage SSO Token with {@link AccountManager} as the storage.
@@ -143,13 +135,13 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
             String encryptedToken = accountManager.getUserData(account, SSO_TOKEN);
             if (encryptedToken != null) {
                 return new SSOToken(new String(encryptor.decrypt(Base64.decode(encryptedToken, Base64.DEFAULT))));
-            } else {
-                return null;
             }
-        } catch (Exception e) {
+        } catch (EncryptionException e) {
             Logger.warn(TAG, e, "Failed to decrypt data");
-            return null;
+            //Data not valid anymore.
+            clear();
         }
+        return null;
     }
 
     @Override
@@ -163,12 +155,13 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                     set.add(array.getString(i));
                 }
                 return set;
-            } else {
-                return emptySet();
             }
         } catch (Exception e) {
-            return emptySet();
+            Logger.warn(TAG, e, "Failed to decrypt data");
+            //Data not valid anymore.
+            clear();
         }
+        return emptySet();
     }
 
     @Override

@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,8 +26,12 @@ public class Account extends ModelObject<Account> {
     private final String id;
     /** Issuer of the account */
     private final String issuer;
+    /** Alternative Issuer of the account */
+    private String displayIssuer;
     /** AccountName, or Username of the account for the issuer */
     private final String accountName;
+    /** Alternative AccountName for the issuer */
+    private String displayAccountName;
     /** URL of Account's logo image */
     private final String imageURL;
     /** HEX Color code in String for Account */
@@ -38,16 +44,20 @@ public class Account extends ModelObject<Account> {
     /**
      * Creates Account object with given information.
      * @param issuer String value of issuer
+     * @param displayIssuer String alternative value of the issuer
      * @param accountName String value of accountName or username
+     * @param displayAccountName String alternative value of the accountName
      * @param imageURL URL of account's logo image (optional)
      * @param backgroundColor String HEX code of account's background color (optional)
      * @param timeAdded Date and Time this Account was stored
      */
-    private Account(String issuer, String accountName, String imageURL, String backgroundColor,
-                    Calendar timeAdded) {
+    public Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
+                   String imageURL, String backgroundColor, Calendar timeAdded) {
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
+        this.displayIssuer = displayIssuer;
         this.accountName = accountName;
+        this.displayAccountName = displayAccountName;
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
         this.timeAdded = timeAdded;
@@ -75,6 +85,40 @@ public class Account extends ModelObject<Account> {
      */
     public String getIssuer() {
         return issuer;
+    }
+
+    /**
+     * Gets the alternative name of the IDP that issued this account. Returns original {@code issuer} if
+     * {@code displayIssuer} is not set.
+     * @return The name of the IDP.
+     */
+    public String getDisplayIssuer() {
+        return displayIssuer != null ? displayIssuer : issuer;
+    }
+
+    /**
+     * Sets an alternative Issuer for this account.
+     * @param issuer The new IDP name.
+     */
+    public void setDisplayIssuer(@NonNull String issuer) {
+        this.displayIssuer = issuer;
+    }
+
+    /**
+     * Returns the name of this account. Returns original {@code accountName} if {@code displayAccountName}
+     * is not set.
+     * @return The account name.
+     */
+    public String getDisplayAccountName() {
+        return displayAccountName != null ? displayAccountName : accountName;
+    }
+
+    /**
+     * Sets an alternative name for the account.
+     * @param accountName The new account name.
+     */
+    public void setDisplayAccountName(@NonNull String accountName) {
+        this.displayAccountName = accountName;
     }
 
     /**
@@ -130,12 +174,14 @@ public class Account extends ModelObject<Account> {
     public String toJson() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("id", getId());
-            jsonObject.put("issuer", getIssuer());
-            jsonObject.put("accountName", getAccountName());
-            jsonObject.put("imageURL", getImageURL());
-            jsonObject.put("backgroundColor", getBackgroundColor());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("id", id);
+            jsonObject.put("issuer", issuer);
+            jsonObject.put("displayIssuer", displayIssuer);
+            jsonObject.put("accountName", accountName);
+            jsonObject.put("displayAccountName", displayAccountName);
+            jsonObject.put("imageURL", imageURL);
+            jsonObject.put("backgroundColor", backgroundColor);
+            jsonObject.put("timeAdded", timeAdded != null ? timeAdded.getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }
@@ -148,7 +194,7 @@ public class Account extends ModelObject<Account> {
      * @return an {@link Account} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static Account deserialize(String jsonString) {
+    public static Account deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -156,10 +202,12 @@ public class Account extends ModelObject<Account> {
             JSONObject jsonObject = new JSONObject(jsonString);
             return Account.builder()
                     .setIssuer(jsonObject.getString("issuer"))
+                    .setDisplayIssuer(jsonObject.has("displayIssuer") ? jsonObject.getString("displayIssuer") : null)
                     .setAccountName(jsonObject.getString("accountName"))
-                    .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL"): null)
-                    .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor"): null)
-                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
+                    .setDisplayAccountName(jsonObject.has("displayAccountName") ? jsonObject.getString("displayAccountName") : null)
+                    .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL") : null)
+                    .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
         } catch (JSONException e) {
             return null;
@@ -214,7 +262,9 @@ public class Account extends ModelObject<Account> {
      */
     public static class AccountBuilder {
         private String issuer = "";
+        private String displayIssuer;
         private String accountName = "";
+        private String displayAccountName;
         private String imageURL;
         private String backgroundColor;
         private Calendar timeCreated;
@@ -229,11 +279,29 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
+         * Sets the alternative name of the IDP that issued this account.
+         * @param issuer The IDP name.
+         */
+        public AccountBuilder setDisplayIssuer(String issuer) {
+            this.displayIssuer = issuer;
+            return this;
+        }
+
+        /**
          * Sets the name of the account.
          * @param accountName The account name.
          */
         public AccountBuilder setAccountName(String accountName) {
             this.accountName = accountName != null ? accountName : "";
+            return this;
+        }
+
+        /**
+         * Sets the alternative name of the account.
+         * @param accountName The account name.
+         */
+        public AccountBuilder setDisplayAccountName(String accountName) {
+            this.displayAccountName = accountName;
             return this;
         }
 
@@ -259,7 +327,7 @@ public class Account extends ModelObject<Account> {
          * Sets the Date and Time this Account was stored.
          * @param timeCreated when this account was stored.
          */
-        public AccountBuilder setTimeCreated(Calendar timeCreated) {
+        public AccountBuilder setTimeAdded(Calendar timeCreated) {
             this.timeCreated = timeCreated;
             return this;
         }
@@ -269,7 +337,8 @@ public class Account extends ModelObject<Account> {
          * @return The account.
          */
         protected Account build() {
-            return new Account(issuer, accountName, imageURL, backgroundColor, timeCreated);
+            return new Account(issuer, displayIssuer, accountName, displayAccountName,
+                    imageURL, backgroundColor, timeCreated);
         }
     }
 }

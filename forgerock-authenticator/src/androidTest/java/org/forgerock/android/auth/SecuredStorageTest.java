@@ -12,6 +12,8 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -160,7 +162,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testStoreOathMechanism() {
+    public void testStoreOathMechanism() throws MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
@@ -180,7 +182,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testStorePushMechanism() {
+    public void testStorePushMechanism() throws MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
@@ -200,7 +202,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testStoreMultipleMechanismsForSameAccount() {
+    public void testStoreMultipleMechanismsForSameAccount() throws MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
         Mechanism mechanism1 = MockModelBuilder.createPush(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
@@ -222,7 +224,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testUpdateExistingMechanism() {
+    public void testUpdateExistingMechanism() throws MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
@@ -254,7 +256,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testRemoveExistingMechanism() {
+    public void testRemoveExistingMechanism() throws MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Account account = MockModelBuilder.createAccount(ISSUER, ACCOUNT_NAME);
@@ -274,7 +276,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testStoreNotification() {
+    public void testStoreNotification() throws InvalidNotificationException, MechanismCreationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 
@@ -300,7 +302,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testStoreMultipleNotificationsForSameAccount() {
+    public void testStoreMultipleNotificationsForSameAccount() throws MechanismCreationException, InvalidNotificationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Calendar timeAdded1 = Calendar.getInstance();
@@ -337,7 +339,7 @@ public class SecuredStorageTest {
 
 
     @Test
-    public void testStoreMultipleNotificationsForDifferentAccounts() {
+    public void testStoreMultipleNotificationsForDifferentAccounts() throws MechanismCreationException, InvalidNotificationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
 
         Calendar timeAdded1 = Calendar.getInstance();
@@ -383,7 +385,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testUpdateExistingNotification() {
+    public void testUpdateExistingNotification() throws MechanismCreationException, InvalidNotificationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
         boolean approved = false;
@@ -423,7 +425,7 @@ public class SecuredStorageTest {
     }
 
     @Test
-    public void testRemoveExistingNotification() {
+    public void testRemoveExistingNotification() throws MechanismCreationException, InvalidNotificationException {
         DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
         Calendar timeAdded = Calendar.getInstance();
 

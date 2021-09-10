@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -22,8 +22,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
-import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
  * Responsible for generating instances of {@link PushMechanism}.
@@ -117,16 +115,20 @@ class PushFactory extends MechanismFactory {
                 messageId, payload, new FRAListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                Mechanism push = PushMechanism.builder()
-                        .setMechanismUID(mechanismUID)
-                        .setIssuer(issuer)
-                        .setAccountName(accountName)
-                        .setAuthenticationEndpoint(authenticationEndpoint)
-                        .setRegistrationEndpoint(registrationEndpoint)
-                        .setSecret(base64Secret)
-                        .setTimeCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
-                        .build();
-                listener.onSuccess(push);
+                try {
+                    Mechanism push = PushMechanism.builder()
+                            .setMechanismUID(mechanismUID)
+                            .setIssuer(issuer)
+                            .setAccountName(accountName)
+                            .setAuthenticationEndpoint(authenticationEndpoint)
+                            .setRegistrationEndpoint(registrationEndpoint)
+                            .setSecret(base64Secret)
+                            .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                            .build();
+                    listener.onSuccess(push);
+                } catch (MechanismCreationException e) {
+                    listener.onException(e);
+                }
             }
 
             @Override

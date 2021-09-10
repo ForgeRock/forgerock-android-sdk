@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -35,6 +35,7 @@ import static org.forgerock.android.auth.Encryptor.getEncryptor;
  * An implementation of {@link SharedPreferences} that encrypts values.
  */
 public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedListener {
+    public static final String TAG = SecuredSharedPreferences.class.getName();
 
     private static final int STRING_TYPE = 0;
     private static final int STRING_SET_TYPE = 1;
@@ -211,13 +212,10 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
     private String decrypt(@lombok.NonNull String data) {
         try {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
-        } catch (Exception e) {
+        } catch (EncryptionException e) {
             //Failed to decrypt the data, reset the encryptor
-            try {
-                encryptor.reset();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+            Logger.warn(TAG, "Failed to decrypt the data." );
+            edit().clear().commit();
             return null;
         }
     }

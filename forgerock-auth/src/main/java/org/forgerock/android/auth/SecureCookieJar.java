@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -73,7 +73,7 @@ public class SecureCookieJar implements CookieJar {
                 // Some cookies are expired, or failed to parse, remove it
                 if (storedCookies.size() != updatedCookies.size()) {
                     cache(cookies);
-                    singleSignOnManager.persist(updatedCookies);
+                    persist(updatedCookies);
                 }
             }
         }
@@ -106,7 +106,7 @@ public class SecureCookieJar implements CookieJar {
             updatedCookies.add(cookieMarshaller.marshal(cookie));
         }
 
-        singleSignOnManager.persist(updatedCookies);
+        persist(updatedCookies);
     }
 
     private boolean contains(Cookie input, Collection<Cookie> cookies) {
@@ -140,6 +140,11 @@ public class SecureCookieJar implements CookieJar {
             cacheRef.set(cookies);
             worker.schedule(() -> cacheRef.set(null), cacheIntervalMillis, TimeUnit.MILLISECONDS);
         }
+    }
+
+    private void persist(Collection<String> cookies) {
+        singleSignOnManager.persist(cookies);
+        FRLifecycle.dispatchCookiesUpdated(cookies);
     }
 
 }

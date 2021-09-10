@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,9 +23,9 @@ public class TOTPMechanism extends OathMechanism {
     private int period;
 
     private TOTPMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                          String algorithm, String secret, int digits, int period, Calendar timeCreated) {
+                          String algorithm, String secret, int digits, int period, Calendar timeAdded) {
         super(mechanismUID, issuer, accountName, type, oathType, algorithm,
-                secret, digits, timeCreated);
+                secret, digits, timeAdded);
         this.period = period;
     }
 
@@ -43,32 +44,28 @@ public class TOTPMechanism extends OathMechanism {
 
     @Override
     public String toJson() {
-        return convertToJson(true);
-    }
-
-    @Override
-    String serialize() {
-        return convertToJson(false);
-    }
-
-    private String convertToJson(boolean excludeSensitiveData) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("id", getId());
             jsonObject.put("issuer", getIssuer());
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
-            jsonObject.put("secret", excludeSensitiveData ? "REMOVED" : getSecret());
+            jsonObject.put("secret", getSecret());
             jsonObject.put("type", getType());
             jsonObject.put("oathType", getOathType());
             jsonObject.put("algorithm", getAlgorithm());
             jsonObject.put("digits", getDigits());
             jsonObject.put("period", getPeriod());
-            jsonObject.put("timeCreated", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushMechanism object to JSON string representation.", e);
         }
         return jsonObject.toString();
+    }
+
+    @Override
+    String serialize() {
+        return this.toJson();
     }
 
     /**
@@ -77,7 +74,7 @@ public class TOTPMechanism extends OathMechanism {
      * @return an {@link TOTPMechanism} object from the string. Returns {@code null} if {@code jsonString} is {@code null},
      * if {@code jsonString} is empty or not able to parse it.
      */
-    static TOTPMechanism deserialize(String jsonString) {
+    public static TOTPMechanism deserialize(String jsonString) {
         if (jsonString == null || jsonString.length() == 0) {
             return null;
         }
@@ -91,9 +88,9 @@ public class TOTPMechanism extends OathMechanism {
                     .setAlgorithm(jsonObject.getString("algorithm"))
                     .setDigits(jsonObject.getInt("digits"))
                     .setPeriod(jsonObject.getInt("period"))
-                    .setTimeCreated(jsonObject.has("timeCreated") ? getDate(jsonObject.optLong("timeCreated")) : null)
+                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
                     .build();
-        } catch (JSONException e) {
+        } catch (JSONException | MechanismCreationException e) {
             return null;
         }
     }
@@ -134,7 +131,7 @@ public class TOTPMechanism extends OathMechanism {
         @Override
         TOTPMechanism buildOath() {
             return new TOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH, TokenType.TOTP, algorithm,
-                    secret, digits, period, timeCreated);
+                    secret, digits, period, timeAdded);
         }
 
     }

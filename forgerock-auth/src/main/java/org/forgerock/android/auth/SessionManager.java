@@ -10,22 +10,19 @@ package org.forgerock.android.auth;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
-import lombok.Builder;
-import lombok.Getter;
-
-import org.forgerock.android.auth.exception.ApiException;
-import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import lombok.Builder;
+import lombok.Getter;
+
 /**
  * Manage the user session
  */
-class SessionManager {
+public class SessionManager {
 
     @Getter
     private TokenManager tokenManager;
@@ -92,7 +89,7 @@ class SessionManager {
     /**
      * Close the session, all tokens will be removed.
      */
-    void close() {
+    public void close() {
         tokenManager.revoke(null);
         singleSignOnManager.revoke(null);
     }
@@ -107,7 +104,7 @@ class SessionManager {
     }
 
     @VisibleForTesting
-    void close(FRListener<Void> listener) {
+    public void close(FRListener<Void> listener) {
         tokenManager.revoke(new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {

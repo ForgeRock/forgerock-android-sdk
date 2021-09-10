@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Base class for objects which are a part of the Authenticator Model.
@@ -42,7 +43,7 @@ abstract class ModelObject<T> implements Comparable<T> {
     static Calendar getDate(long milliSeconds)
     {
         // Create a calendar object that will convert the date and time value in milliseconds to date.
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(milliSeconds);
         return calendar;
     }

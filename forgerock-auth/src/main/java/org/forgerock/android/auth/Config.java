@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Getter;
-import lombok.Setter;
 import okhttp3.CookieJar;
 
 /**
@@ -140,7 +139,7 @@ public class Config {
                 .build();
     }
 
-   OAuth2Client getOAuth2Client() {
+    OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
                 .clientId(clientId)
                 .scope(scope)
@@ -167,7 +166,12 @@ public class Config {
                 .build();
     }
 
-    SessionManager getSessionManager() {
+    /**
+     * Retrieve the Session Manager that manage the user session.
+     *
+     * @return The SessionManager
+     */
+    public SessionManager getSessionManager() {
         return SessionManager.builder()
                 .tokenManager(getTokenManager())
                 .singleSignOnManager(getSingleSignOnManager())

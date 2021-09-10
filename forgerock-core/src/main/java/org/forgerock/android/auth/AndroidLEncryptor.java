@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 -2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,19 +8,20 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Base64;
-import lombok.NonNull;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
+
+import lombok.NonNull;
 
 /**
  * Provide data encryption and decryption for Android L device.
@@ -65,9 +66,17 @@ class AndroidLEncryptor extends AbstractSymmetricEncryptor {
                     Base64.encodeToString(encryptor.encrypt(secretKey.getEncoded()), Base64.DEFAULT));
             return secretKey;
         } else {
-            return new SecretKeySpec(encryptor.decrypt(Base64.decode(encryptedSecretKey, Base64.DEFAULT))
-                    , AES);
-
+            try {
+                return new SecretKeySpec(encryptor.decrypt(Base64.decode(encryptedSecretKey, Base64.DEFAULT))
+                        , AES);
+            } catch (EncryptionException e) {
+                try {
+                    reset();
+                } catch (Exception ioException) {
+                    throw new EncryptionException(ioException);
+                }
+                throw e;
+            }
         }
     }
 

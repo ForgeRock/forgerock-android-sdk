@@ -10,6 +10,7 @@ package org.forgerock.android.auth.webauthn;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
+import android.content.Context;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -113,7 +114,7 @@ public class WebAuthnAuthenticationTest extends BaseTest {
 
     private void testParsingParameterWithUsername(JSONObject value) throws Exception {
 
-       webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value));
+        webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value));
         Mockito.doReturn(new DummyTask()).when(webAuthnAuthentication).getSignPendingIntent(any(), optionsArgumentCaptor.capture());
         webAuthnAuthentication.authenticate(context, null, null, null);
 
@@ -142,9 +143,6 @@ public class WebAuthnAuthenticationTest extends BaseTest {
                 .getJSONArray("output")
                 .getJSONObject(0)
                 .getJSONObject("value");
-        webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value));
-        Mockito.doNothing().when(webAuthnAuthentication).authenticate(any(),
-                any(), any(), allowCredentialsArgumentCaptor.capture(), any());
 
         WebAuthnDataRepository repository = WebAuthnDataRepository.builder()
                 .context(context)
@@ -161,8 +159,18 @@ public class WebAuthnAuthenticationTest extends BaseTest {
 
         repository.persist(source);
 
+        webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value) {
+            @Override
+            protected List<PublicKeyCredentialSource> getPublicKeyCredentialSource(Context context) {
+                return repository.getPublicKeyCredentialSource(relayingPartyId);
+            }
+        });
+        Mockito.doNothing().when(webAuthnAuthentication).authenticate(any(),
+                any(), any(), allowCredentialsArgumentCaptor.capture(), any());
+
+
         webAuthnAuthentication.authenticate(context, null, null,
-                repository, null);
+                null);
 
         List<PublicKeyCredentialDescriptor> descriptors = allowCredentialsArgumentCaptor.getValue();
         assertThat(descriptors).hasSize(1);
@@ -181,9 +189,7 @@ public class WebAuthnAuthenticationTest extends BaseTest {
                 .getJSONArray("output")
                 .getJSONObject(0)
                 .getJSONObject("value");
-        webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value));
-        Mockito.doNothing().when(webAuthnAuthentication).authenticate(any(),
-                any(), any(), allowCredentialsArgumentCaptor.capture(), any());
+
 
         WebAuthnDataRepository repository = WebAuthnDataRepository.builder()
                 .context(context)
@@ -207,7 +213,15 @@ public class WebAuthnAuthenticationTest extends BaseTest {
                 .type("public-key")
                 .build();
         repository.persist(source2);
+        webAuthnAuthentication = Mockito.spy(new WebAuthnAuthentication(value) {
+            @Override
+            protected List<PublicKeyCredentialSource> getPublicKeyCredentialSource(Context context) {
+                return repository.getPublicKeyCredentialSource(relayingPartyId);
 
+            }
+        });
+        Mockito.doNothing().when(webAuthnAuthentication).authenticate(any(),
+                any(), any(), allowCredentialsArgumentCaptor.capture(), any());
 
         webAuthnAuthentication.authenticate(context, null, new WebAuthnKeySelector() {
                     @Override
@@ -216,7 +230,7 @@ public class WebAuthnAuthenticationTest extends BaseTest {
                         listener.onSuccess(sourceList.get(1));
                     }
                 },
-                repository, null);
+                null);
 
         List<PublicKeyCredentialDescriptor> descriptors = allowCredentialsArgumentCaptor.getValue();
         assertThat(descriptors).hasSize(1);
