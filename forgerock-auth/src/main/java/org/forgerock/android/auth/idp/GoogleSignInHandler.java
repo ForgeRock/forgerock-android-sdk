@@ -27,7 +27,9 @@ import org.forgerock.android.auth.Listener;
 
 /**
  * {@link IdPHandler} to handle Google login
+ * @deprecated Use {@link GoogleIdentityServicesHandler}
  */
+@Deprecated
 public class GoogleSignInHandler extends Fragment implements IdPHandler {
 
     public static final int RC_SIGN_IN = 1000;

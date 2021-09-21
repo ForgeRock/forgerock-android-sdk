@@ -15,7 +15,7 @@ import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Listener;
 import org.forgerock.android.auth.idp.AppleSignInHandler;
 import org.forgerock.android.auth.idp.FacebookSignInHandler;
-import org.forgerock.android.auth.idp.GoogleSignInHandler;
+import org.forgerock.android.auth.idp.GoogleIdentityServicesHandler;
 import org.forgerock.android.auth.idp.IdPClient;
 import org.forgerock.android.auth.idp.IdPHandler;
 import org.forgerock.android.auth.idp.IdPResult;
@@ -191,7 +191,7 @@ public class IdPCallback extends AbstractCallback implements IdPClient, Addition
     protected IdPHandler getIdPHandler() {
         IdPHandler idPHandler = null;
         if (provider.toLowerCase().contains("google")) {
-            idPHandler = new GoogleSignInHandler();
+            idPHandler = new GoogleIdentityServicesHandler();
         } else if (provider.toLowerCase().contains("facebook")) {
             idPHandler = new FacebookSignInHandler();
         } else if (provider.toLowerCase().contains("apple")) {
