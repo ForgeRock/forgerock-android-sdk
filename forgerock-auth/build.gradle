@@ -87,7 +87,7 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-fido:18.1.0'
 
     //Social Login
-    compileOnly 'com.google.android.gms:play-services-auth:19.0.0'
+    compileOnly 'com.google.android.gms:play-services-auth:19.2.0'
     compileOnly 'com.facebook.android:facebook-login:7.1.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
