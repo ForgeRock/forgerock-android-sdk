@@ -91,7 +91,15 @@ public class GoogleIdentityServicesHandler extends Fragment implements IdPHandle
                 }
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Listener.onException(listener, new OperationCanceledException());
+            try {
+                if (data != null) {
+                    //something wrong, try to get the error reason
+                    Identity.getSignInClient(getContext()).getSignInCredentialFromIntent(data);
+                }
+                Listener.onException(listener, new OperationCanceledException());
+            } catch (ApiException e) {
+                Listener.onException(listener, e);
+            }
         }
 
     }
