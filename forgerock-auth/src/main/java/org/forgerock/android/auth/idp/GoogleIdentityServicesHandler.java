@@ -30,7 +30,7 @@ import org.forgerock.android.auth.StringUtils;
 
 public class GoogleIdentityServicesHandler extends Fragment implements IdPHandler {
 
-    private static final String TAG = GoogleIdentityServicesHandler.class.getName();
+    public static final String TAG = GoogleIdentityServicesHandler.class.getName();
     public static final int RC_SIGN_IN = 1000;
     public FRListener<IdPResult> listener;
 
