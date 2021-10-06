@@ -1,4 +1,9 @@
-# Version 3.1.1
+# Version 3.2.0
+
+## [3.2.0]
+#### Added
+- Google Sign-In Security Enhancement [SDKS-1252]
+
 ## [3.1.1]
 
 #### Added

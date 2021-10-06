@@ -8,24 +8,30 @@
 package org.forgerock.android.auth;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Parcel;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Status;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.forgerock.android.auth.callback.CallbackFactory;
 import org.forgerock.android.auth.callback.IdPCallback;
 import org.forgerock.android.auth.callback.SelectIdPCallback;
 import org.forgerock.android.auth.idp.AppleSignInHandler;
-import org.forgerock.android.auth.idp.GoogleSignInHandler;
+import org.forgerock.android.auth.idp.GoogleIdentityServicesHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -38,23 +44,19 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 @RunWith(RobolectricTestRunner.class)
 public class SocialLoginTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
     private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
 
-    private GoogleSignInHandler getGoogleSignInHandler(FragmentActivity activity) {
+    private GoogleIdentityServicesHandler getGoogleIdentityServicesHandler(FragmentActivity activity) {
         Fragment fragment = activity.getSupportFragmentManager()
-                .findFragmentByTag(GoogleSignInHandler.TAG);
+                .findFragmentByTag(GoogleIdentityServicesHandler.TAG);
         if (fragment == null) {
             return null;
         }
-        return (GoogleSignInHandler) fragment;
+        return (GoogleIdentityServicesHandler) fragment;
     }
 
     private AppleSignInHandler getAppleSignInHandler(FragmentActivity activity) {
@@ -169,21 +171,22 @@ public class SocialLoginTest extends BaseTest {
             }
         });
 
-        GoogleSignInAccount googleSignInAccount = null;
-        try {
-            googleSignInAccount = GoogleSignInAccount.zaa("{\n" +
-                    "  \"tokenId\" : \"dummy_id_token\",\n" +
-                    "  \"expirationTime\" : 1615838032659,\n" +
-                    "  \"grantedScopes\" : [\"email\"],\n" +
-                    "  \"obfuscatedIdentifier\": \"1234567\"\n" +
-                    "}");
-        } catch (JSONException e) {
-            fail(e.getMessage());
-        }
+        SignInCredential signInCredential = new SignInCredential("1234"
+                , "", "", "",null, "", "dummy_id_token" );
+        Status status = Status.RESULT_SUCCESS;
+        Parcel statusParcel = Parcel.obtain();
+        status.writeToParcel(statusParcel, 0);
+        byte[] bytes = statusParcel.marshall();
+
+        Parcel signInCredentialParcel = Parcel.obtain();
+        signInCredential.writeToParcel(signInCredentialParcel, 0);
+        byte[] bytes2 = signInCredentialParcel.marshall();
+
 
         Intent intent = new Intent();
-        intent.putExtra("googleSignInAccount", googleSignInAccount);
-        getGoogleSignInHandler(fragmentActivity).onActivityResult(GoogleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
+        intent.putExtra("sign_in_credential", bytes2);
+        intent.putExtra("status", bytes);
+        getGoogleIdentityServicesHandler(fragmentActivity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
 
         assertNotNull(nodeListenerFuture.get());
         assertNotNull(FRUser.getCurrentUser());
@@ -273,7 +276,7 @@ public class SocialLoginTest extends BaseTest {
             }
         });
 
-        getGoogleSignInHandler(fragmentActivity).onActivityResult(GoogleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, null);
+        getGoogleIdentityServicesHandler(fragmentActivity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, null);
         countDownLatch.await();
     }
 
@@ -338,7 +341,7 @@ public class SocialLoginTest extends BaseTest {
 
         Intent intent = new Intent();
         intent.setData(Uri.parse("https://opeam.example.com?form_post_entry=dummyValue"));
-        getAppleSignInHandler(fragmentActivity).onActivityResult(GoogleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
+        getAppleSignInHandler(fragmentActivity).onActivityResult(AppleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
 
         assertNotNull(nodeListenerFuture.get());
         assertNotNull(FRUser.getCurrentUser());
