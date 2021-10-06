@@ -26,12 +26,15 @@ import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback;
 import org.forgerock.android.auth.exception.WebAuthnResponseException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -39,6 +42,7 @@ import static org.junit.Assert.fail;
 @RunWith(AndroidJUnit4.class)
 public class WebAuthnRegistrationAndroidTest extends WebAuthnTest {
 
+    @Rule public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private static final String SUCCESS_FIDO2_KEY_RESPONSE_EXTRA = "RU___xgCAAACAP__SAAAAEEAAAABK1OPHJfLzC51p88WTVGLwkeU0GsgXwTTOGkav0-RIiGy634kk3gOz2e_r_I-xNFkyn0NiR-lKiqtTjRQzwY7JgAAAAMA___QAAAAygAAAHsidHlwZSI6IndlYmF1dGhuLmNyZWF0ZSIsImNoYWxsZW5nZSI6ImNtSW5EZkE2VUFMTmhJUlhXYzRmellBVzFmR0tBRVZEcVJpSWdUcXpURDQiLCJvcmlnaW4iOiJhbmRyb2lkOmFway1rZXktaGFzaDpSOHhPN3JsUVdhV0w0QmxGeWdwdFdSYjVxY0tXZGZqelpJYVNSaXQ5WFZ3IiwiYW5kcm9pZFBhY2thZ2VOYW1lIjoib3JnLmZvcmdlcm9jay5hdXRoIn0AAAQA___oAAAA4wAAAKNjZm10ZG5vbmVnYXR0U3RtdKBoYXV0aERhdGFYxX2IE7CjrnLcgPrR-U5RSE6T5bC10JWT1E2_u0U97Z4hRQAAAAAAAAAAAAAAAAAAAAAAAAAAAEEBK1OPHJfLzC51p88WTVGLwkeU0GsgXwTTOGkav0-RIiGy634kk3gOz2e_r_I-xNFkyn0NiR-lKiqtTjRQzwY7JqUBAgMmIAEhWCAyD-pOMu97QL0ZJCGt5r93yBGAzgODv8GjrhbXnG5TBiJYIBk2ztjTWIegVnAJy0tkwz_YqmTfiNhXz48M8VGWH0HLAA";
     private static final String ERROR_FIDO2_KEY_ERROR = "RU___2gAAAACAAQAEgAAAAMA__9YAAAAKAAAAFQAaABlACAAaQBuAGMAbwBtAGkAbgBnACAAcgBlAHEAdQBlAHMAdAAgAGMAYQBuAG4AbwB0ACAAYgBlACAAdgBhAGwAaQBkAGEAdABlAGQAAAAAAA";
     private static final String ERROR_FIDO2_UNSUPPORTED = "RU___3AAAAACAAQACQAAAAMA__9gAAAALQAAAEYASQBEAE8AMgAgAEEAUABJACAAaQBzACAAbgBvAHQAIABzAHUAcABwAG8AcgB0AGUAZAAgAG8AbgAgAGQAZQB2AGkAYwBlAHMAIABiAGUAbABvAHcAIABOAAAA";

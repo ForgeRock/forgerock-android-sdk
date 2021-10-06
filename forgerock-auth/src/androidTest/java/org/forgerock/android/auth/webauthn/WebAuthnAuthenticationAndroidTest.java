@@ -26,12 +26,15 @@ import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback;
 import org.forgerock.android.auth.exception.WebAuthnResponseException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -41,6 +44,8 @@ import static org.junit.Assert.fail;
 @RunWith(AndroidJUnit4.class)
 public class WebAuthnAuthenticationAndroidTest extends WebAuthnTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private static final String SUCCESS_FIDO2_KEY_RESPONSE_EXTRA = "RU___6wBAAACAP__SAAAAEEAAAABqtuz6WWwU9CpCSoQ7VBfR_qGFLqBTjyTeOMnMbHQP_vVWblc6mX6txWpNqsCaHq64kUT_aUJTHJWNhh80KjvbgAAAAMA___MAAAAxwAAAHsidHlwZSI6IndlYmF1dGhuLmdldCIsImNoYWxsZW5nZSI6IklOWVRZWWdkcmozdzlaNXZYZDkwZ0VvSV9KaWNJenpkeVJVWUZSQkY3MjQiLCJvcmlnaW4iOiJhbmRyb2lkOmFway1rZXktaGFzaDpSOHhPN3JsUVdhV0w0QmxGeWdwdFdSYjVxY0tXZGZqelpJYVNSaXQ5WFZ3IiwiYW5kcm9pZFBhY2thZ2VOYW1lIjoib3JnLmZvcmdlcm9jay5hdXRoIn0ABAD__ywAAAAlAAAAfYgTsKOuctyA-tH5TlFITpPlsLXQlZPUTb-7RT3tniEFAAAAAQAAAAUA__9MAAAASAAAADBGAiEA_cn5srrQ7-JR7yrwPIGmJfx5rMkcZKPsAKo5BoEW1fICIQDwORk5kobppwcnbJ9Nm-ZGyEJ1eMupvPtwUr5BT5peLg";
     private static final String ERROR_FIDO2_KEY_ERROR = "RU___2gAAAACAAQAEgAAAAMA__9YAAAAKAAAAFQAaABlACAAaQBuAGMAbwBtAGkAbgBnACAAcgBlAHEAdQBlAHMAdAAgAGMAYQBuAG4AbwB0ACAAYgBlACAAdgBhAGwAaQBkAGEAdABlAGQAAAAAAA";
 

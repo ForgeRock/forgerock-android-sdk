@@ -20,10 +20,13 @@ import androidx.test.core.app.ApplicationProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -31,6 +34,8 @@ import static org.junit.Assert.assertNull;
 @RunWith(AndroidVersionAwareTestRunner.class)
 public class DefaultSingleSignOnManagerTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     public static final String ORG_FORGEROCK = "org.forgerock.test";
     private SingleSignOnManager tokenManager;
     private final Context context = ApplicationProvider.getApplicationContext();

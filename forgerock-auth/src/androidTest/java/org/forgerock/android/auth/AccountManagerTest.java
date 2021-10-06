@@ -14,14 +14,19 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class AccountManagerTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private Context context = ApplicationProvider.getApplicationContext();
 
     @Test

@@ -13,18 +13,23 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.security.KeyStore;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class DefaultTokenManagerTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
 
     private TokenManager tokenManager;

@@ -9,12 +9,19 @@ package org.forgerock.android.auth;
 
 import android.os.Build;
 
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
+import java.util.concurrent.TimeUnit;
+
 public class AndroidVersionAwareTestRunner extends BlockJUnit4ClassRunner {
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
+
     public AndroidVersionAwareTestRunner(Class klass) throws InitializationError {
         super(klass);
     }

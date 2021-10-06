@@ -13,14 +13,20 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.detector.*;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import static android.os.Build.VERSION.SDK_INT;
 
+import java.util.concurrent.TimeUnit;
+
 @RunWith(AndroidJUnit4.class)
 public class RootDeviceTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private Context context = ApplicationProvider.getApplicationContext();
 
     @Test

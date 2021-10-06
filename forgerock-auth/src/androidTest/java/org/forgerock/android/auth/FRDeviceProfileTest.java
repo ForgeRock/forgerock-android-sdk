@@ -19,15 +19,18 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class FRDeviceProfileTest {
 
+    @Rule public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     private Context context = ApplicationProvider.getApplicationContext();
 
     @Rule
