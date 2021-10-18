@@ -46,7 +46,8 @@ public class WebAuthnHeadlessAuthenticateFragment extends Fragment {
 
         WebAuthnHeadlessAuthenticateFragment existing = (WebAuthnHeadlessAuthenticateFragment) fragmentManager.findFragmentByTag(TAG);
         if (existing != null) {
-            return existing;
+            existing.listener = null;
+            fragmentManager.beginTransaction().remove(existing).commitNow();
         }
 
         WebAuthnHeadlessAuthenticateFragment fragment = newInstance(pendingIntent);
