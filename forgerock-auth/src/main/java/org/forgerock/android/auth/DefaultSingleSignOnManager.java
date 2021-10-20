@@ -55,6 +55,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                     .accountName(accountName == null ? context.getString(R.string.forgerock_account_name) : accountName)
                     .encryptor(encryptor).build();
         } catch (Exception e) {
+            Logger.debug(TAG, "Single Sign On is disabled");
             Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
             singleSignOnManager = SharedPreferencesSignOnManager.builder()
                     .context(context)

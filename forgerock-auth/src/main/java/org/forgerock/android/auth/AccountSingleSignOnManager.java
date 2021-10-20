@@ -60,6 +60,9 @@ class AccountSingleSignOnManager implements SingleSignOnManager, KeyUpdatedListe
                 getEncryptor(context, ORG_FORGEROCK_V_1_SSO_KEYS, this, this) :
                 encryptor;
         Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
+
+        verifyAccount(accountManager, accountType, account);
+
     }
 
     @Override
