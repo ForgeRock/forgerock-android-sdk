@@ -30,6 +30,7 @@ interface AccountAware {
 
     String TAG = AccountAware.class.getSimpleName();
     String ACCOUNT_TYPE = "accountType";
+    String HEALTH_CHECK_KEY = "org.forgerock.HEALTH_CHECK";
 
     /**
      * Retrieve the Account Type
@@ -88,6 +89,26 @@ interface AccountAware {
             }
         }
         return false;
+    }
+
+    /**
+     * Verify Account Creation using AccountManager.
+     *
+     * @param accountManager The AccountManager
+     * @param accountType    Account Type
+     * @param account        The Account to be created.
+     */
+    default void verifyAccount(AccountManager accountManager, String accountType, Account account) {
+        if (!isAccountExists(accountManager, accountType, account)) {
+            boolean result = accountManager.addAccountExplicitly(account, null, null);
+            if (!result) {
+                throw new IllegalStateException("Failed to add Account");
+            }
+        } else {
+            //even it is exists, make sure that we still have access to it.
+            //getUserData will throw SecurityException if user has no permission.
+            accountManager.getUserData(account, HEALTH_CHECK_KEY);
+        }
     }
 
     /**
