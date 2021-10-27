@@ -5,8 +5,11 @@
 - Google Sign-In Security Enhancement [SDKS-1252]
 - WebAuthn Registration & Authentication prompt not shown on second invocation on Single Activity App [SDKS-1297]
 
-## [3.1.1]
+## [3.1.2]
+#### Added
+- Disable native SSO if failed to access Android AccountManager [SDKS-1304]
 
+## [3.1.1]
 #### Added
 - Introduce `FRLifecycle` and exposed interfaces to allow custom Native SSO implementation. [SDKS-1140]
 - Unlock device is not required for data decryption. [SDKS-1141]
