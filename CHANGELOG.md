@@ -1,4 +1,10 @@
-# Version 3.1.1
+# Version 3.1.2
+
+## [3.1.2]
+
+#### Added
+- Disable native SSO if failed to access Android AccountManager [SDKS-1304]
+
 ## [3.1.1]
 
 #### Added

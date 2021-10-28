@@ -53,6 +53,8 @@ class AccountDataRepository implements DataRepository, AccountAware, KeyUpdatedL
                 getEncryptor(context, defaultKeyAlias, this) :
                 encryptor;
         Logger.debug(TAG, "Using Encryptor %s", this.encryptor.getClass().getSimpleName());
+
+        verifyAccount(accountManager, accountType, account);
     }
 
     @Override
