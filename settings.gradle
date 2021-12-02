@@ -18,3 +18,5 @@ include ':pebblebank'
 project(':pebblebank').projectDir = new File('demo/pebblebank')
 */
 
+include ':quickstart'
+project(':quickstart').projectDir = new File('samples/quickstart')
