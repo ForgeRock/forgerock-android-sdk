@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -84,6 +85,20 @@ public class Node implements Serializable {
      *
      * @param context  The Application Context
      * @param listener Listener for receiving {@link AuthService} related changes
+     *                    <b> {@link NodeListener#onSuccess(Object)} on success login.
+     *                    <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                    <b> throws {@link IllegalStateException} when the tree is invalid, e.g the authentication tree has been completed.
+     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException} when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                    <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                    <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                    When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                    <b> throws {@link org.forgerock.android.auth.exception.SuspendedAuthSessionException} When Suspended ID timeout
+     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                    <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                    <b> throws {@link IOException } When there is any network error.
+     *                    <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                    <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
+
      */
     public void next(Context context, NodeListener<?> listener) {
         AuthService.goToNext(context, this, listener);

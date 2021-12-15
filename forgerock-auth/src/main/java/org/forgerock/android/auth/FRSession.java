@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.net.Uri;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -79,13 +80,23 @@ public class FRSession {
     }
 
 
-
     /**
      * Trigger the Authentication Tree flow process with the {@link PolicyAdvice}
      *
      * @param context  The Application Context
      * @param advice   Policy Advice for Step up authentication.
-     * @param listener Listener to listen login event.
+     * @param listener Listener to listen for authenticate event.
+     *                 <b> {@link NodeListener#onSuccess(Object)} on success login,  {@link FRSession} is returned.
+     *                 <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                 When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException } When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                 <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
 
     public void authenticate(Context context, PolicyAdvice advice, final NodeListener<FRSession> listener) {
@@ -103,7 +114,18 @@ public class FRSession {
      *
      * @param context     The Application Context
      * @param serviceName Authentication Tree name
-     * @param listener    Listener to listen login event.
+     * @param listener    Listener to listen for authenticate event.
+     *                    <b> {@link NodeListener#onSuccess(Object)} on success login,  {@link FRSession} is returned.
+     *                    <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                    <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                    <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                    When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                    <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                    <b> throws {@link IOException } When there is any network error.
+     *                    <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                    <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
 
     public static void authenticate(Context context, String serviceName, final NodeListener<FRSession> listener) {
@@ -121,7 +143,19 @@ public class FRSession {
      *
      * @param context   The Application Context
      * @param resumeURI Resume URI
-     * @param listener  Listener to listen login event.
+     * @param listener  Listener to listen for authenticate event.
+     *                  <b> {@link NodeListener#onSuccess(Object)} on success login,  {@link FRSession} is returned.
+     *                  <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                  <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                  <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                  <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                  When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                  <b> throws {@link org.forgerock.android.auth.exception.SuspendedAuthSessionException} When Suspended ID timeout
+     *                  <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                  <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                  <b> throws {@link IOException } When there is any network error.
+     *                  <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                  <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
     public static void authenticate(Context context, Uri resumeURI, final NodeListener<FRSession> listener) {
         FRAuth.builder()
