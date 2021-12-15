@@ -34,6 +34,7 @@ import org.junit.runners.Suite;
         NumberAttributeInputCallbackTest.class,
         SelectIdPCallbackTest.class,
         IdPCallbackTest.class,
+        SerializableTest.class,
 
 
         AuthServiceMockTest.class,
