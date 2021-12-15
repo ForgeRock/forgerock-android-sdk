@@ -4,6 +4,9 @@
 #### Added
 - Google Sign-In Security Enhancement [SDKS-1252]
 - WebAuthn Registration & Authentication prompt not shown on second invocation on Single Activity App [SDKS-1297]
+  
+#### Fixed
+- AbstractValidatedCallback is not serializable [SDKS-1486]
 
 ## [3.1.2]
 #### Added
