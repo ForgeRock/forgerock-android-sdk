@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -32,7 +32,7 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
      *
      * @return validation policies
      */
-    private JSONObject policies;
+    private String policies;
 
     /**
      * Return the list of failed policies for this callback.
@@ -51,7 +51,7 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
     protected void setAttribute(String name, Object value) {
         switch (name) {
             case "policies":
-                policies = ((JSONObject) value);
+                policies = value.toString();
                 break;
             case "failedPolicies":
                 prepareFailedPolicy((JSONArray) value);
@@ -64,6 +64,17 @@ public abstract class AbstractValidatedCallback extends AbstractCallback {
     }
 
     public abstract String getPrompt();
+
+    public JSONObject getPolicies() {
+        try {
+            if (policies != null) {
+                return new JSONObject(policies);
+            }
+            return null;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void setValidateOnly(boolean validateOnly) {
         setValue(validateOnly, 1);
