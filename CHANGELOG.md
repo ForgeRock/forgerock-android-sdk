@@ -7,6 +7,7 @@
   
 #### Fixed
 - AbstractValidatedCallback is not serializable [SDKS-1486]
+- Provide Build-in Binary Protection to avoid Memory Corruption Attack [SDKS-1368]
 
 ## [3.1.2]
 #### Added
