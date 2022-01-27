@@ -27,6 +27,7 @@ import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidRedirectUriException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -83,9 +84,13 @@ public class FRUser {
     /**
      * Revoke the {@link AccessToken} asynchronously,
      *
-     *
      * @param listener Listener to listen for token revocation event.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link IOException} When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
      */
+
     public void revokeAccessToken(FRListener<Void> listener) {
         sessionManager.revokeAccessToken(listener);
     }
@@ -94,15 +99,29 @@ public class FRUser {
      * Retrieve the {@link AccessToken} asynchronously,
      *
      * <p>
-     * If the stored {@link AccessToken} is expired, auto refresh the token.
+     * If the stored {@link AccessToken} is expired, auto refresh the token if refresh token
+     * is available.
      *
      * @param listener Listener to listen get Access Token event.
+     *                 <b> throws {@link AuthenticationRequiredException} when unable to retrieve a valid {@link AccessToken},
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException} When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
      */
-
     public void getAccessToken(FRListener<AccessToken> listener) {
         sessionManager.getAccessToken(listener);
     }
 
+    /**
+     * Retrieve the {@link AccessToken}, if the stored {@link AccessToken} is expired, auto
+     * refresh the token it refresh token is available.
+     *
+     * @return The {@link AccessToken}
+     * @throws AuthenticationRequiredException when unable to retrieve a valid {@link AccessToken},
+     *                                         re-login with {@link FRUser#login(Context, NodeListener)}
+     */
     @WorkerThread
     public AccessToken getAccessToken() throws AuthenticationRequiredException {
         return sessionManager.getAccessToken();
@@ -113,6 +132,11 @@ public class FRUser {
      * the authorization for the token.
      *
      * @param listener Listener to listen get UserInfo event.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException} When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
      */
     public void getUserInfo(final FRListener<UserInfo> listener) {
 
@@ -138,7 +162,18 @@ public class FRUser {
      *
      * @param context  The Application Context
      * @param listener Listener to listen login event.
-     *                 <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
+     *                 <b> {@link NodeListener#onSuccess(Object)} on success login,  {@link FRUser} is returned.
+     *                 <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                 <b> throws {@link AlreadyAuthenticatedException} user session already exists.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                 When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException} When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                 <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
     public static void login(Context context, final NodeListener<FRUser> listener) {
         SessionManager sessionManager = Config.getInstance().getSessionManager();
@@ -171,7 +206,18 @@ public class FRUser {
      *
      * @param context  The Application Context
      * @param listener Listener to listen register event.
-     *                 <b> Throw {@link AlreadyAuthenticatedException} user session already exists.
+     *                 <b> {@link NodeListener#onSuccess(Object)} on success login,  {@link FRUser} is returned.
+     *                 <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                 <b> throws {@link AlreadyAuthenticatedException} user session already exists.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                 When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException} When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                 <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
     public static void register(Context context, NodeListener<FRUser> listener) {
         SessionManager sessionManager = Config.getInstance().getSessionManager();
@@ -210,10 +256,36 @@ public class FRUser {
             return appAuthConfigurer;
         }
 
+        /**
+         * @param fragment The current Fragment
+         * @param listener Listener to listen login event.
+         *                 <b> {@link FRListener#onSuccess(Object)} on success login,  {@link FRUser} is returned.
+         *                 <b> throws {@link AlreadyAuthenticatedException} user session already exists.
+         *                 <b> throws {@link InvalidRedirectUriException} Invalid Redirect URI.
+         *                 <b> throws {@link org.forgerock.android.auth.exception.BrowserAuthenticationException} when there is any error during centralize authentication.
+         *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+         *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+         *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+         *                 <b> throws {@link IOException} When there is any network error.
+         *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+         */
         public void login(Fragment fragment, FRListener<FRUser> listener) {
             login(fragment.getContext(), fragment.getFragmentManager(), listener);
         }
 
+        /**
+         * @param activity The current FragmentActivity
+         * @param listener Listener to listen login event.
+         *                 <b> {@link FRListener#onSuccess(Object)} on success login,  {@link FRUser} is returned.
+         *                 <b> throws {@link AlreadyAuthenticatedException} user session already exists.
+         *                 <b> throws {@link InvalidRedirectUriException} Invalid Redirect URI.
+         *                 <b> throws {@link org.forgerock.android.auth.exception.BrowserAuthenticationException} when there is any error during centralize authentication.
+         *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+         *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+         *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+         *                 <b> throws {@link IOException} When there is any network error.
+         *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+         */
         public void login(FragmentActivity activity, FRListener<FRUser> listener) {
             login(activity.getApplicationContext(), activity.getSupportFragmentManager(), listener);
         }

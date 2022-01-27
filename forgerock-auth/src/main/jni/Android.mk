@@ -10,5 +10,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := tool-file
 LOCAL_SRC_FILES := toolFile.cpp
 LOCAL_LDLIBS := -llog
+LOCAL_CFLAGS := -fstack-protector-all
 
 include $(BUILD_SHARED_LIBRARY)
