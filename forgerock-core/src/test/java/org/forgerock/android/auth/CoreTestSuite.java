@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,6 +17,7 @@ import org.junit.runners.Suite;
         LoggerTest.class,
         KeyStoreManagerTest.class,
         RequestInterceptorTest.class,
+        NetworkConfigTest.class,
 
 })
 public class CoreTestSuite {

@@ -1,11 +1,18 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.auth;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
+import static org.forgerock.android.auth.ui.SimpleLoginActivity.ERROR_EXTRA;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.nimbusds.jwt.JWTParser;
 
 import org.forgerock.android.auth.AccessToken;
+import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
@@ -35,7 +43,6 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.PolicyAdvice;
 import org.forgerock.android.auth.SecureCookieJar;
 import org.forgerock.android.auth.UserInfo;
-import org.forgerock.android.auth.collector.FRDeviceCollector;
 import org.forgerock.android.auth.interceptor.AccessTokenInterceptor;
 import org.forgerock.android.auth.interceptor.AdviceHandler;
 import org.forgerock.android.auth.interceptor.IdentityGatewayAdviceInterceptor;
@@ -48,9 +55,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -58,13 +72,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
-
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
-import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
-import static org.forgerock.android.auth.ui.SimpleLoginActivity.ERROR_EXTRA;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -288,6 +295,36 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(VISIBLE);
                 revokeAccessToken();
                 return true;
+            case R.id.trustAllCert:
+
+                try {
+                    final TrustManager trustManager = new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[] {};
+                        }
+                    };
+                    SSLContext sslContext = SSLContext.getInstance("SSL");
+                    sslContext.init(null, new TrustManager[] { trustManager }, new java.security.SecureRandom());
+                    Config.getInstance().reset();
+                    Config.getInstance().init(this);
+                    Config.getInstance().setBuildSteps(Collections.singletonList(builder1 -> {
+                        builder1.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager);
+                        builder1.hostnameVerifier((s, sslSession) -> true);
+                    }));
+
+                } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                    runOnUiThread(() -> content.setText(e.getMessage()));
+                }
+
             default:
                 return super.onOptionsItemSelected(item);
         }

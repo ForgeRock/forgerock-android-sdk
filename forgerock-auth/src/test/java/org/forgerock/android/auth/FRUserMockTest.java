@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -832,7 +832,7 @@ public class FRUserMockTest extends BaseTest {
         when(mockContext.getResources()).thenReturn(resources);
         when(mockContext.getApplicationContext()).thenReturn(context);
         when(resources.getInteger(R.integer.forgerock_timeout)).thenReturn(30);
-        when(resources.getStringArray(R.array.forgerock_pins)).thenReturn(context.getResources().getStringArray(R.array.forgerock_pins));
+        when(resources.getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes)).thenReturn(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes));
         when(mockContext.getString(R.string.forgerock_authenticate_endpoint)).thenReturn("dummy/authenticate");
         when(mockContext.getString(R.string.forgerock_authorize_endpoint)).thenReturn("dummy/authorize");
         when(mockContext.getString(R.string.forgerock_token_endpoint)).thenReturn("dummy/token");

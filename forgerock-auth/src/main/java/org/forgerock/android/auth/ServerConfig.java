@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import okhttp3.CookieJar;
+import okhttp3.OkHttpClient;
 
 import static java.util.Collections.singletonList;
 
@@ -56,6 +57,7 @@ public class ServerConfig extends NetworkConfig {
                          TimeUnit timeUnit,
                          Supplier<CookieJar> cookieJarSupplier,
                          @Singular List<String> pins,
+                         @Singular List<BuildStep<OkHttpClient.Builder>> buildSteps,
                          String cookieName,
                          String authenticateEndpoint,
                          String authorizeEndpoint,
@@ -69,8 +71,8 @@ public class ServerConfig extends NetworkConfig {
                 getTimeOut(context, timeout),
                 timeUnit, cookieJarSupplier,
                 getPins(context, pins),
-                () -> singletonList(new OkHttpRequestInterceptor())
-        );
+                () -> singletonList(new OkHttpRequestInterceptor()),
+                buildSteps);
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
         this.cookieName = cookieName;
@@ -98,7 +100,7 @@ public class ServerConfig extends NetworkConfig {
     }
 
     private static List<String> getPins(Context context, List<String> pins) {
-        return pins == null ? Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins)) : pins;
+        return pins == null ? Arrays.asList(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes)) : pins;
     }
 
 }

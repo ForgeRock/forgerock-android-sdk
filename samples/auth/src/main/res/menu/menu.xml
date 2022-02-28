@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -46,6 +46,11 @@
     <item android:id="@+id/revokeToken"
         android:icon="@android:drawable/ic_menu_crop"
         android:title="@string/revokeToken"
+        app:showAsAction="collapseActionView"/>
+
+    <item android:id="@+id/trustAllCert"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/trustAllCert"
         app:showAsAction="collapseActionView"/>
 
 
