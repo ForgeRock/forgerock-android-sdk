@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
