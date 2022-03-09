@@ -1,4 +1,6 @@
-# Version 3.2.0
+## [Unreleased]
+#### Added
+- Support SSL Pinning [SDKS-80]
 
 ## [3.2.0]
 #### Added

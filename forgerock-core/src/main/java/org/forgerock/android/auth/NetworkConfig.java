@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -16,6 +16,7 @@ import lombok.NonNull;
 import lombok.Singular;
 import okhttp3.CookieJar;
 import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -39,6 +40,8 @@ class NetworkConfig {
 
     private Supplier<List<Interceptor>> interceptorSupplier;
 
+    private List<BuildStep<OkHttpClient.Builder>> buildSteps;
+
     @Builder(builderMethodName = "networkBuilder")
     NetworkConfig(String identifier,
                   @NonNull String host,
@@ -46,7 +49,8 @@ class NetworkConfig {
                   TimeUnit timeUnit,
                   Supplier<CookieJar> cookieJarSupplier,
                   @Singular List<String> pins,
-                  Supplier<List<Interceptor>> interceptorSupplier) {
+                  Supplier<List<Interceptor>> interceptorSupplier,
+                  @Singular List<BuildStep<OkHttpClient.Builder>> buildSteps) {
 
         this.identifier = identifier;
         this.host = host;
@@ -55,6 +59,7 @@ class NetworkConfig {
         this.pins = pins;
         this.cookieJarSupplier = cookieJarSupplier;
         this.interceptorSupplier = interceptorSupplier;
+        this.buildSteps = buildSteps;
     }
 
     CookieJar getCookieJar() {
