@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 -2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
+
+import static net.openid.appauth.AuthorizationException.EXTRA_EXCEPTION;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -26,8 +28,6 @@ import net.openid.appauth.AuthorizationServiceConfiguration;
 
 import org.forgerock.android.auth.exception.BrowserAuthenticationException;
 
-import static net.openid.appauth.AuthorizationException.EXTRA_EXCEPTION;
-
 /**
  * Headless Fragment to receive callback result from AppAuth library
  */
@@ -38,11 +38,12 @@ public class AppAuthFragment extends Fragment {
     static final int AUTH_REQUEST_CODE = 100;
 
     private FRUser.Browser browser;
+    private AuthorizationService authorizationService;
 
     /**
      * Initialize the Fragment to receive AppAuth callback event.
      */
-    static AppAuthFragment init(FragmentManager fragmentManager, FRUser.Browser browser) {
+    static void launch(FragmentManager fragmentManager, FRUser.Browser browser) {
         AppAuthFragment existing = (AppAuthFragment) fragmentManager.findFragmentByTag(TAG);
         if (existing != null) {
             existing.browser = null;
@@ -52,7 +53,6 @@ public class AppAuthFragment extends Fragment {
         AppAuthFragment fragment = new AppAuthFragment();
         fragment.browser = browser;
         fragmentManager.beginTransaction().add(fragment, AppAuthFragment.TAG).commit();
-        return fragment;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class AppAuthFragment extends Fragment {
         //Allow caller to override AppAuth default setting
         AppAuthConfiguration.Builder appAuthConfigurationBuilder = new AppAuthConfiguration.Builder();
         configurer.getAppAuthConfigurationBuilder().accept(appAuthConfigurationBuilder);
-        AuthorizationService authorizationService = new AuthorizationService(getContext(),
+        authorizationService = new AuthorizationService(getContext(),
                 appAuthConfigurationBuilder.build());
 
         //Allow caller to override custom tabs default setting
@@ -116,4 +116,11 @@ public class AppAuthFragment extends Fragment {
         browser = null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (authorizationService != null) {
+            authorizationService.dispose();
+        }
+    }
 }

@@ -2,6 +2,9 @@
 #### Added
 - Support SSL Pinning [SDKS-80]
 
+#### Fixed
+- Dispose AuthorizationService when no longer required [SDKS-1636]
+
 ## [3.2.0]
 #### Added
 - Google Sign-In Security Enhancement [SDKS-1255]
