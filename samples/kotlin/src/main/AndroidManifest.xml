@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:sharedUserId="org.forgerock.singleSignOn"
+    package="com.forgerock.androidapp2">
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+    <uses-permission
+        android:name="com.forgerock.permission" />
+
+    <permission
+        android:name="com.forgerock.permission"
+        android:protectionLevel="signature" />
+
+    <application
+        android:name="com.forgerock.androidapp2.ForgeRockApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ForgeRockAndroid">
+
+        <service
+            android:name="org.forgerock.android.auth.authenticator.AuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/forgerock_authenticator" />
+        </service>
+
+        <receiver android:name=".TokenBroadcastReceiver" android:enabled="true"
+            android:exported="true" android:permission="com.forgerock.permission">
+            <intent-filter>
+                <action android:name="SSO_LOGOUT"></action>
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="com.forgerock.androidapp2.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            tools:node="replace"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.forgerock.androidapp2"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

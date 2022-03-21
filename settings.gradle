@@ -20,3 +20,6 @@ project(':pebblebank').projectDir = new File('demo/pebblebank')
 
 include ':quickstart'
 project(':quickstart').projectDir = new File('samples/quickstart')
+
+include ':kotlin'
+project(':kotlin').projectDir = new File('samples/kotlin')
