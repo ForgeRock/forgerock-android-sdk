@@ -34,20 +34,16 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener,
         updateStatus()
         loginButton.setOnClickListener {
             FRUser.login(applicationContext, this)
-//            if(BuildConfig.embeddedLogin) {
-//                FRUser.login(applicationContext, this)
-//            }
-//            else {
-//                centralizedLogin()
-//            }
+            if(BuildConfig.embeddedLogin) {
+                FRUser.login(applicationContext, this)
+            }
+            else {
+                centralizedLogin()
+            }
         }
         logoutButton.setOnClickListener {
             logout()
         }
-
-//        val intent = IntentFilter("SSO_LOGOUT")
-//        this.registerReceiver(receiver, intent)
-
     }
 
     override fun onStart() {
