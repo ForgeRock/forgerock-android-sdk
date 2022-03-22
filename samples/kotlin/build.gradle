@@ -7,14 +7,18 @@ android {
     compileSdkVersion 32
 
     defaultConfig {
-        applicationId "com.forgerock.androidapp"
+        applicationId "com.forgerock.androidapp2"
         minSdk 21
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
+        resValue "string", "forgerock_sso_permission", "com.forgerock.permission"
+        resValue "bool", "forgerock_broadcast_enabled", "true"
+
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "com.forgerock.androidapp2"
+                appAuthRedirectScheme: "com.forgerock.androidapp2",
+                forgerock_sso_permission :"com.forgerock.permission"
         ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

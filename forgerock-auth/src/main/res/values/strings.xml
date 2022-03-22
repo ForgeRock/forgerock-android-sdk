@@ -8,9 +8,8 @@
 <resources>
     <string name="app_name" translatable="false">forgerock-auth</string>
 
-    <bool name="forgerock_broadcast_enabled" translatable="false">false</bool>
-    <string name="forgerock_sso_permission" translatable="false">org.forgerock.android.auth.SSO_PERMISSION</string>
-    <string name="forgerock_sso_logout" translatable="false">org.forgerock.android.auth.SSO_LOGOUT</string>
+    <string name="forgerock_sso_logout" translatable="false">org.forgerock.android.auth.broadcast.SSO_LOGOUT</string>
+    <string name="forgerock_sso_permission" translatable="false">org.forgerock.android.auth.broadcast.SSO_PERMISSION</string>
 
     <!-- OAuth -->
     <string name="forgerock_oauth_client_id" translatable="false">place holder</string>

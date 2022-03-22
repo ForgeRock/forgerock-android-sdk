@@ -9,8 +9,11 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
+
+import org.forgerock.android.auth.broadcast.SSOBroadcastModel;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -185,6 +188,10 @@ public class Config {
                 .singleSignOnManager(getSingleSignOnManager())
                 .build();
 
+    }
+
+    public SSOBroadcastModel getSSOModel() {
+        return new SSOBroadcastModel();
     }
 
     private CookieJar getCookieJar() {
