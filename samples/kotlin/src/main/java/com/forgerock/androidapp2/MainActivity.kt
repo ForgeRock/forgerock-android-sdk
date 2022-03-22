@@ -2,7 +2,6 @@ package com.forgerock.androidapp2
 
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -19,17 +18,18 @@ interface ActivityListener {
     fun logout()
 }
 
-class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener, BroadcastActivityListener {
+class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener {
 
     private val status: TextView by lazy { findViewById(R.id.status) }
     private val loginButton: Button by lazy { findViewById(R.id.login) }
     private val logoutButton: Button by lazy { findViewById(R.id.logout) }
     private val classNameTag = MainActivity::class.java.name
     private var userInfoFragment: UserInfoFragment? = null
-    private var receiver: TokenBroadcastReceiver? = null
+    private var nodeDialog: NodeDialogFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FRAuth.start(applicationContext)
         setContentView(R.layout.activity_main)
         updateStatus()
         loginButton.setOnClickListener {
@@ -107,12 +107,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener,
         }
     }
 
-    private fun triggerBroadcast() {
-        val intent = Intent("SSO_LOGOUT")
-        intent.putExtra("package", "appB")
-        this.sendBroadcast(intent, "com.forgerock.permission")
-    }
-
     private fun getUserInfo(result: FRUser?) {
         result?.getAccessToken(object : FRListener<AccessToken> {
             override fun onSuccess(token: AccessToken) {
@@ -162,22 +156,18 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener,
     }
 
     override fun onCallbackReceived(node: Node?) {
-
-        val fragment: NodeDialogFragment = NodeDialogFragment.newInstance(node)
-        fragment.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+        nodeDialog?.dismiss()
+        nodeDialog = NodeDialogFragment.newInstance(node)
+        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
 
     }
 
     override fun logout() {
         FRUser.getCurrentUser().logout()
-        triggerBroadcast()
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
         updateStatus()
     }
 
-    override fun updateUI() {
-        FRUser.getCurrentUser()?.logout()
-    }
 }

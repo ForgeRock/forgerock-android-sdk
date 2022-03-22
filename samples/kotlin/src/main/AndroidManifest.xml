@@ -13,10 +13,10 @@
     </queries>
 
     <uses-permission
-        android:name="com.forgerock.permission" />
+        android:name="${forgerock_sso_permission}" />
 
     <permission
-        android:name="com.forgerock.permission"
+        android:name="${forgerock_sso_permission}"
         android:protectionLevel="signature" />
 
     <application
@@ -39,10 +39,10 @@
                 android:resource="@xml/forgerock_authenticator" />
         </service>
 
-        <receiver android:name=".TokenBroadcastReceiver" android:enabled="true"
-            android:exported="true" android:permission="com.forgerock.permission">
+        <receiver android:name="org.forgerock.android.auth.broadcast.SSOBroadcastReceiver" android:enabled="true"
+            android:exported="true" android:permission="${forgerock_sso_permission}">
             <intent-filter>
-                <action android:name="SSO_LOGOUT"></action>
+                <action android:name="org.forgerock.android.auth.broadcast.SSO_LOGOUT"></action>
             </intent-filter>
         </receiver>
 
