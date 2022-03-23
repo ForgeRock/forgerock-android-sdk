@@ -16,7 +16,7 @@ class SSOBroadcastReceiverTest {
     private val sessionManager = mock<SessionManager>()
 
     @Test
-    fun `sendBroadcastEventWhenPermissionIsEnabled`() {
+    fun `receiveBroadcastEventAndInvokeSessionManager`() {
         whenever(config.sessionManager).thenReturn(sessionManager)
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(context, null)
@@ -25,7 +25,7 @@ class SSOBroadcastReceiverTest {
     }
 
     @Test
-    fun `doNotBroadcastMessageWhenContextIsNull`() {
+    fun `doNotInvokeSessionManagerWhenTheContextIsNull`() {
         whenever(config.sessionManager).thenReturn(sessionManager)
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(null, null)
