@@ -73,7 +73,7 @@ public class Config {
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
 
-    //KeyStoreManager
+    //BroadcastModel
     private SSOBroadcastModel ssoBroadcastModel;
 
     @VisibleForTesting

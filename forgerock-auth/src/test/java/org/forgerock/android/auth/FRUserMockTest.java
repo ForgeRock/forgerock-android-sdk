@@ -16,7 +16,6 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.android.auth.broadcast.SSOBroadcastInterface;
 import org.forgerock.android.auth.broadcast.SSOBroadcastModel;
 import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.NameCallback;
@@ -65,7 +64,7 @@ public class FRUserMockTest extends BaseTest {
     private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
 
     @Mock
-    SSOBroadcastModel mockBroadcastInterface;
+    SSOBroadcastModel mockBroadcastModel;
 
     @Test
     public void frUserHappyPath() throws InterruptedException, ExecutionException, MalformedURLException, ParseException, JSONException {
@@ -402,7 +401,7 @@ public class FRUserMockTest extends BaseTest {
     @Test
     public void testLogout() throws InterruptedException, ExecutionException, IOException, JSONException, ParseException, AuthenticationRequiredException, ApiException {
         frUserHappyPath();
-        Config.getInstance().setSSOModel(mockBroadcastInterface);
+        Config.getInstance().setSSOModel(mockBroadcastModel);
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .addHeader("Content-Type", "application/json")
@@ -443,7 +442,7 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.TOKEN));
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
-        verify(mockBroadcastInterface).sendBroadcast();
+        verify(mockBroadcastModel).sendBroadcast();
     }
 
     private RecordedRequest findRequest(String path, RecordedRequest... recordedRequests) {
