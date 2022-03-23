@@ -6,6 +6,7 @@ import org.forgerock.android.auth.SessionManager
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 class SSOBroadcastReceiverTest {
@@ -21,5 +22,13 @@ class SSOBroadcastReceiverTest {
         testObject.onReceive(context, null)
         verify(config).init(context)
         verify(sessionManager).close()
+    }
+
+    @Test
+    fun `doNotBroadcastMessageWhenContextIsNull`() {
+        whenever(config.sessionManager).thenReturn(sessionManager)
+        val testObject = SSOBroadcastReceiver(config)
+        testObject.onReceive(null, null)
+        verifyNoInteractions(sessionManager)
     }
 }

@@ -9,7 +9,6 @@ package org.forgerock.android.auth;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -73,6 +72,9 @@ public class Config {
 
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
+
+    //KeyStoreManager
+    private SSOBroadcastModel ssoBroadcastModel;
 
     @VisibleForTesting
     public void setUrl(String url) {
@@ -190,16 +192,26 @@ public class Config {
 
     }
 
-    public SSOBroadcastModel getSSOModel() {
-        return new SSOBroadcastModel();
-    }
-
     private CookieJar getCookieJar() {
         if (cookieJar == null) {
             cookieJar = SecureCookieJar.builder()
                     .context(context).build();
         }
         return cookieJar;
+    }
+
+    @VisibleForTesting
+    public void setSSOModel(SSOBroadcastModel ssoModel) {
+        this.ssoBroadcastModel = ssoModel;
+    }
+
+
+    public SSOBroadcastModel getSSOBroadcastModel() {
+        if (ssoBroadcastModel == null) {
+            return new SSOBroadcastModel();
+        } else {
+            return ssoBroadcastModel;
+        }
     }
 
     @VisibleForTesting
