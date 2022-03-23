@@ -14,8 +14,8 @@ class SSOBroadcastModelTest {
     private val mockContext = mock<Context> {
         on { packageManager } doReturn mockPackageManager
     }
-    private val intent = Intent("SSO_LOGOUT")
-    private val broadcastPermission = "com.forgerock.sso"
+    private val intent = Intent("org.forgerock.android.auth.broadcast.SSO_LOGOUT")
+    private val broadcastPermission = "org.forgerock.android.auth.broadcast.SSO_PERMISSION"
 
     @Test
     fun `sendBroadcastEventWhenPermissionIsEnabled`() {
