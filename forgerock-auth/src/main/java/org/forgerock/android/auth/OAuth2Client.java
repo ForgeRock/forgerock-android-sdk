@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -105,6 +105,7 @@ public class OAuth2Client {
                     .url(getAuthorizeUrl(token, pkce, additionalParameters))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
+                    .header(serverConfig.getCookieName(), token.getValue() )
                     .tag(AUTHORIZE)
                     .build();
 
@@ -341,7 +342,6 @@ public class OAuth2Client {
             builder.appendQueryParameter(entry.getKey(), entry.getValue());
         }
         return new URL(builder
-                .appendQueryParameter(serverConfig.getCookieName(), token.getValue())
                 .appendQueryParameter(OAuth2.CLIENT_ID, clientId)
                 .appendQueryParameter(OAuth2.SCOPE, scope)
                 .appendQueryParameter(OAuth2.RESPONSE_TYPE, responseType)

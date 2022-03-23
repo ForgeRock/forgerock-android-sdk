@@ -1,6 +1,8 @@
 ## [Unreleased]
 #### Added
 - Support SSL Pinning [SDKS-80]
+- Restore SSO Token when it is out of sync with the SSO Token that bound with the Access Token [SDKS-1664]
+- SSO Token should be included in the header instead of request parameter for /authorize endpoint [SDKS-1670]
 
 #### Fixed
 - Dispose AuthorizationService when no longer required [SDKS-1636]

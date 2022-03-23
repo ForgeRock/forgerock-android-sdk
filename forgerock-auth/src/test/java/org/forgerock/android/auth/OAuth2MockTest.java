@@ -56,8 +56,7 @@ public class OAuth2MockTest extends BaseTest {
         assertEquals(3599, accessToken.getExpiresIn());
 
         RecordedRequest recordedRequest = server.takeRequest(); //authorize
-        Assertions.assertThat(Uri.parse(recordedRequest.getPath()).
-                getQueryParameter(serverConfig.getCookieName())).isEqualTo(token.getValue());
+        Assertions.assertThat(recordedRequest.getHeader(serverConfig.getCookieName())).isEqualTo(token.getValue());
 
     }
 
