@@ -1,4 +1,4 @@
-package com.forgerock.androidapp2
+package com.forgerock.kotlinapp
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

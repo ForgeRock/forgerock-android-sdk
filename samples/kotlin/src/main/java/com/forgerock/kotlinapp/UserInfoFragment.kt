@@ -1,4 +1,4 @@
-package com.forgerock.androidapp2
+package com.forgerock.kotlinapp
 
 import android.graphics.Color
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.bingo.foo.ActivityListener
 
 
 // TODO: Rename parameter arguments, choose names that match

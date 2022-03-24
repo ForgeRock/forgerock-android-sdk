@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="org.forgerock.singleSignOn"
-    package="com.forgerock.androidapp2">
+    package="com.forgerock.kotlinapp">
 
     <queries>
         <intent>
@@ -20,7 +20,7 @@
         android:protectionLevel="signature" />
 
     <application
-        android:name="com.forgerock.androidapp2.ForgeRockApplication"
+        android:name="com.forgerock.kotlinapp.ForgeRockApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -47,7 +47,7 @@
         </receiver>
 
         <activity
-            android:name="com.forgerock.androidapp2.MainActivity"
+            android:name="com.bingo.foo.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

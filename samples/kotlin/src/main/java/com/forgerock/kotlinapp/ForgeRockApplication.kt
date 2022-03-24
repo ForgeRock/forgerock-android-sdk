@@ -1,4 +1,4 @@
-package com.forgerock.androidapp2
+package com.forgerock.kotlinapp
 
 import android.app.Application
 import org.forgerock.android.auth.FRAuth
