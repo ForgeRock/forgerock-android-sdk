@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">ForgeRockApp-Kotlin</string>
     <!-- OAuth 2.0 Client Details -->
-    <string name="forgerock_oauth_client_id" translatable="false">jeyonboarding</string>
+    <string name="forgerock_oauth_client_id" translatable="false">sampleapp</string>
 
     <string name="forgerock_oauth_redirect_uri" translatable="false">com.forgerock.android:/oauth2redirect</string>
     <string name="forgerock_oauth_scope" translatable="false">openid profile email address phone</string>
     <integer name="forgerock_oauth_threshold" translatable="false">30</integer>
 
     <!-- AM Instance Details -->
-    <string name="forgerock_url" translatable="false">https://openam-forgerrock-sdks.forgeblocks.com/am</string>
+    <string name="forgerock_url" translatable="false">http://am.auth.com</string>
     <string name="forgerock_cookie_name" translatable="false">ff55694c448e26e</string>
     <string name="forgerock_realm" translatable="false">alpha</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
@@ -19,7 +19,7 @@
 
 
     <!-- AM Tree Details -->
-    <string name="forgerock_auth_service" translatable="false">jeySdkAuthenticationTree</string>
+    <string name="forgerock_auth_service" translatable="false">sampleAuthTree</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
