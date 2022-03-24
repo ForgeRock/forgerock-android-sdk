@@ -1,7 +1,6 @@
-package com.forgerock.androidapp2
+package com.bingo.foo
 
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -10,6 +9,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
+import com.forgerock.kotlinapp.BuildConfig
+import com.forgerock.kotlinapp.NodeDialogFragment
+import com.forgerock.kotlinapp.R
+import com.forgerock.kotlinapp.UserInfoFragment
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
 
@@ -125,7 +128,12 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
 
     private fun launchUserInfoFragment(token: AccessToken, result: FRUser?) {
-        userInfoFragment = UserInfoFragment.newInstance(result?.accessToken?.value, token.refreshToken, token.idToken, this@MainActivity)
+        userInfoFragment = UserInfoFragment.newInstance(
+            result?.accessToken?.value,
+            token.refreshToken,
+            token.idToken,
+            this@MainActivity
+        )
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction()
                 .add(R.id.container, it).commit()

@@ -7,7 +7,7 @@ android {
     compileSdkVersion 32
 
     defaultConfig {
-        applicationId "com.forgerock.androidapp2"
+        applicationId "com.forgerock.kotlinapp"
         minSdk 21
         targetSdk 32
         versionCode 1

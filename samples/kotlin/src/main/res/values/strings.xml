@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">2-ForgeRockApp-2</string>
+    <string name="app_name">ForgeRockApp-Kotlin</string>
     <!-- OAuth 2.0 Client Details -->
     <string name="forgerock_oauth_client_id" translatable="false">jeyonboarding</string>
 
