@@ -8,9 +8,6 @@
 <resources>
     <string name="app_name" translatable="false">forgerock-auth</string>
 
-    <string name="forgerock_sso_logout" translatable="false">org.forgerock.android.auth.broadcast.SSO_LOGOUT</string>
-    <string name="forgerock_sso_permission" translatable="false">org.forgerock.android.auth.broadcast.SSO_PERMISSION</string>
-
     <!-- OAuth -->
     <string name="forgerock_oauth_client_id" translatable="false">place holder</string>
     <string name="forgerock_oauth_redirect_uri" translatable="false">place holder</string>
@@ -42,6 +39,8 @@
     <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
     <string name="forgerock_webauthn_account_name" translatable="false">WebAuthn</string>
     <integer name="forgerock_webauthn_max_credential" translatable="false">10</integer>
+    <string name="forgerock_sso_logout" translatable="false">org.forgerock.android.auth.broadcast.SSO_LOGOUT</string>
+    <string name="forgerock_sso_permission" translatable="false">org.forgerock.android.auth.broadcast.SSO_PERMISSION</string>
 
     <!-- Service -->
     <string name="forgerock_auth_service" translatable="false">UsernamePassword</string>
