@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.RadioButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
-import com.bingo.foo.MainActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.forgerock.android.auth.Node

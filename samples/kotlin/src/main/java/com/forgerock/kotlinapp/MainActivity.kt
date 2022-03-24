@@ -1,4 +1,4 @@
-package com.bingo.foo
+package com.forgerock.kotlinapp
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -9,10 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
-import com.forgerock.kotlinapp.BuildConfig
-import com.forgerock.kotlinapp.NodeDialogFragment
-import com.forgerock.kotlinapp.R
-import com.forgerock.kotlinapp.UserInfoFragment
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
 
