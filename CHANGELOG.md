@@ -1,6 +1,7 @@
 ## [Unreleased]
 #### Added
 - Support SSL Pinning [SDKS-80]
+- Support to broadcast logout event to clear application tokens when user logout the app [SDKS-1663]
 
 #### Fixed
 - Dispose AuthorizationService when no longer required [SDKS-1636]
