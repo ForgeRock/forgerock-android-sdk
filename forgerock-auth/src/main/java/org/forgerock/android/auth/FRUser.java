@@ -79,7 +79,7 @@ public class FRUser {
         current.set(null);
         sessionManager.close();
         FRLifecycle.dispatchLogout();
-        Config.getInstance().getSSOBroadcastModel().sendBroadcast();
+        Config.getInstance().getSSOBroadcastModel().sendLogoutBroadcast();
     }
 
     /**

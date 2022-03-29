@@ -47,7 +47,7 @@ class SSOBroadcastModelTest {
         whenever(mockPackageManager.queryBroadcastReceivers(intent, 0)).thenReturn(listOf(resolveInfo))
 
         val testObject = SSOBroadcastModel(mockContext, intent)
-        testObject.sendBroadcast()
+        testObject.sendLogoutBroadcast()
 
         verify(intent).putExtra("BROADCAST_PACKAGE_KEY", packageName)
         verify(mockContext).sendBroadcast(intent, broadcastPermission)
@@ -59,7 +59,7 @@ class SSOBroadcastModelTest {
 
         whenever(mockPackageManager.queryBroadcastReceivers(intent, 0)).thenReturn(listOf<ResolveInfo>())
         val testObject = SSOBroadcastModel(mockContext, intent)
-        testObject.sendBroadcast()
+        testObject.sendLogoutBroadcast()
 
         verify(mockContext, times(0)).sendBroadcast(intent, broadcastPermission)
     }
@@ -68,7 +68,7 @@ class SSOBroadcastModelTest {
     fun `doNotSendBroadcastEventWhenContextIsNull`() {
 
         val testObject = SSOBroadcastModel(null, Intent())
-        testObject.sendBroadcast()
+        testObject.sendLogoutBroadcast()
 
         verify(mockContext, times(0)).sendBroadcast(intent, broadcastPermission)
     }
@@ -83,7 +83,7 @@ class SSOBroadcastModelTest {
         whenever(mockPackageManager.queryBroadcastReceivers(intent, 0)).thenReturn(listOf(resolveInfo))
 
         val testObject = SSOBroadcastModel(mockContext, intent)
-        testObject.sendBroadcast()
+        testObject.sendLogoutBroadcast()
 
         verify(mockContext, times(0)).sendBroadcast(intent, broadcastPermission)
     }

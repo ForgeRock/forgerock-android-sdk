@@ -206,7 +206,7 @@ public class Config {
 
     SSOBroadcastModel getSSOBroadcastModel() {
         if (ssoBroadcastModel == null) {
-            return new SSOBroadcastModel();
+            return ssoBroadcastModel = new SSOBroadcastModel();
         } else {
             return ssoBroadcastModel;
         }

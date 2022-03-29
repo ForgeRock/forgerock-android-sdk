@@ -23,7 +23,7 @@ internal class SSOBroadcastModel(private val context: Context? = InitProvider.ge
 
     private val broadcastPermission: String? = context?.resources?.getString(R.string.forgerock_sso_permission)
 
-    fun sendBroadcast() {
+    fun sendLogoutBroadcast() {
          context?.let {
              if (isBroadcastEnabled() && broadcastPermission != null) {
                  broadcastIntent.putExtra(BroadcastConst.broadcastPackageKey, it.packageName)

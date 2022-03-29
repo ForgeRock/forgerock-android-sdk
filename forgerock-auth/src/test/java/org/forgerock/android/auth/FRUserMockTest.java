@@ -441,7 +441,7 @@ public class FRUserMockTest extends BaseTest {
         assertTrue(body.contains(OAuth2.TOKEN));
         assertTrue(body.contains(OAuth2.CLIENT_ID));
         assertTrue(body.contains(accessToken.getRefreshToken()));
-        verify(mockBroadcastModel).sendBroadcast();
+        verify(mockBroadcastModel).sendLogoutBroadcast();
     }
 
     private RecordedRequest findRequest(String path, RecordedRequest... recordedRequests) {
