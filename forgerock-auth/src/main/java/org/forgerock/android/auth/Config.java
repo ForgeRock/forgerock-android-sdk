@@ -12,8 +12,6 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.forgerock.android.auth.broadcast.SSOBroadcastModel;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -201,12 +199,12 @@ public class Config {
     }
 
     @VisibleForTesting
-    public void setSSOModel(SSOBroadcastModel ssoModel) {
+    void setSSOModel(SSOBroadcastModel ssoModel) {
         this.ssoBroadcastModel = ssoModel;
     }
 
 
-    public SSOBroadcastModel getSSOBroadcastModel() {
+    SSOBroadcastModel getSSOBroadcastModel() {
         if (ssoBroadcastModel == null) {
             return new SSOBroadcastModel();
         } else {

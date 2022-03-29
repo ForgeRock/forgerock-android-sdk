@@ -66,10 +66,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     private fun centralizedLogin() {
         FRUser.browser().appAuthConfigurer()
             .authorizationRequest { r: AuthorizationRequest.Builder ->

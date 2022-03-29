@@ -1,28 +1,29 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
  *
- * This software may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
+ *  * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *  *
+ *  * This software may be modified and distributed under the terms
+ *  * of the MIT license. See the LICENSE file for details.
+ *
+ *
  */
 
-package org.forgerock.android.auth.broadcast
+package org.forgerock.android.auth
 
 import android.content.Context
 import android.content.Intent
-import org.forgerock.android.auth.InitProvider
-import org.forgerock.android.auth.R
 
 
 /**
  * SSOBroadcastModel to broadcast the SSO SignOut message to single sign on apps
  */
 
-class SSOBroadcastModel(private val context: Context? = InitProvider.getCurrentActivity(),
+internal class SSOBroadcastModel(private val context: Context? = InitProvider.getCurrentActivity(),
                         private val broadcastIntent: Intent = Intent(context?.resources?.getString(R.string.forgerock_sso_logout))) {
 
     private val broadcastPermission: String? = context?.resources?.getString(R.string.forgerock_sso_permission)
 
-     fun sendBroadcast() {
+    fun sendBroadcast() {
          context?.let {
              if (isBroadcastEnabled() && broadcastPermission != null) {
                  broadcastIntent.putExtra(BroadcastConst.broadcastPackageKey, it.packageName)
