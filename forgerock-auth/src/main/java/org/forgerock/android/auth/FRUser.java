@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentManager;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.RedirectUriReceiverActivity;
 
-import org.forgerock.android.auth.broadcast.SSOBroadcastModel;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidRedirectUriException;
