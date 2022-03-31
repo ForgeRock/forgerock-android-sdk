@@ -23,7 +23,7 @@ android {
         resValue "string", "forgerock_sso_permission", "com.forgerock.permission"
 
         manifestPlaceholders = [
-                appAuthRedirectScheme: "com.forgerock.androidapp2",
+                appAuthRedirectScheme: "org.forgerock.demo",
                 forgerock_sso_permission :"com.forgerock.permission"
         ]
 

@@ -69,7 +69,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="com.forgerock.androidapp2"/>
+                <data android:scheme="org.forgerock.demo"/>
             </intent-filter>
         </activity>
     </application>
