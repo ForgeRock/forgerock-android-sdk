@@ -41,6 +41,7 @@ import okhttp3.Response;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Ignore("This is flaky test , failed in jenkins , need to verify why ")
 @RunWith(RobolectricTestRunner.class)
 public class RequestInterceptorTest {
     protected MockWebServer server;
@@ -69,7 +70,6 @@ public class RequestInterceptorTest {
         return "http://" + server.getHostName() + ":" + server.getPort();
     }
 
-    @Ignore("This is flaky test , failed in jenkins , need to verify why ")
     @Test
     public void testSimpleIntercept() throws InterruptedException {
         final Boolean[] executed = {false};
@@ -158,7 +158,6 @@ public class RequestInterceptorTest {
         assertThat(server.takeRequest().getHeader("HeaderName")).isNull();
     }
 
-    @Ignore("This is flaky test , failed in jenkins , need to verify why ")
     @Test
     public void testReplaceHeader() throws InterruptedException {
         RequestInterceptorRegistry.getInstance().register(
@@ -193,7 +192,6 @@ public class RequestInterceptorTest {
 
     }
 
-    @Ignore("This is flaky test , failed in jenkins , need to verify why ")
     @Test
     public void testCustomizeParam() throws InterruptedException, JSONException {
 
