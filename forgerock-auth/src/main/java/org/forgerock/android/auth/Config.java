@@ -71,6 +71,9 @@ public class Config {
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
 
+    //BroadcastModel
+    private SSOBroadcastModel ssoBroadcastModel;
+
     @VisibleForTesting
     public void setUrl(String url) {
         this.url = url;
@@ -193,6 +196,20 @@ public class Config {
                     .context(context).build();
         }
         return cookieJar;
+    }
+
+    @VisibleForTesting
+    void setSSOModel(SSOBroadcastModel ssoModel) {
+        this.ssoBroadcastModel = ssoModel;
+    }
+
+
+    SSOBroadcastModel getSSOBroadcastModel() {
+        if (ssoBroadcastModel == null) {
+            return ssoBroadcastModel = new SSOBroadcastModel();
+        } else {
+            return ssoBroadcastModel;
+        }
     }
 
     @VisibleForTesting
