@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import android.os.Bundle;
 import android.util.Base64;
 
@@ -24,6 +27,7 @@ import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.BeforeClass;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -32,9 +36,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import okhttp3.mockwebserver.MockWebServer;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 public abstract class FRABaseTest {
 
@@ -66,6 +67,12 @@ public abstract class FRABaseTest {
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
+
+
+    @BeforeClass
+    public static void setup() {
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+    }
 
     public static Map<String, String> generateBaseMessage() {
         Map<String, String> baseMessage;
