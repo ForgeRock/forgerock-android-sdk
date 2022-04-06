@@ -13,6 +13,7 @@ package org.forgerock.android.auth
 import android.content.Context
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.squareup.okhttp.mockwebserver.Dispatcher
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.RecordedRequest
 import org.assertj.core.api.Assertions.*
@@ -21,9 +22,8 @@ import org.forgerock.android.auth.callback.PasswordCallback
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.URL
-import java.text.SimpleDateFormat
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
@@ -41,7 +41,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         throw IllegalArgumentException()
     }
 
-    private fun frUserHappyPath() {
+    private fun login() {
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
@@ -88,63 +88,16 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val future = FRListenerFuture<UserInfo>()
         FRUser.getCurrentUser().getUserInfo(future)
         val userinfo = future.get()
-        assertEquals("sub", userinfo.sub)
-        assertEquals("name", userinfo.name)
-        assertEquals("given name", userinfo.givenName)
-        assertEquals("family name", userinfo.familyName)
-        assertEquals("middle name", userinfo.middleName)
-        assertEquals("nick name", userinfo.nickName)
-        assertEquals("preferred username", userinfo.preferredUsername)
-        assertEquals(URL("http://profile"), userinfo.profile)
-        assertEquals(URL("http://picture"), userinfo.picture)
-        assertEquals(URL("http://website"), userinfo.website)
-        assertEquals("test@email.com", userinfo.email)
-        assertEquals(true, userinfo.emailVerified)
-        assertEquals("male", userinfo.gender)
-        val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        assertEquals(simpleDateFormat.parse("2008-01-30"), userinfo.birthDate)
-        assertEquals("zoneinfo", userinfo.zoneInfo)
-        assertEquals("locale", userinfo.locale)
-        assertEquals("phone number", userinfo.phoneNumber)
-        assertEquals(true, userinfo.phoneNumberVerified)
-        assertEquals("800000", userinfo.updateAt.toString())
-        assertEquals("formatted", userinfo.address.formatted)
-        assertEquals("street address", userinfo.address.streetAddress)
-        assertEquals("locality", userinfo.address.locality)
-        assertEquals("region", userinfo.address.region)
-        assertEquals("90210", userinfo.address.postalCode)
-        assertEquals("US", userinfo.address.country)
-        assertEquals(getJson("/userinfo_success.json"), userinfo.raw.toString(2))
+        assertNotNull(userinfo)
     }
 
     @Test
     fun logoutWhenBroadcastLogOutEvent() {
-        frUserHappyPath()
-        server.enqueue(
-            MockResponse()
-                .setResponseCode(HttpURLConnection.HTTP_OK)
-                .addHeader("Content-Type", "application/json")
-                .setBody("{}")
-        )
-        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK)
-        var rr: RecordedRequest =
-            server.takeRequest() //Start the Auth Service POST /json/realms/root/authenticate?authIndexType=service&authIndexValue=Test HTTP/1.1
-        assertThat(rr.path)
-            .isEqualTo("/json/realms/root/authenticate?authIndexType=service&authIndexValue=Test")
-        rr = server.takeRequest() //Post Name Callback POST /json/realms/root/authenticate HTTP/1.1
-        assertThat(rr.path).isEqualTo("/json/realms/root/authenticate")
-        rr =
-            server.takeRequest() //Post Password Callback POST /json/realms/root/authenticate HTTP/1.1
-        assertThat(rr.path).isEqualTo("/json/realms/root/authenticate")
-        rr =
-            server.takeRequest() //Post to /authorize endpoint GET /oauth2/realms/root/authorize?iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&client_id=andy_app&scope=openid&response_type=code&redirect_uri=https%3A%2F%2Fwww.example.com%3A8080%2Fcallback&code_challenge=PnQUh9V3GPr5qamcKZ39fcv4o81KJbhYls89L5rkVs8&code_challenge_method=S256 HTTP/1.1
-        assertThat(rr.path).startsWith("/oauth2/realms/root/authorize")
-        rr =
-            server.takeRequest() //Post to /access-token endpoint POST /oauth2/realms/root/access_token HTTP/1.1
-        assertThat(rr.path).isEqualTo("/oauth2/realms/root/access_token")
-        rr =
-            server.takeRequest() //Post to /user-info endpoint GET /oauth2/realms/root/userinfo HTTP/1.1
-        assertThat(rr.path).isEqualTo("/oauth2/realms/root/userinfo")
+        login()
+
+        val mockHttpDispatcher = MockHttpDispatcher(context)
+        server.setDispatcher(mockHttpDispatcher)
+
         val accessToken = FRUser.getCurrentUser().accessToken
         assertNotNull(FRUser.getCurrentUser())
 
@@ -158,10 +111,10 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
         sessionManagerObject.hasSession()
 
-        val revoke1: RecordedRequest =
-            server.takeRequest() //Post to oauth2/realms/root/token/revoke
-        val revoke2: RecordedRequest =
-            server.takeRequest() //Post to /sessions?_action=logout endpoint
+        val mockPackageManager = org.mockito.kotlin.mock<RecordedRequest>()
+
+        val revoke1: RecordedRequest = mockHttpDispatcher.list[0] ?: mockPackageManager //Post to oauth2/realms/root/token/revoke
+        val revoke2: RecordedRequest = mockHttpDispatcher.list[1] ?: mockPackageManager //Post to /sessions?_action=logout endpoint
 
         //revoke Refresh Token and SSO Token are performed async
         val ssoTokenRevoke: RecordedRequest =
@@ -177,6 +130,34 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
         assertTrue(body.contains(accessToken.refreshToken))
+
+    }
+}
+
+private class MockHttpDispatcher(private val context: Context): Dispatcher() {
+    val list = mutableListOf<RecordedRequest?>()
+    override fun dispatch(request: RecordedRequest?): MockResponse {
+        if(request?.path == "/json/realms/root/sessions?_action=logout") {
+            list.add(request)
+            return MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(getJsonDataFromAsset(context, "/sessions_logout.json"))
+        }
+        if(request?.path == "/oauth2/realms/root/token/revoke") {
+            list.add(request)
+        }
+        return MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+            .addHeader("Content-Type", "application/json")
+            .setBody("{}")
+    }
+
+    private fun getJsonDataFromAsset(context: Context, fileName: String): String? {
+        val jsonString: String
+        try {
+            jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
+        } catch (ioException: IOException) {
+            ioException.printStackTrace()
+            return null
+        }
+        return jsonString
     }
 }
 
