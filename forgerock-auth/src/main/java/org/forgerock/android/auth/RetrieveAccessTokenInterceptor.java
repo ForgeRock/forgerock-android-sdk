@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
+    private final SingleSignOnManager singleSignOnManager;
     private final TokenManager tokenManager;
 
     @Override
@@ -25,12 +26,21 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
         //With Verifier to verify the token is associated with the Session Token
         tokenManager.getAccessToken(accessToken -> {
-            if (sessionToken == null && accessToken.getSessionToken() == null) {
-                return true;
-            } else {
-                return accessToken.getSessionToken() != null &&
-                        accessToken.getSessionToken().equals(sessionToken);
-            }
+
+           if (sessionToken == null) {
+               if (accessToken.getSessionToken() != null) {
+                   //sessionToken may be deleted, restore it.
+                   singleSignOnManager.persist(accessToken.getSessionToken());
+               }
+               //If sessionToken is null and accessToken's session Token is null
+               //it considers as Centralize login, no validation on session token binding.
+               return true;
+           } else {
+               //Verify the accessToken is bound to the right session token.
+               //For SSO scenario, the session token may associate with different user.
+               return accessToken.getSessionToken() != null &&
+                       accessToken.getSessionToken().equals(sessionToken);
+           }
         }, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken result) {

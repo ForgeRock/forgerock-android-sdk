@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -38,7 +38,7 @@ public class SessionManager {
 
         this.interceptors = Arrays.asList(
                 new RetrieveSSOTokenInterceptor(this.singleSignOnManager),
-                new RetrieveAccessTokenInterceptor(this.tokenManager),
+                new RetrieveAccessTokenInterceptor(this.singleSignOnManager, this.tokenManager),
                 new OAuthInterceptor(this),
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }

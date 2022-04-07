@@ -215,6 +215,11 @@ public class FRUserMockTest extends BaseTest {
     @Test
     public void testRevokeAccessToken() throws Exception {
         frUserHappyPath();
+        //revoke Access Token
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
 
         FRListenerFuture<Void> future = new FRListenerFuture<>();
         assertNotNull(FRUser.getCurrentUser());
@@ -1224,6 +1229,110 @@ public class FRUserMockTest extends BaseTest {
 
         Assertions.assertThat(FRUser.getCurrentUser()).isNull();
         Assertions.assertThat(FRSession.getCurrentSession()).isNull();
+
+    }
+
+    @Test
+    public void testAccessTokenWithUnmatchSSOToken() throws ExecutionException, InterruptedException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        //revoke Access Token
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+
+        //endsession
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+        //SSO Token has been updated, user may sing in with another user with a different SSOToken
+        Config.getInstance().getSingleSignOnManager().persist(new SSOToken("UpdatedSSOToken"));
+
+        try {
+            FRUser.getCurrentUser().getAccessToken();
+            fail();
+        } catch (AuthenticationRequiredException e) {
+            //expect exception
+        }
+
+        Assertions.assertThat(FRUser.getCurrentUser()).isNull();
+        Assertions.assertThat(FRSession.getCurrentSession()).isNull();
+
+    }
+
+    @Test
+    public void testAccessTokenRestoreSSOToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+        Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
+        Config.getInstance().setUrl(getUrl());
+        Config.getInstance().setEncryptor(new MockEncryptor());
+
+        NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
+
+            @Override
+            public void onCallbackReceived(Node state) {
+                if (state.getCallback(NameCallback.class) != null) {
+                    state.getCallback(NameCallback.class).setName("tester");
+                    state.next(context, this);
+                    return;
+                }
+
+                if (state.getCallback(PasswordCallback.class) != null) {
+                    state.getCallback(PasswordCallback.class).setPassword("password".toCharArray());
+                    state.next(context, this);
+                }
+            }
+        };
+
+        FRUser.login(context, nodeListenerFuture);
+
+        assertNotNull(nodeListenerFuture.get());
+        assertNotNull(FRUser.getCurrentUser());
+        //Remove the SSOToken
+        Config.getInstance().getSingleSignOnManager().revoke(null);
+
+        Assertions.assertThat(FRUser.getCurrentUser().getAccessToken()).isNotNull();
+        Assertions.assertThat(Config.getInstance().getSingleSignOnManager().getToken()).isNotNull();
 
     }
 }
