@@ -29,7 +29,7 @@ class SSOBroadcastReceiver(private val instance: Config = Config.getInstance()):
                 "Received SSO_LOGOUT broadcast message! broadcastPackageKey: %s, action: %s", context?.packageName, intent?.action
             )
             instance.init(context)
-            instance.sessionManager.close()
+            instance.tokenManager.revoke(null)
         }
     }
 }
