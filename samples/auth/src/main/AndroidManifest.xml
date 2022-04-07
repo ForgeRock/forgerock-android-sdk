@@ -7,13 +7,18 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.forgerock.auth"
-    android:sharedUserId="org.forgerock.singleSignOn">
+    package="org.forgerock.auth">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="${forgerock_sso_permission}" />
+
+    <permission
+        android:name="${forgerock_sso_permission}"
+        android:protectionLevel="signature" />
 
     <queries>
         <intent>
@@ -47,6 +52,13 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/forgerock_authenticator" />
         </service>
+
+        <receiver android:name="org.forgerock.android.auth.SSOBroadcastReceiver" android:enabled="true"
+            android:exported="true" android:permission="${forgerock_sso_permission}">
+            <intent-filter>
+                <action android:name="org.forgerock.android.auth.broadcast.SSO_LOGOUT"></action>
+            </intent-filter>
+        </receiver>
 
         <activity android:name="org.forgerock.auth.MainActivity"
             android:exported="true">

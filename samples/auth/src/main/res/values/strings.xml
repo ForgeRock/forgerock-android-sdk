@@ -6,7 +6,7 @@
   -->
 
 <resources>
-    <string name="app_name">A</string>
+    <string name="app_name">App B</string>
     <string name="logout">Logout</string>
     <string name="instanceId">Show InstanceId</string>
     <string name="userinfo">UserInfo</string>
@@ -29,7 +29,7 @@
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">https://openam.example.com/am</string>
+    <string name="forgerock_url" translatable="false">https://default.forgeops.petrov.ca/am</string>
     <string name="forgerock_realm" translatable="false">root</string>
 
     <integer name="forgerock_timeout" translatable="false">30</integer>

@@ -34,6 +34,7 @@ import com.nimbusds.jwt.JWTParser;
 
 import org.forgerock.android.auth.AccessToken;
 import org.forgerock.android.auth.Config;
+import org.forgerock.android.auth.Encryptor;
 import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRDevice;
 import org.forgerock.android.auth.FRListener;
@@ -55,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -97,6 +99,25 @@ public class MainActivity extends AppCompatActivity {
         FRAuth.start(this);
         Logger.set(Logger.Level.DEBUG);
         super.onCreate(savedInstanceState);
+
+        Config.getInstance().reset();
+        Config.getInstance().init(this);
+        Config.getInstance().setEncryptor(new Encryptor() {
+            @Override
+            public byte[] encrypt(byte[] clearText) {
+                return clearText;
+            }
+
+            @Override
+            public byte[] decrypt(byte[] encryptedData) {
+                return encryptedData;
+            }
+
+            @Override
+            public void reset() throws GeneralSecurityException, IOException {
+
+            }
+        });
 
         setContentView(org.forgerock.auth.R.layout.activity_main);
         success = findViewById(org.forgerock.auth.R.id.success);
@@ -316,6 +337,22 @@ public class MainActivity extends AppCompatActivity {
                     sslContext.init(null, new TrustManager[] { trustManager }, new java.security.SecureRandom());
                     Config.getInstance().reset();
                     Config.getInstance().init(this);
+                    Config.getInstance().setEncryptor(new Encryptor() {
+                        @Override
+                        public byte[] encrypt(byte[] clearText) {
+                            return clearText;
+                        }
+
+                        @Override
+                        public byte[] decrypt(byte[] encryptedData) {
+                            return encryptedData;
+                        }
+
+                        @Override
+                        public void reset() throws GeneralSecurityException, IOException {
+
+                        }
+                    });
                     Config.getInstance().setBuildSteps(Collections.singletonList(builder1 -> {
                         builder1.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager);
                         builder1.hostnameVerifier((s, sslSession) -> true);

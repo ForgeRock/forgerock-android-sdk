@@ -26,6 +26,11 @@ internal class SSOBroadcastModel(private val context: Context? = InitProvider.ge
     fun sendLogoutBroadcast() {
          context?.let {
              if (isBroadcastEnabled() && broadcastPermission != null) {
+                 Logger.warn(
+                     "SSOBroadcastModel.sendLogoutBroadcast",
+                     "Sending SSO_LOGOUT broadcast message! :: broadcastPackageKey: %s; broadcastPermission: %s", it.packageName, broadcastPermission
+                 )
+
                  broadcastIntent.putExtra(BroadcastConst.broadcastPackageKey, it.packageName)
                  it.sendBroadcast(broadcastIntent, broadcastPermission)
              }

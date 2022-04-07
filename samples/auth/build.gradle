@@ -10,11 +10,20 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 31
     defaultConfig {
-        applicationId "org.forgerock.auth"
+        applicationId "org.forgerock.auth.b"
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
+
+
+        resValue "string", "forgerock_sso_permission", "com.forgerock.permission"
+
+        manifestPlaceholders = [
+                appAuthRedirectScheme: "org.forgerock.demo",
+                forgerock_sso_permission :"com.forgerock.permission"
+        ]
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
@@ -30,6 +39,12 @@ android {
 
     signingConfigs {
         debug {
+            storeFile file('../debug.jks')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
             storeFile file('../debug.jks')
             storePassword 'android'
             keyAlias 'androiddebugkey'

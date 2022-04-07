@@ -24,6 +24,10 @@ class SSOBroadcastReceiver(private val instance: Config = Config.getInstance()):
         if(intent?.getStringExtra(broadcastPackageKey) != context?.packageName
             && context != null
             && intent?.action == context.resources?.getString(R.string.forgerock_sso_logout)) {
+            Logger.warn(
+                "SSOBroadcastReceiver.onReceive",
+                "Received SSO_LOGOUT broadcast message! broadcastPackageKey: %s, action: %s", context?.packageName, intent?.action
+            )
             instance.init(context)
             instance.sessionManager.close()
         }
