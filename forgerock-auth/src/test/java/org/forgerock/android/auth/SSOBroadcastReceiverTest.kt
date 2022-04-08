@@ -17,7 +17,10 @@ import org.mockito.kotlin.*
 
 class SSOBroadcastReceiverTest {
 
-    private val config = mock<Config>()
+    private val tokenManager: TokenManager = mock()
+    private val config = mock<Config> {
+        on { tokenManager } doReturn tokenManager
+    }
     private val intent = mock<Intent>()
     private val resources = mock<android.content.res.Resources>()
     private val context = mock<Context> {
@@ -28,21 +31,21 @@ class SSOBroadcastReceiverTest {
     private val sessionManager = mock<SessionManager>()
 
     @Test
-    fun `receiveBroadcastEventAndInvokeSessionManager`() {
+    fun receiveBroadcastEventAndInvokeSessionManager() {
         whenever(intent.action).thenReturn("com.forgerock.action")
         whenever(config.sessionManager).thenReturn(sessionManager)
         whenever(intent.getStringExtra("BROADCAST_PACKAGE_KEY")).thenReturn("com.forgerock.action")
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(context, intent)
         verify(config).init(context)
-        verify(sessionManager).close()
+        verify(tokenManager).revoke(null)
     }
 
     @Test
-    fun `doNotInvokeSessionManagerWhenTheContextIsNull`() {
+    fun doNotInvokeSessionManagerWhenTheContextIsNull() {
         whenever(config.sessionManager).thenReturn(sessionManager)
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(null, null)
-        verifyNoInteractions(sessionManager)
+        verifyNoInteractions(tokenManager)
     }
 }
