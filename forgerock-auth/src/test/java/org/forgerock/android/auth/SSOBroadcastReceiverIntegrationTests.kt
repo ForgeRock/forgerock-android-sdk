@@ -92,10 +92,10 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     }
 
     @Test
-    fun logoutWhenBroadcastLogOutEvent() {
+    fun whenBroadcastReceiverGetsLogoutEventThenVerifyRevokeTokenInvoked() {
         login()
 
-        val mockHttpDispatcher = MockHttpDispatcher(context)
+        val mockHttpDispatcher = MockHttpDispatcher()
         server.setDispatcher(mockHttpDispatcher)
 
         val accessToken = FRUser.getCurrentUser().accessToken
@@ -106,26 +106,17 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         intent.putExtra("BROADCAST_PACKAGE_KEY", "com.test.forgerock")
         testObject.onReceive(context, intent)
 
-        assertNull(FRUser.getCurrentUser())
         val sessionManagerObject: SessionManager = Config.getInstance().sessionManager
 
         sessionManagerObject.hasSession()
 
         val mockPackageManager = org.mockito.kotlin.mock<RecordedRequest>()
 
-        val revoke1: RecordedRequest = mockHttpDispatcher.list[0] ?: mockPackageManager //Post to oauth2/realms/root/token/revoke
-        val revoke2: RecordedRequest = mockHttpDispatcher.list[1] ?: mockPackageManager //Post to /sessions?_action=logout endpoint
+        val revokeRequest: RecordedRequest = mockHttpDispatcher.list[0] ?: mockPackageManager //Post to oauth2/realms/root/token/revoke
 
         //revoke Refresh Token and SSO Token are performed async
-        val ssoTokenRevoke: RecordedRequest =
-            findRequest("/json/realms/root/sessions?_action=logout", revoke1, revoke2)
         val refreshTokenRevoke: RecordedRequest =
-            findRequest("/oauth2/realms/root/token/revoke", revoke1, revoke2)
-        assertNotNull(ssoTokenRevoke.getHeader(serverConfig.cookieName))
-        assertEquals(
-            ServerConfig.API_VERSION_3_1,
-            ssoTokenRevoke.getHeader(ServerConfig.ACCEPT_API_VERSION)
-        )
+            findRequest("/oauth2/realms/root/token/revoke", revokeRequest)
         val body = refreshTokenRevoke.body.readUtf8()
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
@@ -134,30 +125,15 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     }
 }
 
-private class MockHttpDispatcher(private val context: Context): Dispatcher() {
+private class MockHttpDispatcher: Dispatcher() {
     val list = mutableListOf<RecordedRequest?>()
     override fun dispatch(request: RecordedRequest?): MockResponse {
-        if(request?.path == "/json/realms/root/sessions?_action=logout") {
-            list.add(request)
-            return MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(getJsonDataFromAsset(context, "/sessions_logout.json"))
-        }
         if(request?.path == "/oauth2/realms/root/token/revoke") {
             list.add(request)
         }
         return MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
             .addHeader("Content-Type", "application/json")
             .setBody("{}")
-    }
-
-    private fun getJsonDataFromAsset(context: Context, fileName: String): String? {
-        val jsonString: String
-        try {
-            jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
-        } catch (ioException: IOException) {
-            ioException.printStackTrace()
-            return null
-        }
-        return jsonString
     }
 }
 

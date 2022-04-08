@@ -37,7 +37,7 @@ class SSOBroadcastModelTest {
     private val intent = mock<Intent>()
 
     @Test
-    fun `sendBroadcastEventWhenPermissionIsEnabled`() {
+    fun sendBroadcastEventWhenPermissionIsEnabled() {
 
         val activityInfo = ActivityInfo()
         activityInfo.permission = broadcastPermission
@@ -50,12 +50,13 @@ class SSOBroadcastModelTest {
         testObject.sendLogoutBroadcast()
 
         verify(intent).putExtra("BROADCAST_PACKAGE_KEY", packageName)
+        verify(intent).flags = Intent.FLAG_RECEIVER_FOREGROUND
         verify(mockContext).sendBroadcast(intent, broadcastPermission)
 
     }
 
     @Test
-    fun `doNotSendBroadcastEventWhenPermissionIsNotEnabled`() {
+    fun doNotSendBroadcastEventWhenPermissionIsNotEnabled() {
 
         whenever(mockPackageManager.queryBroadcastReceivers(intent, 0)).thenReturn(listOf<ResolveInfo>())
         val testObject = SSOBroadcastModel(mockContext, intent)
@@ -65,7 +66,7 @@ class SSOBroadcastModelTest {
     }
 
     @Test
-    fun `doNotSendBroadcastEventWhenContextIsNull`() {
+    fun doNotSendBroadcastEventWhenContextIsNull() {
 
         val testObject = SSOBroadcastModel(null, Intent())
         testObject.sendLogoutBroadcast()
@@ -74,7 +75,7 @@ class SSOBroadcastModelTest {
     }
 
     @Test
-    fun `doNotSendBroadcastEventWhenPermissionIsDifferent`() {
+    fun doNotSendBroadcastEventWhenPermissionIsDifferent() {
 
         val activityInfo = ActivityInfo()
         activityInfo.permission = "errorPermission"

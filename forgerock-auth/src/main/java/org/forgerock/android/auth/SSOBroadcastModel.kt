@@ -12,6 +12,7 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_RECEIVER_FOREGROUND
 
 
 /**
@@ -26,6 +27,7 @@ internal class SSOBroadcastModel(private val context: Context? = InitProvider.ge
     fun sendLogoutBroadcast() {
          context?.let {
              if (isBroadcastEnabled() && broadcastPermission != null) {
+                 broadcastIntent.flags = FLAG_RECEIVER_FOREGROUND
                  broadcastIntent.putExtra(BroadcastConst.broadcastPackageKey, it.packageName)
                  it.sendBroadcast(broadcastIntent, broadcastPermission)
              }
