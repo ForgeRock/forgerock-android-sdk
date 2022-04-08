@@ -41,7 +41,6 @@ import okhttp3.Response;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore("This is flaky test , failed in jenkins , need to verify why ")
 @RunWith(RobolectricTestRunner.class)
 public class RequestInterceptorTest {
     protected MockWebServer server;
