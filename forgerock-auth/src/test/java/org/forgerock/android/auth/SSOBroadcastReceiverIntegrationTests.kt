@@ -22,7 +22,6 @@ import org.forgerock.android.auth.callback.PasswordCallback
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.*
 
@@ -105,10 +104,6 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val intent = Intent("org.forgerock.android.auth.broadcast.SSO_LOGOUT")
         intent.putExtra("BROADCAST_PACKAGE_KEY", "com.test.forgerock")
         testObject.onReceive(context, intent)
-
-        val sessionManagerObject: SessionManager = Config.getInstance().sessionManager
-
-        sessionManagerObject.hasSession()
 
         val mockPackageManager = org.mockito.kotlin.mock<RecordedRequest>()
 
