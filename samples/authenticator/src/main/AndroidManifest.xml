@@ -20,6 +20,7 @@
         <activity
             android:name=".view.activity.LauncherActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="true"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,6 +32,7 @@
             android:name=".view.activity.AccountsActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
+            android:exported="true"
             android:theme="@style/AppTheme.Launcher"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
