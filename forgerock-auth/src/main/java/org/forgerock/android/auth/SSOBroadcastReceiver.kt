@@ -25,7 +25,7 @@ class SSOBroadcastReceiver(private val instance: Config = Config.getInstance()):
             && context != null
             && intent?.action == context.resources?.getString(R.string.forgerock_sso_logout)) {
             instance.init(context)
-            instance.sessionManager.close()
+            instance.tokenManager.revoke(null)
         }
     }
 }
