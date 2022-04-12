@@ -21,7 +21,7 @@
                 android:resource="@xml/forgerock_authenticator" />
         </service>
 
-        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
