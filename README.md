@@ -1,5 +1,5 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ForgeRock/forgerock-android-sdk?color=%23f46200&label=Version&style=flat-square)](CHANGELOG.md)
-[![Build Status](https://jenkins.petrov.ca/buildStatus/icon?job=Android-SDK&style=flat-square)](https://jenkins.petrov.ca/job/Android-SDK/)
+[![Build Status](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/build.yaml/badge.svg)](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/build.yaml)
 
 <p align="center">
   <a href="https://github.com/ForgeRock">
