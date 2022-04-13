@@ -24,7 +24,7 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -51,7 +51,7 @@ jobs:
         if: success() || failure()
         with:
           name: Unit tests results
-          path: '**/build/test-results/testDebugUnitTest/TEST-*.xml'
+          path: '**/build/test-results/**/TEST-*.xml'
           list-suites: 'all'
           list-tests: 'all'
           fail-on-error: 'true'
