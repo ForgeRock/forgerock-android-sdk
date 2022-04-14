@@ -17,17 +17,6 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Send slack notification that the build process has started
-      - uses: 8398a7/action-slack@v3
-        with:
-          author_name: 'Android Build and Test'
-          fields: repo,author,eventName,message,commit
-          status: ${{ job.status }}
-          text: 'Build started'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        if: always() # Pick up events even if the job fails or is canceled.
-      
       # Clone the repo
       - name: Clone the repository
         uses: actions/checkout@v3
@@ -52,7 +41,7 @@ jobs:
       
       # Execute unit tests
       - name: Run unit tests
-        run: ./gradlew test --stacktrace
+        run: ./gradlew test --stacktrace --no-daemon
 
       # Publish test reports for the unit tests
       - name: Publish test results
@@ -66,14 +55,13 @@ jobs:
           fail-on-error: 'true'
           reporter: java-junit
 
+      # Send slack notification with result status
       - uses: 8398a7/action-slack@v3
         with:
-          author_name: 'Android Build and Test'
           mention: 'stoyan.petrov'
           if_mention: 'failure,cancelled'
-          fields: repo,author,eventName,message,commit,took
+          fields: repo,author,eventName,message,job,pullRequest,took
           status: ${{ job.status }}
-          text: 'Build finished!'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         if: always()
