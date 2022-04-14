@@ -7,17 +7,15 @@
 
 package org.forgerock.android.auth;
 
-import android.util.Log;
-import androidx.annotation.VisibleForTesting;
-import org.forgerock.android.core.BuildConfig;
+import androidx.annotation.NonNull;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Logger for ForgeRock SDK
  */
 public class Logger {
-
-    @VisibleForTesting
-    static final String FORGE_ROCK = "ForgeRock";
 
     public enum Level {
         DEBUG,
@@ -29,6 +27,10 @@ public class Logger {
     //Default level to warn
     private static Level level = Level.WARN;
 
+    private static final Set<FRLogger> loggers = new HashSet<FRLogger>() {{
+        add(new FRConsoleLogger()); // Default logger, always present
+    }};
+
     public static void set(Level level) {
         Logger.level = level;
     }
@@ -37,41 +39,60 @@ public class Logger {
         return Logger.level == Level.DEBUG;
     }
 
-    private static void log(Level level, String tag, Throwable t, String message, Object... args) {
-        if (level.ordinal() >= Logger.level.ordinal() ) {
-            String value =
-                    String.format("[%s] [%s]: ", BuildConfig.VERSION_NAME, tag)
-                            + String.format(message, args);
-            switch (level) {
-                case DEBUG:
-                    Log.i(FORGE_ROCK, value);
-                    return;
-                case WARN:
-                    Log.w(FORGE_ROCK, value, t);
-                    return;
-                case ERROR:
-                    Log.e(FORGE_ROCK, value, t);
-            }
-        }
+    /**
+     * Add a logger to be handled by the system.
+     *
+     * @return {@code true} if the logger was not already added
+     */
+    public static boolean addLogger(@NonNull FRLogger logger) {
+        return loggers.add(logger);
+    }
+
+    /**
+     * Remove a logger from the system.
+     *
+     * @return {@code true} if the logger was added previously
+     */
+    public static boolean removeLogger(@NonNull FRLogger logger) {
+        return loggers.remove(logger);
     }
 
     public static void error(String tag, Throwable t, String message, Object... values) {
-        log(Level.ERROR, tag, t, message, values);
+        if (isLoggingDisabled(Level.ERROR)) return;
+        for (FRLogger logger : loggers) {
+            logger.error(tag, t, message, values);
+        }
     }
 
     public static void error(String tag, String message, Object... values) {
-        log(Level.ERROR, tag, null, message, values);
+        if (isLoggingDisabled(Level.ERROR)) return;
+        for (FRLogger logger : loggers) {
+            logger.error(tag, message, values);
+        }
     }
 
     public static void warn(String tag, String message, Object... values) {
-        log(Level.WARN, tag, null, message, values);
+        if (isLoggingDisabled(Level.WARN)) return;
+        for (FRLogger logger : loggers) {
+            logger.warn(tag, message, values);
+        }
     }
 
     public static void warn(String tag, Throwable t, String message, Object... values) {
-        log(Level.WARN, tag, t, message, values);
+        if (isLoggingDisabled(Level.WARN)) return;
+        for (FRLogger logger : loggers) {
+            logger.warn(tag, t, message, values);
+        }
     }
 
     public static void debug(String tag, String message, Object... values) {
-        log(Level.DEBUG, tag, null, message, values);
+        if (isLoggingDisabled(Level.DEBUG)) return;
+        for (FRLogger logger : loggers) {
+            logger.debug(tag, message, values);
+        }
+    }
+
+    private static boolean isLoggingDisabled(Level level) {
+        return level.ordinal() < Logger.level.ordinal();
     }
 }

@@ -7,17 +7,15 @@
 
 package org.forgerock.android.auth;
 
-import android.util.Log;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.forgerock.android.core.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLog;
-import org.robolectric.shadows.ShadowLog.LogItem;
-
-import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class LoggerTest {
@@ -30,29 +28,12 @@ public class LoggerTest {
     }
 
     @Test
-    public void testDebugLogging() {
-        Logger.debug("Test", "This is a test", null);
-        LogItem logItem = ShadowLog.getLogsForTag(Logger.FORGE_ROCK).get(0);
-        assertEquals(Log.INFO, logItem.type);
-        assertEquals("[" + BuildConfig.VERSION_NAME + "] [Test]: This is a test", logItem.msg);
-    }
-
-
-    @Test
-    public void testDebugLoggingWithArgs() {
-        Logger.debug("Test", "This is a test %s, %d", "hello", 3);
-        LogItem logItem = ShadowLog.getLogsForTag(Logger.FORGE_ROCK).get(0);
-        assertEquals(Log.INFO, logItem.type);
-        assertEquals("[" + BuildConfig.VERSION_NAME + "] [Test]: This is a test hello, 3", logItem.msg);
-    }
-
-    @Test
     public void testLowerLevel() {
         Logger.set(Logger.Level.ERROR);
         Logger.warn("Test", "warning");
         Logger.debug("Test", "debugging");
         //Should not log
-        assertEquals(0, ShadowLog.getLogsForTag(Logger.FORGE_ROCK).size());
+        assertEquals(0, ShadowLog.getLogs().size());
     }
 
     @Test
@@ -60,7 +41,7 @@ public class LoggerTest {
         Logger.set(Logger.Level.DEBUG);
         Logger.warn("Test", "warning");
         Logger.error("Test", "error");
-        assertEquals(2, ShadowLog.getLogsForTag(Logger.FORGE_ROCK).size());
+        assertEquals(2, ShadowLog.getLogs().size());
     }
 
     @Test
@@ -69,24 +50,7 @@ public class LoggerTest {
         Logger.debug("Test", "debugging");
         Logger.warn("Test", "warning");
         Logger.debug("Test", "debugging");
-        assertEquals(0, ShadowLog.getLogsForTag(Logger.FORGE_ROCK).size());
-    }
-
-
-    @Test
-    public void testWarnThrowable() {
-        Logger.warn("Test", new IllegalArgumentException("test"), "warning");
-        LogItem logItem = ShadowLog.getLogsForTag(Logger.FORGE_ROCK).get(0);
-        assertEquals(Log.WARN, logItem.type);
-        assertTrue(logItem.throwable instanceof IllegalArgumentException);
-    }
-
-    @Test
-    public void testErrorThrowable() {
-        Logger.error("Test", new IllegalArgumentException("test"), "error");
-        LogItem logItem = ShadowLog.getLogsForTag(Logger.FORGE_ROCK).get(0);
-        assertEquals(Log.ERROR, logItem.type);
-        assertTrue(logItem.throwable instanceof IllegalArgumentException);
+        assertEquals(0, ShadowLog.getLogs().size());
     }
 
     @Test
