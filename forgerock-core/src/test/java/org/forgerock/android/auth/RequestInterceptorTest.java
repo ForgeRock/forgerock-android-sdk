@@ -7,21 +7,20 @@
 
 package org.forgerock.android.auth;
 
-import android.net.Uri;
+import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Collections.singletonList;
 
-import androidx.annotation.NonNull;
+import android.net.Uri;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
-import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -38,9 +37,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-
 @RunWith(RobolectricTestRunner.class)
 public class RequestInterceptorTest {
     protected MockWebServer server;
@@ -56,6 +52,8 @@ public class RequestInterceptorTest {
         server.enqueue(new MockResponse().setResponseCode(200));
         data = new JSONObject();
         data.put("test", "test");
+        OkHttpClientProvider.getInstance().clear();
+        RequestInterceptorRegistry.getInstance().register(null);
     }
 
     @After
