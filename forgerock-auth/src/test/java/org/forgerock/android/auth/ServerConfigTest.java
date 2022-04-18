@@ -79,46 +79,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
-                .build();
-
-        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
-
-        Request request = new Request.Builder()
-                .get()
-                .url("https://api.ipify.org?format=json")
-                .build();
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-        final boolean[] result = new boolean[1];
-
-        client.newCall(request).enqueue(new okhttp3.Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                result[0] = false;
-                countDownLatch.countDown();
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                result[0] = true;
-                countDownLatch.countDown();
-            }
-
-        });
-        countDownLatch.await();
-        assertTrue(result[0]);
-
-    }
-
-    @Test
-    public void testSha1Pinning() throws InterruptedException {
-        ServerConfig serverConfig = ServerConfig.builder()
-                .context(context)
-                .url("https://api.ipify.org")
-                .pin("sha1/2vB3hhEJ98C5efhhWpxtD2wxYek=")
+                .pin("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -160,8 +121,8 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
-                .pin("sha256/invalid")
+                .pin("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
+                .pin("invalid")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -200,7 +161,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/invalid=")
+                .pin("invalid=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -243,9 +204,7 @@ public class ServerConfigTest {
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         assertThat(client.certificatePinner().getPins())
                 .contains(new CertificatePinner.Pin(serverConfig.getHost(),
-                        "sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M="))
-                .contains(new CertificatePinner.Pin(serverConfig.getHost(),
-                        "sha1/2vB3hhEJ98C5efhhWpxtD2wxYek="));
+                        "sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M="));
     }
 
     @Test

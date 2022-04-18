@@ -78,15 +78,13 @@ public class NetworkConfigTest {
     public void testPinningConfig() {
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
-                .pin("sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
-                .pin("sha1/2vB3hhEJ98C5efhhWpxtD2wxYek=")
+                .pin("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
                 .build();
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(networkConfig);
         //Make sure the pinning is configured
         Assertions.assertThat(client.certificatePinner().getPins())
                 .contains(new CertificatePinner.Pin(server.getHostName(),
-                        "sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M="))
-                .contains(new CertificatePinner.Pin(server.getHostName(), "sha1/2vB3hhEJ98C5efhhWpxtD2wxYek="));
+                        "sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M="));
     }
 
 

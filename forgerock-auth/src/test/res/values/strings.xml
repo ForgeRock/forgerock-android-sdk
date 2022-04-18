@@ -23,8 +23,7 @@
     <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
     <string-array name="forgerock_ssl_pinning_public_key_hashes">
-        <item>sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=</item>
-        <item>sha1/2vB3hhEJ98C5efhhWpxtD2wxYek=</item>
+        <item>9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=</item>
     </string-array>
 
 
