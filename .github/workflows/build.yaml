@@ -25,12 +25,6 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      # Replace the "dummy" google-services.json with a real one (ACME account)
-      - name: Replace google-services.json in the project
-        env:
-          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
-        run: echo $GOOGLE_SERVICES > samples/authenticator/google-services.json
-
       # Setup JDK and cache and restore dependencies.
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -38,10 +32,21 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
           cache: 'gradle'
-      
-      # Execute unit tests
-      - name: Run unit tests
-        run: ./gradlew test --stacktrace --no-daemon
+
+      # Execute forgerock-core debug unit tests
+      - name: Run forgerock-core debug unit tests
+        run: ./gradlew :forgerock-core:testDebugUnitTest --stacktrace --no-daemon
+        if: always()
+
+      # Execute forgerock-auth debug unit tests
+      - name: Run forgerock-auth debug unit tests
+        run: ./gradlew :forgerock-auth:testDebugUnitTest --stacktrace --no-daemon
+        if: always()
+
+      # Execute forgerock-authenticator debug unit tests
+      - name: Run forgerock-authenticator debug unit tests
+        run: ./gradlew :forgerock-authenticator:testDebugUnitTest --stacktrace --no-daemon
+        if: always()
 
       # Publish test reports for the unit tests
       - name: Publish test results
@@ -58,7 +63,7 @@ jobs:
       # Send slack notification with result status
       - uses: 8398a7/action-slack@v3
         with:
-          mention: 'stoyan.petrov'
+          mention: 'stoyan.petrov,andy.witrisna,jey.periyasamy'
           if_mention: 'failure,cancelled'
           fields: repo,author,eventName,message,job,pullRequest,took
           status: ${{ job.status }}
