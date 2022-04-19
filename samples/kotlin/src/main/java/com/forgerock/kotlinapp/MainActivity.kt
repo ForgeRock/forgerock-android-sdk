@@ -17,6 +17,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
+import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
 interface ActivityListener {
@@ -49,6 +50,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         logoutButton.setOnClickListener {
             logout()
         }
+        FRUser.getCurrentUser()
     }
 
     override fun onStart() {
@@ -56,13 +58,19 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
+        
         if(FRUser.getCurrentUser() == null) {
-            updateStatus()
+            updateStatus(true)
         } else {
-            loginButton.visibility = View.GONE
-            logoutButton.visibility = View.GONE
-            status.visibility = View.GONE
-            launchUserInfoFragment(FRUser.getCurrentUser().accessToken, FRUser.getCurrentUser())
+            try {
+                val currentUser = FRUser.getCurrentUser()
+                updateStatus(false)
+                launchUserInfoFragment(currentUser.accessToken, currentUser)
+            }
+            catch(e: AuthenticationRequiredException) {
+                updateStatus(true)
+            }
+
         }
     }
 
@@ -91,22 +99,19 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
     }
 
 
-    private fun updateStatus() {
+    private fun updateStatus(showLogin: Boolean = false) {
         runOnUiThread {
-            loginButton.visibility = View.VISIBLE
-            logoutButton.visibility = View.VISIBLE
-            status.visibility = View.VISIBLE
-            if(FRUser.getCurrentUser() == null) {
-                status.text = "User is not authenticated"
-                loginButton.apply { this.isEnabled = true }
-                logoutButton.apply { this.isEnabled = false }
-            } else {
-                status.text = "User is authenticated"
-                loginButton.apply { this.isEnabled = false }
-                logoutButton.apply { this.isEnabled = true }
+            (if(showLogin) View.VISIBLE else View.GONE).also {
+                loginButton.visibility = it
+                logoutButton.visibility = it
+                status.visibility = it
             }
+            loginButton.apply { this.isEnabled = showLogin == true }
+            logoutButton.apply { this.isEnabled = showLogin == false }
+            status.text = if(showLogin) "User is not authenticated" else "User is authenticated"
         }
     }
+
 
     private fun getUserInfo(result: FRUser?) {
         result?.getAccessToken(object : FRListener<AccessToken> {
@@ -173,7 +178,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
-        updateStatus()
+        updateStatus(true)
     }
 
 }

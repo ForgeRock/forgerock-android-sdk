@@ -25,7 +25,7 @@ public class PushMechanism extends Mechanism {
     /** The authentication URL for Push mechanism */
     private String authenticationEndpoint;
     /** List of PushNotification objects associated with this mechanism **/
-    private List<PushNotification> pushNotificationList = new ArrayList<>();
+    private List<PushNotification> pushNotificationList;
 
     /**
      * Creates a Push mechanism with given data.
