@@ -12,7 +12,6 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import android.content.Intent
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squareup.okhttp.mockwebserver.Dispatcher
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.RecordedRequest
@@ -22,10 +21,12 @@ import org.forgerock.android.auth.callback.PasswordCallback
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
 import java.util.*
+import java.util.concurrent.CountDownLatch
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
     private val defaultTokenManagerTest = "DefaultTokenManagerTest"
@@ -94,7 +95,8 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     fun whenBroadcastReceiverGetsLogoutEventThenVerifyRevokeTokenInvoked() {
         login()
 
-        val mockHttpDispatcher = MockHttpDispatcher()
+        val latch = CountDownLatch(1)
+        val mockHttpDispatcher = MockHttpDispatcher(latch)
         server.setDispatcher(mockHttpDispatcher)
 
         val accessToken = FRUser.getCurrentUser().accessToken
@@ -106,6 +108,8 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         testObject.onReceive(context, intent)
 
         val mockPackageManager = org.mockito.kotlin.mock<RecordedRequest>()
+
+        latch.await()
 
         val revokeRequest: RecordedRequest = mockHttpDispatcher.list[0] ?: mockPackageManager //Post to oauth2/realms/root/token/revoke
 
@@ -120,11 +124,12 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     }
 }
 
-private class MockHttpDispatcher: Dispatcher() {
+private class MockHttpDispatcher(private val latch: CountDownLatch): Dispatcher() {
     val list = mutableListOf<RecordedRequest?>()
     override fun dispatch(request: RecordedRequest?): MockResponse {
         if(request?.path == "/oauth2/realms/root/token/revoke") {
             list.add(request)
+            latch.countDown()
         }
         return MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
             .addHeader("Content-Type", "application/json")

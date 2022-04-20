@@ -20,10 +20,10 @@
         <activity
             android:name=".view.activity.LauncherActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="true"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -31,6 +31,7 @@
             android:name=".view.activity.AccountsActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
+            android:exported="true"
             android:theme="@style/AppTheme.Launcher"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
@@ -53,22 +54,26 @@
         <activity
             android:name=".view.activity.AddMechanismActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:label="@string/title_activity_add_account"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".view.activity.DeleteAccountActivity"
+            android:exported="false"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_delete_account"
             android:theme="@android:style/Theme.Holo.Light.Dialog"
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".camera.CameraScanActivity"
+            android:exported="false"
             android:configChanges="orientation|screenSize"
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".view.activity.PushNotificationActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             android:excludeFromRecents="true"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
@@ -76,6 +81,7 @@
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".view.activity.NotificationsActivity"
+            android:exported="false"
             android:configChanges="orientation|screenSize"
             android:label="Notifications"
             tools:ignore="LockedOrientationActivity" />
