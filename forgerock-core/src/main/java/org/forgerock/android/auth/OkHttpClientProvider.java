@@ -74,7 +74,7 @@ class OkHttpClientProvider {
         if (!networkConfig.getPins().isEmpty()) {
             CertificatePinner.Builder cpBuilder = new CertificatePinner.Builder();
             for (String s : networkConfig.getPins()) {
-                cpBuilder.add(networkConfig.getHost(), s);
+                cpBuilder.add(networkConfig.getHost(), "sha256/" + s);
             }
             builder.certificatePinner(cpBuilder.build());
         }
