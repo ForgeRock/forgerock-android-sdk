@@ -35,7 +35,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FRAuth.start(applicationContext)
         setContentView(R.layout.activity_main)
         updateStatus()
         loginButton.setOnClickListener {
@@ -50,7 +49,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         logoutButton.setOnClickListener {
             logout()
         }
-        FRUser.getCurrentUser()
     }
 
     override fun onStart() {
