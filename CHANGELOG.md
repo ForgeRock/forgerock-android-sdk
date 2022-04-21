@@ -4,9 +4,12 @@
 - Restore SSO Token when it is out of sync with the SSO Token that bound with the Access Token [SDKS-1664]
 - SSO Token should be included in the header instead of request parameter for /authorize endpoint [SDKS-1670]
 - Support to broadcast logout event to clear application tokens when user logout the app [SDKS-1663]
+- Obtain timestamp from new PushNotification payload [SDKS-1666]
+- Add new payload attributes to the PushNotification [SDKS-1776]
 
 #### Fixed
 - Dispose AuthorizationService when no longer required [SDKS-1636]
+- Authenticator sample app crash after scan push mechanism [SDKS-1454]
 
 ## [3.2.0]
 #### Added

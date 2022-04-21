@@ -7,6 +7,7 @@
 
 package org.forgerock.authenticator.sample.controller;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -59,8 +60,8 @@ public class FcmService extends FirebaseMessagingService {
                     .getInstance(getApplicationContext())
                     .handleRemoteMessage(message);
 
-            // If it's a valid Push message from AM, create a system notification
-            if(pushNotification != null) {
+            // If it's a valid Push message from AM and not expired, create a system notification
+            if(pushNotification != null && !pushNotification.isExpired()) {
                 createSystemNotification(pushNotification);
             }
         } catch (InvalidNotificationException e) {
@@ -100,9 +101,18 @@ public class FcmService extends FirebaseMessagingService {
         notificationManager.notify(id, notification);
     }
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     private Notification generatePending(Context context, int requestCode, String title, String message, Intent intent) {
         createNotificationChannel(context);
-        PendingIntent pendIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        }else {
+            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
         return new NotificationCompat.Builder(context, context.getString(R.string.channel_id))
                 .setSmallIcon(R.drawable.forgerock_notification)
                 .setContentTitle(title)
@@ -110,7 +120,7 @@ public class FcmService extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendIntent)
+                .setContentIntent(pendingIntent)
                 .build();
     }
 

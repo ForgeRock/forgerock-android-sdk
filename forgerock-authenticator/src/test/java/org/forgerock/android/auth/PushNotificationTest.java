@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -54,7 +54,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateNotificationSuccessfuly() throws InvalidNotificationException {
+    public void testCreateNotificationSuccessfully() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
 
@@ -78,7 +78,7 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateNotificationWithOptionalParametersSuccessfuly() throws InvalidNotificationException {
+    public void testCreateNotificationWithOptionalParametersSuccessfully() throws InvalidNotificationException {
         Calendar timeAdded = Calendar.getInstance();
         Calendar timeExpired = Calendar.getInstance();
         long time = timeExpired.getTimeInMillis();
@@ -118,6 +118,38 @@ public class PushNotificationTest extends FRABaseTest {
                 .setAmlbCookie(AMLB_COOKIE)
                 .setTtl(TTL)
                 .build();
+    }
+
+    @Test
+    public void testShouldPassNoPushType() throws InvalidNotificationException {
+        Calendar timeAdded = Calendar.getInstance();
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .setPushType(null)
+                .build();
+
+        assertEquals(PushType.DEFAULT, pushNotification.getPushType());
+    }
+
+    @Test
+    public void testShouldPassInvalidPushType() throws InvalidNotificationException {
+        Calendar timeAdded = Calendar.getInstance();
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(TTL)
+                .setPushType("invalid")
+                .build();
+
+        assertEquals(PushType.DEFAULT, pushNotification.getPushType());
     }
 
     @Test (expected = InvalidNotificationException.class)
@@ -416,6 +448,43 @@ public class PushNotificationTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldParseToJsonWithNewAttributesSuccessfully() throws InvalidNotificationException {
+        String json = "{" +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
+                "\"message\":\"Login attempt at ForgeRock\"," +
+                "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
+                "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"ttl\":120," +
+                "\"approved\":false," +
+                "\"pending\":true," +
+                "\"numbersChallenge\":\"34,43,57\"," +
+                "\"pushType\":\"challenge\"}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
+
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setMessage(MESSAGE)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setPushType(PushType.CHALLENGE.toString())
+                .setNumbersChallenge(NUMBERS_CHALLENGE)
+                .setTtl(TTL)
+                .build();
+
+        String pusNotificationAsJson = pushNotification.toJson();
+
+        assertNotNull(pusNotificationAsJson);
+        assertEquals(json, pusNotificationAsJson);
+    }
+
+    @Test
     public void testShouldSerializeSuccessfully() throws InvalidNotificationException {
         String json = "{" +
                 "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
@@ -467,6 +536,37 @@ public class PushNotificationTest extends FRABaseTest {
         assertEquals(pushNotification.getChallenge(), CHALLENGE);
         assertEquals(pushNotification.getAmlbCookie(), AMLB_COOKIE);
         assertEquals(pushNotification.getTtl(), TTL);
+    }
+
+    @Test
+    public void testShouldDeserializeWithNewAttributesSuccessfully() {
+        String json = "{" +
+                "\"id\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95-1629261902660\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"messageId\":\"AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441\"," +
+                "\"message\":\"Login attempt at ForgeRock\"," +
+                "\"challenge\":\"fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=\"," +
+                "\"amlbCookie\":\"ZnJfc3NvX2FtbGJfcHJvZD0wMQ==\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"ttl\":120," +
+                "\"approved\":false," +
+                "\"pushType\":\"challenge\"," +
+                "\"numbersChallenge\":\"34,43,57\"," +
+                "\"pending\":true}";
+
+        PushNotification pushNotification = PushNotification.deserialize(json);
+
+        assertNotNull(pushNotification);
+        assertEquals(pushNotification.getMechanismUID(), MECHANISM_UID);
+        assertEquals(pushNotification.getMessageId(), MESSAGE_ID);
+        assertEquals(pushNotification.getMessage(), MESSAGE);
+        assertEquals(pushNotification.getChallenge(), CHALLENGE);
+        assertEquals(pushNotification.getAmlbCookie(), AMLB_COOKIE);
+        assertEquals(pushNotification.getTtl(), TTL);
+        assertEquals(pushNotification.getPushType(), PushType.CHALLENGE);
+        assertEquals(pushNotification.getNumbersChallenge()[0], 34);
+        assertEquals(pushNotification.getNumbersChallenge()[1], 43);
+        assertEquals(pushNotification.getNumbersChallenge()[2], 57);
     }
 
 }
