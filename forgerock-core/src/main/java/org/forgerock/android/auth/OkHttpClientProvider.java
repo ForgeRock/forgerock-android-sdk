@@ -66,7 +66,7 @@ class OkHttpClientProvider {
         }
 
         if (Logger.isDebugEnabled()) {
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            HttpLoggingInterceptor interceptor = Logger.getCustomInterceptor();
             interceptor.level(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(interceptor);
         }
