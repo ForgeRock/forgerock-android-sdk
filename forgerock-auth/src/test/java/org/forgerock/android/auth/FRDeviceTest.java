@@ -65,7 +65,7 @@ public class FRDeviceTest {
         System.setProperty("http.agent", "test");
         DeviceCollector collector = new BrowserCollector();
         collector.collect(context, listener);
-        Assert.assertEquals("test", listener.get().getString("userAgent"));
+        Assert.assertEquals("user", listener.get().getString("userAgent"));
     }
 
     @Test

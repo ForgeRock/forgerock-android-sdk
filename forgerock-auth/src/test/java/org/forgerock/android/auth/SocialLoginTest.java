@@ -21,6 +21,8 @@ import android.os.Parcel;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.testing.FragmentScenario;
+import androidx.test.core.app.ActivityScenario;
 
 import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.common.api.ApiException;
@@ -125,9 +127,8 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setUrl(getUrl());
         Config.getInstance().setEncryptor(new MockEncryptor());
 
-        //Create a dummy Fragment
-        FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
-        InitProvider.setCurrentActivity(fragmentActivity);
+        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        scenario.onActivity(InitProvider::setCurrentActivity);
 
         CountDownLatch executeTree = new CountDownLatch(2);
 
@@ -171,8 +172,8 @@ public class SocialLoginTest extends BaseTest {
             }
         });
 
-        SignInCredential signInCredential = new SignInCredential("1234"
-                , "", "", "",null, "", "dummy_id_token" );
+        SignInCredential signInCredential = new SignInCredential("1234", "", "", "", null, "", "dummy_id_token");
+
         Status status = Status.RESULT_SUCCESS;
         Parcel statusParcel = Parcel.obtain();
         status.writeToParcel(statusParcel, 0);
@@ -186,7 +187,9 @@ public class SocialLoginTest extends BaseTest {
         Intent intent = new Intent();
         intent.putExtra("sign_in_credential", bytes2);
         intent.putExtra("status", bytes);
-        getGoogleIdentityServicesHandler(fragmentActivity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
+
+        scenario.onActivity(activity -> getGoogleIdentityServicesHandler((FragmentActivity) activity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, intent));
+
 
         assertNotNull(nodeListenerFuture.get());
         assertNotNull(FRUser.getCurrentUser());
@@ -230,8 +233,8 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setEncryptor(new MockEncryptor());
 
         //Create a dummy Fragment
-        FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
-        InitProvider.setCurrentActivity(fragmentActivity);
+        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        scenario.onActivity(InitProvider::setCurrentActivity);
 
         CountDownLatch executeTree = new CountDownLatch(2);
 
@@ -276,7 +279,7 @@ public class SocialLoginTest extends BaseTest {
             }
         });
 
-        getGoogleIdentityServicesHandler(fragmentActivity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, null);
+        scenario.onActivity(activity -> getGoogleIdentityServicesHandler((FragmentActivity) activity).onActivityResult(GoogleIdentityServicesHandler.RC_SIGN_IN, Activity.RESULT_OK, null));
         countDownLatch.await();
     }
 
@@ -294,8 +297,9 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setUrl(getUrl());
         Config.getInstance().setEncryptor(new MockEncryptor());
 
-        FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
-        InitProvider.setCurrentActivity(fragmentActivity);
+        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        scenario.onActivity(InitProvider::setCurrentActivity);
+
 
         CountDownLatch executeTree = new CountDownLatch(2);
 
@@ -341,7 +345,7 @@ public class SocialLoginTest extends BaseTest {
 
         Intent intent = new Intent();
         intent.setData(Uri.parse("https://opeam.example.com?form_post_entry=dummyValue"));
-        getAppleSignInHandler(fragmentActivity).onActivityResult(AppleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, intent);
+        scenario.onActivity(activity -> getAppleSignInHandler((FragmentActivity) activity).onActivityResult(AppleSignInHandler.RC_SIGN_IN, Activity.RESULT_OK, intent));
 
         assertNotNull(nodeListenerFuture.get());
         assertNotNull(FRUser.getCurrentUser());
