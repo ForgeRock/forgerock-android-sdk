@@ -16,6 +16,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -114,6 +115,11 @@ public class AppAuthFragment extends Fragment {
             Listener.onException(browser.getListener(), new BrowserAuthenticationException("No response data"));
         }
         browser = null;
+    }
+
+    @VisibleForTesting
+    void setBrowser(FRUser.Browser userBrowser) {
+        browser = userBrowser;
     }
 
     @Override

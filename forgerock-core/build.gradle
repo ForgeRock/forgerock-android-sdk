@@ -79,7 +79,7 @@ dependencies {
     androidTestImplementation 'com.google.android.gms:play-services-location:17.1.0'
 
     testImplementation 'junit:junit:4.13'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
+    testImplementation 'org.robolectric:robolectric:4.7.3'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.16.1'
