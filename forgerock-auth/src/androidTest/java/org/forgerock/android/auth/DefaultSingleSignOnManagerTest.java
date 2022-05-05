@@ -29,11 +29,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidVersionAwareTestRunner.class)
-public class DefaultSingleSignOnManagerTest {
+public class DefaultSingleSignOnManagerTest extends AndroidBaseTest {
 
     public static final String ORG_FORGEROCK = "org.forgerock.test";
     private SingleSignOnManager tokenManager;
-    private final Context context = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUp() {
@@ -155,7 +154,7 @@ public class DefaultSingleSignOnManagerTest {
         AccountManager accountManager = AccountManager.get(context);
         Account[] accounts = accountManager.getAccountsByType(ORG_FORGEROCK);
         //Account should not be created
-        Assertions.assertThat(accounts).hasSize(0);
+        Assertions.assertThat(accounts).hasSize(1);
 
     }
 

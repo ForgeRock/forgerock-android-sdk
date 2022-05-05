@@ -7,9 +7,7 @@
 
 package org.forgerock.android.auth;
 
-import android.content.Context;
 import android.os.Build;
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.detector.*;
 import org.junit.Assert;
@@ -19,9 +17,7 @@ import org.junit.runner.RunWith;
 import static android.os.Build.VERSION.SDK_INT;
 
 @RunWith(AndroidJUnit4.class)
-public class RootDeviceTest {
-
-    private Context context = ApplicationProvider.getApplicationContext();
+public class RootDeviceTest extends AndroidBaseTest {
 
     @Test
     public void testBuildTagDetector() {
@@ -37,7 +33,7 @@ public class RootDeviceTest {
                 .detector(new DangerousPropertyDetector())
                 .build();
         //Expect 1.0 on emulator
-        if (isEmulator() && SDK_INT < 30) {
+        if (isEmulator()) {
             Assert.assertEquals(1.0, rootDetector.isRooted(context), 0.0001);
         } else {
             Assert.assertEquals(0.0, rootDetector.isRooted(context), 0.0001);

@@ -15,19 +15,21 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
 
+import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.FRListenerFuture;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(AndroidJUnit4.class)
-public class DeviceProfileCollectorCallbackAndroidTest {
+import java.util.concurrent.TimeUnit;
 
-    private Context context = ApplicationProvider.getApplicationContext();
+@RunWith(AndroidJUnit4.class)
+public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
 
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
