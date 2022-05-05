@@ -9,32 +9,17 @@ package org.forgerock.android.auth;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-
-import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
-import org.forgerock.android.auth.exception.AuthenticationRequiredException;
-import org.hamcrest.collection.IsIn;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class FRUserTest extends AndroidBaseTest {

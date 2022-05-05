@@ -7,10 +7,9 @@
 
 package org.forgerock.android.auth.collector;
 
-import android.content.Context;
 import android.provider.Settings;
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.DeviceIdentifier;
 import org.forgerock.android.auth.KeyStoreManager;
@@ -25,10 +24,7 @@ import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
-public class FRDeviceIdentifierTest {
-
-
-    private Context context = ApplicationProvider.getApplicationContext();
+public class FRDeviceIdentifierTest extends AndroidBaseTest {
 
     @Test
     public void testDeviceId() {
