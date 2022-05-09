@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -35,6 +35,18 @@ class PushParser extends MechanismParser {
     public static final String MECHANISM_UID = "u";
     /** The Time To Live of the notification */
     public static final String TTL = "t";
+    /** The time interval when the notification was created. */
+    public static final String TIME_INTERVAL = "i";
+    /** The notification message */
+    public static final String NOTIFICATION_MESSAGE = "m";
+    /** The Time To Live of the notification */
+    public static final String CUSTOM_PAYLOAD = "p";
+    /** The key for the push notification type. */
+    public static final String PUSH_TYPE = "k";
+    /** The key for the challenge numbers type. */
+    public static final String NUMBERS_CHALLENGE = "n";
+    /** The key for the context info. */
+    public static final String CONTEXT_INFO = "x";
 
     private static final String BASE_64_URL_SHARED_SECRET = "s";
     private static final String BASE_64_URL_CHALLENGE = "c";

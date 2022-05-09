@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -59,15 +59,22 @@ public abstract class FRABaseTest {
     public static final String AUTHENTICATION_ENDPOINT = "http://openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
     public static final String OTHER_AUTHENTICATION_ENDPOINT = "http://develop.openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
     public static final String MESSAGE_ID = "AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441";
+    public static final String MESSAGE = "Login attempt at ForgeRock";
     public static final String OTHER_MESSAGE_ID = "AUTHENTICATE:10ce6f20-1bfb-4198-eed1-aa5041fbbea0158123456789";
     public static final String CHALLENGE = "fZl8wu9JBxdRQ7miq3dE0fbF0Bcdd+gRETUbtl6qSuM=";
     public static final String AMLB_COOKIE = "ZnJfc3NvX2FtbGJfcHJvZD0wMQ==";
+    public static final String CUSTOM_PAYLOAD = "{\"forgeRock.device.profile\":\"{ \\\"identifier\\\": \\\"772644096-668289665-4003237949\\\", \\\"metadata\\\": { \\\"hardware\\\": { \\\"cpuClass\\\": null, \\\"deviceMemory\\\": 8, \\\"hardwareConcurrency\\\": 10, \\\"maxTouchPoints\\\": 0, \\\"oscpu\\\": null, \\\"display\\\": { \\\"width\\\": 1920, \\\"height\\\": 1080, \\\"pixelDepth\\\": 24, \\\"angle\\\": 0 } }, \\\"browser\\\": { \\\"userAgent\\\": \\\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36\\\", \\\"appName\\\": \\\"Netscape\\\", \\\"appCodeName\\\": \\\"Mozilla\\\", \\\"appVersion\\\": \\\"5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36\\\", \\\"appMinorVersion\\\": null, \\\"buildID\\\": null, \\\"product\\\": \\\"Gecko\\\", \\\"productSub\\\": \\\"20030107\\\", \\\"vendor\\\": \\\"Google Inc.\\\", \\\"vendorSub\\\": \\\"\\\", \\\"browserLanguage\\\": null, \\\"plugins\\\": \\\"internal-pdf-viewer;internal-pdf-viewer;internal-pdf-viewer;internal-pdf-viewer;internal-pdf-viewer;\\\" }, \\\"platform\\\": { \\\"language\\\": \\\"en-US\\\", \\\"platform\\\": \\\"MacIntel\\\", \\\"userLanguage\\\": null, \\\"systemLanguage\\\": null, \\\"deviceName\\\": \\\"Mac (Browser)\\\", \\\"fonts\\\": \\\"cursive;monospace;sans-serif;fantasy;Arial;Arial Black;Arial Narrow;Arial Rounded MT Bold;Comic Sans MS;Courier;Courier New;Georgia;Impact;Papyrus;Tahoma;Trebuchet MS;Verdana;\\\", \\\"timezone\\\": 420 } }, \\\"location\\\": { \\\"latitude\\\": 49.2208569, \\\"longitude\\\": -123.1174431 } }\"}";
+    public static final String LOCATION = "{\"latitude\":49.2208569,\"longitude\":-123.1174431}";
+    public static final String CONTEXT_INFO = "{\"location\":{\"latitude\":49.2208569,\"longitude\":-123.1174431},\"userAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36\",\"platform\":\"MacIntel\"}";
+    public static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
+    public static final String PLATFORM = "MacIntel";
+    public static final String NUMBERS_CHALLENGE = "34,43,57";
     public static final long TTL = 120;
     public static final long TIME_ADDED = 1629261902660L;
+    public static final long TIME_EXPIRED = 1629262022660L;
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
-
 
     @BeforeClass
     public static void setup() {
@@ -85,6 +92,18 @@ public abstract class FRABaseTest {
         return baseMessage;
     }
 
+    public static Map<String, String> generateBaseMessageWithNewPayloadAttributes() {
+        Map<String, String> baseMessage;
+        baseMessage = new HashMap<>();
+        baseMessage.put(PushParser.MESSAGE_ID, MESSAGE_ID);
+        baseMessage.put(PushParser.CHALLENGE, CHALLENGE);
+        baseMessage.put(PushParser.MECHANISM_UID, MECHANISM_UID);
+        baseMessage.put(PushParser.AM_LOAD_BALANCER_COOKIE, AMLB_COOKIE);
+        baseMessage.put(PushParser.TTL, String.valueOf(TTL));
+        baseMessage.put(PushParser.TIME_INTERVAL, String.valueOf(1629261902660L));
+        baseMessage.put(PushParser.CUSTOM_PAYLOAD, CUSTOM_PAYLOAD);
+        return baseMessage;
+    }
     public static PushMechanism mockPushMechanism(String mechanismUid) {
         final PushMechanism push = mock(PushMechanism.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);

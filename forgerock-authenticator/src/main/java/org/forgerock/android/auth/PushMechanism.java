@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,6 +13,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -74,13 +76,17 @@ public class PushMechanism extends Mechanism {
      * @return The list of notifications.
      */
     public List<PushNotification> getPendingNotifications() {
-        List<PushNotification> pendingList = new ArrayList<>(pushNotificationList);
-        for (PushNotification notification : pushNotificationList) {
-            if (!notification.isPending()){
-                pendingList.remove(notification);
+        if(pushNotificationList != null) {
+            List<PushNotification> pendingList = new ArrayList<>(pushNotificationList);
+            for (PushNotification notification : pushNotificationList) {
+                if (!notification.isPending()) {
+                    pendingList.remove(notification);
+                }
             }
+            return pendingList;
+        } else {
+            return Collections.emptyList();
         }
-        return pendingList;
     }
 
     void setPushNotificationList(List<PushNotification> pushNotificationList) {
