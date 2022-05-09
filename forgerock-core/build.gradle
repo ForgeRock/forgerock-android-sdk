@@ -9,6 +9,7 @@ apply plugin: 'com.android.library'
 apply plugin: "com.adarshr.test-logger"
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 31
@@ -67,6 +68,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation("com.appmattus.certificatetransparency:certificatetransparency-android:1.1.0")
 
     testImplementation 'androidx.test:core:1.4.0'
     testImplementation 'androidx.test:runner:1.4.0'

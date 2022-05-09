@@ -7,6 +7,16 @@
 
 package org.forgerock.android.auth;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -77,6 +87,11 @@ class OkHttpClientProvider {
                 cpBuilder.add(networkConfig.getHost(), "sha256/" + s);
             }
             builder.certificatePinner(cpBuilder.build());
+        }
+
+        Interceptor certificateTransparency = new CTInterceptor().getCTInterceptor(Arrays.asList("default.forgeops.petrov.ca"), Collections.emptyList());
+        if(certificateTransparency != null) {
+           builder.addNetworkInterceptor(certificateTransparency);
         }
 
         for (BuildStep<OkHttpClient.Builder> buildStep : networkConfig.getBuildSteps()) {
