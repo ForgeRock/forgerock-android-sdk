@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
@@ -403,6 +405,8 @@ public class OathFactoryTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
         given(storageClient.getAccount(any(String.class))).willReturn( null);
         given(storageClient.setAccount(any(Account.class))).willReturn(false);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(Collections.emptyList());
+        given(storageClient.setMechanism(any(Mechanism.class))).willReturn(true);
         factory = new OathFactory(context, storageClient);
 
         try {
@@ -411,7 +415,7 @@ public class OathFactoryTest extends FRABaseTest {
             Assert.fail("Should throw MechanismCreationException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismCreationException);
-            assertTrue(e.getLocalizedMessage().contains("Error while storing a new Account"));
+            assertTrue(e.getLocalizedMessage().contains("Error while storing the Account"));
         }
     }
 

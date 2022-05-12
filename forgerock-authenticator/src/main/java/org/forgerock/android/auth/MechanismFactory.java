@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -90,34 +90,22 @@ abstract class MechanismFactory {
             return;
         }
 
-        // Lookup the an existent account or create a new one
-        Logger.debug(TAG, "Lookup account for the new mechanism.");
-        Account account = storageClient.getAccount(issuer + "-" + accountName);
+        // Constructs Account object
+        Account account = Account.builder()
+                .setIssuer(issuer)
+                .setAccountName(accountName)
+                .setImageURL(imageURL)
+                .setBackgroundColor(bgColor)
+                .build();
+
+        // Constructs Mechanism object, and tries to store it
         try {
-            if (account == null) {
-                Logger.debug(TAG, "Account not found. Creating new account for the mechanism.");
-                account = Account.builder()
-                        .setIssuer(issuer)
-                        .setAccountName(accountName)
-                        .setImageURL(imageURL)
-                        .setBackgroundColor(bgColor)
-                        .build();
-                if(storageClient.setAccount(account)) {
-                    Logger.debug(TAG, "New account stored successfully.");
-                } else {
-                    Logger.debug(TAG,"Failed to create an Account for the mechanism .");
-                    listener.onException(new MechanismCreationException("Error while storing a new " +
-                            "Account (" + account.getId() + ") for the new mechanism into the storage system."));
+            // Validating stored Mechanism for duplication
+            final List<Mechanism> mechanisms = storageClient.getMechanismsForAccount(account);
+            for (Mechanism mechanism : mechanisms) {
+                if (mechanism.getType().equals(mechanismType)) {
+                    listener.onException(new DuplicateMechanismException("Matching mechanism already exists", mechanism));
                     return;
-                }
-            } else {
-                Logger.debug(TAG, "Account with id '%s' already exists.", account.getId());
-                final List<Mechanism> mechanisms = storageClient.getMechanismsForAccount(account);
-                for (Mechanism mechanism : mechanisms) {
-                    if (mechanism.getType().equals(mechanismType)) {
-                        listener.onException(new DuplicateMechanismException("Matching mechanism already exists", mechanism));
-                        return;
-                    }
                 }
             }
 
@@ -130,6 +118,11 @@ abstract class MechanismFactory {
                     if(storageClient.setMechanism(newMechanism)) {
                         Logger.debug(TAG, "New mechanism with UID %s stored successfully.", mechanismUID);
                         newMechanism.setAccount(finalAccount);
+                        try {
+                            storeAccount(finalAccount);
+                        } catch (MechanismCreationException e) {
+                            listener.onException(e);
+                        }
                         listener.onSuccess(newMechanism);
                     } else {
                         Logger.debug(TAG,"Error storing the mechanism (%s) for the Account.", mechanismUID);
@@ -205,6 +198,22 @@ abstract class MechanismFactory {
             result.addAll(storageClient.getMechanismsForAccount(account));
         }
         return result;
+    }
+
+    private void storeAccount(Account account) throws MechanismCreationException {
+        // Lookup the an existent account to update or create a new one
+        Logger.debug(TAG, "Lookup for existing account.");
+        if (storageClient.getAccount(account.getId()) != null) {
+            Logger.debug(TAG,"Account (%s) already exists; updating Account object for newly given QRCode", account.getId());
+        }
+
+        if(storageClient.setAccount(account)) {
+            Logger.debug(TAG, "Account stored successfully.");
+        } else {
+            Logger.debug(TAG,"Failed to store Account.");
+            throw new MechanismCreationException("Error while storing the " +
+                    "Account (" + account.getId() + ") for the new mechanism into the storage system.");
+        }
     }
 
     private void checkOrphanAccount(Account account) {
