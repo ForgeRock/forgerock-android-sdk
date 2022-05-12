@@ -199,7 +199,7 @@ public class Config {
     }
 
     @VisibleForTesting
-    void setSSOModel(SSOBroadcastModel ssoModel) {
+    void setSSOBroadcastModel(SSOBroadcastModel ssoModel) {
         this.ssoBroadcastModel = ssoModel;
     }
 

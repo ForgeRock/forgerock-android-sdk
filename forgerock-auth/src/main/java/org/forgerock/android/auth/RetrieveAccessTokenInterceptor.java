@@ -23,24 +23,27 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
     @Override
     public void intercept(final Chain chain, final SSOToken sessionToken) {
-
         //With Verifier to verify the token is associated with the Session Token
         tokenManager.getAccessToken(accessToken -> {
 
-           if (sessionToken == null) {
-               if (accessToken.getSessionToken() != null) {
-                   //sessionToken may be deleted, restore it.
-                   singleSignOnManager.persist(accessToken.getSessionToken());
-               }
-               //If sessionToken is null and accessToken's session Token is null
-               //it considers as Centralize login, no validation on session token binding.
-               return true;
-           } else {
-               //Verify the accessToken is bound to the right session token.
-               //For SSO scenario, the session token may associate with different user.
-               return accessToken.getSessionToken() != null &&
-                       accessToken.getSessionToken().equals(sessionToken);
-           }
+            if (sessionToken == null) {
+                if (accessToken.getSessionToken() == null) {
+                    //If sessionToken is null and accessToken's session Token is null
+                    //it considers as Centralize login, no validation on session token binding.
+                    return true;
+                } else {
+                    if (Config.getInstance().getSSOBroadcastModel().isBroadcastEnabled()) {
+                        //sessionToken may be deleted, restore it.
+                        singleSignOnManager.persist(accessToken.getSessionToken());
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            } else {
+                return accessToken.getSessionToken() != null &&
+                        accessToken.getSessionToken().equals(sessionToken);
+            }
         }, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken result) {
