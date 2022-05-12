@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -200,10 +200,9 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         try {
             pushNotification = authenticatorManager.handleMessage(remoteMessage);
         } catch (Exception e) {
-            assertTrue(e instanceof InvalidNotificationException);
-            assertTrue(e.getLocalizedMessage().contains("Cannot process Push notification"));
+            e.printStackTrace();
         }
-        assertNull(pushNotification);
+        assertNotNull(pushNotification);
 
         try {
             authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
