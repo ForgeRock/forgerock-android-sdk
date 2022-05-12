@@ -34,7 +34,7 @@ internal class SSOBroadcastModel(private val context: Context? = InitProvider.ge
          }
     }
 
-    private fun isBroadcastEnabled(): Boolean {
+    fun isBroadcastEnabled(): Boolean {
         val receivers =  context?.packageManager?.queryBroadcastReceivers(broadcastIntent, 0)?.filter { it.activityInfo.permission == broadcastPermission }
         return receivers?.let { it.count() > 0 } ?: false
     }

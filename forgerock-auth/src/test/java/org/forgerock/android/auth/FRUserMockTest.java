@@ -28,6 +28,7 @@ import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.json.JSONException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +65,12 @@ public class FRUserMockTest extends BaseTest {
 
     @Mock
     SSOBroadcastModel mockBroadcastModel;
+
+    @Before
+    public void setUp() throws Exception {
+        Config.getInstance().setSSOBroadcastModel(mockBroadcastModel);
+        when(mockBroadcastModel.isBroadcastEnabled()).thenReturn(true);
+    }
 
     @Test
     public void frUserHappyPath() throws InterruptedException, ExecutionException, MalformedURLException, ParseException, JSONException {
@@ -405,7 +412,6 @@ public class FRUserMockTest extends BaseTest {
     @Test
     public void testLogout() throws InterruptedException, ExecutionException, IOException, JSONException, ParseException, AuthenticationRequiredException, ApiException {
         frUserHappyPath();
-        Config.getInstance().setSSOModel(mockBroadcastModel);
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_OK)
                 .addHeader("Content-Type", "application/json")
