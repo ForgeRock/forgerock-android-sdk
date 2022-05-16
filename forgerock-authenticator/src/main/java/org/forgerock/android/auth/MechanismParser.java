@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -93,6 +93,9 @@ abstract class MechanismParser {
         for (String query : queryParts) {
             String[] split = split(query, "=");
             if (split != null) {
+                if (split[0].equals(ISSUER) && split[1].isEmpty()) {
+                    continue;
+                }
                 r.put(split[0], split[1]);
             }
         }
