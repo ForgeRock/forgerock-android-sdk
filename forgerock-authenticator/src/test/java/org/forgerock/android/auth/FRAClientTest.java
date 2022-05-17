@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -310,54 +310,6 @@ public class FRAClientTest extends FRABaseTest {
         assertEquals(new String(Base64.decode(AMLB_COOKIE, Base64.NO_WRAP)), pushNotification.getAmlbCookie());
         assertEquals(MECHANISM_UID, pushNotification.getMechanismUID());
         assertEquals(TTL, pushNotification.getTtl());
-    }
-
-    @Test
-    public void testHandleMessageAsParametersFailureNoFCMTokenProvided() throws Exception {
-        FRAClient fraClient = FRAClient.builder()
-                .withContext(context)
-                .withStorage(storageClient)
-                .start();
-
-        assertNotNull(fraClient);
-        assertNotNull(fraClient.getAuthenticatorManagerInstance());
-
-        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
-        String messageId = remoteMessage.getData().get("messageId");
-        String message = remoteMessage.getData().get("message");
-
-        PushNotification pushNotification = null;
-        try {
-            pushNotification = fraClient.handleMessage(messageId, message);
-            fail("Should throw InvalidNotificationException");
-        } catch (Exception e) {
-            assertNull(pushNotification);
-            assertTrue(e instanceof InvalidNotificationException);
-            assertTrue(e.getLocalizedMessage().contains("FCM token was not provided during SDK initialization"));
-        }
-    }
-
-    @Test
-    public void testHandleRemoteMessageFailureNoFCMTokenProvided() throws Exception {
-        FRAClient fraClient = FRAClient.builder()
-                .withContext(context)
-                .withStorage(storageClient)
-                .start();
-
-        assertNotNull(fraClient);
-        assertNotNull(fraClient.getAuthenticatorManagerInstance());
-
-        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
-
-        PushNotification pushNotification = null;
-        try {
-            pushNotification = fraClient.handleMessage(remoteMessage);
-            fail("Should throw InvalidNotificationException");
-        } catch (Exception e) {
-            assertNull(pushNotification);
-            assertTrue(e instanceof InvalidNotificationException);
-            assertTrue(e.getLocalizedMessage().contains("FCM token was not provided during SDK initialization"));
-        }
     }
 
     @Test

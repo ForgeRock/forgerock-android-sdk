@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -42,23 +42,18 @@ class AuthenticatorManager {
         this.context = context;
         this.storageClient = storageClient;
         this.deviceToken = deviceToken;
-
         this.oathFactory = new OathFactory(context, storageClient);
-        OathCodeGenerator.getInstance(storageClient);
+        this.pushFactory = new PushFactory(context, storageClient, deviceToken);
+        this.notificationFactory = new NotificationFactory(storageClient);
 
-        if(deviceToken != null) {
-            this.pushFactory = new PushFactory(context, storageClient, deviceToken);
-            this.notificationFactory = new NotificationFactory(storageClient);
-            PushResponder.getInstance(storageClient);
-        } else {
-            Logger.debug(TAG, "No FCM device token provided. SDK will not be able to register Push mechanisms.");
-        }
+        OathCodeGenerator.getInstance(storageClient);
+        PushResponder.getInstance(storageClient);
     }
 
     void createMechanismFromUri(String uri, FRAListener<Mechanism> listener) {
         Logger.debug(TAG, "Creating new mechanism from URI: %s", uri);
         if(uri.startsWith(Mechanism.PUSH)) {
-            if(pushFactory != null) {
+            if(deviceToken != null) {
                 pushFactory.createFromUri(uri, listener);
             } else {
                 Logger.warn(TAG, "Attempt to add a Push mechanism has failed. " +
@@ -219,27 +214,13 @@ class AuthenticatorManager {
     PushNotification handleMessage(RemoteMessage message)
             throws InvalidNotificationException {
         Logger.debug(TAG, "Processing FCM remote message.");
-        if(notificationFactory != null) {
-            return notificationFactory.handleMessage(message);
-        } else {
-            Logger.warn(TAG, "Attempt to process Push Notification has failed. " +
-                    "FCM token was not provided during SDK initialization.");
-            throw new InvalidNotificationException("Cannot process Push notification. " +
-                    "FCM token was not provided during SDK initialization.");
-        }
+        return notificationFactory.handleMessage(message);
     }
 
     PushNotification handleMessage(String messageId, String message)
             throws InvalidNotificationException {
         Logger.debug(TAG, "Processing FCM remote message.");
-        if(notificationFactory != null) {
-            return notificationFactory.handleMessage(messageId, message);
-        } else {
-            Logger.warn(TAG, "Attempt to process Push Notification has failed. " +
-                    "FCM token was not provided during SDK initialization.");
-            throw new InvalidNotificationException("Cannot process Push notification. " +
-                    "FCM token was not provided during SDK initialization.");
-        }
+        return notificationFactory.handleMessage(messageId, message);
     }
 
     List<PushNotification> getAllNotifications() {

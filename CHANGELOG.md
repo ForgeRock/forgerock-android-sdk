@@ -6,6 +6,7 @@
 - Support to broadcast logout event to clear application tokens when user logout the app [SDKS-1663]
 - Obtain timestamp from new PushNotification payload [SDKS-1666]
 - Add new payload attributes to the PushNotification [SDKS-1776]
+- Allow processing of Push Notifications without device token [SDKS-1844]
 
 #### Fixed
 - Dispose AuthorizationService when no longer required [SDKS-1636]
