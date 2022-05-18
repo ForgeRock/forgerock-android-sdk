@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -56,7 +56,7 @@ class PushFactory extends MechanismFactory {
 
         // Check FCM device token
         if(this.fcmToken == null || this.fcmToken.length() == 0) {
-            listener.onException(new MechanismCreationException("Invalid FCM token."));
+            listener.onException(new MechanismCreationException("Invalid FCM token. SDK will not be able to register Push mechanisms."));
             return;
         }
 

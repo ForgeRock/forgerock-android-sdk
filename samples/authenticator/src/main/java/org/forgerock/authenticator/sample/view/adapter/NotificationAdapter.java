@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,6 +17,7 @@ import org.forgerock.android.auth.Mechanism;
 import org.forgerock.android.auth.PushMechanism;
 import org.forgerock.android.auth.PushNotification;
 import org.forgerock.authenticator.sample.R;
+import org.forgerock.authenticator.sample.controller.AuthenticatorModel;
 import org.forgerock.authenticator.sample.view.layout.NotificationLayout;
 
 import java.util.List;
@@ -35,7 +36,9 @@ public class NotificationAdapter extends BaseAdapter {
     public NotificationAdapter(Context context, Mechanism mechanism) {
         this.mechanism = (PushMechanism)mechanism;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        notificationList = ((PushMechanism) mechanism).getAllNotifications();
+
+        AuthenticatorModel authenticatorModel = AuthenticatorModel.getInstance(context);
+        notificationList = authenticatorModel.getNotificationsForMechanism(mechanism);
     }
 
     public int getCount() {

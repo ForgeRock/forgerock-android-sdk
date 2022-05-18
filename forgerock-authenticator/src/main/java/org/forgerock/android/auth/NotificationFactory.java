@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -25,7 +25,13 @@ import java.util.TimeZone;
 
 import static org.forgerock.android.auth.PushParser.AM_LOAD_BALANCER_COOKIE;
 import static org.forgerock.android.auth.PushParser.CHALLENGE;
+import static org.forgerock.android.auth.PushParser.CONTEXT_INFO;
+import static org.forgerock.android.auth.PushParser.NOTIFICATION_MESSAGE;
+import static org.forgerock.android.auth.PushParser.NUMBERS_CHALLENGE;
+import static org.forgerock.android.auth.PushParser.CUSTOM_PAYLOAD;
 import static org.forgerock.android.auth.PushParser.MECHANISM_UID;
+import static org.forgerock.android.auth.PushParser.PUSH_TYPE;
+import static org.forgerock.android.auth.PushParser.TIME_INTERVAL;
 import static org.forgerock.android.auth.PushParser.TTL;
 
 /**
@@ -66,11 +72,17 @@ class NotificationFactory {
 
         PushNotification pushNotification;
         SignedJWT signedJwt;
-        String mechanismUid;
         String base64Challenge;
         String base64amlbCookie;
-        String amlbCookie = null;
+        String mechanismUid;
+        String amlbCookie;
         String ttlString;
+        String timeIntervalString;
+        String customMessage;
+        String pushType;
+        String customPayload;
+        String numbersChallenge;
+        String contextInfo;
 
         // Reconstruct JWT
         try {
@@ -78,10 +90,23 @@ class NotificationFactory {
 
             mechanismUid = (String) signedJwt.getJWTClaimsSet().getClaim(MECHANISM_UID);
             base64Challenge = (String) signedJwt.getJWTClaimsSet().getClaim(CHALLENGE);
-            base64amlbCookie = (String) signedJwt.getJWTClaimsSet().getClaim(AM_LOAD_BALANCER_COOKIE);
-            if(base64amlbCookie != null)
-                amlbCookie = new String(Base64.decode(base64amlbCookie, Base64.NO_WRAP));
             ttlString = (String) signedJwt.getJWTClaimsSet().getClaim(TTL);
+            timeIntervalString = (String) signedJwt.getJWTClaimsSet().getClaim(TIME_INTERVAL);
+            customMessage = (String) signedJwt.getJWTClaimsSet().getClaim(NOTIFICATION_MESSAGE);
+            pushType = (String) signedJwt.getJWTClaimsSet().getClaim(PUSH_TYPE);
+            customPayload = (String) signedJwt.getJWTClaimsSet().getClaim(CUSTOM_PAYLOAD);
+            contextInfo = (String) signedJwt.getJWTClaimsSet().getClaim(CONTEXT_INFO);
+            
+            base64amlbCookie = (String) signedJwt.getJWTClaimsSet().getClaim(AM_LOAD_BALANCER_COOKIE);
+            amlbCookie = null;
+            if(base64amlbCookie != null) {
+                amlbCookie = new String(Base64.decode(base64amlbCookie, Base64.NO_WRAP));
+            }
+
+            numbersChallenge = null;
+            if (PushType.fromString(pushType) == PushType.CHALLENGE) {
+                numbersChallenge = (String) signedJwt.getJWTClaimsSet().getClaim(NUMBERS_CHALLENGE);
+            }
         } catch (ParseException e) {
             Logger.warn(TAG, e, "Failed to reconstruct JWT for message: %s", messageId);
             throw new InvalidNotificationException("Failed to reconstruct JWT for the remote message.");
@@ -95,6 +120,17 @@ class NotificationFactory {
             } catch (NumberFormatException e) {
                 Logger.warn(TAG, e, "Failed to reconstruct JWT for message: %s. TTL was not a number.", messageId);
                 throw new InvalidNotificationException("Failed to reconstruct JWT for the remote message. TTL was not a number.");
+            }
+        }
+
+        // Parse Time Interval
+        long timeInterval = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+        if (timeIntervalString != null) {
+            try {
+                timeInterval = Long.parseLong(timeIntervalString);
+            } catch (NumberFormatException e) {
+                Logger.warn(TAG, e, "Failed to reconstruct JWT for message: %s. timeInterval was not a number.", messageId);
+                throw new InvalidNotificationException("Failed to reconstruct JWT for the remote message. timeInterval was not a number.");
             }
         }
 
@@ -123,7 +159,8 @@ class NotificationFactory {
         }
 
         // Create Push Notification and persist it
-        pushNotification = generateNotification(mechanismUid, messageId, base64Challenge, amlbCookie, ttl);
+        pushNotification = generateNotification(mechanismUid, messageId, customMessage, base64Challenge, amlbCookie,
+                customPayload, numbersChallenge, pushType, contextInfo, timeInterval, ttl);
         if (pushNotification != null) {
             if(storageClient.setNotification(pushNotification)) {
                 Logger.debug(TAG, "PushNotification object with messageId %s stored into StorageClient.", messageId);
@@ -143,21 +180,34 @@ class NotificationFactory {
         return signedJwt.verify(verifier);
     }
 
-    private PushNotification generateNotification(String mechanismUid, String messageId,
-                                                  String base64Challenge, String amlbCookie, int ttl) throws InvalidNotificationException {
+    private PushNotification generateNotification(String mechanismUid, String messageId, String message,
+                                                  String base64Challenge, String amlbCookie,
+                                                  String customPayload, String numbersChallenge,
+                                                  String pushType, String contextInfo,
+                                                  long timeInterval,  int ttl)
+            throws InvalidNotificationException {
+
         Calendar timeReceived = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeReceived.setTimeInMillis(timeInterval);
+
         Calendar timeExpired = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeExpired.setTimeInMillis(timeInterval);
         timeExpired.add(Calendar.SECOND, ttl);
 
         return PushNotification.builder()
-                        .setMechanismUID(mechanismUid)
-                        .setTimeAdded(timeReceived)
-                        .setTimeExpired(timeExpired)
-                        .setMessageId(messageId)
-                        .setChallenge(base64Challenge)
-                        .setAmlbCookie(amlbCookie)
-                        .setTtl(ttl)
-                        .build();
+                .setMechanismUID(mechanismUid)
+                .setTimeAdded(timeReceived)
+                .setTimeExpired(timeExpired)
+                .setMessageId(messageId)
+                .setMessage(message)
+                .setChallenge(base64Challenge)
+                .setAmlbCookie(amlbCookie)
+                .setCustomPayload(customPayload)
+                .setNumbersChallenge(numbersChallenge)
+                .setPushType(pushType)
+                .setContextInfo(contextInfo)
+                .setTtl(ttl)
+                .build();
     }
 
 }

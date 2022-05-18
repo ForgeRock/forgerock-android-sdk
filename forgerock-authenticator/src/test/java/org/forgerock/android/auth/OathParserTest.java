@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -61,6 +61,13 @@ public class OathParserTest {
     }
 
     @Test
+    public void testShouldParseIssuerSinglePath() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Badger?secret=ABC");
+        assertEquals(result.get(OathParser.ISSUER), "Badger");
+        assertEquals(result.get(OathParser.ACCOUNT_NAME), "Badger");
+    }
+
+    @Test
     public void testShouldParseIssuerFromParameters() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/?issuer=Stoat&secret=ABC");
         assertEquals(result.get(OathParser.ISSUER), "Stoat");
@@ -71,6 +78,13 @@ public class OathParserTest {
     public void testShouldOverwriteIssuerFromParameters() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/Badger:ferret?issuer=Stoat&secret=ABC");
         assertEquals(result.get(OathParser.ISSUER), "Stoat");
+        assertEquals(result.get(OathParser.ACCOUNT_NAME), "ferret");
+    }
+
+    @Test
+    public void testShouldKeepIssuerFromPathIfParameterIsEmpty() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Badger:ferret?issuer=&secret=ABC");
+        assertEquals(result.get(OathParser.ISSUER), "Badger");
         assertEquals(result.get(OathParser.ACCOUNT_NAME), "ferret");
     }
 

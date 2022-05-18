@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -28,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -45,6 +46,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static java.net.HttpURLConnection.HTTP_OK;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -62,6 +64,7 @@ class PushResponder {
     private static final String JWT_ALGORITHM = "HmacSHA256";
     private static final String RESPONSE_KEY = "response";
     private static final String DENY_KEY = "deny";
+    private static final String CHALLENGE_RESPONSE_KEY = "challengeResponse";
 
     private static final int TIMEOUT = 30;
 
@@ -132,72 +135,44 @@ class PushResponder {
      * Used to respond an authentication request from a given message
      *
      * @param pushNotification The push notification object.
+     * @param challengeResponse The response to push challenge
+     * @param listener Listener for receiving the HTTP call response code.
+     */
+    void authenticationWithChallenge(@NonNull PushNotification pushNotification,
+                                     @NonNull String challengeResponse,
+                                     final @NonNull FRAListener<Void> listener) {
+        try {
+            // Prepare payload
+            Map<String, Object> payload = getAuthenticationPayload(pushNotification);
+            if(pushNotification.getPushType() == PushType.CHALLENGE) {
+                payload.put(CHALLENGE_RESPONSE_KEY, challengeResponse);
+            }
+            // Perform authentication
+            performAuthentication(pushNotification, true, payload, listener);
+        } catch (JOSEException | IllegalArgumentException | IOException | ChallengeResponseException | JSONException e) {
+            listener.onException(new PushMechanismException("Error processing the Push " +
+                    "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
+        }
+    }
+
+    /**
+     * Used to respond an authentication request from a given message
+     *
+     * @param pushNotification The push notification object.
      * @param approved The approval response
      * @param listener Listener for receiving the HTTP call response code.
      */
-    void authentication(@NonNull PushNotification pushNotification, boolean approved,
+    void authentication(@NonNull PushNotification pushNotification,
+                        boolean approved,
                         final @NonNull FRAListener<Void> listener) {
         try {
-            // Check if notification has been approved
-            if(!pushNotification.isPending()) {
-                listener.onException(new PushMechanismException("PushNotification is not in a" +
-                        " valid status to authenticate; either PushNotification has already been" +
-                        " authenticated or expired."));
-                return;
-            }
-
-            // Get authentication endpoint
-            String endpoint = pushNotification.getPushMechanism().getAuthenticationEndpoint();
-            URL url = new URL(endpoint);;
-
             // Prepare payload
-            Map<String, Object> payload = new HashMap<>();
-            payload.put(RESPONSE_KEY, generateChallengeResponse(
-                    pushNotification.getPushMechanism().getSecret(),
-                    pushNotification.getChallenge()));
-            if(!approved)
+            Map<String, Object> payload = getAuthenticationPayload(pushNotification);
+            if(!approved) {
                 payload.put(DENY_KEY, true);
-
-            // Build request
-            OkHttpClient okHttpClient = getOkHttpClient(url);
-            Request request = buildRequest(url,
-                    pushNotification.getAmlbCookie(),
-                    pushNotification.getPushMechanism().getSecret(),
-                    pushNotification.getMessageId(),
-                    payload);
-
-            // Invoke URL
-            okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
-                @Override
-                public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    Logger.debug(TAG, "Response from server: \n" + response.toString());
-                    // Check if operation succeed
-                    if(response.code() == 200) {
-                        // Update notification status
-                        pushNotification.setPending(false);
-                        if(approved)
-                            pushNotification.setApproved(true);
-                        else
-                            pushNotification.setApproved(false);
-                        // Persist status
-                        if(!storageClient.setNotification(pushNotification))
-                            listener.onException(new PushMechanismException("Push Authentication " +
-                                    "request was successfully processed, however it could not be persisted."));
-                        listener.onSuccess(null);
-                    } else {
-                        listener.onException(new PushMechanismException("Communication with " +
-                                "server returned " + response.code() + " code."));
-                    }
-                    response.close();
-                }
-
-                @Override
-                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    Logger.warn(TAG, "Failure on connecting to the server: \n" + call.request().toString());
-                    listener.onException(new PushMechanismException("Network error while processing the Push " +
-                            "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
-                }
-            });
+            }
+            // Perform authentication
+            performAuthentication(pushNotification, approved, payload, listener);
         } catch (JOSEException | IllegalArgumentException | IOException | ChallengeResponseException | JSONException e) {
             listener.onException(new PushMechanismException("Error processing the Push " +
                     "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
@@ -253,6 +228,73 @@ class PushResponder {
             listener.onException(new PushMechanismException("Error processing the Push " +
                     "Registration request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
         }
+    }
+
+    /**
+     * Used to respond an authentication request from a given message
+     *
+     * @param pushNotification The push notification object.
+     * @param approved The approval response
+     * @param payload The payload
+     * @param listener Listener for receiving the HTTP call response code.
+     */
+    private void performAuthentication(@NonNull PushNotification pushNotification,
+                                       boolean approved,
+                                       Map<String, Object> payload,
+                                       final @NonNull FRAListener<Void> listener)
+            throws MalformedURLException, JSONException, JOSEException {
+
+        // Check if notification has been approved
+        if(!pushNotification.isPending()) {
+            listener.onException(new PushMechanismException("PushNotification is not in a" +
+                    " valid status to authenticate; either PushNotification has already been" +
+                    " authenticated or expired."));
+            return;
+        }
+
+        // Get authentication endpoint
+        String endpoint = pushNotification.getPushMechanism().getAuthenticationEndpoint();
+        URL url = new URL(endpoint);
+
+        // Build request
+        OkHttpClient okHttpClient = getOkHttpClient(url);
+        Request request = buildRequest(url,
+                pushNotification.getAmlbCookie(),
+                pushNotification.getPushMechanism().getSecret(),
+                pushNotification.getMessageId(),
+                payload);
+
+        // Invoke URL
+        okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                Logger.debug(TAG, "Response from server: \n" + response.toString());
+                // Check if operation succeed
+                if(response.code() == HTTP_OK) {
+                    // Update notification status
+                    pushNotification.setPending(false);
+                    pushNotification.setApproved(approved);
+                    // Persist status
+                    if(!storageClient.setNotification(pushNotification)) {
+                        listener.onException(new PushMechanismException("Push Authentication " +
+                                "request was successfully processed, however it could not be persisted."));
+                        return;
+                    }
+                    listener.onSuccess(null);
+                } else {
+                    listener.onException(new PushMechanismException("Communication with " +
+                            "server returned " + response.code() + " code."));
+                }
+                response.close();
+            }
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Logger.warn(TAG, "Failure on connecting to the server: \n" + call.request().toString());
+                listener.onException(new PushMechanismException("Network error while processing the Push " +
+                        "Authentication request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
+            }
+        });
     }
 
     /**
@@ -341,6 +383,17 @@ class PushResponder {
         // Sign JWT
         signedJWT.sign(signer);
         return signedJWT.serialize();
+    }
+
+    private Map<String, Object> getAuthenticationPayload(PushNotification pushNotification)
+            throws ChallengeResponseException {
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put(RESPONSE_KEY, generateChallengeResponse(
+                pushNotification.getPushMechanism().getSecret(),
+                pushNotification.getChallenge()));
+
+        return payload;
     }
 
     @VisibleForTesting

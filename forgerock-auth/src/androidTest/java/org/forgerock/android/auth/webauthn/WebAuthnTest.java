@@ -23,10 +23,16 @@ import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public abstract class WebAuthnTest extends MockServer {
+
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
 
     @Rule
     public ActivityTestRule<DummyActivity> activityRule = new ActivityTestRule<>(DummyActivity.class);

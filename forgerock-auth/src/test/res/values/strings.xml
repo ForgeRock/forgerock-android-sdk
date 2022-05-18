@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -22,6 +22,10 @@
     <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
     <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
+    <string-array name="forgerock_ssl_pinning_public_key_hashes">
+        <item>9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=</item>
+    </string-array>
+
 
     <!-- SSO -->
     <string name="forgerock">ForgeRock</string> <!-- Account Label -->

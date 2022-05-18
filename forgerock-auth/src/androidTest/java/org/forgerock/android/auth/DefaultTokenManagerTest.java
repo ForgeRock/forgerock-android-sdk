@@ -23,12 +23,10 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
-public class DefaultTokenManagerTest {
+public class DefaultTokenManagerTest extends AndroidBaseTest {
 
     private static final String ANDROID_KEYSTORE = "AndroidKeyStore";
-
     private TokenManager tokenManager;
-    private Context context = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUp() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,11 +13,14 @@ import android.content.SharedPreferences;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.Setter;
 import okhttp3.CookieJar;
+import okhttp3.OkHttpClient;
 
 /**
  * Provide SDK Configuration, most components in the SDK has its default setting, this class allow developer to
@@ -41,6 +44,8 @@ public class Config {
     private String realm;
     private int timeout;
     private List<String> pins;
+    @Setter
+    private List<BuildStep<OkHttpClient.Builder>> buildSteps;
     private CookieJar cookieJar;
     private String cookieName;
 
@@ -65,6 +70,9 @@ public class Config {
 
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
+
+    //BroadcastModel
+    private SSOBroadcastModel ssoBroadcastModel;
 
     @VisibleForTesting
     public void setUrl(String url) {
@@ -103,7 +111,8 @@ public class Config {
             timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
             cookieJar = null; // We cannot initialize default cookie jar here
             cookieName = context.getString(R.string.forgerock_cookie_name);
-            pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_pins));
+            pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes));
+            buildSteps = Collections.emptyList();
             authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
             authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
             tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
@@ -129,6 +138,8 @@ public class Config {
                 .timeout(timeout)
                 .cookieJarSupplier(this::getCookieJar)
                 .cookieName(cookieName)
+                .pins(pins)
+                .buildSteps(buildSteps)
                 .authenticateEndpoint(authenticateEndpoint)
                 .authorizeEndpoint(authorizeEndpoint)
                 .tokenEndpoint(tokenEndpoint)
@@ -185,6 +196,20 @@ public class Config {
                     .context(context).build();
         }
         return cookieJar;
+    }
+
+    @VisibleForTesting
+    void setSSOBroadcastModel(SSOBroadcastModel ssoModel) {
+        this.ssoBroadcastModel = ssoModel;
+    }
+
+
+    SSOBroadcastModel getSSOBroadcastModel() {
+        if (ssoBroadcastModel == null) {
+            return ssoBroadcastModel = new SSOBroadcastModel();
+        } else {
+            return ssoBroadcastModel;
+        }
     }
 
     @VisibleForTesting

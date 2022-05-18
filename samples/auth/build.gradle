@@ -55,8 +55,8 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:3.2.0'
-    implementation 'org.forgerock:forgerock-auth-ui:3.2.0'
+    implementation 'org.forgerock:forgerock-auth:3.3.0'
+    implementation 'org.forgerock:forgerock-auth-ui:3.3.0'
      */
 
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'
@@ -82,8 +82,8 @@ dependencies {
     implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 
 
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
 }

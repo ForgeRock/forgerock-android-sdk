@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.Cookie;
-import okhttp3.HttpUrl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

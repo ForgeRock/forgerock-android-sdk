@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,13 +7,15 @@
 
 package org.forgerock.android.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Call;
+import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,6 +38,7 @@ public class ServerConfigTest {
     @Before
     public void setUp() {
         OkHttpClientProvider.getInstance().clear();
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
     }
 
     @Test(expected = NullPointerException.class)
@@ -48,7 +52,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig);
-        Assertions.assertThat(client1 == client2).isTrue();
+        assertThat(client1 == client2).isTrue();
     }
 
     @Test
@@ -60,9 +64,8 @@ public class ServerConfigTest {
         Config.getInstance().init(context);
         ServerConfig serverConfig2 = Config.getInstance().getServerConfig();
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig2);
-        Assertions.assertThat(client1 != client2).isTrue();
+        assertThat(client1 != client2).isTrue();
     }
-
 
     /**
      * Generate PEM file
@@ -76,7 +79,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
+                .pin("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -106,46 +109,7 @@ public class ServerConfigTest {
 
         });
         countDownLatch.await();
-        Assert.assertTrue(result[0]);
-
-    }
-
-    @Test
-    public void testSha1Pinning() throws InterruptedException {
-        ServerConfig serverConfig = ServerConfig.builder()
-                .context(context)
-                .url("https://api.ipify.org")
-                .pin("sha1/2vB3hhEJ98C5efhhWpxtD2wxYek=")
-                .build();
-
-        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
-
-        Request request = new Request.Builder()
-                .get()
-                .url("https://api.ipify.org?format=json")
-                .build();
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-        final boolean[] result = new boolean[1];
-
-        client.newCall(request).enqueue(new okhttp3.Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                result[0] = false;
-                countDownLatch.countDown();
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                result[0] = true;
-                countDownLatch.countDown();
-            }
-
-        });
-        countDownLatch.await();
-        Assert.assertTrue(result[0]);
+        assertTrue(result[0]);
 
     }
 
@@ -157,8 +121,8 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
-                .pin("sha256/invalid")
+                .pin("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=")
+                .pin("invalid")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -188,7 +152,7 @@ public class ServerConfigTest {
 
         });
         countDownLatch.await();
-        Assert.assertTrue(result[0]);
+        assertTrue(result[0]);
 
     }
 
@@ -197,7 +161,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("sha256/invalid=")
+                .pin("invalid=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -230,7 +194,100 @@ public class ServerConfigTest {
 
         });
         countDownLatch.await();
-        Assert.assertFalse(result[0]);
+        assertFalse(result[0]);
+    }
+
+    @Test
+    public void testPinningConfig() {
+        Config.getInstance().init(context);
+        ServerConfig serverConfig = Config.getInstance().getServerConfig();
+        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
+        assertThat(client.certificatePinner().getPins())
+                .contains(new CertificatePinner.Pin(serverConfig.getHost(),
+                        "sha256/9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M="));
+    }
+
+    @Test
+    public void testBuildStepWithCustomPin() throws InterruptedException {
+        ServerConfig serverConfig = ServerConfig.builder()
+                .context(context)
+                .url("https://api.ipify.org")
+                .buildStep(builder -> builder.certificatePinner(
+                        new CertificatePinner.Builder().add("api.ipify.org", "sha1/2vB3hhEJ98C5efhhWpxtD2wxYek=" ).build()))
+                .build();
+
+        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
+
+        Request request = new Request.Builder()
+                .get()
+                .url("https://api.ipify.org?format=json")
+                .build();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        final boolean[] result = new boolean[1];
+
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                result[0] = false;
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                result[0] = true;
+                countDownLatch.countDown();
+            }
+
+        });
+        countDownLatch.await();
+        assertTrue(result[0]);
 
     }
+
+    @Test
+    public void testBuildStepWithCustomPinFailed() throws InterruptedException {
+        ServerConfig serverConfig = ServerConfig.builder()
+                .context(context)
+                .url("https://api.ipify.org")
+                .buildStep(builder -> builder.certificatePinner(
+                        new CertificatePinner.Builder().add("api.ipify.org", "sha256/invalid=" ).build()))
+                .build();
+
+        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
+
+        Request request = new Request.Builder()
+                .get()
+                .url("https://api.ipify.org?format=json")
+                .build();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        final boolean[] result = new boolean[1];
+        result[0] = true;
+
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                if (e.getMessage().contains("Certificate pinning failure!")) {
+                    result[0] = false;
+                }
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                result[0] = true;
+                countDownLatch.countDown();
+            }
+
+        });
+        countDownLatch.await();
+        assertFalse(result[0]);
+
+    }
+
 }

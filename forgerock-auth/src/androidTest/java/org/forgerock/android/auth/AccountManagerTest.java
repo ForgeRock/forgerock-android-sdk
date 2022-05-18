@@ -20,9 +20,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
-public class AccountManagerTest {
-
-    private Context context = ApplicationProvider.getApplicationContext();
+public class AccountManagerTest extends AndroidBaseTest {
 
     @Test
     @Ignore("For AccountManager interface testing, not SDK function")

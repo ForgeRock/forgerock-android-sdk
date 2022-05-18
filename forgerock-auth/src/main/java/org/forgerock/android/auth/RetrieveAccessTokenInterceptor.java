@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,15 +18,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
 
+    private final SingleSignOnManager singleSignOnManager;
     private final TokenManager tokenManager;
 
     @Override
     public void intercept(final Chain chain, final SSOToken sessionToken) {
-
         //With Verifier to verify the token is associated with the Session Token
         tokenManager.getAccessToken(accessToken -> {
-            if (sessionToken == null && accessToken.getSessionToken() == null) {
-                return true;
+
+            if (sessionToken == null) {
+                if (accessToken.getSessionToken() == null) {
+                    //If sessionToken is null and accessToken's session Token is null
+                    //it considers as Centralize login, no validation on session token binding.
+                    return true;
+                } else {
+                    if (Config.getInstance().getSSOBroadcastModel().isBroadcastEnabled()) {
+                        //sessionToken may be deleted, restore it.
+                        singleSignOnManager.persist(accessToken.getSessionToken());
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
             } else {
                 return accessToken.getSessionToken() != null &&
                         accessToken.getSessionToken().equals(sessionToken);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -22,6 +22,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Collections;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -197,7 +198,10 @@ public class PushFactoryTest extends FRABaseTest {
         StorageClient storageClient = mock(DefaultStorageClient.class);
         given(storageClient.getAccount(any(String.class))).willReturn( null);
         given(storageClient.setAccount(any(Account.class))).willReturn(false);
-        factory = new PushFactory(context, storageClient, "s-o-m-e-i-d");
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(Collections.emptyList());
+        given(storageClient.setMechanism(any(Mechanism.class))).willReturn(true);
+        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        doReturn(true).when(factory).checkGooglePlayServices();
 
         try {
             factory.createFromUri(uri, pushListenerFuture);
@@ -205,7 +209,7 @@ public class PushFactoryTest extends FRABaseTest {
             Assert.fail("Should throw MechanismCreationException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismCreationException);
-            assertTrue(e.getLocalizedMessage().contains("Error while storing a new Account"));
+            assertTrue(e.getLocalizedMessage().contains("Error while storing the Account"));
         }
     }
 

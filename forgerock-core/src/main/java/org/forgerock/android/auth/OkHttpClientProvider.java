@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -32,6 +32,7 @@ class OkHttpClientProvider {
         return INSTANCE;
     }
 
+
     /**
      * Create or lookup a cached OKHttpClient
      *
@@ -51,7 +52,7 @@ class OkHttpClientProvider {
                 .writeTimeout(networkConfig.getTimeout(), networkConfig.getTimeUnit())
                 .followRedirects(false);
 
-        if(networkConfig.getCookieJar() == null){
+        if (networkConfig.getCookieJar() == null) {
             builder.cookieJar(CookieJar.NO_COOKIES);
         } else {
             builder.cookieJar(networkConfig.getCookieJar());
@@ -73,9 +74,15 @@ class OkHttpClientProvider {
         if (!networkConfig.getPins().isEmpty()) {
             CertificatePinner.Builder cpBuilder = new CertificatePinner.Builder();
             for (String s : networkConfig.getPins()) {
-                cpBuilder.add(networkConfig.getHost(), s);
+                cpBuilder.add(networkConfig.getHost(), "sha256/" + s);
             }
             builder.certificatePinner(cpBuilder.build());
+        }
+
+        for (BuildStep<OkHttpClient.Builder> buildStep : networkConfig.getBuildSteps()) {
+            if (buildStep != null) {
+                buildStep.build(builder);
+            }
         }
 
         client = builder.build();

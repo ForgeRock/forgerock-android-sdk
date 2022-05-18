@@ -105,7 +105,7 @@ public class AuthServiceMockTest extends BaseTest {
         recordedRequest = server.takeRequest();
         Uri uri = Uri.parse(recordedRequest.getPath());
         assertEquals("/oauth2/realms/root/authorize", uri.getPath());
-        assertEquals(nodeListenerFuture.get().getValue(), uri.getQueryParameter("iPlanetDirectoryPro"));
+        assertEquals(nodeListenerFuture.get().getValue(), recordedRequest.getHeader("iPlanetDirectoryPro"));
         assertEquals("andy_app", uri.getQueryParameter("client_id"));
         assertEquals("openid email address", uri.getQueryParameter("scope"));
         assertEquals("code", uri.getQueryParameter("response_type"));

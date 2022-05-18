@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -203,6 +203,20 @@ public class AuthenticatorModel {
             notifyDataChanged();
         }
         return result;
+    }
+
+    /**
+     * Retrieve all notifications from the storage system
+     */
+    public List<PushNotification> getAllNotifications() {
+        return fraClient.getAllNotifications();
+    }
+
+    /**
+     * Retrieve notifications filtered by Mechanism the storage system
+     */
+    public List<PushNotification> getNotificationsForMechanism(Mechanism mechanism) {
+        return fraClient.getAllNotifications(mechanism);
     }
 
 }

@@ -12,9 +12,15 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
+
+import java.util.concurrent.TimeUnit;
 
 public abstract class AndroidBaseTest {
 
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     protected Context context = ApplicationProvider.getApplicationContext();
     public static String USERNAME = "sdkuser";
     public static String PASSWORD = "password";

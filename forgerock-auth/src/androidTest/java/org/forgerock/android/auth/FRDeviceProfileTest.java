@@ -10,7 +10,6 @@ package org.forgerock.android.auth;
 import android.Manifest;
 import android.content.Context;
 import android.os.Build;
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
 import org.forgerock.android.auth.collector.*;
@@ -26,9 +25,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
-public class FRDeviceProfileTest {
-
-    private Context context = ApplicationProvider.getApplicationContext();
+public class FRDeviceProfileTest extends AndroidBaseTest {
 
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
