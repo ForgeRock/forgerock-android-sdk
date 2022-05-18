@@ -55,8 +55,8 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:3.2.0'
-    implementation 'org.forgerock:forgerock-auth-ui:3.2.0'
+    implementation 'org.forgerock:forgerock-auth:3.3.0'
+    implementation 'org.forgerock:forgerock-auth-ui:3.3.0'
      */
 
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'
