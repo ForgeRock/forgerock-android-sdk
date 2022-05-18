@@ -1,4 +1,4 @@
-## [Unreleased]
+## [3.3.0]
 #### Added
 - Support SSL Pinning [SDKS-80]
 - Restore SSO Token when it is out of sync with the SSO Token that bound with the Access Token [SDKS-1664]
