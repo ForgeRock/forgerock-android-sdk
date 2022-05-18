@@ -29,8 +29,8 @@
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">https://openam.example.com/am</string>
-    <string name="forgerock_realm" translatable="false">root</string>
+    <string name="forgerock_url" translatable="false">https://openam-forgerrock-sdks.forgeblocks.com/am</string>
+    <string name="forgerock_realm" translatable="false">alpha</string>
 
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
@@ -45,11 +45,11 @@
     <integer name="forgerock_webauthn_max_credential" translatable="false">10</integer>
 
     <!-- Service -->
-    <string name="forgerock_auth_service" translatable="false">Login</string>
+    <string name="forgerock_auth_service" translatable="false">WebAuthn-stoyan</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
 
     <string name="asset_statements" translatable="false">           [{
-             "include": "https://openam.example.com/.well-known/assetlinks.json"
+             "include": "https://default.forgeops.petrov.ca/.well-known/assetlinks.json"
            }]</string>
 
     <!-- Facebook -->

@@ -6,6 +6,7 @@
  */
 package com.forgerock.kotlinapp
 
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
@@ -17,6 +18,11 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
+import android.util.Log
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationUserState
+import android.os.Build
+import androidx.annotation.RequiresApi
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -33,9 +39,34 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
     private var userInfoFragment: UserInfoFragment? = null
     private var nodeDialog: NodeDialogFragment? = null
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val context: Context = this
+        val manager = context.getSystemService(DomainVerificationManager::class.java)
+        val userState: DomainVerificationUserState? = manager.getDomainVerificationUserState(context.packageName)
+
+        // Domains that have passed Android App Links verification.
+        val verifiedDomains = userState?.hostToStateMap
+            ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED }
+
+        // Domains that haven't passed Android App Links verification but that the user
+        // has associated with an app.
+        val selectedDomains = userState?.hostToStateMap
+            ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_SELECTED }
+
+        // All other domains.
+        val unapprovedDomains = userState?.hostToStateMap
+            ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
+
+
+
+        Log.d("verifiedDomains ----> $verifiedDomains", "")
+        Log.d("selectedDomains ----> $selectedDomains", "")
+        Log.d("unapprovedDomain ----> $unapprovedDomains", "")
+
         updateStatus()
         loginButton.setOnClickListener {
             FRUser.login(applicationContext, this)
@@ -73,6 +104,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
     }
 
     private fun centralizedLogin() {
+
         FRUser.browser().appAuthConfigurer()
             .authorizationRequest { r: AuthorizationRequest.Builder ->
                 // Add a login hint parameter about the user:
