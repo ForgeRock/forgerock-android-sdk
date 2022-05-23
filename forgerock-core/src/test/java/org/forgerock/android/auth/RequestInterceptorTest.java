@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static java.util.Collections.singletonList;
 
 import android.net.Uri;
@@ -186,6 +188,32 @@ public class RequestInterceptorTest {
                 .build();
         send(networkConfig, request);
         assertThat(server.takeRequest().getPath()).isEqualTo("/somewhere");
+
+    }
+
+    @Test
+    public void testValidateClearHTTPEventFired() throws InterruptedException {
+        RequestInterceptorRegistry.getInstance().register(
+                request -> request.newBuilder().url(getUrl() + "/somewhere").build());
+
+        NetworkConfig networkConfig = NetworkConfig.networkBuilder()
+                .host(server.getHostName())
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor())).build();
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(getUrl())
+                .get()
+                .build();
+        send(networkConfig, request);
+        assertThat(server.takeRequest().getPath()).isEqualTo("/somewhere");
+
+        OkHttpClient client = OkHttpClientProvider.getInstance().lookup(networkConfig);
+
+        CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers();
+
+        OkHttpClient cacheClearClient = OkHttpClientProvider.getInstance().lookup(networkConfig);
+
+        assertNotEquals(cacheClearClient, client);
+
 
     }
 
