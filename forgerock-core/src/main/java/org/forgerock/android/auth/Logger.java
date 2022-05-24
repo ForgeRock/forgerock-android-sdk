@@ -9,7 +9,6 @@ package org.forgerock.android.auth;
 
 import android.util.Log;
 import androidx.annotation.VisibleForTesting;
-import org.forgerock.android.core.BuildConfig;
 
 /**
  * Logger for ForgeRock SDK
@@ -18,6 +17,8 @@ public class Logger {
 
     @VisibleForTesting
     static final String FORGE_ROCK = "ForgeRock";
+
+    private static final String versionNumber = new BuildConfigWrapper().getVersionNumber();
 
     public enum Level {
         DEBUG,
@@ -40,7 +41,7 @@ public class Logger {
     private static void log(Level level, String tag, Throwable t, String message, Object... args) {
         if (level.ordinal() >= Logger.level.ordinal() ) {
             String value =
-                    String.format("[%s] [%s]: ", BuildConfig.VERSION_NAME, tag)
+                    String.format("[%s] [%s]: ", versionNumber, tag)
                             + String.format(message, args);
             switch (level) {
                 case DEBUG:
