@@ -12,15 +12,15 @@
 
     <!-- OAuth -->
     <string name="forgerock_oauth_client_id" translatable="false">AndroidTest</string>
-    <string name="forgerock_oauth_redirect_uri" translatable="false">http://www.example.com</string>
+    <string name="forgerock_oauth_redirect_uri" translatable="false">org.forgerock.demo:/oauth2redirect</string>
     <string name="forgerock_oauth_scope" translatable="false">openid profile email address phone</string>
-    <string name="forgerock_oauth_url" translatable="false">https://default.forgeops.petrov.ca/am</string>
+    <string name="forgerock_oauth_url" translatable="false">https://openam-forgerrock-sdksteanant.forgeblocks.com/am</string>
     <integer name="forgerock_oauth_threshold" translatable="false">30</integer> <!-- in second -->
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">https://default.forgeops.petrov.ca/am</string>
-    <string name="forgerock_realm" translatable="false">root</string>
+    <string name="forgerock_url" translatable="false">https://openam-forgerrock-sdksteanant.forgeblocks.com/am</string>
+    <string name="forgerock_realm" translatable="false">alpha</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
 
