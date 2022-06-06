@@ -21,7 +21,7 @@ class LoggerUnitTest {
         var infoMethodCalled = false
         var networkMethodCalled = false
 
-        class CustomLoggerLogger : FRLogger {
+        open class CustomLogger : FRLogger {
             override fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
                 errorWithThrowableCalled = true
             }
@@ -44,9 +44,25 @@ class LoggerUnitTest {
             override fun network(tag: String?, message: String?, vararg values: Any?) {
                 networkMethodCalled = true
             }
+
+            override fun isNetworkEnabled(): Boolean {
+                return true
+            }
         }
-        Logger.setCustomLogger(CustomLoggerLogger())
-        assertNotNull(Logger.getNetworkInterceptor())
+
+        open class CustomLoggerNetworkNotEnabled: CustomLogger() {
+            override fun isNetworkEnabled(): Boolean {
+                return false
+            }
+        }
+
+        Logger.setCustomLogger(CustomLogger())
+        assertNotNull(Logger.frLogger)
+        assertTrue(Logger.frLogger is CustomLogger)
+        Logger.setCustomLogger(CustomLoggerNetworkNotEnabled())
+        assertTrue(Logger.frLogger is CustomLoggerNetworkNotEnabled)
+        assertNotNull(Logger.frLogger)
+
         Logger.debug("", "")
         Logger.info("", "", "")
         Logger.error("", "", "")
@@ -68,7 +84,8 @@ class LoggerUnitTest {
     fun testDefaultLogger() {
         val frLogger = Mockito.mock(FRLogger::class.java)
         val throwable = Throwable("errorOrWarning")
-        Logger.frLogger = frLogger
+        Logger.setCustomLogger(frLogger)
+        assertNotNull(Logger.frLogger)
         Logger.debug("debug", "debug", "debug")
         Mockito.verify(frLogger).debug("debug", "debug", "debug")
         Logger.info("info", "info", "info")
@@ -80,34 +97,11 @@ class LoggerUnitTest {
     }
 
     @Test
-    fun testDebugEnabled() {
-        Logger.set(Logger.Level.DEBUG)
-        assertTrue(Logger.isDebugEnabled())
-    }
-
-    @Test
-    fun networkInterceptorIsNullByDefault() {
-        Logger.set(Logger.Level.INFO)
-        val interceptor = Logger.getNetworkInterceptor()
-        assertNull(interceptor)
-    }
-
-    @Test
     fun networkInterceptorIsNotNullOnDebugMode() {
         Logger.set(Logger.Level.DEBUG)
-        val interceptor = Logger.getNetworkInterceptor()
-        assertNotNull(interceptor)
+        val logger = Logger.frLogger
+        assertTrue(logger is DefaultLogger)
+        assertNotNull(logger)
     }
 
-    @Test
-    fun verifyInterceptorNull() {
-        Logger.set(Logger.Level.ERROR)
-        assertNull(Logger.getNetworkInterceptor())
-        Logger.setCustomLogger(null)
-        assertNull(Logger.getNetworkInterceptor())
-        Logger.set(Logger.Level.WARN)
-        assertNull(Logger.getNetworkInterceptor())
-        Logger.setCustomLogger(null)
-        assertNull(Logger.getNetworkInterceptor())
-    }
 }

@@ -25,6 +25,8 @@ class OkHttpClientProvider {
 
     private Map<String, OkHttpClient> cache = new ConcurrentHashMap<>();
 
+    private final InterceptorProvider interceptorProvider = new InterceptorProvider();
+
     private OkHttpClientProvider() {
         CoreEventDispatcher.CLEAR_OKHTTP.addObserver((o, arg) -> clear());
     }
@@ -65,7 +67,7 @@ class OkHttpClientProvider {
             }
         }
 
-        HttpLoggingInterceptor networkInterceptor = Logger.getNetworkInterceptor();
+        HttpLoggingInterceptor networkInterceptor = interceptorProvider.getInterceptor();
         if (networkInterceptor != null) {
             builder.addInterceptor(networkInterceptor);
         }

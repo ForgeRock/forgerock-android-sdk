@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -193,6 +193,9 @@ public class RequestInterceptorTest {
 
     @Test
     public void testValidateClearHTTPEventFired() throws InterruptedException {
+
+        Logger.set(Logger.Level.DEBUG);
+
         RequestInterceptorRegistry.getInstance().register(
                 request -> request.newBuilder().url(getUrl() + "/somewhere").build());
 

@@ -24,36 +24,36 @@ class Logger {
 
         //Create Default Logger with Warning LogLevel
         @VisibleForTesting
+        @JvmStatic
         internal var frLogger: FRLogger = DefaultLogger(level)
+          private set
 
-        //Create Default Interceptor
-        private var interceptorProvider = InterceptorProvider(isDebugEnabled =  isDebugEnabled())
-
+        /**
+         * Set the Log Level to Info/Debug/Warning/Error/None. Default LogLevel is Warning
+         *
+         * @param level Setting this level will reset the logger to Default Logger. Custom Logger will be inactive
+         */
         @JvmStatic
         fun set(level: Level) {
             CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers()
             Logger.level = level
             frLogger = DefaultLogger(level)
-            interceptorProvider = InterceptorProvider(isDebugEnabled =  isDebugEnabled())
         }
 
+        /**
+         * Set the Logger to Custom Logger
+         *
+         * @param logger Setting this logger will reset the logger to Custom Logger, Default Logger will be inactive
+         */
         @JvmStatic
-        fun setCustomLogger(logger: FRLogger?) {
-            if (logger != null) {
-                CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers()
-                frLogger = logger
-                interceptorProvider = InterceptorProvider(customLogger = frLogger)
-            }
+        fun setCustomLogger(logger: FRLogger) {
+            CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers()
+            frLogger = logger
         }
 
         @JvmStatic
         fun isDebugEnabled(): Boolean {
              return level == Level.DEBUG
-        }
-
-        @JvmStatic
-        fun getNetworkInterceptor(): HttpLoggingInterceptor? {
-            return interceptorProvider.getInterceptor()
         }
 
         @JvmStatic

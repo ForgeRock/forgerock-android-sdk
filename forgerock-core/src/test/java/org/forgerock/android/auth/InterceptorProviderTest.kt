@@ -10,40 +10,59 @@ package org.forgerock.android.auth
 import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Assert.*
 import org.junit.Test
-
+import org.mockito.Mockito
 
 class InterceptorProviderTest {
 
     @Test
-    fun testInterceptorWithLogger() {
+    fun testInterceptorWithInfoLevelLogger() {
         val logger: FRLogger = DefaultLogger(Logger.Level.INFO)
-        val provider = InterceptorProvider(logger)
-        val interceptor = provider.getInterceptor()
-        assertNotNull(interceptor)
-        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
-    }
-
-    @Test
-    fun testInterceptorWithLoggerAndDebugFalse() {
-        val logger: FRLogger = DefaultLogger(Logger.Level.INFO)
-        val provider = InterceptorProvider(logger, false)
-        val interceptor = provider.getInterceptor()
-        assertNotNull(interceptor)
-        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
-    }
-
-    @Test
-    fun testInterceptorWithDebugEnabled() {
-        val provider = InterceptorProvider(isDebugEnabled = true)
-        val interceptor = provider.getInterceptor()
-        assertNotNull(interceptor)
-        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
-    }
-
-    @Test
-    fun testInterceptorWithNotDebugEnabled() {
-        val provider = InterceptorProvider(null, isDebugEnabled = false)
-        val interceptor = provider.getInterceptor()
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor(logger)
         assertNull(interceptor)
+    }
+
+    @Test
+    fun testInterceptorWithErrorLevelLogger() {
+        val logger: FRLogger = DefaultLogger(Logger.Level.ERROR)
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor(logger)
+        assertNull(interceptor)
+    }
+
+    @Test
+    fun testInterceptorWithWarnLevelLogger() {
+        val logger: FRLogger = DefaultLogger(Logger.Level.WARN)
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor(logger)
+        assertNull(interceptor)
+    }
+
+    @Test
+    fun testInterceptorWithLoggerDebugModeButNetworkModeNotEnabled() {
+        val logger: FRLogger = DefaultLogger(Logger.Level.DEBUG)
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor(logger)
+        assertNotNull(interceptor)
+        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
+    }
+
+    @Test
+    fun testInterceptorWithLoggerDebugModeButNetworkModeEnabledTrue() {
+        Logger.set(Logger.Level.DEBUG)
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor()
+        assertNotNull(interceptor)
+        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
+    }
+
+    @Test
+    fun testInterceptorWithCustomLogger() {
+        val frLogger = Mockito.mock(FRLogger::class.java)
+        Mockito.`when`(frLogger.isNetworkEnabled()).thenReturn(true)
+        val provider = InterceptorProvider()
+        val interceptor = provider.getInterceptor(frLogger)
+        assertNotNull(interceptor)
+        assertEquals(interceptor?.level, HttpLoggingInterceptor.Level.BODY)
     }
 }

@@ -8,21 +8,23 @@
 package org.forgerock.android.auth
 
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.logging.HttpLoggingInterceptor.*
 
-internal class InterceptorProvider @JvmOverloads constructor(private val customLogger: FRLogger? = null,
-                                                             private val isDebugEnabled: Boolean = false) {
-    fun getInterceptor(): HttpLoggingInterceptor? {
-        val httpLogger = object: HttpLoggingInterceptor.Logger {
+internal class InterceptorProvider {
+    @JvmOverloads
+    fun getInterceptor(frLogger: FRLogger = Logger.frLogger): HttpLoggingInterceptor? {
+        val httpLogger = object : HttpLoggingInterceptor.Logger {
             override fun log(message: String) {
-                customLogger?.network("OKHttpClient..", message, "")
+                frLogger.network("OKHttpClient..", message, "")
             }
         }
-        if(customLogger != null) {
-            return  HttpLoggingInterceptor(httpLogger).apply { this.level = HttpLoggingInterceptor.Level.BODY }
-        }
-        if(isDebugEnabled) {
-            return  HttpLoggingInterceptor().apply { this.level = HttpLoggingInterceptor.Level.BODY }
-        }
+        if (frLogger.isNetworkEnabled()) {
+            val logger = when(frLogger) {
+                is DefaultLogger -> HttpLoggingInterceptor.Logger.DEFAULT
+                else -> httpLogger
+            }
+            return HttpLoggingInterceptor(logger).apply { this.level = Level.BODY }
+         }
         return null
     }
 }

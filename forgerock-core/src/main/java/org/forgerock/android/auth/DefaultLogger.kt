@@ -18,9 +18,12 @@ interface FRLogger {
     fun debug(tag: String?, message: String?, vararg values: Any?)
     fun info(tag: String?, message: String?, vararg values: Any?)
     fun network(tag: String?, message: String?, vararg values: Any?)
+    fun isNetworkEnabled(): Boolean {
+        return false
+    }
 }
 
-internal class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
+class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
     private fun log(
         level: Logger.Level,
         tag: String,
@@ -85,4 +88,7 @@ internal class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
         log(Logger.Level.DEBUG, tag ?: "", null, message ?: "", *values)
     }
 
+    override fun isNetworkEnabled(): Boolean {
+        return Logger.isDebugEnabled()
+    }
 }
