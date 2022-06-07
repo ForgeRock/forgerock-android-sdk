@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -25,6 +25,7 @@ import okhttp3.Response;
  */
 class AuthServiceResponseHandler implements ResponseHandler {
 
+    private static final String TAG = AuthServiceResponseHandler.class.getSimpleName();
     private static final String TOKEN_ID = "tokenId";
     public static final String SUSPENDED_AUTH_SESSION_EXCEPTION = "org.forgerock.openam.auth.nodes.framework.token.SuspendedAuthSessionException";
     private NodeListener<SSOToken> listener;
@@ -52,6 +53,7 @@ class AuthServiceResponseHandler implements ResponseHandler {
                 //Proceed to next Node in the tree
                 JSONObject jsonObject = new JSONObject(response.body().string());
                 if (jsonObject.has(Node.AUTH_ID)) {
+                    Logger.debug(TAG, "Journey callback(s) received.");
                     if (listener != null) {
                         Node node = listener.onCallbackReceived(authService.getAuthServiceId(), jsonObject);
                         listener.onCallbackReceived(node);
@@ -59,7 +61,9 @@ class AuthServiceResponseHandler implements ResponseHandler {
                 } else {
                     //The Auth Tree is consider finished if auth id not from the response
                     authService.done();
+                    Logger.debug(TAG, "Journey finished with Success outcome.");
                     if (jsonObject.has(TOKEN_ID)) {
+                        Logger.debug(TAG, "SSO Token received.");
                         Listener.onSuccess(listener, new SSOToken(jsonObject.getString(TOKEN_ID)));
                     } else {
                         Listener.onSuccess(listener, null);
@@ -120,6 +124,7 @@ class AuthServiceResponseHandler implements ResponseHandler {
     }
 
     void handleError(Exception e) {
+        Logger.debug(TAG, "Journey finished with failed result %s", e.getMessage());
         Listener.onException(listener, e);
     }
 

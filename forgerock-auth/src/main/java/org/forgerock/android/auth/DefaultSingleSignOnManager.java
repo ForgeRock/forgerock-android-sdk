@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -126,18 +126,22 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                 .tag(LOGOUT)
                 .build();
 
+        Logger.debug(TAG, "Logout session.");
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Logger.debug(TAG, "Logout session failed %s:", e.getMessage());
                 Listener.onException(listener, e);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
+                    Logger.debug(TAG, "Logout session success");
                     Listener.onSuccess(listener, null);
                     close(response);
                 } else {
+                    Logger.debug(TAG, "Logout session failed");
                     handleError(response, listener);
                 }
             }
