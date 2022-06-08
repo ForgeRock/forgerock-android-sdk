@@ -7,7 +7,6 @@
 package org.forgerock.android.auth
 
 import androidx.annotation.VisibleForTesting
-import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * Logger for ForgeRock SDK
@@ -25,7 +24,7 @@ class Logger {
         //Create Default Logger with Warning LogLevel
         @VisibleForTesting
         @JvmStatic
-        internal var frLogger: FRLogger = DefaultLogger(level)
+        internal var frLogger: FRLogger = DefaultLogger()
           private set
 
         /**
@@ -37,7 +36,6 @@ class Logger {
         fun set(level: Level) {
             CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers()
             Logger.level = level
-            frLogger = DefaultLogger(level)
         }
 
         /**
@@ -58,37 +56,58 @@ class Logger {
 
         @JvmStatic
         fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
-            frLogger.error(tag, t, message, *values)
+            verbosityCheck(Level.ERROR) {
+                frLogger.error(tag, t, message, *values)
+            }
         }
 
         @JvmStatic
         fun error(tag: String?, message: String?, vararg values: Any?) {
-            frLogger.error(tag, message, *values)
+            verbosityCheck(Level.ERROR) {
+                frLogger.error(tag, message, *values)
+            }
         }
 
         @JvmStatic
         fun warn(tag: String?, message: String?, vararg values: Any?) {
-            frLogger.warn(tag, message, *values)
+            verbosityCheck(Level.WARN) {
+                frLogger.warn(tag, message, *values)
+            }
         }
 
         @JvmStatic
         fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
-            frLogger.warn(tag, t, message, *values)
+            verbosityCheck(Level.WARN) {
+                frLogger.warn(tag, t, message, *values)
+            }
         }
 
         @JvmStatic
         fun debug(tag: String?, message: String?, vararg values: Any?) {
-            frLogger.debug(tag, message, *values)
+            verbosityCheck(Level.DEBUG) {
+                frLogger.debug(tag, message, *values)
+            }
         }
 
         @JvmStatic
         fun info(tag: String?, message: String?, vararg values: Any?) {
-            frLogger.info(tag, message, *values)
+            verbosityCheck(Level.INFO) {
+                frLogger.info(tag, message, *values)
+            }
         }
 
         @JvmStatic
         fun network(tag: String?, message: String?, vararg values: Any?) {
-            frLogger.network(tag, message, *values)
+            if(frLogger.isNetworkEnabled()) {
+                frLogger.network(tag, message, *values)
+            }
+        }
+
+        // checks the verbosityLevel to execute the logger
+        private fun verbosityCheck(logLevel: Level, callback: ()->(Unit)) {
+            if (logLevel.ordinal >= level.ordinal) {
+                callback()
+            }
         }
     }
 

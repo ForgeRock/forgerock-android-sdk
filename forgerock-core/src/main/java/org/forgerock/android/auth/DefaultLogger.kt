@@ -23,7 +23,7 @@ interface FRLogger {
     }
 }
 
-class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
+internal class DefaultLogger: FRLogger {
     private fun log(
         level: Logger.Level,
         tag: String,
@@ -31,8 +31,6 @@ class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
         message: String,
         vararg args: Any?
     ) {
-        if (level.ordinal >= loggerLevel.ordinal) {
-
             val value = format(
                 "[%s] [%s]: ",
                 BuildConfig.VERSION_NAME,
@@ -57,7 +55,6 @@ class DefaultLogger(private val loggerLevel: Logger.Level): FRLogger {
 
                 }
             }
-        }
     }
 
     override fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {

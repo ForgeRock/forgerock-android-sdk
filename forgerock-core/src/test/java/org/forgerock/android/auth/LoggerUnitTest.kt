@@ -57,6 +57,7 @@ class LoggerUnitTest {
         }
 
         Logger.setCustomLogger(CustomLogger())
+        Logger.set(Logger.Level.DEBUG)
         assertNotNull(Logger.frLogger)
         assertTrue(Logger.frLogger is CustomLogger)
         Logger.setCustomLogger(CustomLoggerNetworkNotEnabled())
@@ -71,13 +72,19 @@ class LoggerUnitTest {
         Logger.warn("", "", "")
         Logger.warn("", Throwable("warning"), "", "")
 
+
         assertTrue(errorWithThrowableCalled)
         assertTrue(errorMethodCalled)
         assertTrue(warnMethodCalled)
         assertTrue(warnMethodWithThrowableCalled)
         assertTrue(debugMethodCalled)
         assertTrue(infoMethodCalled)
+        assertFalse(networkMethodCalled)
+
+        Logger.setCustomLogger(CustomLogger())
+        Logger.network("", "", "")
         assertTrue(networkMethodCalled)
+
     }
 
     @Test
@@ -85,6 +92,7 @@ class LoggerUnitTest {
         val frLogger = Mockito.mock(FRLogger::class.java)
         val throwable = Throwable("errorOrWarning")
         Logger.setCustomLogger(frLogger)
+        Logger.set(Logger.Level.DEBUG)
         assertNotNull(Logger.frLogger)
         Logger.debug("debug", "debug", "debug")
         Mockito.verify(frLogger).debug("debug", "debug", "debug")
@@ -97,11 +105,11 @@ class LoggerUnitTest {
     }
 
     @Test
-    fun networkInterceptorIsNotNullOnDebugMode() {
+    fun testDefaultLoggerNotNull() {
         Logger.set(Logger.Level.DEBUG)
-        val logger = Logger.frLogger
-        assertTrue(logger is DefaultLogger)
-        assertNotNull(logger)
+        val frLogger: FRLogger = DefaultLogger()
+        Logger.setCustomLogger(frLogger)
+        assertTrue(Logger.frLogger is DefaultLogger)
     }
 
 }
