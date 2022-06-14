@@ -1,0 +1,100 @@
+name: Prepare BitBar Artifacts
+on:
+  workflow_call:
+    secrets:
+      SIGNING_KEYSTORE:
+        description: 'Needed for signing the apk artifacts'
+        required: true
+      SIGNING_ALIAS:
+        description: 'Needed for signing the apk artifacts'
+        required: true
+      SIGNING_KEYSTORE_PASSWORD:
+        description: 'Needed for signing the apk artifacts'
+        required: true
+      SIGNING_KEY_PASSWORD:
+        description: 'Needed for signing the apk artifacts'
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+jobs:
+  prepare-device-farm-artifacts:
+    runs-on: macos-latest
+
+    steps:
+      # Clone the repo
+      - name: Clone the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      # Setup JDK and cache and restore dependencies.
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          cache: 'gradle'
+
+      # Build apk files
+      - name: Prepare device farm artifacts
+        run: ./gradlew assembleDebugAndroidTest --stacktrace --no-daemon
+
+      # Sign auth-debug-androidTest.apk
+      - name: Sign auth-debug-androidTest.apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: samples/auth/build/outputs/apk/androidTest/debug
+          signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
+          alias: ${{ secrets.SIGNING_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "30.0.3"
+
+      # Sign forgerock-auth-debug-androidTest.apk
+      - name: Sign forgerock-auth-debug-androidTest.apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: forgerock-auth/build/outputs/apk/androidTest/debug
+          signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
+          alias: ${{ secrets.SIGNING_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "30.0.3"
+
+      # Publish the signed APKs as build artifacts
+      - name: Publish auth-debug-androidTest.apk
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: auth-debug-androidTest-signed.apk
+          path: samples/auth/build/outputs/apk/androidTest/debug/auth-debug-androidTest-signed.apk
+
+      - name: Publish forgerock-auth-debug-androidTest.apk
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: forgerock-auth-debug-androidTest-signed.apk
+          path: forgerock-auth/build/outputs/apk/androidTest/debug/forgerock-auth-debug-androidTest-signed.apk
+
+      # Send slack notification ONLY if any of the steps above fail
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: ':no_entry: Failed to prepare BitBar test artifacts',
+                color: 'danger',
+                text: `\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}\nPull request: ${process.env.AS_PULL_REQUEST}\nCommit: ${process.env.AS_COMMIT} by ${process.env.AS_AUTHOR}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: failure()

@@ -1,20 +1,18 @@
 name: Build and Test
-
-# Trigger on push or pull request
 on:
-  pull_request:
-    types: [opened, reopened, synchronize, edited]
-    branches:
-      - master
-      - develop
-  push:
-    branches:
-      - master
-      - develop
-
+  workflow_call:
+    inputs:
+      runs-on:
+        description: Platform to execute on
+        type: string
+        default: macos-latest
+    secrets:
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
 jobs:
   build-and-test:
-    runs-on: macos-latest
+    runs-on: ${{ inputs.runs-on }}
 
     steps:
       # Clone the repo
@@ -36,22 +34,19 @@ jobs:
       # Execute forgerock-core debug unit tests
       - name: Run forgerock-core debug unit tests
         run: ./gradlew :forgerock-core:testDebugUnitTest --stacktrace --no-daemon
-        if: always()
-
+        
       # Execute forgerock-auth debug unit tests
       - name: Run forgerock-auth debug unit tests
         run: ./gradlew :forgerock-auth:testDebugUnitTest --stacktrace --no-daemon
-        if: always()
 
       # Execute forgerock-authenticator debug unit tests
       - name: Run forgerock-authenticator debug unit tests
         run: ./gradlew :forgerock-authenticator:testDebugUnitTest --stacktrace --no-daemon
-        if: always()
 
       # Publish test reports for the unit tests
       - name: Publish test results
-        uses: dorny/test-reporter@v1
         if: success() || failure()
+        uses: dorny/test-reporter@v1
         with:
           name: Unit tests results
           path: 'forgerock-core/build/test-results/**/TEST-*.xml,forgerock-auth/build/test-results/**/TEST-*.xml,forgerock-authenticator/build/test-results/**/TEST-*.xml'
