@@ -28,9 +28,11 @@ class Logger {
           private set
 
         /**
-         * Set the Log Level to Info/Debug/Warning/Error/None. Default LogLevel is Warning
+         * Set the Log Level to Info/Debug/Warning/Error/None. Default LogLevel is Warning.
          *
-         * @param level Setting this level will reset the logger to Default Logger. Custom Logger will be inactive
+         * @param level The log level to be set.
+         * @see Level
+         *
          */
         @JvmStatic
         fun set(level: Level) {
@@ -41,7 +43,7 @@ class Logger {
         /**
          * Set the Logger to Custom Logger
          *
-         * @param logger Setting this logger will reset the logger to Custom Logger, Default Logger will be inactive
+         * @param logger Setting this logger will reset the logger to Custom Logger, the Default Logger will become inactive.
          */
         @JvmStatic
         fun setCustomLogger(logger: FRLogger) {
@@ -49,11 +51,22 @@ class Logger {
             frLogger = logger
         }
 
+        /**
+         * Check if DEBUG Log Level is enabled
+         * @return true if debug level is enabled and false otherwise
+         */
         @JvmStatic
         fun isDebugEnabled(): Boolean {
              return level == Level.DEBUG
         }
 
+        /**
+         * Logs a message at ERROR level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param t An exception to log.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.ERROR) {
@@ -61,6 +74,12 @@ class Logger {
             }
         }
 
+        /**
+         * Logs a message at ERROR level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun error(tag: String?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.ERROR) {
@@ -68,6 +87,12 @@ class Logger {
             }
         }
 
+        /**
+         * Logs a message at WARN level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun warn(tag: String?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.WARN) {
@@ -75,6 +100,13 @@ class Logger {
             }
         }
 
+        /**
+         * Logs a message at WARN level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param t An exception to log.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.WARN) {
@@ -82,6 +114,12 @@ class Logger {
             }
         }
 
+        /**
+         * Logs a message at DEBUG level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun debug(tag: String?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.DEBUG) {
@@ -89,6 +127,12 @@ class Logger {
             }
         }
 
+        /**
+         * Logs a message at INFO level.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun info(tag: String?, message: String?, vararg values: Any?) {
             verbosityCheck(Level.INFO) {
@@ -96,6 +140,12 @@ class Logger {
             }
         }
 
+        /**
+         * Logs network call detail message.
+         * @param tag Used to identify the source of the log message where the log call occurs.
+         * @param message The message to be logged.
+         * @param values Additional arguments relevant to the log message.
+         */
         @JvmStatic
         fun network(tag: String?, message: String?, vararg values: Any?) {
             if(frLogger.isNetworkEnabled()) {
@@ -111,6 +161,9 @@ class Logger {
         }
     }
 
+    /**
+     * Log Level priority constants
+     */
     enum class Level {
         DEBUG, INFO, WARN, ERROR, NONE
     }

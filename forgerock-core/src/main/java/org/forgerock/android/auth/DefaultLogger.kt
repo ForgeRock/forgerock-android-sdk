@@ -10,14 +10,73 @@ import android.util.Log
 import org.forgerock.android.core.BuildConfig
 import java.lang.String.format
 
+/**
+ * Defines the interface for handling log messages in the ForgeRock Android SDK.
+ */
 interface FRLogger {
+
+    /**
+     * Logs a message at ERROR level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param t An exception to log.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs a message at ERROR level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun error(tag: String?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs a message at WARN level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun warn(tag: String?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs a message at WARN level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param t An exception to log.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs a message at DEBUG level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun debug(tag: String?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs a message at INFO level.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun info(tag: String?, message: String?, vararg values: Any?)
+
+    /**
+     * Logs an network message.
+     * @param tag Used to identify the source of the log message where the log call occurs.
+     * @param message The message to be logged.
+     * @param values Additional arguments relevant to the log message.
+     */
     fun network(tag: String?, message: String?, vararg values: Any?)
+
+    /**
+     * Check if the network calls details should be logged or not.
+     * @return Whether or not to log network calls details.
+     */
     fun isNetworkEnabled(): Boolean {
         return false
     }
@@ -31,11 +90,15 @@ internal class DefaultLogger: FRLogger {
         message: String,
         vararg args: Any?
     ) {
-            val value = format(
-                "[%s] [%s]: ",
-                BuildConfig.VERSION_NAME,
-                tag
-            ) + format(message, *args)
+            val value = try {
+                format(
+                    "[%s] [%s]: ",
+                    BuildConfig.VERSION_NAME,
+                    tag
+                ) + format(message, *args)
+            } catch (e: Exception) {
+                ""
+            }
 
             when (level) {
                 Logger.Level.DEBUG -> {
@@ -68,6 +131,7 @@ internal class DefaultLogger: FRLogger {
     override fun warn(tag: String?, message: String?, vararg values: Any?) {
         log(Logger.Level.WARN, tag ?: "", null, message ?: "", *values)
     }
+
 
     override fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
         log(Logger.Level.WARN, tag ?: "", t, message ?: "", *values)
