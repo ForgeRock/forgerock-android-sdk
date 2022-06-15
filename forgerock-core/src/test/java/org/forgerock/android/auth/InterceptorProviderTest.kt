@@ -16,7 +16,7 @@ class InterceptorProviderTest {
 
     @Test
     fun testInterceptorWithInfoLevelLogger() {
-        val logger: FRLogger = DefaultLogger(Logger.Level.INFO)
+        val logger: FRLogger = DefaultLogger()
         val provider = InterceptorProvider()
         val interceptor = provider.getInterceptor(logger)
         assertNull(interceptor)
@@ -24,7 +24,7 @@ class InterceptorProviderTest {
 
     @Test
     fun testInterceptorWithErrorLevelLogger() {
-        val logger: FRLogger = DefaultLogger(Logger.Level.ERROR)
+        val logger: FRLogger = DefaultLogger()
         val provider = InterceptorProvider()
         val interceptor = provider.getInterceptor(logger)
         assertNull(interceptor)
@@ -32,7 +32,7 @@ class InterceptorProviderTest {
 
     @Test
     fun testInterceptorWithWarnLevelLogger() {
-        val logger: FRLogger = DefaultLogger(Logger.Level.WARN)
+        val logger: FRLogger = DefaultLogger()
         val provider = InterceptorProvider()
         val interceptor = provider.getInterceptor(logger)
         assertNull(interceptor)
@@ -40,7 +40,7 @@ class InterceptorProviderTest {
 
     @Test
     fun testInterceptorWithLoggerDebugModeButNetworkModeNotEnabled() {
-        val logger: FRLogger = DefaultLogger(Logger.Level.DEBUG)
+        val logger: FRLogger = DefaultLogger()
         val provider = InterceptorProvider()
         val interceptor = provider.getInterceptor(logger)
         assertNotNull(interceptor)
