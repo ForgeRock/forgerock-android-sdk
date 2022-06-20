@@ -1,3 +1,7 @@
+## [3.3.2]
+#### Added
+- Interface for log management [SDKS-1864]
+
 ## [3.3.0]
 #### Added
 - Support SSL Pinning [SDKS-80]
