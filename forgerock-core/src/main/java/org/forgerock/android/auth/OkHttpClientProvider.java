@@ -25,13 +25,15 @@ class OkHttpClientProvider {
 
     private Map<String, OkHttpClient> cache = new ConcurrentHashMap<>();
 
+    private final InterceptorProvider interceptorProvider = new InterceptorProvider();
+
     private OkHttpClientProvider() {
+        CoreEventDispatcher.CLEAR_OKHTTP.addObserver((o, arg) -> clear());
     }
 
     public static OkHttpClientProvider getInstance() {
         return INSTANCE;
     }
-
 
     /**
      * Create or lookup a cached OKHttpClient
@@ -65,10 +67,9 @@ class OkHttpClientProvider {
             }
         }
 
-        if (Logger.isDebugEnabled()) {
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.level(HttpLoggingInterceptor.Level.BODY);
-            builder.addInterceptor(interceptor);
+        HttpLoggingInterceptor networkInterceptor = interceptorProvider.getInterceptor();
+        if (networkInterceptor != null) {
+            builder.addInterceptor(networkInterceptor);
         }
 
         if (!networkConfig.getPins().isEmpty()) {

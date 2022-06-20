@@ -101,6 +101,7 @@ public class OAuth2Client {
 
             final PKCE pkce = generateCodeChallenge();
 
+            Logger.debug(TAG, "Exchanging Authorization Code with SSO Token.");
             okhttp3.Request request = new okhttp3.Request.Builder()
                     .url(getAuthorizeUrl(token, pkce, additionalParameters))
                     .get()
@@ -113,6 +114,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Logger.debug(TAG, "Failed to exchange for Authorization Code: %s", e.getMessage());
                     listener.onException(e);
                 }
 
@@ -121,11 +123,13 @@ public class OAuth2Client {
                     handler.handleAuthorizeResponse(response, new FRListener<String>() {
                         @Override
                         public void onException(Exception e) {
+                            Logger.debug(TAG, "Failed to exchange for Authorization Code: %s", e.getMessage());
                             listener.onException(new AuthorizeException("Failed to exchange authorization code with sso token", e));
                         }
 
                         @Override
                         public void onSuccess(String code) {
+                            Logger.debug(TAG, "Authorization Code received.");
                             token(token, code, pkce, additionalParameters, handler, listener);
                         }
                     });
@@ -257,10 +261,12 @@ public class OAuth2Client {
         }
 
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
+        Logger.debug(TAG, "End session with id token");
         getOkHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Logger.debug(TAG, "Revoke session with id token failed: %s", e.getMessage());
                 Listener.onException(listener, e);
             }
 
@@ -321,6 +327,7 @@ public class OAuth2Client {
             getOkHttpClient().newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Logger.debug(TAG, "Exchange Access Token with Authorization Code failed: %s", e.getMessage());
                     listener.onException(e);
                 }
 

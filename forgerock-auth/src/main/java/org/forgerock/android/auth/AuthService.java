@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -117,6 +117,7 @@ public class AuthService {
      * @param listener Listener for receiving {@link AuthService} related changes
      */
     public void next(Context context, final NodeListener<?> listener) {
+        Logger.debug(TAG, "Journey start: %s", getName());
         authServiceClient.authenticate(this,
                 new AuthServiceResponseHandler(this,
                         new NodeInterceptorHandler(context, interceptors, listener, 0)));

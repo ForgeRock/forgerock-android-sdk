@@ -1,0 +1,100 @@
+name: BitBar Test Results
+
+on:
+  workflow_call:
+    inputs:
+      bitbar-project-id:
+        description: BitBar Project ID
+        type: string
+        required: true
+
+      bitbar-run-id:
+        description: BitBar Run ID
+        type: string
+        required: true
+
+    outputs:
+      bitbar-run-url:
+        description: "The BitBar run URL"
+        value: ${{ jobs.bitbar-run.outputs.bitbar_run_url }}
+
+    secrets:
+      BITBAR_API_KEY:
+        description: BitBar API Key
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+
+jobs:
+  bitbar-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Workflow inputs:"
+        run: |
+          echo "Project ID - ${{ inputs.bitbar-project-id }}"
+          echo "Run ID - ${{ inputs.bitbar-run-id }}"
+
+      - name: Wait for BitBar test run to finish...
+        timeout-minutes: 30
+        run: |
+          (
+            until [ "$(curl -s -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/projects/${{ inputs.bitbar-project-id }}/runs/${{ inputs.bitbar-run-id }} | jq -r '.state')" == "FINISHED" ];
+            do
+              echo "Waiting for BitBar Results. Sleeping for 10 seconds..."
+              sleep 10
+            done
+          )
+          echo "BITBAR_TEST_RUN_RESULT=$(curl -s -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/projects/${{ inputs.bitbar-project-id }}/runs/${{ inputs.bitbar-run-id }})" >> $GITHUB_ENV
+
+      # Get the outcome json of the test run.
+      - name: Parse test run outcome json
+        run: |
+          echo ${{ env.BITBAR_TEST_RUN_RESULT }}
+          echo "==========================================="
+          echo "projectName: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.projectName')"
+          echo "displayName: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.displayName')"
+          echo "executedTestCaseCount: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.executedTestCaseCount')"
+          echo "successfulTestCaseCount: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.successfulTestCaseCount')"
+          echo "failedTestCaseCount: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.failedTestCaseCount')"
+          echo "runningDeviceCount: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.runningDeviceCount')"
+          echo "totalDeviceCount: $(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq '.totalDeviceCount')"
+          echo "==========================================="
+          echo "BITBAR_PROJECT_NAME=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.projectName')" >> $GITHUB_ENV
+          echo "BITBAR_RUN_DISPLAY_NAME=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.displayName')" >> $GITHUB_ENV
+          echo "BITBAR_RUN_NUMBER=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.number')" >> $GITHUB_ENV
+          echo "BITBAR_EXECUTED_TESTS_COUNT=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.executedTestCaseCount')" >> $GITHUB_ENV
+          echo "BITBAR_SUCCESS_TESTS_COUNT=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.successfulTestCaseCount')" >> $GITHUB_ENV
+          echo "BITBAR_FAILED_TESTS_COUNT=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.failedTestCaseCount')" >> $GITHUB_ENV
+          echo "BITBAR_SUCCESS_RATIO=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.successRatio')" >> $GITHUB_ENV          
+          echo "BITBAR_DEVICE_COUNT=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.totalDeviceCount')" >> $GITHUB_ENV
+          echo "BITBAR_DEVICE_GROUP_NAME=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.config.usedDeviceGroupName')" >> $GITHUB_ENV
+          echo "BITBAR_TEST_RUN_URL=$(echo '${{ env.BITBAR_TEST_RUN_RESULT }}' | jq -r '.uiLink')" >> $GITHUB_ENV
+
+      # Check for failures and set the outcome of the workflow
+      - name: Set job status
+        run: |
+          if [[ ${{env.BITBAR_FAILED_TESTS_COUNT}} != '0' ]]; then
+            exit 1
+          else
+            exit 0
+          fi
+
+      # Send slack notification with result status
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: 'BitBar ${{ env.BITBAR_PROJECT_NAME }} - #${{ env.BITBAR_RUN_NUMBER }}',
+                title_link: '${{ env.BITBAR_TEST_RUN_URL }}',
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `\nTest summary: ${{ job.status }} in ${process.env.AS_TOOK}\nPassed: ${{ env.BITBAR_SUCCESS_TESTS_COUNT }}, Failed: ${{ env.BITBAR_FAILED_TESTS_COUNT }}\nDevice group: ${{ env.BITBAR_DEVICE_GROUP_NAME }}, Number of devices: ${{ env.BITBAR_DEVICE_COUNT }}\n\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}\nPull request: ${process.env.AS_PULL_REQUEST}\nCommit: ${process.env.AS_COMMIT} by ${process.env.AS_AUTHOR}\nMessage: ${process.env.AS_MESSAGE}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

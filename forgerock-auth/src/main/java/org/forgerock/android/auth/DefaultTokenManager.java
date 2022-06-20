@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -164,9 +164,11 @@ class DefaultTokenManager implements TokenManager {
             Listener.onException(listener, new AuthenticationRequiredException("Refresh Token does not exists."));
             return;
         }
+        Logger.debug(TAG, "Exchange AccessToken with Refresh Token");
         oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<AccessToken>() {
             @Override
             public void onSuccess(AccessToken token) {
+                Logger.debug(TAG, "Exchange AccessToken with Refresh Token Success");
                 persist(token);
                 token.setPersisted(true);
                 Listener.onSuccess(listener, token);
@@ -174,6 +176,7 @@ class DefaultTokenManager implements TokenManager {
 
             @Override
             public void onException(Exception e) {
+                Logger.debug(TAG, "Exchange AccessToken with Refresh Token Failed: %s", e.getMessage());
                 if (e instanceof ApiException && e.getMessage() != null) {
                     //We clear the tokens if failed to refresh.
                     ApiException apiException = (ApiException) e;
@@ -249,9 +252,11 @@ class DefaultTokenManager implements TokenManager {
             return;
         }
         //There are 2 steps here to revoke the token, the AccessToken and idToken
+        Logger.debug(TAG, "Revoking AccessToken & Refresh Token.");
         oAuth2Client.revoke(accessToken, new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
+                Logger.debug(TAG, "Revoking AccessToken & Refresh Token Success");
                 if (!endSession(true)) {
                     Listener.onSuccess(listener, result);
                 }
@@ -260,6 +265,7 @@ class DefaultTokenManager implements TokenManager {
             @Override
             public void onException(Exception e) {
                 //Try best to end the session
+                Logger.debug(TAG, "Revoking AccessToken & Refresh Token failed: %s", e.getMessage());
                 endSession(false);
                 Listener.onException(listener, e);
             }

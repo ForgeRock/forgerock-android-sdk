@@ -20,6 +20,10 @@
             android:supportsRtl="true"
             android:usesCleartextTraffic="true">
 
+        <activity
+            android:name="org.forgerock.android.auth.DummyActivity"
+            android:exported="true" />
+
         <service
                 android:name=".authenticator.AuthenticatorService" android:exported="false">
             <intent-filter>
