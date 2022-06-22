@@ -55,12 +55,12 @@ dependencies {
     implementation project(':forgerock-auth-ui')
 
     /*
-    implementation 'org.forgerock:forgerock-auth:3.3.2'
-    implementation 'org.forgerock:forgerock-auth-ui:3.3.2'
+    implementation 'org.forgerock:forgerock-auth:3.3.3'
+    implementation 'org.forgerock:forgerock-auth-ui:3.3.3'
      */
 
-    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.2.0'

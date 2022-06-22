@@ -1,3 +1,7 @@
+## [3.3.3]
+#### Fixed
+- Bumped the version of the com.squareup.okhttp3 library to 4.10.0 [SDKS-1957]
+
 ## [3.3.2]
 #### Added
 - Interface for log management [SDKS-1864]
