@@ -37,6 +37,9 @@ public class Config {
     private String redirectUri;
     private String scope;
     private String oAuthUrl;
+    private Long oauthCacheMillis;
+    private Long oauthThreshold;
+    private Long cookieCacheMillis;
 
     //Server
     private String identifier;
@@ -120,6 +123,9 @@ public class Config {
             userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
             logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
             endSessionEndpoint = context.getString(R.string.forgerock_endsession_endpoint);
+            oauthCacheMillis = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000);
+            oauthThreshold = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_oauth_threshold));
+            cookieCacheMillis = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000);
             identifier = UUID.randomUUID().toString();
         }
         initialized = true;
@@ -165,6 +171,8 @@ public class Config {
                 .context(context)
                 .sharedPreferences(sharedPreferences)
                 .oAuth2Client(getOAuth2Client())
+                .cacheIntervalMillis(oauthCacheMillis)
+                .threshold(oauthThreshold)
                 .build();
     }
 
@@ -193,7 +201,7 @@ public class Config {
     private CookieJar getCookieJar() {
         if (cookieJar == null) {
             cookieJar = SecureCookieJar.builder()
-                    .context(context).build();
+                    .context(context).cacheIntervalMillis(cookieCacheMillis).build();
         }
         return cookieJar;
     }
