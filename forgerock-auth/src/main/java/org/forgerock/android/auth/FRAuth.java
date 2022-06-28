@@ -8,8 +8,9 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.List;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Model of an FRAuth.
@@ -36,22 +35,26 @@ public class FRAuth {
 
     //Alias to store Previous Configure Host
     public static final String ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS";
+
     private static boolean started;
 
-    public static void start(Context context) {
-        if (!started) {
+    private static FROptions cachedOptions;
+
+    public static void start(Context context, @Nullable FROptions options) {
+        if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
-            Config.getInstance().init(context);
-            //Clean up when server switch
-            SharedPreferences sharedPreferences = context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
-            String previousHost = sharedPreferences.getString("url", null);
-            if (previousHost != null) {
-                if (!Config.getInstance().getUrl().equals(previousHost)) {
-                    Config.getInstance().getSessionManager().close();
-                }
+            FROptions frOptions = ConfigHelper.load(context, options);
+            Config.getInstance().init(context, frOptions);
+            if (ConfigHelper.isConfigChanged(context, frOptions)) {
+                Config.getInstance().getSessionManager().close();
             }
-            sharedPreferences.edit().putString("url", Config.getInstance().getUrl()).apply();
+            ConfigHelper.persist(context, frOptions);
+            cachedOptions = options;
         }
+    }
+
+    public static void start(Context context) {
+       start(context, null);
     }
 
     @Builder
@@ -62,8 +65,6 @@ public class FRAuth {
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
                    @Singular List<Interceptor<?>> interceptors) {
-
-        Config.getInstance().init(context);
 
         this.sessionManager = sessionManager == null ? Config.getInstance().getSessionManager() : sessionManager;
 

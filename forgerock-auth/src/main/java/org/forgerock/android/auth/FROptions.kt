@@ -1,20 +1,36 @@
 package org.forgerock.android.auth
 
+import okhttp3.OkHttpClient
 
-class FROptions {
+data class FROptions(val server: Server, val oauth: OAuth, val service: Service, val urlPath: UrlPath, val sslPinning: SSLPinning) {
+    companion object {
+        @JvmStatic
+        fun equals(old: FROptions?, new: FROptions?): Boolean {
+            // referential check first
+            if(old === new) {
+                return true
+            }
+            // if there is a change in reference then check the value
+            return old?.oauth == new?.oauth
+                    && old?.server == new?.server
+                    && old?.sslPinning == new?.sslPinning
+                    && old?.service == new?.service
+                    && old?.urlPath == new?.urlPath
+        }
+    }
+}
 
-    var server: Server? = null
-        private set
-    var oauth: OAuth? = null
-        private set
-    var service: Service? = null
-        private set
-    var urlPath: UrlPath? = null
-        private set
+class FROptionsBuilder {
+
+    private var server: Server = Server()
+    private var oauth: OAuth = OAuth()
+    private var service: Service = Service()
+    private var urlPath: UrlPath = UrlPath()
+    private var sslPinning: SSLPinning = SSLPinning()
 
     companion object {
         @JvmStatic
-        fun builder(block: FROptions.() -> Unit): FROptions = FROptions().apply(block)
+        fun build(block: FROptionsBuilder.() -> Unit): FROptions = FROptionsBuilder().apply(block).build()
     }
 
     fun server(block: ServerBuilder.() -> Unit) {
@@ -33,48 +49,53 @@ class FROptions {
         urlPath = UrlPathBuilder().apply(block).build()
     }
 
+    fun sslPinning(block: SSLPinningBuilder.() -> Unit) {
+        sslPinning = SSLPinningBuilder().apply(block).build()
+    }
+
+    fun build(): FROptions {
+        return FROptions(server, oauth, service, urlPath, sslPinning)
+    }
+
 }
 
-data class Server(val url: String,
-                  val oauthUrl: String,
-                  val realm: String,
-                  val timeout: String,
-                  val cookieName: String,
-                  val pins: String?)
+data class Server(val url: String? = "",
+                  val realm: String? = "root",
+                  val timeout: Int = 30,
+                  val cookieName: String? = "iPlanetDirectoryPro",
+                  val oauthUrl: String = "")
 
 class ServerBuilder {
-    lateinit var url: String
-    lateinit var realm: String
-    lateinit var timeout: String
-    lateinit var cookieName: String
-    lateinit var oauthUrl: String
-    var pins: String? = null
+    var url: String? = ""
+    var realm: String? = "root"
+    var timeout: Int = 30
+    var cookieName: String? = "iPlanetDirectoryPro"
+    var oauthUrl: String = ""
 
-    fun build(): Server = Server(url, realm, timeout, cookieName, oauthUrl, pins)
-
+    fun build(): Server = Server(url, realm, timeout, cookieName, oauthUrl)
 }
 
-data class OAuth(val oauthClientId: String?,
-                 val oauthRedirectUri: String?,
-                 val oauthScope: String?,
-                 val oauthThresholdSeconds: Long?,
-                 val oauthCacheSeconds: Long?,
-                 val cookieCacheSeconds: Long?)
+data class OAuth(val oauthClientId: String? = "",
+                 val oauthRedirectUri: String = "",
+                 val oauthScope: String = "",
+                 val oauthThresholdSeconds: Long = 30,
+                 val oauthCacheSeconds: Long = 0,
+                 val cookieCacheSeconds: Long = 0)
 
 class OAuthBuilder {
-    var oauthClientId: String? = null
-    var oauthRedirectUri: String? = null
-    var oauthScope: String? = null
-    var oauthThresholdSeconds: Long? = null
-    var oauthCacheSeconds: Long? = null
-    var cookieCacheSeconds: Long? = null
+    var oauthClientId: String? = ""
+    var oauthRedirectUri: String = ""
+    var oauthScope: String = ""
+    var oauthThresholdSeconds: Long = 30
+    var oauthCacheSeconds: Long = 0
+    var cookieCacheSeconds: Long = 0
 
     fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthScope, oauthThresholdSeconds, oauthCacheSeconds, cookieCacheSeconds)
 
 }
 
-data class Service(val authServiceName: String?,
-                   val registrationServiceName: String?)
+data class Service(val authServiceName: String? = null,
+                   val registrationServiceName: String? = null)
 
 class ServiceBuilder {
     var authServiceName: String? = null
@@ -84,12 +105,24 @@ class ServiceBuilder {
 
 }
 
-data class UrlPath(val authenticateEndpoint: String?,
-                   val revokeEndpoint: String?,
-                   val logoutEndpoint: String?,
-                   val tokenEndpoint: String?,
-                   val userinfoEndpoint: String?,
-                   val authorizeEndpoint: String?)
+data class SSLPinning(val buildSteps: List<BuildStep<OkHttpClient.Builder>>? = emptyList(),
+                      val pins: List<String>? = emptyList())
+
+class SSLPinningBuilder {
+    var buildSteps: List<BuildStep<OkHttpClient.Builder>>? = emptyList()
+    var pins: List<String>? = emptyList()
+
+    fun build() : SSLPinning = SSLPinning(buildSteps, pins)
+
+}
+
+data class UrlPath(val authenticateEndpoint: String? = null,
+                   val revokeEndpoint: String? = null,
+                   val logoutEndpoint: String? = null,
+                   val tokenEndpoint: String? = null,
+                   val userinfoEndpoint: String? = null,
+                   val authorizeEndpoint: String? = null,
+                   val endSessionEndpoint: String? = null)
 
 class UrlPathBuilder {
     var authenticateEndpoint: String? = null
@@ -98,7 +131,8 @@ class UrlPathBuilder {
     var tokenEndpoint: String? = null
     var userinfoEndpoint: String? = null
     var authorizeEndpoint: String? = null
+    var endSessionEndpoint: String? = null
 
-    fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, logoutEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint)
+    fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, logoutEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint, endSessionEndpoint)
 
 }

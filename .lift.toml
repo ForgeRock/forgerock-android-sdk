@@ -1,0 +1,2 @@
+build = "./gradlew assembleDebugAndroidTest"
+jdkVersion = "11"

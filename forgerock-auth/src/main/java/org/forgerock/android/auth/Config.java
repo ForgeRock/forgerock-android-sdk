@@ -60,6 +60,10 @@ public class Config {
     private String logoutEndpoint;
     private String endSessionEndpoint;
 
+    //service
+    private String authServiceName;
+    private String registrationServiceName;
+
     //SSO Token Manager
     private Encryptor encryptor;
 
@@ -82,6 +86,10 @@ public class Config {
         this.url = url;
     }
 
+    public String getUrl() {
+        return this.url;
+    }
+
     private Config() {
     }
 
@@ -102,32 +110,49 @@ public class Config {
         this.sharedPreferences = sharedPreferences;
     }
 
-    public synchronized void init(Context context) {
+
+    // We need to address this in a different story to remove, because all the tests are depends on this.
+    @Deprecated
+    public synchronized void init(Context appContext) {
         if (!initialized) {
-            this.context = context.getApplicationContext();
-            clientId = context.getString(R.string.forgerock_oauth_client_id);
-            redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
-            scope = context.getString(R.string.forgerock_oauth_scope);
-            oAuthUrl = context.getString(R.string.forgerock_oauth_url);
-            url = context.getString(R.string.forgerock_url);
-            realm = context.getString(R.string.forgerock_realm);
-            timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
-            cookieJar = null; // We cannot initialize default cookie jar here
-            cookieName = context.getString(R.string.forgerock_cookie_name);
-            pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes));
-            buildSteps = Collections.emptyList();
-            authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
-            authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
-            tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
-            revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
-            userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
-            logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
-            endSessionEndpoint = context.getString(R.string.forgerock_endsession_endpoint);
-            oauthCacheMillis = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000);
-            oauthThreshold = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_oauth_threshold));
-            cookieCacheMillis = Long.valueOf(context.getResources().getInteger(R.integer.forgerock_cookie_cache) * 1000);
-            identifier = UUID.randomUUID().toString();
+            FROptions option = ConfigHelper.load(appContext, null);
+            init(appContext, option);
         }
+        initialized = true;
+    }
+
+    public synchronized void init(Context context, FROptions options) {
+        this.context = context.getApplicationContext();
+        cookieJar = null;
+
+        clientId = options.getOauth().getOauthClientId();
+        redirectUri = options.getOauth().getOauthRedirectUri();
+        scope = options.getOauth().getOauthScope();
+        oauthCacheMillis = options.getOauth().getOauthCacheSeconds() * 1000;
+        oauthThreshold = options.getOauth().getOauthThresholdSeconds();
+        cookieCacheMillis = options.getOauth().getCookieCacheSeconds() * 1000;
+
+        oAuthUrl = options.getServer().getOauthUrl();
+        url = options.getServer().getUrl();
+        realm = options.getServer().getRealm();
+        timeout = options.getServer().getTimeout();
+        cookieName = options.getServer().getCookieName();
+
+        registrationServiceName = options.getService().getRegistrationServiceName();
+        authServiceName = options.getService().getAuthServiceName();
+
+        pins = options.getSslPinning().getPins();
+        buildSteps = options.getSslPinning().getBuildSteps();
+
+        authenticateEndpoint = options.getUrlPath().getAuthenticateEndpoint();
+        authorizeEndpoint = options.getUrlPath().getAuthorizeEndpoint();
+        tokenEndpoint = options.getUrlPath().getTokenEndpoint();
+        revokeEndpoint = options.getUrlPath().getRevokeEndpoint();
+        userinfoEndpoint = options.getUrlPath().getUserinfoEndpoint();
+        logoutEndpoint = options.getUrlPath().getLogoutEndpoint();
+        endSessionEndpoint = options.getUrlPath().getEndSessionEndpoint();
+
+        identifier = UUID.randomUUID().toString();
         initialized = true;
     }
 
