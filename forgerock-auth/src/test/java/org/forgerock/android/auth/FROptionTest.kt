@@ -1,6 +1,7 @@
 package org.forgerock.android.auth
 
 import okhttp3.OkHttpClient
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -30,5 +31,17 @@ class FROptionTest {
         assertTrue(option.urlPath.userinfoEndpoint == null)
         assertTrue(option.urlPath.authorizeEndpoint == null)
         assertTrue(option.urlPath.endSessionEndpoint == null)
+    }
+
+    @Test
+    fun testReferenceAndValue() {
+        val option1 = FROptionsBuilder.build {  }
+        var option2 = FROptionsBuilder.build {  }
+        assertTrue(FROptions.equals(option1, option2))
+        option2 = FROptionsBuilder.build { server {
+            url = "https://andy.com"
+        }}
+        assertFalse(FROptions.equals(option1, option2))
+        assertTrue(FROptions.equals(option2, option2))
     }
 }

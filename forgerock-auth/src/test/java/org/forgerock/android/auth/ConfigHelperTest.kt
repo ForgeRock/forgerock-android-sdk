@@ -94,7 +94,7 @@ class ConfigHelperTest {
     }
 
     @Test
-    fun loadDFROption() {
+    fun loadFROption() {
         val frOptions = FROptionsBuilder.build {
             server {
                 url = "https://forgerock"
@@ -110,7 +110,7 @@ class ConfigHelperTest {
             }
         }
         val defaultOption = ConfigHelper.load(context, frOptions)
-        val expectedResult = "FROptions(server=Server(url=https://forgerock, realm=realm123, timeout=30, cookieName=cookieName, oauthUrl=), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=null, registrationServiceName=null), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, logoutEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]))"
+        val expectedResult = "FROptions(server=Server(url=https://forgerock, realm=realm123, timeout=30, cookieName=cookieName, oauthUrl=null), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=null, registrationServiceName=null), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, logoutEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]))"
         assertTrue(defaultOption.toString() == expectedResult)
     }
 }

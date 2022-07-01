@@ -61,42 +61,7 @@ class ConfigHelper: ConfigInterface {
 
         @JvmStatic
         fun load(context: Context, frOption: FROptions?): FROptions {
-            return frOption?.let {
-                FROptionsBuilder.build {
-                    server {
-                        url = it.server.url
-                        realm = it.server.realm
-                        timeout = it.server.timeout
-                        cookieName = it.server.cookieName
-                        oauthUrl = it.server.oauthUrl
-                    }
-                    oauth {
-                        oauthClientId = it.oauth.oauthClientId
-                        oauthRedirectUri = it.oauth.oauthRedirectUri
-                        oauthScope = it.oauth.oauthScope
-                        oauthThresholdSeconds = it.oauth.oauthThresholdSeconds
-                        oauthCacheSeconds = it.oauth.oauthCacheSeconds
-                        cookieCacheSeconds = it.oauth.cookieCacheSeconds
-                    }
-                    sslPinning {
-                        pins = it.sslPinning.pins
-                        buildSteps = it.sslPinning.buildSteps
-                    }
-                    service {
-                        authServiceName = it.service.authServiceName
-                        registrationServiceName = it.service.registrationServiceName
-                    }
-                    urlPath {
-                        authenticateEndpoint = it.urlPath.authenticateEndpoint
-                        authorizeEndpoint = it.urlPath.authorizeEndpoint
-                        tokenEndpoint = it.urlPath.tokenEndpoint
-                        revokeEndpoint = it.urlPath.revokeEndpoint
-                        userinfoEndpoint = it.urlPath.userinfoEndpoint
-                        logoutEndpoint = it.urlPath.logoutEndpoint
-                        endSessionEndpoint = it.urlPath.endSessionEndpoint
-                    }
-                }
-            } ?: FROptionsBuilder.build {
+            return frOption ?: FROptionsBuilder.build {
                 server {
                     url = context.getString(R.string.forgerock_url)
                     realm = context.getString(R.string.forgerock_realm)
@@ -150,7 +115,7 @@ class ConfigHelper: ConfigInterface {
                 server {
                     url = sharedPreferences.getString("url", null) ?: ""
                     realm = sharedPreferences.getString("realm", null) ?: ""
-                    cookieName = sharedPreferences.getString("cookieName", null) ?: ""
+                    cookieName = sharedPreferences.getString("cookieName", null)
                 }
                 oauth {
                     oauthClientId = sharedPreferences.getString("client_id", null) ?: ""
