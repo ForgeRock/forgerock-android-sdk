@@ -871,7 +871,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
         Config.reset();
-        Config.getInstance().init(mockContext);
+        FROptions options = ConfigHelper.load(mockContext, null);
+        Config.getInstance().init(mockContext, options);
         serverConfig = Config.getInstance().getServerConfig();
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));

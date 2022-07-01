@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth
 
 import android.content.Context
@@ -18,7 +24,7 @@ class ConfigHelperTest {
 
         val frOptions = FROptionsBuilder.build {
             server {
-                url = "https://forgerock"
+                url = "https://dummy"
                 realm = "realm123"
                 cookieName = "cookieName"
             }
@@ -33,7 +39,7 @@ class ConfigHelperTest {
         ConfigHelper.persist(context, frOptions)
         val sharedPreferences =
             context.getSharedPreferences(ConfigHelper.ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
-        assertTrue(sharedPreferences.getString("url", null) == "https://forgerock")
+        assertTrue(sharedPreferences.getString("url", null) == "https://dummy")
         assertTrue(sharedPreferences.getString("realm", null) == "realm123")
         assertTrue(sharedPreferences.getString("cookieName", null) == "cookieName")
         assertTrue(sharedPreferences.getString("client_id", null) == "client_id")
@@ -43,7 +49,7 @@ class ConfigHelperTest {
     fun testConfigChanged() {
         val frOptions = FROptionsBuilder.build {
             server {
-                url = "https://forgerock"
+                url = "https://dummy"
                 realm = "realm123"
                 cookieName = "cookieName"
             }
@@ -72,7 +78,7 @@ class ConfigHelperTest {
         }
         val urlChanged = FROptionsBuilder.build {
             server {
-                url  = "url"
+                url  = "dummy"
             }
         }
         ConfigHelper.persist(context, frOptions)
@@ -89,7 +95,7 @@ class ConfigHelperTest {
     @Test
     fun loadDefaultFROptionWithNull() {
        val defaultOption = ConfigHelper.load(context, null)
-       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, oauthUrl=https://openam.example.com:8081/openam), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, logoutEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]))"
+        val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, oauthUrl=https://openam.example.com:8081/openam), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, logoutEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
         assertTrue(defaultOption.toString() == expectedResult)
     }
 
@@ -97,7 +103,7 @@ class ConfigHelperTest {
     fun loadFROption() {
         val frOptions = FROptionsBuilder.build {
             server {
-                url = "https://forgerock"
+                url = "https://dummy"
                 realm = "realm123"
                 cookieName = "cookieName"
             }
@@ -110,7 +116,7 @@ class ConfigHelperTest {
             }
         }
         val defaultOption = ConfigHelper.load(context, frOptions)
-        val expectedResult = "FROptions(server=Server(url=https://forgerock, realm=realm123, timeout=30, cookieName=cookieName, oauthUrl=null), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=null, registrationServiceName=null), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, logoutEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]))"
+        val expectedResult ="FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName, oauthUrl=null), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=null, registrationServiceName=null), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, logoutEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
         assertTrue(defaultOption.toString() == expectedResult)
     }
 }

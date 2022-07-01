@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -33,6 +33,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRAuthMockTest extends BaseTest {
@@ -104,7 +107,8 @@ public class FRAuthMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_oauth_client_id)).thenReturn("andy_app");
 
         Config.reset();
-        Config.getInstance().init(context);
+        FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
 
         final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
                 .context(context)
@@ -205,7 +209,7 @@ public class FRAuthMockTest extends BaseTest {
     public void startTest() {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(FRAuth.ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
-        sharedPreferences.edit().putString("url", "something").commit();
+        sharedPreferences.edit().putString("url", "http://forgerocktest.com").commit();
 
         FRAuth.start(context);
         //host url is created
@@ -214,4 +218,51 @@ public class FRAuthMockTest extends BaseTest {
 
     }
 
+    @Test
+    public void startTestWithOptions() {
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences(FRAuth.ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
+        sharedPreferences.edit().putString("url", "something").commit();
+
+        FROptions frOptions = FROptionsBuilder.build(frOptionsBuilder -> {
+            frOptionsBuilder.server(serverBuilder -> {
+                serverBuilder.setUrl("https://forgerocker.com");
+                serverBuilder.setRealm("realm");
+                serverBuilder.setCookieName("planet");
+                serverBuilder.setOauthUrl("https://forgerocker.com");
+                serverBuilder.setTimeout(50);
+                return null;
+            });
+            frOptionsBuilder.oauth(oAuthBuilder -> {
+                oAuthBuilder.setOauthClientId("client_id");
+                return null;
+            });
+            frOptionsBuilder.urlPath(urlPathBuilder -> {
+                urlPathBuilder.setRevokeEndpoint("https://revokeEndpoint.com");
+                urlPathBuilder.setEndSessionEndpoint("https://endSessionEndpoint.com");
+                return null;
+            });
+            return null;
+        });
+
+        FRAuth.start(context, frOptions);
+        //host url is created
+        assertEquals(Config.getInstance().getUrl(), sharedPreferences.getString("url", null));
+        assertEquals(Config.getInstance().getRealm(), sharedPreferences.getString("realm", null));
+        assertEquals(Config.getInstance().getCookieName(), sharedPreferences.getString("cookieName", null));
+        assertEquals(Config.getInstance().getClientId(), sharedPreferences.getString("client_id", null));
+        assertEquals(Config.getInstance().getEndSessionEndpoint(), sharedPreferences.getString("end_session_endpoint", null));
+        assertEquals(Config.getInstance().getRevokeEndpoint(), sharedPreferences.getString("revoke_endpoint", null));
+        assertEquals(Config.getInstance().getPins(), frOptions.getSslPinning().getPins());
+        assertEquals(Config.getInstance().getBuildSteps(), frOptions.getSslPinning().getBuildSteps());
+        assertEquals(Config.getInstance().getAuthServiceName(), frOptions.getService().getAuthServiceName());
+        assertEquals(Config.getInstance().getRegistrationServiceName(), frOptions.getService().getRegistrationServiceName());
+        assertEquals(Config.getInstance().getRedirectUri(), frOptions.getOauth().getOauthRedirectUri());
+        Long millisOauthCache = frOptions.getOauth().getOauthCacheSeconds() * 1000;
+        assertEquals(Config.getInstance().getOauthCacheMillis(), millisOauthCache);
+        Long thresholdSeconds = frOptions.getOauth().getOauthThresholdSeconds();
+        assertEquals(Config.getInstance().getOauthThreshold(), thresholdSeconds);
+        Long millisCookieCache = frOptions.getOauth().getCookieCacheSeconds() * 1000;
+        assertEquals(Config.getInstance().getCookieCacheMillis(), millisCookieCache);
+    }
 }

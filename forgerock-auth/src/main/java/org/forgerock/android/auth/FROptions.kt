@@ -1,8 +1,20 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth
 
 import okhttp3.OkHttpClient
 
-data class FROptions(val server: Server, val oauth: OAuth, val service: Service, val urlPath: UrlPath, val sslPinning: SSLPinning) {
+data class FROptions(val server: Server,
+                     val oauth: OAuth,
+                     val service: Service,
+                     val urlPath: UrlPath,
+                     val sslPinning: SSLPinning,
+                     val logger: Log) {
+
     companion object {
         @JvmStatic
         fun equals(old: FROptions?, new: FROptions?): Boolean {
@@ -16,6 +28,7 @@ data class FROptions(val server: Server, val oauth: OAuth, val service: Service,
                     && old?.sslPinning == new?.sslPinning
                     && old?.service == new?.service
                     && old?.urlPath == new?.urlPath
+                    && old?.logger == new?.logger
         }
     }
 }
@@ -27,6 +40,7 @@ class FROptionsBuilder {
     private var service: Service = Service()
     private var urlPath: UrlPath = UrlPath()
     private var sslPinning: SSLPinning = SSLPinning()
+    private var logger: Log = Log()
 
     companion object {
         @JvmStatic
@@ -53,8 +67,12 @@ class FROptionsBuilder {
         sslPinning = SSLPinningBuilder().apply(block).build()
     }
 
-    fun build(): FROptions {
-        return FROptions(server, oauth, service, urlPath, sslPinning)
+    fun logger(block: LoggerBuilder.() -> Unit) {
+        logger = LoggerBuilder().apply(block).build()
+    }
+
+    private fun build(): FROptions {
+        return FROptions(server, oauth, service, urlPath, sslPinning, logger)
     }
 
 }
@@ -135,4 +153,12 @@ class UrlPathBuilder {
 
     fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, logoutEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint, endSessionEndpoint)
 
+}
+
+data class Log(val logLevel: Logger.Level? = null, val customLogger: FRLogger? = null)
+
+class LoggerBuilder {
+    var customLogger: FRLogger? = null
+    var logLevel: Logger.Level? = null
+    fun build(): Log = Log(logLevel, customLogger)
 }

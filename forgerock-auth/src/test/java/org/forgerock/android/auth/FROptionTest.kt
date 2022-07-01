@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth
 
 import okhttp3.OkHttpClient
@@ -8,7 +14,22 @@ import org.junit.Test
 class FROptionTest {
     @Test
     fun testDefaultBuilderOption() {
-        val option = FROptionsBuilder.build { }
+        class TestCustomLogger: FRLogger {
+            override fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {}
+            override fun error(tag: String?, message: String?, vararg values: Any?) {}
+            override fun warn(tag: String?, message: String?, vararg values: Any?) {}
+            override fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {}
+            override fun debug(tag: String?, message: String?, vararg values: Any?) {}
+            override fun info(tag: String?, message: String?, vararg values: Any?) {}
+            override fun network(tag: String?, message: String?, vararg values: Any?) {}
+        }
+        val logger:FRLogger  = TestCustomLogger()
+        val option = FROptionsBuilder.build {
+            logger {
+                logLevel = Logger.Level.ERROR
+                customLogger = logger
+            }
+        }
         assertTrue(option.sslPinning.pins == emptyList<String>())
         assertTrue(option.sslPinning.buildSteps == emptyList<BuildStep<OkHttpClient.Builder>>())
         assertTrue(option.server.realm == "root")
@@ -31,6 +52,8 @@ class FROptionTest {
         assertTrue(option.urlPath.userinfoEndpoint == null)
         assertTrue(option.urlPath.authorizeEndpoint == null)
         assertTrue(option.urlPath.endSessionEndpoint == null)
+        assertTrue(option.logger.logLevel == Logger.Level.ERROR)
+        assertTrue(option.logger.customLogger == logger)
     }
 
     @Test

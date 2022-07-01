@@ -111,7 +111,7 @@ public class Config {
     }
 
 
-    // We need to address this in a different story to remove, because all the tests are depends on this.
+    // We need to remove this in future, because the connected tests are depends on this. but the unit tests/integration tests are not depend on this.
     @Deprecated
     public synchronized void init(Context appContext) {
         if (!initialized) {
@@ -123,27 +123,22 @@ public class Config {
 
     public synchronized void init(Context context, FROptions options) {
         this.context = context.getApplicationContext();
-        cookieJar = null;
-
         clientId = options.getOauth().getOauthClientId();
         redirectUri = options.getOauth().getOauthRedirectUri();
         scope = options.getOauth().getOauthScope();
         oauthCacheMillis = options.getOauth().getOauthCacheSeconds() * 1000;
         oauthThreshold = options.getOauth().getOauthThresholdSeconds();
         cookieCacheMillis = options.getOauth().getCookieCacheSeconds() * 1000;
-
+        cookieJar = null; // We cannot initialize default cookie jar here
         oAuthUrl = options.getServer().getOauthUrl();
         url = options.getServer().getUrl();
         realm = options.getServer().getRealm();
         timeout = options.getServer().getTimeout();
         cookieName = options.getServer().getCookieName();
-
         registrationServiceName = options.getService().getRegistrationServiceName();
         authServiceName = options.getService().getAuthServiceName();
-
         pins = options.getSslPinning().getPins();
         buildSteps = options.getSslPinning().getBuildSteps();
-
         authenticateEndpoint = options.getUrlPath().getAuthenticateEndpoint();
         authorizeEndpoint = options.getUrlPath().getAuthorizeEndpoint();
         tokenEndpoint = options.getUrlPath().getTokenEndpoint();
@@ -151,8 +146,15 @@ public class Config {
         userinfoEndpoint = options.getUrlPath().getUserinfoEndpoint();
         logoutEndpoint = options.getUrlPath().getLogoutEndpoint();
         endSessionEndpoint = options.getUrlPath().getEndSessionEndpoint();
-
         identifier = UUID.randomUUID().toString();
+        FRLogger customLogger = options.getLogger().getCustomLogger();
+        if(customLogger != null) {
+            Logger.setCustomLogger(customLogger);
+        }
+        Logger.Level logLevel = options.getLogger().getLogLevel();
+        if(logLevel != null) {
+            Logger.set(logLevel);
+        }
         initialized = true;
     }
 
