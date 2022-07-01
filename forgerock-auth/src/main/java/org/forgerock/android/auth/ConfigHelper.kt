@@ -148,12 +148,12 @@ class ConfigHelper: ConfigInterface {
                 context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
             return FROptionsBuilder.build {
                 server {
-                    url = sharedPreferences.getString("url", null)
-                    realm = sharedPreferences.getString("realm", null)
-                    cookieName = sharedPreferences.getString("cookieName", null)
+                    url = sharedPreferences.getString("url", null) ?: ""
+                    realm = sharedPreferences.getString("realm", null) ?: ""
+                    cookieName = sharedPreferences.getString("cookieName", null) ?: ""
                 }
                 oauth {
-                    oauthClientId = sharedPreferences.getString("client_id", null)
+                    oauthClientId = sharedPreferences.getString("client_id", null) ?: ""
                 }
                 urlPath {
                     endSessionEndpoint = sharedPreferences.getString("end_session_endpoint", null)

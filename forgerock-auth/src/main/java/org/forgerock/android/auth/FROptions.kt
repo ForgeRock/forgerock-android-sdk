@@ -59,23 +59,23 @@ class FROptionsBuilder {
 
 }
 
-data class Server(val url: String? = "",
-                  val realm: String? = "root",
+data class Server(val url: String = "",
+                  val realm: String = "root",
                   val timeout: Int = 30,
-                  val cookieName: String? = "iPlanetDirectoryPro",
-                  val oauthUrl: String = "")
+                  val cookieName: String = "iPlanetDirectoryPro",
+                  val oauthUrl: String? = null)
 
 class ServerBuilder {
-    var url: String? = ""
-    var realm: String? = "root"
+    lateinit var url: String
+    var realm: String = "root"
     var timeout: Int = 30
-    var cookieName: String? = "iPlanetDirectoryPro"
-    var oauthUrl: String = ""
+    var cookieName: String = "iPlanetDirectoryPro"
+    var oauthUrl: String? = null
 
     fun build(): Server = Server(url, realm, timeout, cookieName, oauthUrl)
 }
 
-data class OAuth(val oauthClientId: String? = "",
+data class OAuth(val oauthClientId: String = "",
                  val oauthRedirectUri: String = "",
                  val oauthScope: String = "",
                  val oauthThresholdSeconds: Long = 30,
@@ -83,7 +83,7 @@ data class OAuth(val oauthClientId: String? = "",
                  val cookieCacheSeconds: Long = 0)
 
 class OAuthBuilder {
-    var oauthClientId: String? = ""
+    var oauthClientId: String = ""
     var oauthRedirectUri: String = ""
     var oauthScope: String = ""
     var oauthThresholdSeconds: Long = 30
@@ -105,12 +105,12 @@ class ServiceBuilder {
 
 }
 
-data class SSLPinning(val buildSteps: List<BuildStep<OkHttpClient.Builder>>? = emptyList(),
-                      val pins: List<String>? = emptyList())
+data class SSLPinning(val buildSteps: List<BuildStep<OkHttpClient.Builder>> = emptyList(),
+                      val pins: List<String> = emptyList())
 
 class SSLPinningBuilder {
-    var buildSteps: List<BuildStep<OkHttpClient.Builder>>? = emptyList()
-    var pins: List<String>? = emptyList()
+    var buildSteps: List<BuildStep<OkHttpClient.Builder>> = emptyList()
+    var pins: List<String> = emptyList()
 
     fun build() : SSLPinning = SSLPinning(buildSteps, pins)
 
