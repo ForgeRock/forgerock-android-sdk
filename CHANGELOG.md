@@ -1,3 +1,7 @@
+## [Unreleased]
+#### Fixed
+- Changed Activity type used as parameter in 'PushNotification.accept' [SDKS-1968]
+
 ## [3.3.3]
 #### Fixed
 - Bumped the version of the com.squareup.okhttp3 library to 4.10.0 [SDKS-1957]
