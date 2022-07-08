@@ -1,0 +1,39 @@
+name: Release Android SDK
+
+on: 
+  workflow_dispatch:
+    branches:
+        - master
+        - develop
+    inputs:
+      version:
+        description: |
+          Enter version number:
+          To publish a snapshot release add SNAPSHOT suffix to the version number: x.x.x-SNAPSHOT
+        required: true
+        type: string
+
+jobs:
+  # Check release number
+  check-release-number:
+    name: Check release number
+    uses: ./.github/workflows/check-release-version.yaml
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    with: 
+      version: ${{ github.event.inputs.version }}
+
+  # Publish to Sonatype Nexus repo
+  publish:
+    name: Publish to nexus
+    uses: ./.github/workflows/publish.yaml
+    needs: check-release-number
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
+      PUBLISHING_SIGNING_KEY_PASSWORD: ${{ secrets.PUBLISHING_SIGNING_KEY_PASSWORD }}
+      PUBLISHING_SIGNING_KEY_RING_FILE_BASE64: ${{ secrets.PUBLISHING_SIGNING_KEY_RING_FILE_BASE64 }}
+      PUBLISHING_USERNAME: ${{ secrets.PUBLISHING_USERNAME }}
+      PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
+    with: 
+      version: ${{ needs.check-release-number.outputs.version }}
