@@ -8,6 +8,9 @@ package org.forgerock.android.auth
 
 import okhttp3.OkHttpClient
 
+/**
+ * Manages SDK configuration information
+ */
 data class FROptions(val server: Server,
                      val oauth: OAuth,
                      val service: Service,
@@ -33,9 +36,12 @@ data class FROptions(val server: Server,
     }
 }
 
+/**
+ * Option builder to build the SDK configuration information
+ */
 class FROptionsBuilder {
 
-    private var server: Server = Server()
+    private var server: Server = Server("", "")
     private var oauth: OAuth = OAuth()
     private var service: Service = Service()
     private var urlPath: UrlPath = UrlPath()
@@ -47,26 +53,56 @@ class FROptionsBuilder {
         fun build(block: FROptionsBuilder.() -> Unit): FROptions = FROptionsBuilder().apply(block).build()
     }
 
+    /**
+     * Build the server configurations
+     *
+     * @param block  takes the  closure to set the values for server configuration.
+     */
     fun server(block: ServerBuilder.() -> Unit) {
         server = ServerBuilder().apply(block).build()
     }
 
+    /**
+     * Build the oauth configurations
+     *
+     * @param block takes the  closure to set the values for oauth configuration.
+     */
     fun oauth(block: OAuthBuilder.() -> Unit) {
         oauth = OAuthBuilder().apply(block).build()
     }
 
+    /**
+     * Build the service configurations
+     *
+     * @param block takes the closure to set the values for service configuration.
+     */
     fun service(block: ServiceBuilder.() -> Unit) {
         service = ServiceBuilder().apply(block).build()
     }
 
+    /**
+     * Build the endpoints
+     *
+     * @param block takes the  closure to set the values for urls.
+     */
     fun urlPath(block: UrlPathBuilder.() -> Unit) {
         urlPath = UrlPathBuilder().apply(block).build()
     }
 
+    /**
+     * Build the ssl pinning
+     *
+     * @param block takes the builder closure to set the values for ssl pinning.
+     */
     fun sslPinning(block: SSLPinningBuilder.() -> Unit) {
         sslPinning = SSLPinningBuilder().apply(block).build()
     }
 
+    /**
+     * Build the custom logger
+     *
+     * @param block takes the builder closure to configure custom logger.
+     */
     fun logger(block: LoggerBuilder.() -> Unit) {
         logger = LoggerBuilder().apply(block).build()
     }
@@ -77,34 +113,44 @@ class FROptionsBuilder {
 
 }
 
-data class Server(val url: String? = "",
-                  val realm: String? = "root",
+/**
+ * Data class for the server configurations
+ */
+data class Server(val url: String,
+                  val realm: String,
                   val timeout: Int = 30,
-                  val cookieName: String? = "iPlanetDirectoryPro",
-                  val oauthUrl: String? = null)
+                  val cookieName: String = "iPlanetDirectoryPro")
 
+/**
+ * Server builder to build the SDK configuration information specific to server
+ */
 class ServerBuilder {
-    var url: String? = ""
-    var realm: String? = "root"
+    lateinit var url: String
+    lateinit var realm: String
     var timeout: Int = 30
-    var cookieName: String? = "iPlanetDirectoryPro"
-    var oauthUrl: String? = null
+    var cookieName: String = "iPlanetDirectoryPro"
 
-    fun build(): Server = Server(url, realm, timeout, cookieName, oauthUrl)
+    fun build(): Server = Server(url, realm, timeout, cookieName)
 }
 
+/**
+ * Data class for the OAuth configurations
+ */
 data class OAuth(val oauthClientId: String? = "",
-                 val oauthRedirectUri: String = "",
-                 val oauthScope: String = "",
-                 val oauthThresholdSeconds: Long = 30,
+                 val oauthRedirectUri: String? = "",
+                 val oauthScope: String? = "",
+                 val oauthThresholdSeconds: Long = 0,
                  val oauthCacheSeconds: Long = 0,
                  val cookieCacheSeconds: Long = 0)
 
+/**
+ * Oauth builder to build the SDK configuration information specific to oauth
+ */
 class OAuthBuilder {
     var oauthClientId: String? = ""
-    var oauthRedirectUri: String = ""
-    var oauthScope: String = ""
-    var oauthThresholdSeconds: Long = 30
+    var oauthRedirectUri: String? = ""
+    var oauthScope: String? = ""
+    var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
     var cookieCacheSeconds: Long = 0
 
@@ -112,20 +158,32 @@ class OAuthBuilder {
 
 }
 
-data class Service(val authServiceName: String? = null,
-                   val registrationServiceName: String? = null)
+/**
+ * Data class for the Service configurations
+ */
+data class Service(val authServiceName: String = "Login",
+                   val registrationServiceName: String = "Registration")
 
+/**
+ * Service builder to build the SDK configuration information specific to services
+ */
 class ServiceBuilder {
-    var authServiceName: String? = null
-    var registrationServiceName: String? = null
+    var authServiceName: String = "Login"
+    var registrationServiceName: String = "Registration"
 
     fun build() : Service = Service(authServiceName, registrationServiceName)
 
 }
 
+/**
+ * Data class for the SSL pinning configurations
+ */
 data class SSLPinning(val buildSteps: List<BuildStep<OkHttpClient.Builder>> = emptyList(),
                       val pins: List<String> = emptyList())
 
+/**
+ * SSL builder to build the SDK configuration information specific to SSL
+ */
 class SSLPinningBuilder {
     var buildSteps: List<BuildStep<OkHttpClient.Builder>> = emptyList()
     var pins: List<String> = emptyList()
@@ -134,6 +192,9 @@ class SSLPinningBuilder {
 
 }
 
+/**
+ * Data class for the URL configurations
+ */
 data class UrlPath(val authenticateEndpoint: String? = null,
                    val revokeEndpoint: String? = null,
                    val logoutEndpoint: String? = null,
@@ -142,6 +203,9 @@ data class UrlPath(val authenticateEndpoint: String? = null,
                    val authorizeEndpoint: String? = null,
                    val endSessionEndpoint: String? = null)
 
+/**
+ * URL Path builder to build the SDK configuration information specific to endpoints
+ */
 class UrlPathBuilder {
     var authenticateEndpoint: String? = null
     var revokeEndpoint: String? = null
@@ -155,8 +219,14 @@ class UrlPathBuilder {
 
 }
 
+/**
+ * Data class to set the log level and custom logger configurations
+ */
 data class Log(val logLevel: Logger.Level? = null, val customLogger: FRLogger? = null)
 
+/**
+ * Logger builder to build the SDK configuration information specific to loggers
+ */
 class LoggerBuilder {
     var customLogger: FRLogger? = null
     var logLevel: Logger.Level? = null

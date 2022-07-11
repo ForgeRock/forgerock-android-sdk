@@ -25,6 +25,10 @@ class FROptionTest {
         }
         val logger:FRLogger  = TestCustomLogger()
         val option = FROptionsBuilder.build {
+            server {
+                url = "https://andy.com"
+                realm = "root"
+            }
             logger {
                 logLevel = Logger.Level.ERROR
                 customLogger = logger
@@ -33,18 +37,17 @@ class FROptionTest {
         assertTrue(option.sslPinning.pins == emptyList<String>())
         assertTrue(option.sslPinning.buildSteps == emptyList<BuildStep<OkHttpClient.Builder>>())
         assertTrue(option.server.realm == "root")
-        assertTrue(option.server.url == "")
+        assertTrue(option.server.url == "https://andy.com")
         assertTrue(option.server.cookieName == "iPlanetDirectoryPro")
-        assertTrue(option.server.oauthUrl == null)
         assertTrue(option.server.timeout == 30)
         assertTrue(option.oauth.oauthClientId == "")
         assertTrue(option.oauth.oauthRedirectUri == "")
         assertTrue(option.oauth.oauthScope == "")
-        assertTrue(option.oauth.oauthThresholdSeconds == 30.toLong())
+        assertTrue(option.oauth.oauthThresholdSeconds == 0.toLong())
         assertTrue(option.oauth.oauthCacheSeconds == 0.toLong())
         assertTrue(option.oauth.cookieCacheSeconds == 0.toLong())
-        assertTrue(option.service.authServiceName == null)
-        assertTrue(option.service.registrationServiceName == null)
+        assertTrue(option.service.authServiceName == "Login")
+        assertTrue(option.service.registrationServiceName == "Registration")
         assertTrue(option.urlPath.authorizeEndpoint == null)
         assertTrue(option.urlPath.revokeEndpoint == null)
         assertTrue(option.urlPath.logoutEndpoint == null)
@@ -63,6 +66,7 @@ class FROptionTest {
         assertTrue(FROptions.equals(option1, option2))
         option2 = FROptionsBuilder.build { server {
             url = "https://andy.com"
+            realm = ""
         }}
         assertFalse(FROptions.equals(option1, option2))
         assertTrue(FROptions.equals(option2, option2))

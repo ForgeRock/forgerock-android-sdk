@@ -12,11 +12,10 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.CookieJar;
@@ -36,13 +35,14 @@ public class Config {
     private String clientId;
     private String redirectUri;
     private String scope;
-    private String oAuthUrl;
     private Long oauthCacheMillis;
     private Long oauthThreshold;
     private Long cookieCacheMillis;
 
     //Server
+    @Getter(value = AccessLevel.NONE)
     private String identifier;
+
     private String url;
     private String realm;
     private int timeout;
@@ -110,15 +110,11 @@ public class Config {
         this.sharedPreferences = sharedPreferences;
     }
 
-
     // We need to remove this in future, because the connected tests are depends on this. but the unit tests/integration tests are not depend on this.
     @Deprecated
     public synchronized void init(Context appContext) {
-        if (!initialized) {
-            FROptions option = ConfigHelper.load(appContext, null);
-            init(appContext, option);
-        }
-        initialized = true;
+        FROptions option = ConfigHelper.load(appContext, null);
+        init(appContext, option);
     }
 
     public synchronized void init(Context context, FROptions options) {
@@ -130,7 +126,6 @@ public class Config {
         oauthThreshold = options.getOauth().getOauthThresholdSeconds();
         cookieCacheMillis = options.getOauth().getCookieCacheSeconds() * 1000;
         cookieJar = null; // We cannot initialize default cookie jar here
-        oAuthUrl = options.getServer().getOauthUrl();
         url = options.getServer().getUrl();
         realm = options.getServer().getRealm();
         timeout = options.getServer().getTimeout();
@@ -155,7 +150,6 @@ public class Config {
         if(logLevel != null) {
             Logger.set(logLevel);
         }
-        initialized = true;
     }
 
     public static Config getInstance() {

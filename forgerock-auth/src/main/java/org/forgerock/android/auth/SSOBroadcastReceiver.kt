@@ -26,7 +26,7 @@ class SSOBroadcastReceiver(private val instance: Config = Config.getInstance(),
                 instance.tokenManager.revoke(null)
             }
             catch (e: Exception) {
-                configHelper.loadFromPreference(context)?.let {
+                configHelper.loadFromPreference(context).let {
                     instance.init(context, it)
                     instance.tokenManager.revoke(null)
                 }

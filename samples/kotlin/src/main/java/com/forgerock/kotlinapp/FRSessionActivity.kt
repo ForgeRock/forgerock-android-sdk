@@ -33,7 +33,8 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
         setContentView(R.layout.activity_main)
         updateStatus(showLogin = true)
         loginButton.setOnClickListener {
-            val journeyName = "Login"
+            // FRSession.authenticate() method will take as an input the Tree/Journey name and output the SSO token, to get a Access Token you have to invoke the getAccessToken method.
+            val journeyName = "SimpleLogin"
             FRSession.authenticate(this, journeyName, this)
         }
         logoutButton.setOnClickListener {
@@ -70,7 +71,7 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
             }
 
             override fun onException(e: Exception?) {
-                TODO("Not yet implemented")
+                Logger.error(classNameTag, e?.message)
             }
 
         })

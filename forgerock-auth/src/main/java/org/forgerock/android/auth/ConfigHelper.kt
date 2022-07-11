@@ -10,64 +10,114 @@ package org.forgerock.android.auth
 import android.content.Context
 import android.content.SharedPreferences
 
+/**
+ * Listener to load the options from persistence for the given context
+ */
 interface ConfigInterface {
     fun loadFromPreference(context: Context): FROptions
 }
 
+/**
+ * ConfigHelper Provide the helper methods to persist and load the configurations on start of the SDK
+ * This class also verify if the configuration changes on the current and previous launch.
+ */
 class ConfigHelper: ConfigInterface {
 
     companion object {
 
+         const val realm = "realm"
+         const val url = "url"
+         const val cookieName = "cookieName"
+         const val clientId = "client_id"
+         const val revokeEndpoint = "revoke_endpoint"
+         const val endSessionEndpoint = "end_session_endpoint"
+         const val scope = "scope"
+         const val redirectUri = "redirect_uri"
+
+        //Alias to store Previous Configure Host
         const val ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS"
 
+
+        /**
+         * Persist the FROption Data in shared preference
+         *
+         * @param context  The Application Context
+         * @param frOptions Argument to persist the data in shared preference using the context
+         */
         @JvmStatic
         fun persist(context: Context, frOptions: FROptions) {
             val sharedPreferences =
                 context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
-            sharedPreferences.edit().putString("url", frOptions.server.url)
-                .putString("realm", frOptions.server.realm)
-                .putString("cookieName", frOptions.server.cookieName)
-                .putString("client_id", frOptions.oauth.oauthClientId)
-                .putString("revoke_endpoint", frOptions.urlPath.revokeEndpoint)
-                .putString("end_session_endpoint", frOptions.urlPath.endSessionEndpoint).apply()
+            sharedPreferences.edit().putString(url, frOptions.server.url)
+                .putString(realm, frOptions.server.realm)
+                .putString(cookieName, frOptions.server.cookieName)
+                .putString(clientId, frOptions.oauth.oauthClientId)
+                .putString(revokeEndpoint, frOptions.urlPath.revokeEndpoint)
+                .putString(endSessionEndpoint, frOptions.urlPath.endSessionEndpoint)
+                .putString(scope, frOptions.oauth.oauthScope)
+                .putString(redirectUri, frOptions.oauth.oauthRedirectUri)
+                .apply()
         }
 
+        /**
+         * validate the configuration changes on start of the SDK
+         *
+         * @param context  The Application Context
+         * @param frOptions takes current configuration and compare with persisted configuration
+         * @return true when the config changed and false if its not changed
+         */
         @JvmStatic
-        fun isConfigChanged(context: Context, frOption: FROptions): Boolean {
+        fun isConfigDifferentFromPersistedValue(context: Context, frOptions: FROptions): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
-            sharedPreferences.getString("url", null)?.apply {
-                if(frOption.server.url != this) {
+            sharedPreferences.getString(url, null)?.apply {
+                if(frOptions.server.url != this) {
                     return true
                 }
             }
-            sharedPreferences.getString("realm", null)?.apply {
-                if(frOption.server.realm != this) {
+            sharedPreferences.getString(realm, null)?.apply {
+                if(frOptions.server.realm != this) {
                     return true
                 }
             }
-            sharedPreferences.getString("client_id", null)?.apply {
-                if(frOption.oauth.oauthClientId != this) {
+            sharedPreferences.getString(clientId, null)?.apply {
+                if(frOptions.oauth.oauthClientId != this) {
                     return true
                 }
             }
-            sharedPreferences.getString("cookieName", null)?.apply {
-                if(frOption.server.cookieName != this) {
+            sharedPreferences.getString(cookieName, null)?.apply {
+                if(frOptions.server.cookieName != this) {
+                    return true
+                }
+            }
+            sharedPreferences.getString(scope, null)?.apply {
+                if(frOptions.oauth.oauthScope != this) {
+                    return true
+                }
+            }
+            sharedPreferences.getString(redirectUri, null)?.apply {
+                if(frOptions.oauth.oauthRedirectUri != this) {
                     return true
                 }
             }
             return false
         }
 
+        /**
+         * load the sdk configuration for the caller
+         *
+         * @param context  The Application Context
+         * @param frOptions takes current configuration and compare with persisted configuration
+         * @return FROptions from strings.xml or passed value
+         */
         @JvmStatic
-        fun load(context: Context, frOption: FROptions?): FROptions {
-            return frOption ?: FROptionsBuilder.build {
+        fun load(context: Context, frOptions: FROptions?): FROptions {
+            return frOptions ?: FROptionsBuilder.build {
                 server {
                     url = context.getString(R.string.forgerock_url)
                     realm = context.getString(R.string.forgerock_realm)
                     timeout = context.resources.getInteger(R.integer.forgerock_timeout)
                     cookieName = context.getString(R.string.forgerock_cookie_name)
-                    oauthUrl = context.getString(R.string.forgerock_oauth_url)
                 }
                 oauth {
                     oauthClientId = context.getString(R.string.forgerock_oauth_client_id)
@@ -108,21 +158,29 @@ class ConfigHelper: ConfigInterface {
         }
     }
 
+    /**
+     * load the sdk configuration from the persistence
+     *
+     * @param context  The Application Context
+     * @return FROptions from stored persistence
+     */
     override fun loadFromPreference(context: Context): FROptions {
             val sharedPreferences: SharedPreferences =
                 context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
             return FROptionsBuilder.build {
                 server {
-                    url = sharedPreferences.getString("url", null)
-                    realm = sharedPreferences.getString("realm", null)
-                    cookieName = sharedPreferences.getString("cookieName", null)
+                    url = sharedPreferences.getString(ConfigHelper.url, null) ?: ""
+                    realm = sharedPreferences.getString(ConfigHelper.realm, null) ?: ""
+                    cookieName = sharedPreferences.getString(ConfigHelper.cookieName, null) ?: ""
                 }
                 oauth {
-                    oauthClientId = sharedPreferences.getString("client_id", null)
+                    oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null)
+                    oauthScope = sharedPreferences.getString(ConfigHelper.scope, null)
+                    oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null)
                 }
                 urlPath {
-                    endSessionEndpoint = sharedPreferences.getString("end_session_endpoint", null)
-                    revokeEndpoint = sharedPreferences.getString("revoke_endpoint", null)
+                    endSessionEndpoint = sharedPreferences.getString(ConfigHelper.endSessionEndpoint, null)
+                    revokeEndpoint = sharedPreferences.getString(ConfigHelper.revokeEndpoint, null)
                 }
             }
     }

@@ -33,19 +33,22 @@ public class FRAuth {
     private AuthService authService;
     private SessionManager sessionManager;
 
-    //Alias to store Previous Configure Host
-    public static final String ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS";
-
     private static boolean started;
 
     private static FROptions cachedOptions;
 
-    public static void start(Context context, @Nullable FROptions options) {
+    /**
+     * Start the SDK
+     *
+     * @param context  The Application Context
+     * @param options  The FROptions is a nullable field which takes either a null or config. If the caller passes null it fetches the default values from strings.xml .
+     */
+    public static synchronized void start(Context context, @Nullable FROptions options) {
         if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
             FROptions frOptions = ConfigHelper.load(context, options);
             Config.getInstance().init(context, frOptions);
-            if (ConfigHelper.isConfigChanged(context, frOptions)) {
+            if (ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions)) {
                 Config.getInstance().getSessionManager().close();
             }
             ConfigHelper.persist(context, frOptions);
