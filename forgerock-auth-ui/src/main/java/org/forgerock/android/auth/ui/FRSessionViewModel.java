@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,6 +13,7 @@ import android.net.Uri;
 
 import androidx.lifecycle.ViewModel;
 
+import org.forgerock.android.auth.Config;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
@@ -47,7 +48,7 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
     }
 
     public void authenticate(Context context) {
-        String tree = context.getString(R.string.forgerock_auth_service);
+        String tree = Config.getInstance().getAuthServiceName();
         if (context instanceof Activity) {
             String treeName = ((Activity) context).getIntent().getStringExtra(TREE_NAME);
             if (treeName != null) {
@@ -68,7 +69,7 @@ public class FRSessionViewModel extends FRViewModel<FRSession> {
     }
 
     public void register(Context context) {
-        FRSession.authenticate(context, context.getString(R.string.forgerock_registration_service), nodeListener);
+        FRSession.authenticate(context, Config.getInstance().getRegistrationServiceName(), nodeListener);
     }
 
     public void next(Context context, Node node) {

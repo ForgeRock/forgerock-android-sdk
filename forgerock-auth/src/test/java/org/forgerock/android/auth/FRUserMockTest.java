@@ -847,6 +847,9 @@ public class FRUserMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_realm)).thenReturn(context.getString(R.string.forgerock_realm));
         Resources resources = Mockito.mock(Resources.class);
         when(mockContext.getResources()).thenReturn(resources);
+        when(mockContext.getString(R.string.forgerock_url)).thenReturn("https://dummy.com");
+        when(mockContext.getString(R.string.forgerock_realm)).thenReturn("root");
+        when(mockContext.getString(R.string.forgerock_registration_service)).thenReturn("registration");
         when(mockContext.getApplicationContext()).thenReturn(context);
         when(resources.getInteger(R.integer.forgerock_timeout)).thenReturn(30);
         when(resources.getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes)).thenReturn(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes));
@@ -871,7 +874,8 @@ public class FRUserMockTest extends BaseTest {
         enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
         Config.reset();
-        Config.getInstance().init(mockContext);
+        FROptions options = ConfigHelper.load(mockContext, null);
+        Config.getInstance().init(mockContext, options);
         serverConfig = Config.getInstance().getServerConfig();
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));

@@ -48,7 +48,8 @@ public class ServerConfigTest {
 
     @Test
     public void testCachedOkHttpClient() {
-        Config.getInstance().init(context);
+        FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -57,11 +58,12 @@ public class ServerConfigTest {
 
     @Test
     public void testOkHttpCachedWithDifferentIdentifier() {
-        Config.getInstance().init(context);
+        FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
         Config.reset();
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, options);
         ServerConfig serverConfig2 = Config.getInstance().getServerConfig();
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig2);
         assertThat(client1 != client2).isTrue();
@@ -199,7 +201,8 @@ public class ServerConfigTest {
 
     @Test
     public void testPinningConfig() {
-        Config.getInstance().init(context);
+        FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         assertThat(client.certificatePinner().getPins())

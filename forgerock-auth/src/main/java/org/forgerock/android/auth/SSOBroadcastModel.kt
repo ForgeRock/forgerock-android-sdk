@@ -1,11 +1,8 @@
 /*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
  *
- *  * Copyright (c) 2022 ForgeRock. All rights reserved.
- *  *
- *  * This software may be modified and distributed under the terms
- *  * of the MIT license. See the LICENSE file for details.
- *
- *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth
@@ -36,7 +33,7 @@ internal class SSOBroadcastModel(private val context: Context? = InitProvider.ge
 
     fun isBroadcastEnabled(): Boolean {
         val receivers =  context?.packageManager?.queryBroadcastReceivers(broadcastIntent, 0)?.filter { it.activityInfo.permission == broadcastPermission }
-        return receivers?.let { it.count() > 0 } ?: false
+        return receivers?.isNotEmpty() ?: false
     }
 }
 

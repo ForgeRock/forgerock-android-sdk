@@ -12,11 +12,10 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.VisibleForTesting;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import okhttp3.CookieJar;
@@ -36,10 +35,14 @@ public class Config {
     private String clientId;
     private String redirectUri;
     private String scope;
-    private String oAuthUrl;
+    private Long oauthCacheMillis;
+    private Long oauthThreshold;
+    private Long cookieCacheMillis;
 
     //Server
+    @Getter(value = AccessLevel.NONE)
     private String identifier;
+
     private String url;
     private String realm;
     private int timeout;
@@ -57,11 +60,12 @@ public class Config {
     private String logoutEndpoint;
     private String endSessionEndpoint;
 
+    //service
+    private String authServiceName;
+    private String registrationServiceName;
+
     //SSO Token Manager
     private Encryptor encryptor;
-
-    private boolean initialized = false;
-
 
     private SharedPreferences ssoSharedPreferences;
 
@@ -77,6 +81,10 @@ public class Config {
     @VisibleForTesting
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getUrl() {
+        return this.url;
     }
 
     private Config() {
@@ -99,30 +107,46 @@ public class Config {
         this.sharedPreferences = sharedPreferences;
     }
 
-    public synchronized void init(Context context) {
-        if (!initialized) {
-            this.context = context.getApplicationContext();
-            clientId = context.getString(R.string.forgerock_oauth_client_id);
-            redirectUri = context.getString(R.string.forgerock_oauth_redirect_uri);
-            scope = context.getString(R.string.forgerock_oauth_scope);
-            oAuthUrl = context.getString(R.string.forgerock_oauth_url);
-            url = context.getString(R.string.forgerock_url);
-            realm = context.getString(R.string.forgerock_realm);
-            timeout = context.getResources().getInteger(R.integer.forgerock_timeout);
-            cookieJar = null; // We cannot initialize default cookie jar here
-            cookieName = context.getString(R.string.forgerock_cookie_name);
-            pins = Arrays.asList(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes));
-            buildSteps = Collections.emptyList();
-            authenticateEndpoint = context.getString(R.string.forgerock_authenticate_endpoint);
-            authorizeEndpoint = context.getString(R.string.forgerock_authorize_endpoint);
-            tokenEndpoint = context.getString(R.string.forgerock_token_endpoint);
-            revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint);
-            userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint);
-            logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint);
-            endSessionEndpoint = context.getString(R.string.forgerock_endsession_endpoint);
-            identifier = UUID.randomUUID().toString();
+    // We need to remove this in future, because the connected tests are depends on this. but the unit tests/integration tests are not depend on this.
+    @Deprecated
+    public synchronized void init(Context appContext) {
+        FROptions option = ConfigHelper.load(appContext, null);
+        init(appContext, option);
+    }
+
+    public synchronized void init(Context context, FROptions options) {
+        this.context = context.getApplicationContext();
+        clientId = options.getOauth().getOauthClientId();
+        redirectUri = options.getOauth().getOauthRedirectUri();
+        scope = options.getOauth().getOauthScope();
+        oauthCacheMillis = options.getOauth().getOauthCacheSeconds() * 1000;
+        oauthThreshold = options.getOauth().getOauthThresholdSeconds();
+        cookieCacheMillis = options.getOauth().getCookieCacheSeconds() * 1000;
+        cookieJar = null; // We cannot initialize default cookie jar here
+        url = options.getServer().getUrl();
+        realm = options.getServer().getRealm();
+        timeout = options.getServer().getTimeout();
+        cookieName = options.getServer().getCookieName();
+        registrationServiceName = options.getService().getRegistrationServiceName();
+        authServiceName = options.getService().getAuthServiceName();
+        pins = options.getSslPinning().getPins();
+        buildSteps = options.getSslPinning().getBuildSteps();
+        authenticateEndpoint = options.getUrlPath().getAuthenticateEndpoint();
+        authorizeEndpoint = options.getUrlPath().getAuthorizeEndpoint();
+        tokenEndpoint = options.getUrlPath().getTokenEndpoint();
+        revokeEndpoint = options.getUrlPath().getRevokeEndpoint();
+        userinfoEndpoint = options.getUrlPath().getUserinfoEndpoint();
+        logoutEndpoint = options.getUrlPath().getLogoutEndpoint();
+        endSessionEndpoint = options.getUrlPath().getEndSessionEndpoint();
+        identifier = UUID.randomUUID().toString();
+        FRLogger customLogger = options.getLogger().getCustomLogger();
+        if(customLogger != null) {
+            Logger.setCustomLogger(customLogger);
         }
-        initialized = true;
+        Logger.Level logLevel = options.getLogger().getLogLevel();
+        if(logLevel != null) {
+            Logger.set(logLevel);
+        }
     }
 
     public static Config getInstance() {
@@ -165,6 +189,8 @@ public class Config {
                 .context(context)
                 .sharedPreferences(sharedPreferences)
                 .oAuth2Client(getOAuth2Client())
+                .cacheIntervalMillis(oauthCacheMillis)
+                .threshold(oauthThreshold)
                 .build();
     }
 
@@ -193,7 +219,7 @@ public class Config {
     private CookieJar getCookieJar() {
         if (cookieJar == null) {
             cookieJar = SecureCookieJar.builder()
-                    .context(context).build();
+                    .context(context).cacheIntervalMillis(cookieCacheMillis).build();
         }
         return cookieJar;
     }

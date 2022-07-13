@@ -47,7 +47,8 @@ public class BaseTest {
         server = new MockWebServer();
         server.start();
 
-        Config.getInstance().init(context);
+       FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
         Config.getInstance().setUrl(getUrl());
         Config.getInstance().setEncryptor(new MockEncryptor());
 

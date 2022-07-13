@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -12,7 +12,9 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.forgerock.android.auth.Config;
+import org.forgerock.android.auth.ConfigHelper;
 import org.forgerock.android.auth.FRListenerFuture;
+import org.forgerock.android.auth.FROptions;
 import org.forgerock.android.auth.KeyStoreManager;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -45,7 +47,8 @@ public class DeviceProfileCollectorCallbackTest {
         byte[] encoded = "public key".getBytes();
         when(publicKey.getEncoded()).thenReturn(encoded);
         when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-        Config.getInstance().init(context);
+        FROptions options = ConfigHelper.load(context, null);
+        Config.getInstance().init(context, options);
         Config.getInstance().setKeyStoreManager(keyStoreManager);
     }
 
