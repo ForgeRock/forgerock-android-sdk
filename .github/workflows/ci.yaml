@@ -19,6 +19,15 @@ jobs:
     uses: ./.github/workflows/build-and-test.yaml
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Run Sonatype OSS Index Scan
+  sonatype-ossindex:
+    name: Scan for open source vulnerabilities (Sonatype OSS Index)
+    uses: ./.github/workflows/sonatype-ossi-scan.yaml
+    secrets:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
   # Build and sign BitBar test artifacts (auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk)
   bitbar-prepare-artifacts:
