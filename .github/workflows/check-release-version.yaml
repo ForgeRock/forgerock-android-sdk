@@ -1,0 +1,141 @@
+name: Check version number
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version number to check
+        type: string
+        required: true
+
+    outputs:
+      version:
+        description: The validated version number
+        value: ${{ jobs.check-release-number.outputs.version }}
+      
+    secrets:
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+
+jobs:
+  # Check release number
+  check-release-number:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version_id.outputs.version }}
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      - name: Get the latest tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        with: 
+          with_initial_version: true
+          initial_version: "0.0.0"
+        id: get-latest-tag
+
+      - run: |
+          version=${{ inputs.version }}
+          is_snapshot=false
+          shopt -s nocasematch
+          if [[ $version =~ snapshot ]];
+          then
+              echo "This is a SNAPSHOT release!"
+              # Make all letters capital
+              version=$(echo $version | tr '[a-z]' '[A-Z]')
+              is_snapshot=true
+          fi
+          # unset nocasematch option
+          shopt -u nocasematch
+
+          # If we want a snapshot release, make sure that the version format is correct
+          if $is_snapshot;
+          then
+              if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)$ ]];
+              then
+                  echo "SNAPSHOT version format is correct"
+              else
+                  echo "This is supposed to be a SNAPSHOT version, but the format is NOT correct. Aborting!"
+                  echo "ERROR_MESSAGE=SNAPSHOT version format is NOT correct! ($version)" >> $GITHUB_ENV
+                  exit 1
+              fi
+          fi
+
+          echo "LATEST_TAG=${{ steps.get-latest-tag.outputs.tag }}" >> $GITHUB_ENV
+          echo "CHANGELOG_VERSION=$(echo $(awk '/[[0-9]+\.[0-9]+\.[0-9]]/{print;exit}' CHANGELOG.md | sed -E 's/(version)|[:,\",#]//gi' | tr -d '[[:space:]]'))" >> $GITHUB_ENV
+          echo "NEW_VERSION=$version" >> $GITHUB_ENV
+          echo "IS_SNAPSHOT=$is_snapshot" >> $GITHUB_ENV
+
+      - name: Print versions
+        run: |
+          echo "Checking if version ${{ env.NEW_VERSION }} is good."
+          echo "LATEST_TAG: ${{ env.LATEST_TAG }}"
+          echo "CHANGELOG_VERSION: ${{ env.CHANGELOG_VERSION }}"
+          echo "NEW_VERSION: ${{ env.NEW_VERSION }}"
+          echo "IS_SNAPSHOT: ${{ env.IS_SNAPSHOT }}"
+
+      # Make sure that the version entered is in the expected format
+      - name: Ensure that the new version is in the expected format
+        run: |
+          if [[ ${{ env.NEW_VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+([-][a-zA-Z0-9\.]+)?$ ]]; 
+          then
+            echo "Version number is in the expected format."
+            exit 0
+          else
+            echo "Version format is NOT good! Aborting!"
+            echo "ERROR_MESSAGE=Version format is NOT good! (${{ env.NEW_VERSION }})" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      # The new version should be bigger than the previous release version
+      - name: Ensure the new version is bigger than the last one
+        run: |
+          if [[ ${{ env.NEW_VERSION }} > ${{ env.LATEST_TAG }} ]];
+          then
+            echo "The new version is bigger than the last one (good)!"
+            exit 0
+          else
+            echo "The new version needs to be bigger than the last one! Aborting!"
+            echo "ERROR_MESSAGE=The new version needs to be bigger than the last one!\nNEW_VERSION: ${{ env.NEW_VERSION }}\nLATEST_TAG: ${{ env.LATEST_TAG }}" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      # Check if the version in the CHANGELOG.md is the same as the new release version
+      # This check does NOT apply to SNAPSHOT release
+      - name: Ensure that the new version matches the one in CHANGELOG.md
+        run: |
+          if ! ${{ env.IS_SNAPSHOT }}; 
+          then
+            if [[ ${{ env.NEW_VERSION }} == ${{ env.CHANGELOG_VERSION }} ]];
+            then
+              echo "The version in CHANGELOG.md is OK!"
+              exit 0
+            else
+              echo "The version in CHANGELOG.md does not match the version to be published. Aborting!"
+              echo "ERROR_MESSAGE=The version in CHANGELOG.md does not match the version to be published.\nNEW_VERSION: ${{ env.NEW_VERSION }}\nCHANGELOG_VERSION: ${{ env.CHANGELOG_VERSION }}" >> $GITHUB_ENV
+              exit 1
+            fi
+          fi
+
+      # Set version as output of the workflow. This is needed for the next workflow to continue.
+      - name: Set the version output
+        id: version_id
+        run: echo "::set-output name=version::${{ env.NEW_VERSION }}"
+
+      # Send a slack notification if the version check did not pass
+      - name: Send a slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: ':no_entry: Release version check failed!',
+                color: 'danger',
+                text: `\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}\n\nError message: ${{ env.ERROR_MESSAGE }}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: failure()

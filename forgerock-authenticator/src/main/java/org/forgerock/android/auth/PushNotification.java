@@ -11,8 +11,8 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
+import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.biometric.BiometricAuth;
 import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler;
@@ -352,7 +352,7 @@ public class PushNotification extends ModelObject<PushNotification> {
     public final void accept(String title,
                              String subtitle,
                              boolean allowDeviceCredentials,
-                             @NonNull AppCompatActivity activity,
+                             @NonNull FragmentActivity activity,
                              @NonNull FRAListener<Void> listener) {
         if (this.pushType == PushType.BIOMETRIC) {
             final PushNotification pushNotification = this;

@@ -67,9 +67,6 @@ public class Config {
     //SSO Token Manager
     private Encryptor encryptor;
 
-    private boolean initialized = false;
-
-
     private SharedPreferences ssoSharedPreferences;
 
     //Token Manager

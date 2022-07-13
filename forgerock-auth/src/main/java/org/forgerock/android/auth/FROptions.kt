@@ -21,7 +21,7 @@ data class FROptions(val server: Server,
     companion object {
         @JvmStatic
         fun equals(old: FROptions?, new: FROptions?): Boolean {
-            // referential check first
+            // do the referential check first
             if(old === new) {
                 return true
             }

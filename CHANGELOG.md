@@ -1,3 +1,9 @@
+## [Unreleased]
+#### Fixed
+- Changed Activity type used as parameter in 'PushNotification.accept' [SDKS-1968]
+- Deserializing an object with whitelist to prevent deserialization of untrusted data.  [SDKS-1818]
+
+
 ## [3.3.3]
 #### Fixed
 - Bumped the version of the com.squareup.okhttp3 library to 4.10.0 [SDKS-1957]
