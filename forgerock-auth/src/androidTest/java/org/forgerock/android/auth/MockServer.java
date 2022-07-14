@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -39,7 +39,7 @@ public abstract class MockServer {
         server = new MockWebServer();
         server.start();
 
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         Config.getInstance().setUrl(getUrl());
     }
 

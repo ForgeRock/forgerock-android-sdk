@@ -21,7 +21,7 @@ interface ConfigInterface {
  * ConfigHelper Provide the helper methods to persist and load the configurations on start of the SDK
  * This class also verify if the configuration changes on the current and previous launch.
  */
-class ConfigHelper: ConfigInterface {
+internal class ConfigHelper: ConfigInterface {
 
     companion object {
 

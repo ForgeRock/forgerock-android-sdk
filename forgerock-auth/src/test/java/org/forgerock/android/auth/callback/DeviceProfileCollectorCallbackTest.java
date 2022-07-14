@@ -7,14 +7,16 @@
 
 package org.forgerock.android.auth.callback;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
 import org.forgerock.android.auth.Config;
-import org.forgerock.android.auth.ConfigHelper;
 import org.forgerock.android.auth.FRListenerFuture;
-import org.forgerock.android.auth.FROptions;
 import org.forgerock.android.auth.KeyStoreManager;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -25,10 +27,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.security.PublicKey;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class DeviceProfileCollectorCallbackTest {
@@ -47,8 +45,7 @@ public class DeviceProfileCollectorCallbackTest {
         byte[] encoded = "public key".getBytes();
         when(publicKey.getEncoded()).thenReturn(encoded);
         when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-        FROptions options = ConfigHelper.load(context, null);
-        Config.getInstance().init(context, options);
+        Config.getInstance().init(context, null);
         Config.getInstance().setKeyStoreManager(keyStoreManager);
     }
 
