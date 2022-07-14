@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.List;
@@ -107,15 +108,25 @@ public class Config {
         this.sharedPreferences = sharedPreferences;
     }
 
-    // We need to remove this in future, because the connected tests are depends on this. but the unit tests/integration tests are not depend on this.
-    @Deprecated
+    /**
+     * Load all the SDK configuration from the strings.xml
+     *
+     * @param appContext  The Application Context
+     */
     public synchronized void init(Context appContext) {
         FROptions option = ConfigHelper.load(appContext, null);
         init(appContext, option);
     }
 
-    public synchronized void init(Context context, FROptions options) {
+    /**
+     * Load all the SDK configuration from the FROptions
+     *
+     * @param context  The Application Context
+     * @param frOptions  FrOptions is nullable it loads the config from strings.xml, if not use the passed value.
+     */
+    public synchronized void init(Context context, @Nullable FROptions frOptions) {
         this.context = context.getApplicationContext();
+        FROptions options = (frOptions == null) ? ConfigHelper.load(context, null) : frOptions;
         clientId = options.getOauth().getOauthClientId();
         redirectUri = options.getOauth().getOauthRedirectUri();
         scope = options.getOauth().getOauthScope();

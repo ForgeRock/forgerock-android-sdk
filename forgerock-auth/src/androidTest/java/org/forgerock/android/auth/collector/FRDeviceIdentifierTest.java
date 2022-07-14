@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -29,7 +29,7 @@ public class FRDeviceIdentifierTest extends AndroidBaseTest {
     @Test
     public void testDeviceId() {
 
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
                 .context(context)
                 .keyStoreManager(KeyStoreManager.builder().context(context).build())
@@ -45,7 +45,7 @@ public class FRDeviceIdentifierTest extends AndroidBaseTest {
     @Test
     public void testRegenerateDeviceId() throws GeneralSecurityException, IOException {
 
-        Config.getInstance().init(context);
+        Config.getInstance().init(context,  null);
         DeviceIdentifier deviceIdentifier = DeviceIdentifier.builder()
                 .context(context)
                 .keyStoreManager(KeyStoreManager.builder().context(context).build())
