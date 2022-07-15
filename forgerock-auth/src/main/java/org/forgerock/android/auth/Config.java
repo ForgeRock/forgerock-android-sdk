@@ -88,8 +88,7 @@ public class Config {
         return this.url;
     }
 
-    private Config() {
-    }
+     Config() {}
 
     @VisibleForTesting
     public void setEncryptor(Encryptor encryptor) {
@@ -230,6 +229,7 @@ public class Config {
     private CookieJar getCookieJar() {
         if (cookieJar == null) {
             cookieJar = SecureCookieJar.builder()
+                    .singleSignOnManager(getSingleSignOnManager())
                     .context(context).cacheIntervalMillis(cookieCacheMillis).build();
         }
         return cookieJar;

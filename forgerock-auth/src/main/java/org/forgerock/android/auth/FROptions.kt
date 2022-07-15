@@ -136,9 +136,9 @@ class ServerBuilder {
 /**
  * Data class for the OAuth configurations
  */
-data class OAuth(val oauthClientId: String? = "",
-                 val oauthRedirectUri: String? = "",
-                 val oauthScope: String? = "",
+data class OAuth(val oauthClientId: String = "",
+                 val oauthRedirectUri: String = "",
+                 val oauthScope: String = "",
                  val oauthThresholdSeconds: Long = 0,
                  val oauthCacheSeconds: Long = 0,
                  val cookieCacheSeconds: Long = 0)
@@ -147,9 +147,9 @@ data class OAuth(val oauthClientId: String? = "",
  * Oauth builder to build the SDK configuration information specific to oauth
  */
 class OAuthBuilder {
-    var oauthClientId: String? = ""
-    var oauthRedirectUri: String? = ""
-    var oauthScope: String? = ""
+    var oauthClientId: String = ""
+    var oauthRedirectUri: String = ""
+    var oauthScope: String = ""
     var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
     var cookieCacheSeconds: Long = 0

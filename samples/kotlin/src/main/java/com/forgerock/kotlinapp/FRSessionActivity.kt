@@ -46,15 +46,17 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
         getAccessToken()
     }
 
+
+    override fun onException(e: Exception?) {
+      print("------> $e")
+    }
+
     override fun onCallbackReceived(node: Node?) {
         nodeDialog?.dismiss()
         nodeDialog = NodeDialogFragment.newInstance(node)
         nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
     }
 
-    override fun onException(e: Exception?) {
-
-    }
 
     private fun getAccessToken() {
         FRUser.getCurrentUser()?.getAccessToken(object : FRListener<AccessToken> {
@@ -66,7 +68,6 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
                     token?.let {
                         launchUserInfoFragment(token)
                     }
-
                 }
             }
 

@@ -87,8 +87,12 @@ class NodeDialogFragment: DialogFragment() {
             dismiss()
             node?.getCallback(NameCallback::class.java)?.setName(username.text.toString())
             node?.getCallback(PasswordCallback::class.java)?.setPassword(password.text.toString().toCharArray())
-            node?.next(context, listener)
-            node?.next(context, listenerSession)
+            if(listener != null) {
+                node?.next(context, listener)
+            }
+            if(listenerSession != null) {
+                node?.next(context, listenerSession)
+            }
         }
         val cancel: Button = view.findViewById(R.id.cancel)
         cancel.setOnClickListener { dismiss() }

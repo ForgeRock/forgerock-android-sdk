@@ -13,34 +13,34 @@ import android.content.Intent
 import org.junit.Test
 import org.mockito.kotlin.*
 
+
 class SSOBroadcastReceiverTest {
 
-    private val tokenManager: TokenManager = mock()
-    private val config = mock<Config> {
-        on { tokenManager } doReturn tokenManager
-    }
+    private val config = mock<Config>()
     private val intent = mock<Intent>()
+    private val tokenManager = mock<TokenManager>()
     private val resources = mock<android.content.res.Resources>()
     private val context = mock<Context> {
         on { packageName } doReturn "com.forgerock.sso"
         on { resources } doReturn resources
         on { resources.getString(R.string.forgerock_sso_logout) } doReturn "com.forgerock.action"
     }
-    private val sessionManager = mock<SessionManager>()
 
     @Test
     fun receiveBroadcastEventAndInvokeSessionManager() {
         whenever(intent.action).thenReturn("com.forgerock.action")
-        whenever(config.sessionManager).thenReturn(sessionManager)
         whenever(intent.getStringExtra("BROADCAST_PACKAGE_KEY")).thenReturn("com.forgerock.action")
+        whenever(config.tokenManager).thenReturn(tokenManager)
+
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(context, intent)
+
         verify(tokenManager).revoke(null)
+
     }
 
     @Test
     fun doNotInvokeSessionManagerWhenTheContextIsNull() {
-        whenever(config.sessionManager).thenReturn(sessionManager)
         val testObject = SSOBroadcastReceiver(config)
         testObject.onReceive(null, null)
         verifyNoInteractions(tokenManager)
