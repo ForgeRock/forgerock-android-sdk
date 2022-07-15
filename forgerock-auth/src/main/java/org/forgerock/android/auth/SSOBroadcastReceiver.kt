@@ -16,21 +16,17 @@ import org.forgerock.android.auth.BroadcastConst.broadcastPackageKey
  * Broadcast receiver to receive the logout SSO message
  */
 
-class SSOBroadcastReceiver(private val instance: Config = Config.getInstance(),
-                           private val configHelper: ConfigInterface = ConfigHelper()): BroadcastReceiver() {
+class SSOBroadcastReceiver(private val revokeToken: RevokeToken = RevokeToken()): BroadcastReceiver() {
+
     override fun onReceive(context: Context?, intent: Intent?) {
         if(intent?.getStringExtra(broadcastPackageKey) != context?.packageName
             && context != null
             && intent?.action == context.resources?.getString(R.string.forgerock_sso_logout)) {
             try {
-                instance.tokenManager.revoke(null)
+                revokeToken.clearToken(context, null, ClearToken)
             }
             catch (e: Exception) {
-                configHelper.loadFromPreference(context).let {
-                    instance.init(context, it)
-                    instance.tokenManager.revoke(null)
-                }
-
+                Logger.warn(SSOBroadcastReceiver::class.java.simpleName, e.message)
             }
         }
     }

@@ -88,8 +88,7 @@ public class Config {
         return this.url;
     }
 
-    private Config() {
-    }
+     Config() {}
 
     @VisibleForTesting
     public void setEncryptor(Encryptor encryptor) {

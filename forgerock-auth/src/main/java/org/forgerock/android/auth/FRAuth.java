@@ -46,12 +46,12 @@ public class FRAuth {
     public static synchronized void start(Context context, @Nullable FROptions options) {
         if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
-            FROptions frOptions = ConfigHelper.load(context, options);
-            Config.getInstance().init(context, frOptions);
-            if (ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions)) {
-                Config.getInstance().getSessionManager().close();
+            FROptions currentOptions = ConfigHelper.load(context, options);
+            if (ConfigHelper.isConfigDifferentFromPersistedValue(context, currentOptions)) {
+               ConfigHelper.closeSession(context, cachedOptions);
             }
-            ConfigHelper.persist(context, frOptions);
+            Config.getInstance().init(context, currentOptions);
+            ConfigHelper.persist(context, currentOptions);
             cachedOptions = options;
         }
     }

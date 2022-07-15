@@ -202,7 +202,7 @@ public class FRAuthMockTest extends BaseTest {
     public void startTest() {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigHelper.ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
-        sharedPreferences.edit().putString("url", "somethingelse").commit();
+        sharedPreferences.edit().putString("url", "https://somethingelse").commit();
 
         FRAuth.start(context);
         //host url is created
@@ -234,7 +234,7 @@ public class FRAuthMockTest extends BaseTest {
     public void startTestWithOptionsAndNull() {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(ConfigHelper.ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
-        sharedPreferences.edit().putString("url", "something_else").commit();
+        sharedPreferences.edit().putString("url", "https://somethingelseone").commit();
 
         FROptions frOptions = FROptionsBuilder.build(frOptionsBuilder -> {
             frOptionsBuilder.server(serverBuilder -> {

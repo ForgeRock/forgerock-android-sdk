@@ -42,6 +42,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     }
 
     private fun login() {
+
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
@@ -95,6 +96,9 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     fun whenBroadcastReceiverGetsLogoutEventThenVerifyRevokeTokenInvoked() {
         login()
 
+        val options = ConfigHelper.load(context, null).copy(Server(url, "root"))
+        ConfigHelper.persist(context, options)
+
         val latch = CountDownLatch(1)
         val mockHttpDispatcher = MockHttpDispatcher(latch)
         server.setDispatcher(mockHttpDispatcher)
@@ -102,7 +106,18 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val accessToken = FRUser.getCurrentUser().accessToken
         assertNotNull(FRUser.getCurrentUser())
 
-        val testObject = SSOBroadcastReceiver()
+        val config = Config()
+        config.sharedPreferences =  context.getSharedPreferences(
+            defaultTokenManagerTest,
+            Context.MODE_PRIVATE
+        )
+        config.ssoSharedPreferences =
+            context.getSharedPreferences(
+                defaultSSOTokenManagerTest,
+                Context.MODE_PRIVATE
+            )
+
+        val testObject = SSOBroadcastReceiver(RevokeToken(config))
         val intent = Intent("org.forgerock.android.auth.broadcast.SSO_LOGOUT")
         intent.putExtra("BROADCAST_PACKAGE_KEY", "com.test.forgerock")
         testObject.onReceive(context, intent)
@@ -120,7 +135,6 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
         assertTrue(body.contains(accessToken.refreshToken))
-
     }
 }
 

@@ -8,31 +8,24 @@
 package org.forgerock.android.auth
 
 import android.content.Context
-import android.content.SharedPreferences
 
-/**
- * Listener to load the options from persistence for the given context
- */
-interface ConfigInterface {
-    fun loadFromPreference(context: Context): FROptions
-}
 
 /**
  * ConfigHelper Provide the helper methods to persist and load the configurations on start of the SDK
  * This class also verify if the configuration changes on the current and previous launch.
  */
-internal class ConfigHelper: ConfigInterface {
+class ConfigHelper {
 
     companion object {
 
-         const val realm = "realm"
-         const val url = "url"
-         const val cookieName = "cookieName"
-         const val clientId = "client_id"
-         const val revokeEndpoint = "revoke_endpoint"
-         const val endSessionEndpoint = "end_session_endpoint"
-         const val scope = "scope"
-         const val redirectUri = "redirect_uri"
+        private  const val realm = "realm"
+        private const val url = "url"
+        private const val cookieName = "cookieName"
+        private const val clientId = "client_id"
+        private const val revokeEndpoint = "revoke_endpoint"
+        private const val endSessionEndpoint = "end_session_endpoint"
+        private const val scope = "scope"
+        private const val redirectUri = "redirect_uri"
 
         //Alias to store Previous Configure Host
         const val ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS"
@@ -57,6 +50,14 @@ internal class ConfigHelper: ConfigInterface {
                 .putString(scope, frOptions.oauth.oauthScope)
                 .putString(redirectUri, frOptions.oauth.oauthRedirectUri)
                 .apply()
+        }
+
+        @JvmOverloads
+        @JvmStatic
+        fun closeSession(context: Context,
+                         options: FROptions? = null) {
+            val revokeToken = RevokeToken()
+            revokeToken.clearToken(context, options, EndSession)
         }
 
         /**
@@ -164,24 +165,41 @@ internal class ConfigHelper: ConfigInterface {
      * @param context  The Application Context
      * @return FROptions from stored persistence
      */
-    override fun loadFromPreference(context: Context): FROptions {
-            val sharedPreferences: SharedPreferences =
-                context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)
-            return FROptionsBuilder.build {
+    @JvmOverloads
+    fun loadFromPreference(context: Context): FROptions? {
+        return context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, Context.MODE_PRIVATE)?.let { sharedPreferences ->
+             FROptionsBuilder.build {
                 server {
                     url = sharedPreferences.getString(ConfigHelper.url, null) ?: ""
                     realm = sharedPreferences.getString(ConfigHelper.realm, null) ?: ""
                     cookieName = sharedPreferences.getString(ConfigHelper.cookieName, null) ?: ""
                 }
                 oauth {
-                    oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null)
-                    oauthScope = sharedPreferences.getString(ConfigHelper.scope, null)
-                    oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null)
+                    oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null) ?: ""
+                    oauthScope = sharedPreferences.getString(ConfigHelper.scope, null) ?: ""
+                    oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null) ?: ""
                 }
                 urlPath {
                     endSessionEndpoint = sharedPreferences.getString(ConfigHelper.endSessionEndpoint, null)
                     revokeEndpoint = sharedPreferences.getString(ConfigHelper.revokeEndpoint, null)
                 }
             }
+        }
     }
+}
+
+sealed class RevokeType
+object ClearToken: RevokeType()
+object EndSession: RevokeType()
+
+class RevokeToken(private val config: Config = Config(),
+                  private val configHelper: ConfigHelper = ConfigHelper()
+) {
+     fun clearToken(context: Context, options: FROptions?, type: RevokeType) {
+         config.init(context, options ?: configHelper.loadFromPreference(context))
+         when(type) {
+             is ClearToken -> config.tokenManager.revoke(null)
+             is EndSession -> config.sessionManager.close()
+         }
+     }
 }
