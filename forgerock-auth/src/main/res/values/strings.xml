@@ -23,7 +23,9 @@
     <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
-    <string-array name="forgerock_ssl_pinning_public_key_hashes"></string-array>
+    <string-array name="forgerock_ssl_pinning_public_key_hashes">
+
+    </string-array>
 
     <!-- To override default path -->
     <string name="forgerock_authenticate_endpoint" translatable="false" />

@@ -112,5 +112,4 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
         updateStatus(true)
     }
 
-
 }

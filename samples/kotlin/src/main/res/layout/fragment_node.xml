@@ -76,18 +76,22 @@
 
         <Button
             android:id="@+id/cancel"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginRight="8dp"
             android:text="Cancel"
+            tools:visibility="visible"
             android:textAlignment="center" />
 
         <Button
             android:id="@+id/next"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            tools:visibility="visible"
             android:text="Next" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.RadioButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.forgerock.android.auth.Node
@@ -28,6 +29,7 @@ class NodeDialogFragment: DialogFragment() {
     private var listener: MainActivity? = null
     private var listenerSession: FRSessionActivity? = null
     private var node: Node? = null
+
     companion object {
         fun newInstance(node: Node?): NodeDialogFragment {
             return NodeDialogFragment().apply {
@@ -67,16 +69,33 @@ class NodeDialogFragment: DialogFragment() {
                 node?.getCallback(ChoiceCallback::class.java)?.setSelectedIndex(1)
             }
         }
-        node?.callbacks?.forEach {
-            when (it.type) {
-                "NameCallback" -> {
-                    (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "PasswordCallback" -> {
-                    (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "ChoiceCallback" -> {
-                    choiceNode.visibility = View.VISIBLE
+
+        node?.apply {
+            this.callbacks?.forEach {
+                when (it.type) {
+                    "NameCallback" -> {
+                        (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                        (view.findViewById(R.id.next) as? Button)?.visibility =
+                            View.VISIBLE
+                        (view.findViewById(R.id.cancel) as? Button)?.visibility =
+                            View.VISIBLE
+                    }
+                    "PasswordCallback" -> {
+                        (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                        (view.findViewById(R.id.next) as? Button)?.visibility =
+                            View.VISIBLE
+                        (view.findViewById(R.id.cancel) as? Button)?.visibility =
+                            View.VISIBLE
+                    }
+                    "ChoiceCallback" -> {
+                        choiceNode.visibility = View.VISIBLE
+                        (view.findViewById(R.id.next) as? Button)?.visibility =
+                            View.VISIBLE
+                        (view.findViewById(R.id.cancel) as? Button)?.visibility =
+                            View.VISIBLE
+                    }
                 }
             }
         }
@@ -87,8 +106,12 @@ class NodeDialogFragment: DialogFragment() {
             dismiss()
             node?.getCallback(NameCallback::class.java)?.setName(username.text.toString())
             node?.getCallback(PasswordCallback::class.java)?.setPassword(password.text.toString().toCharArray())
-            node?.next(context, listener)
-            node?.next(context, listenerSession)
+            listener?.let {
+                node?.next(context, listener)
+            }
+            listenerSession?.let {
+                node?.next(context, listenerSession)
+            }
         }
         val cancel: Button = view.findViewById(R.id.cancel)
         cancel.setOnClickListener { dismiss() }

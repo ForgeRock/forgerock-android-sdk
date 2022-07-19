@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.messaging.RemoteMessage;
+
 import org.forgerock.android.auth.Account;
 import org.forgerock.android.auth.FRAListener;
 import org.forgerock.android.auth.Mechanism;
@@ -33,6 +35,7 @@ import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.authenticator.sample.R;
 import org.forgerock.authenticator.sample.controller.AuthenticatorModel;
 import org.forgerock.authenticator.sample.controller.AuthenticatorModelListener;
+import org.forgerock.authenticator.sample.controller.FcmService;
 import org.forgerock.authenticator.sample.view.adapter.AccountAdapter;
 
 /**
@@ -48,6 +51,9 @@ public class AccountsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
+
+        FcmService service = new FcmService();
+        service.onMessageReceived(this);
 
         authenticatorModel = AuthenticatorModel.getInstance(getApplicationContext());
 

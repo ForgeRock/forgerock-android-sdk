@@ -52,22 +52,33 @@ public class FcmService extends FirebaseMessagingService {
     public FcmService() {
     }
 
+
+    public void onMessageReceived(Context context) {
+        createSystemNotification(null, context);
+    }
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message){
         try {
-            // Send remote message received to be processed by the Authenticator SDK
-            PushNotification pushNotification =  AuthenticatorModel
-                    .getInstance(getApplicationContext())
-                    .handleRemoteMessage(message);
 
-            // If it's a valid Push message from AM and not expired, create a system notification
-            if(pushNotification != null && !pushNotification.isExpired()) {
-                createSystemNotification(pushNotification);
-            }
-        } catch (InvalidNotificationException e) {
+          //  createSystemNotification(null);
+
+            // Send remote message received to be processed by the Authenticator SDK
+//            PushNotification pushNotification =  AuthenticatorModel
+//                    .getInstance(getApplicationContext())
+//                    .handleRemoteMessage(message);
+//
+//            // If it's a valid Push message from AM and not expired, create a system notification
+//            if(pushNotification != null && !pushNotification.isExpired()) {
+//                createSystemNotification(pushNotification);
+//            }
+        } catch (Exception e) {
             Log.e(TAG,"Error handling remote message: ", e);
         }
     }
+
+
+
 
     @Override
     public void onNewToken(@NonNull String s) {
@@ -84,34 +95,34 @@ public class FcmService extends FirebaseMessagingService {
      * Create system notification to display to user the Push request received
      * @param pushNotification the PushNotification object
      */
-    private void createSystemNotification(PushNotification pushNotification) {
+    private void createSystemNotification(PushNotification pushNotification, Context context) {
         int id = messageCount++;
 
-        Mechanism mechanism = AuthenticatorModel.getInstance(getApplicationContext()).getMechanism(pushNotification);
-        Intent intent = BaseNotificationActivity.setupIntent(this, PushNotificationActivity.class,
-                pushNotification, mechanism);
+      //  Mechanism mechanism = AuthenticatorModel.getInstance(getApplicationContext()).getMechanism(pushNotification);
+     //   Intent intent = BaseNotificationActivity.setupIntent(this, PushNotificationActivity.class,
+       //         null, null);
 
-        String title = String.format(getString(R.string.system_notification_title),
-                mechanism.getAccountName(), mechanism.getIssuer());
-        String body = getString(R.string.system_notification_body);
+//        String title = String.format(getString(R.string.system_notification_title),
+//                "test", "jey");
+//        String body = getString(R.string.system_notification_body);
 
-        Notification notification = generatePending(this, id, title, body, intent);
+        Notification notification = generatePending(context, id, "title", "body");
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(id, notification);
     }
 
     @SuppressLint("UnspecifiedImmutableFlag")
-    private Notification generatePending(Context context, int requestCode, String title, String message, Intent intent) {
+    private Notification generatePending(Context context, int requestCode, String title, String message) {
         createNotificationChannel(context);
 
-        PendingIntent pendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        }else {
-            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+//        PendingIntent pendingIntent;
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+//
+//        }else {
+//            pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        }
 
         return new NotificationCompat.Builder(context, context.getString(R.string.channel_id))
                 .setSmallIcon(R.drawable.forgerock_notification)
@@ -120,7 +131,7 @@ public class FcmService extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+              //  .setContentIntent(pendingIntent)
                 .build();
     }
 

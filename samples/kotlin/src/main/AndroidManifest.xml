@@ -25,6 +25,8 @@
         android:name="${forgerock_sso_permission}"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name="com.forgerock.kotlinapp.ForgeRockApplication"
         android:allowBackup="true"
@@ -33,6 +35,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ForgeRockAndroid">
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+
+        <activity android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name="org.forgerock.android.auth.authenticator.AuthenticatorService"

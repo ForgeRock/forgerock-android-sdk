@@ -17,6 +17,10 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
+import org.forgerock.android.auth.callback.IdPCallback
+import org.forgerock.android.auth.callback.SelectIdPCallback
+import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
+import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -38,7 +42,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         setContentView(R.layout.activity_main)
         updateStatus()
         loginButton.setOnClickListener {
-            FRUser.login(applicationContext, this)
             if(BuildConfig.embeddedLogin) {
                 FRUser.login(applicationContext, this)
             }
@@ -154,7 +157,12 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                 // if the dialog is cancelable
                 .setCancelable(false)
                 // positive button text and action
-                .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ -> })
+                .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                    FRUser.getCurrentUser()?.let {
+                        it.logout()
+                        updateStatus(true)
+                    }
+                })
             // create dialog box
             val alert = dialogBuilder.create()
             // set title for alert dialog box
@@ -165,10 +173,68 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
     }
 
     override fun onCallbackReceived(node: Node?) {
+        val activity = this
         nodeDialog?.dismiss()
-        nodeDialog = NodeDialogFragment.newInstance(node)
-        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+        node?.takeUnless { it.callbacks.isEmpty() }?.let {
+            it.callbacks.forEach { typer ->
+                when(typer.type) {
+                    "IdPCallback" -> {
+                        val idp: IdPCallback = node.getCallback(
+                            IdPCallback::class.java
+                        )
+                        idp.signIn(null, object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
 
+                            override fun onException(e: java.lang.Exception?) {
+                            }
+
+                        })
+                    }
+                    "SelectIdPCallback" -> {
+                        val idp: SelectIdPCallback = node.getCallback(
+                            SelectIdPCallback::class.java
+                        )
+                        idp.setValue("google_andy")
+                        node.next(activity, activity)
+                    }
+                    "WebAuthnAuthenticationCallback" -> {
+                        val webAuthCallback = node.getCallback(
+                            WebAuthnAuthenticationCallback::class.java
+                        )
+                        webAuthCallback?.authenticate(node, null, object : FRListener<Void?> {
+                            override fun onException(e: Exception) {
+                                print("")
+                                node.next(activity, activity)
+                            }
+
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    }
+                    "WebAuthnRegistrationCallback" -> {
+                        val callback = node.getCallback(
+                            WebAuthnRegistrationCallback::class.java
+                        )
+                        callback?.register(node, object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onException(e: java.lang.Exception?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    } "NameCallback", "ChoiceCallback", "ChoiceCallback" -> {
+                    nodeDialog = NodeDialogFragment.newInstance(it)
+                    nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                }
+            }
+
+        }
     }
 
     override fun logout() {

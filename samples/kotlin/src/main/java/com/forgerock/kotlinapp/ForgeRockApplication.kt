@@ -7,7 +7,9 @@
 package com.forgerock.kotlinapp
 
 import android.app.Application
+import org.forgerock.android.auth.Config
 import org.forgerock.android.auth.FRAuth
+import org.forgerock.android.auth.FROptionsBuilder
 import org.forgerock.android.auth.Logger
 
 class ForgeRockApplication: Application() {

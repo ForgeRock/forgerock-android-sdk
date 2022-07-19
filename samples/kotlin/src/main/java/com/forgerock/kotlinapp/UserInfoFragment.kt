@@ -15,6 +15,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import org.forgerock.android.auth.FRAuth
+import org.forgerock.android.auth.FROptionsBuilder
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -68,6 +70,24 @@ class UserInfoFragment : Fragment() {
         val logout: Button = view.findViewById(R.id.logout)
         logout.setOnClickListener {
             listener?.logout()
+        }
+        val realmButton: Button = view.findViewById(R.id.realm)
+        realmButton.setOnClickListener {
+            val frOptions = FROptionsBuilder.build {
+                server {
+                    url = "https://openam-forgerrock-sdks.forgeblocks.com/am"
+                    realm = "alpha"
+                }
+                oauth {
+                    oauthClientId = "AndroidTest"
+                    oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+                    oauthScope = "openid profile email address phone"
+                }
+                service {
+                    authServiceName = "jeySdkAuthenticationTree"
+                }
+            }
+            FRAuth.start(view.context, frOptions)
         }
     }
 
