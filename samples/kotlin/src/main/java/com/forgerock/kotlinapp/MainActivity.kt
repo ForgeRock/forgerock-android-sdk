@@ -38,7 +38,6 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         setContentView(R.layout.activity_main)
         updateStatus()
         loginButton.setOnClickListener {
-            FRUser.login(applicationContext, this)
             if(BuildConfig.embeddedLogin) {
                 FRUser.login(applicationContext, this)
             }

@@ -9,10 +9,11 @@ package org.forgerock.android.auth
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ConfigHelperTest {
@@ -36,6 +37,7 @@ class ConfigHelperTest {
             urlPath {
                 revokeEndpoint = "https://revoke"
                 endSessionEndpoint = "https://endsession"
+                logoutEndpoint = "https://logout"
             }
         }
         ConfigHelper.persist(context, frOptions)
@@ -47,6 +49,7 @@ class ConfigHelperTest {
         assertTrue(sharedPreferences.getString("client_id", null) == "client_id")
         assertTrue(sharedPreferences.getString("revoke_endpoint", null) == "https://revoke")
         assertTrue(sharedPreferences.getString("end_session_endpoint", null) == "https://endsession")
+        assertTrue(sharedPreferences.getString("logout_endpoint", null) == "https://logout")
         assertTrue(sharedPreferences.getString("scope", null) == "openid email address")
         assertTrue(sharedPreferences.getString("redirect_uri", null) == "https://redirecturi")
     }
@@ -128,8 +131,14 @@ class ConfigHelperTest {
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, scopeChanged))
         assertFalse(ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions))
 
-        val preference = ConfigHelper().loadFromPreference(context)
+        val preference = ConfigHelper.loadFromPreference(context)
         assertTrue(preference == frOptions)
+    }
+
+    @Test
+    fun closeSession() {
+        val config = ConfigHelper.getPersistedConfig(context, null)
+        assertNotNull(config)
     }
 
     @Test
