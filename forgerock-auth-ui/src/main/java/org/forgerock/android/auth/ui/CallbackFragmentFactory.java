@@ -63,6 +63,8 @@ public class CallbackFragmentFactory {
         register(WebAuthnAuthenticationCallback.class, WebAuthnAuthenticationCallbackFragment.class);
         register(SelectIdPCallback.class, SelectIdPCallbackFragment.class);
         register(IdPCallback.class, IdPCallbackFragment.class);
+        register(DeviceBindingCallback.class, DeviceBindingCallbackFragment.class);
+        register(DeviceSigningVerifierCallback.class, DeviceSigningVerifierCallbackFragment.class);
     }
 
     public static CallbackFragmentFactory getInstance() {
