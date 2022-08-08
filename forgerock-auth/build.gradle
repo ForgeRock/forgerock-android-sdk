@@ -10,6 +10,7 @@ apply plugin: "com.adarshr.test-logger"
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 31
@@ -18,7 +19,7 @@ android {
     useLibrary 'android.test.mock'
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
@@ -79,6 +80,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     //Make it optional for developer
     compileOnly 'com.google.android.gms:play-services-location:17.1.0'

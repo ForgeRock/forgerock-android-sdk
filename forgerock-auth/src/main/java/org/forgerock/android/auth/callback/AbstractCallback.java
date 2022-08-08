@@ -7,9 +7,6 @@
 
 package org.forgerock.android.auth.callback;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,8 +15,6 @@ import org.json.JSONObject;
  * Abstract Callback that provides the raw content of the Callback, and allow sub classes to access
  * Callback's input and output
  */
-@NoArgsConstructor
-@Getter
 public abstract class AbstractCallback implements Callback {
 
     //The content is as JSON representation, JSONObject is not Serializable
@@ -27,6 +22,8 @@ public abstract class AbstractCallback implements Callback {
 
     protected String content;
     protected int _id;
+
+    public AbstractCallback() {}
 
     protected JSONObject getContentAsJson() throws JSONException {
         return new JSONObject(content);
@@ -122,4 +119,11 @@ public abstract class AbstractCallback implements Callback {
 
     }
 
+    public String getContent() {
+        return this.content;
+    }
+
+    public int get_id() {
+        return this._id;
+    }
 }

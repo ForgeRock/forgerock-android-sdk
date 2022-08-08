@@ -11,7 +11,7 @@ android {
     compileSdkVersion 31
     defaultConfig {
         applicationId "org.forgerock.auth"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

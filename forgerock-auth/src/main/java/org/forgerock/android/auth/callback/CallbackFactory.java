@@ -49,6 +49,7 @@ public class CallbackFactory {
         register(WebAuthnAuthenticationCallback.class);
         register(SelectIdPCallback.class);
         register(IdPCallback.class);
+        register(DeviceBindingCallback.class);
     }
 
     /**
