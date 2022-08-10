@@ -2,7 +2,7 @@
 #### Fixed
 - Changed Activity type used as parameter in 'PushNotification.accept' [SDKS-1968]
 - Deserializing an object with whitelist to prevent deserialization of untrusted data.  [SDKS-1818]
-
+- Updated `authenticator` module and sample app to handle the new `POST_NOTIFICATIONS` permission. [SDKS-2033]
 
 ## [3.3.3]
 #### Fixed
