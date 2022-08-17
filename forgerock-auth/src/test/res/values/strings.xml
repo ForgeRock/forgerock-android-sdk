@@ -20,7 +20,6 @@
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
-    <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
     <string-array name="forgerock_ssl_pinning_public_key_hashes">
         <item>9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=</item>
