@@ -215,7 +215,9 @@ class DefaultTokenManager implements TokenManager {
         if (value == null) {
             return null;
         }
-        return AccessToken.fromJson(value);
+        AccessToken accessToken =  AccessToken.fromJson(value);
+        cache(accessToken);
+        return accessToken;
     }
 
     /**
