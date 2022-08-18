@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,13 +7,16 @@
 
 package org.forgerock.authenticator.sample.view.activity;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -24,7 +27,13 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import org.forgerock.android.auth.Account;
 import org.forgerock.android.auth.FRAListener;
@@ -43,6 +52,7 @@ public class AccountsActivity extends AppCompatActivity {
     private AuthenticatorModel authenticatorModel;
     private AccountAdapter accountAdapter;
     private AuthenticatorModelListener listener;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +99,30 @@ public class AccountsActivity extends AppCompatActivity {
             }
         };
         authenticatorModel.addListener(listener);
+
+        // Request notification permission for Android 13 and above
+        if (Build.VERSION.SDK_INT >= 33) {
+            final Activity activity = this;
+            requestPermissionLauncher = registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+                        @Override
+                        public void onActivityResult(Boolean isGranted) {
+                            if (isGranted) {
+                                Toast.makeText(activity,
+                                        "Notification permission granted. You now can " +
+                                                "use Push accounts.",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(activity,
+                                        "Permission not granted. You can manually set " +
+                                                "via Android Settings",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+
+            requestNotificationPermission();
+        }
     }
 
     @Override
@@ -114,6 +148,38 @@ public class AccountsActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @RequiresApi(api = 33)
+    private void requestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED) {
+            // Push notifications are enabled
+        } else if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS)) {
+            // User denied permission before, explain to the user why the app requires this permission
+            new AlertDialog.Builder(this)
+                    .setTitle("Notification Permission required")
+                    .setMessage("Notification Permission is needed in order to receive Push Authentication requests on your device. " +
+                            "If you deny, you will be unable to use Push accounts. To enable Push Notifications, click on 'Enable' and " +
+                            "select 'Allow' in the next screen.")
+                    .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).create().show();
+        } else {
+            // User didn't take any action yet, ask for the permission
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+        }
     }
 
     @Override
