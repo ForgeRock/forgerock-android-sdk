@@ -2,6 +2,7 @@
 #### Fixed
 - Changed Activity type used as parameter in 'PushNotification.accept' [SDKS-1968]
 - Deserializing an object with whitelist to prevent deserialization of untrusted data.  [SDKS-1818]
+- DefaultTokenManager does not cache AccessToken in memory upon retrieval from Shared Preferences.  [SDKS-2066]
 
 
 ## [3.3.3]
