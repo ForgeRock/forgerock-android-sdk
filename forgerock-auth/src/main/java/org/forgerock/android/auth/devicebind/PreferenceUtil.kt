@@ -25,10 +25,9 @@ interface PreferenceInterface {
  * Helper class to save and retrieve EncryptedMessage
  */
 class PreferenceUtil(context: Context,
-                     sharedPrefFileName: String = "deviceBinding",
                      private val uuid: String = UUID.randomUUID().toString(),
                      private val sharedPreferences: SharedPreferences =
-                         EncryptedPreferences.getInstance(context, sharedPrefFileName)): PreferenceInterface {
+                         EncryptedPreferences.getInstance(context)): PreferenceInterface {
 
     /**
      * Saved and EncryptedMessage
@@ -36,8 +35,6 @@ class PreferenceUtil(context: Context,
     override fun persist(userId: String,
                          key: String,
                          authenticationType: DeviceBindingAuthenticationType): String {
-        val binding: String? = sharedPreferences.getString(key, null)
-        if (binding == null) {
             val jsonObject = JSONObject()
             try {
                 jsonObject.put("userId", userId)
@@ -47,7 +44,6 @@ class PreferenceUtil(context: Context,
                 throw RuntimeException(e)
             }
             sharedPreferences.edit().putString(key, jsonObject.toString())?.apply()
-        }
         return this.uuid
     }
 }

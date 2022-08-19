@@ -150,11 +150,12 @@ class BiometricAuth @JvmOverloads constructor(
     }
 
     private fun setServicesFromActivity(activity: FragmentActivity) {
+        val context = activity.baseContext
         biometricManager = BiometricManager.from(activity)
-        keyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+        keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             fingerprintManager =
-                activity.getSystemService(Context.FINGERPRINT_SERVICE) as FingerprintManager
+                context.getSystemService(Context.FINGERPRINT_SERVICE) as FingerprintManager
         }
     }
 

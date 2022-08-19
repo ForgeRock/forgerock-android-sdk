@@ -7,15 +7,12 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import androidx.biometric.BiometricPrompt
+import org.forgerock.android.auth.DeviceIdentifier
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * Callback to collect the device binding information
@@ -39,11 +36,7 @@ open class DeviceBindingCallback: AbstractCallback {
     override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" ->  userId = value as String
         "challenge" -> challenge = value as String
-        "authenticationType" -> {
-            deviceBindingAuthenticationType = (value as? String)?.let {
-                DeviceBindingAuthenticationType.valueOf(it)
-            } ?: DeviceBindingAuthenticationType.NONE
-        }
+        "authenticationType" -> deviceBindingAuthenticationType = DeviceBindingAuthenticationType.valueOf(value as String)
         "title" -> title = value as? String ?: ""
         "subtitle" -> subtitle = value as? String ?: ""
         "description" -> description = value as? String ?: ""
@@ -63,8 +56,12 @@ open class DeviceBindingCallback: AbstractCallback {
         super.setValue(value, 1)
     }
 
-    fun setClientError(value: String?) {
+    fun setDeviceId(value: String?) {
         super.setValue(value, 2)
+    }
+
+    fun setClientError(value: String?) {
+        super.setValue(value, 3)
     }
 
     fun bind(context: Context,
@@ -74,85 +71,49 @@ open class DeviceBindingCallback: AbstractCallback {
 
     internal fun execute(context: Context,
                          listener: FRListener<Void>,
-                         keyAware: KeyAwareInterface = KeyAware(userId),
-                         biometric: BiometricInterface? = BiometricUtil(title, subtitle, description, deviceBindAuthenticationType = deviceBindingAuthenticationType),
-                         encryptedPreference: PreferenceInterface = PreferenceUtil(context)) {
+                         authInterface: AuthenticationInterface = getAuthenticationType(),
+                         encryptedPreference: PreferenceInterface = PreferenceUtil(context),
+                         deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
 
-        val keypair: KeyPair
-        // If the authentication type is none or the biometric supported then create keypair. if not throw exception
-        if(deviceBindingAuthenticationType == DeviceBindingAuthenticationType.NONE || isSupported(biometric)) {
-            keypair = createKeyPair(context, keyAware) ?: return
-        } else {
-            setClientError("Unsupported")
-            Logger.error(tag, "keypair creation failed and returning back ")
-            Listener.onException(
-                listener,
-                DeviceKeyPairCreationException("Please verify the biometric or credential settings, we are unable to create key pair")
-            )
-            return
-        }
-
-        if(deviceBindingAuthenticationType == DeviceBindingAuthenticationType.NONE) {
-            sign(context, listener, keypair, keyAware, encryptedPreference)
-            return
-        }
-        val startTime = Date().time
-        val biometricListener = object: BiometricAuthCompletionHandler {
-            override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {
-                val endTime =  TimeUnit.MILLISECONDS.toSeconds(Date().time - startTime)
-                if(endTime > (this@DeviceBindingCallback.timeout?.toLong() ?: 60)) {
-                    setClientError("Timeout")
-                    Listener.onException(
-                        listener,
-                        DeviceBindBiometricException("Biometric Timeout Exception"))
-                } else {
-                    sign(context, listener, keypair, keyAware, encryptedPreference)
+        when {
+            authInterface.isSupported() -> {
+                try {
+                    val keypair = authInterface.generateKeys(context)
+                    authInterface.authenticate(timeout ?: 60) { result ->
+                        if (result.isSucceeded) {
+                            val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
+                            val jws = authInterface.sign(keypair, kid, userId, challenge)
+                            setJws(jws)
+                            setDeviceId(deviceId)
+                            Listener.onSuccess(listener, null)
+                        } else {
+                            handleException(result.message, result.exception?.message ?: "", listener)
+                        }
+                    }
+                }
+                catch (e: Exception) {
+                    handleException("Abort", e.message ?: "", listener)
                 }
             }
-
-            override fun onError(errorCode: Int, errorMessage: String?) {
-                setClientError("Abort")
-                Logger.error(tag, errorMessage)
-                Listener.onException(
-                    listener,
-                    DeviceBindBiometricException("$errorCode: + $errorMessage"))
+            else -> {
+                handleException("Unsupported", "Please verify the biometric or credential settings, we are unable to create key pair", listener)
             }
         }
-        biometric?.setListener(biometricListener)
-        biometric?.authenticate()
-
     }
 
-    @JvmOverloads
-    open fun createKeyPair(context: Context, keyAware: KeyAwareInterface): KeyPair? {
-        return keyAware.generateKeys(context, challenge, deviceBindingAuthenticationType)
+    private fun handleException(serverError: String,
+                                logMessage: String,
+                                listener: FRListener<Void>,) {
+        setClientError(serverError)
+        Logger.error(tag, logMessage)
+        Listener.onException(
+            listener,
+            DeviceBindingException(logMessage)
+        )
     }
 
-    @JvmOverloads
-    open fun isSupported(biometricUtil: BiometricInterface?): Boolean {
-        return biometricUtil?.isSupported() == true
-    }
-
-    @JvmOverloads
-    open fun sign(context: Context,
-                  listener: FRListener<Void>,
-                  keyPair: KeyPair,
-                  keyInterface: KeyAwareInterface,
-                  encryptedPreference: PreferenceInterface) {
-        try {
-            val kid = encryptedPreference.persist(userId, keyPair.keyAlias, deviceBindingAuthenticationType)
-            val jws = keyInterface.sign(keyPair, kid, challenge)
-            setJws(jws)
-            Listener.onSuccess(listener, null)
-        }
-        catch (e: Exception) {
-            setClientError("Abort")
-            Logger.error(tag, "DeviceBindSigningException - " + e.message)
-            Listener.onException(
-                listener,
-                DeviceBindSigningException("DeviceBindSigningException" + e.message)
-            )
-        }
+    open fun getAuthenticationType(): AuthenticationInterface {
+        return DeviceBindAuthentication.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
     }
 }
 

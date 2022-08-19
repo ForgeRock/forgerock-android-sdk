@@ -1,4 +1,4 @@
-package org.forgerock.android.auth
+package org.forgerock.android.auth.devicebind
 
 import android.content.Context
 import android.content.SharedPreferences

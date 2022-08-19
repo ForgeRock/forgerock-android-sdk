@@ -1,4 +1,4 @@
-package org.forgerock.android.auth
+package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -7,14 +7,10 @@ import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
 import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.forgerock.android.auth.devicebind.BiometricUtil
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
+import java.util.concurrent.CountDownLatch
 
 class BiometricUtilTest {
 
@@ -25,7 +21,7 @@ class BiometricUtilTest {
     fun testStrongTypeWithBiometricOnly() {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricOnly())
         verify(biometricAuth).authenticatorType = AuthenticatorType.STRONG
     }
 
@@ -33,7 +29,7 @@ class BiometricUtilTest {
     fun testWeakTypeWithBiometricOnly() {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK)).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricOnly())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -41,7 +37,7 @@ class BiometricUtilTest {
     fun testWeakTypeWithFingerPrint() {
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricOnly())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -51,7 +47,7 @@ class BiometricUtilTest {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertFalse(testObject.isSupported())
+        assertFalse(testObject.isSupportedForBiometricOnly())
         verify(biometricAuth, never()).authenticatorType = AuthenticatorType.WEAK
         verify(biometricAuth, never()).authenticatorType = AuthenticatorType.STRONG
     }
@@ -62,7 +58,7 @@ class BiometricUtilTest {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricOnly())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -70,7 +66,7 @@ class BiometricUtilTest {
     fun testStrongTypeWithBiometricAndDeviceCredential() {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricAndDeviceCredential())
         verify(biometricAuth).authenticatorType = AuthenticatorType.STRONG
     }
 
@@ -78,7 +74,7 @@ class BiometricUtilTest {
     fun testWeakTypeWithBiometricAndDeviceCredential() {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricAndDeviceCredential())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -86,7 +82,7 @@ class BiometricUtilTest {
     fun testWeakTypeFingerPrintWithBiometricAndDeviceCredential() {
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricAndDeviceCredential())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -96,7 +92,7 @@ class BiometricUtilTest {
         whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricAndDeviceCredential())
         verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
@@ -104,7 +100,7 @@ class BiometricUtilTest {
     fun testKeyGuardManager() {
         whenever(biometricAuth.hasDeviceCredential()).thenReturn(true)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupportedForBiometricAndDeviceCredential())
         verify(biometricAuth, never()).authenticatorType = AuthenticatorType.WEAK
         verify(biometricAuth, never()).authenticatorType = AuthenticatorType.STRONG
     }
@@ -114,13 +110,62 @@ class BiometricUtilTest {
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
 
         val listener = object: BiometricAuthCompletionHandler {
-            override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {}
+            override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {
+
+            }
             override fun onError(errorCode: Int, errorMessage: String?) {}
 
         }
         testObject.setListener(listener)
         verify(biometricAuth).biometricAuthListener = listener
     }
+
+    @Test
+    fun testBiometricListenerForSuccess() {
+        val latch = CountDownLatch(1)
+        val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
+        val listener = testObject.getBiometricListener(timeout = 60) {
+            assertEquals(it, BiometricStatus(true, "", null))
+            assertNull(it.exception)
+            latch.countDown()
+        }
+        testObject.setListener(listener)
+        listener.onSuccess(null)
+        latch.await()
+    }
+
+
+    @Test
+    fun testBiometricListenerForTimeoutFailure() {
+        val latch = CountDownLatch(1)
+        val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
+        val listener = testObject.getBiometricListener(timeout = -100) {
+            assertEquals(false, it.isSucceeded)
+            assertEquals("Timeout", it.message)
+            assertNotNull(it.exception)
+            latch.countDown()
+        }
+        testObject.setListener(listener)
+        listener.onSuccess(null)
+        latch.await()
+    }
+
+    @Test
+    fun testBiometricListenerForWrongFingerPrintFailure() {
+        val latch = CountDownLatch(1)
+        val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
+        val listener = testObject.getBiometricListener(timeout = 60) {
+            assertEquals(false, it.isSucceeded)
+            assertEquals("Abort", it.message)
+            assertNotNull(it.exception)
+            latch.countDown()
+        }
+        testObject.setListener(listener)
+        listener.onError(1, "invalid credential")
+        latch.await()
+    }
+
+
 
     @Test
     fun authenticate() {

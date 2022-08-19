@@ -3,14 +3,14 @@ package org.forgerock.android.auth.devicebind
 /**
  * Exceptions for device binding
  */
-class DeviceBindSigningException @JvmOverloads constructor(
+class BiometricTimeOutException @JvmOverloads constructor(
     val error: String? = null,
 ) : Exception(error)
 
-class DeviceKeyPairCreationException @JvmOverloads constructor(
-    val error: String? = null
+class BiometricErrorException @JvmOverloads constructor(
+    val error: String? = null,
 ) : Exception(error)
 
-class DeviceBindBiometricException @JvmOverloads constructor(
+class DeviceBindingException @JvmOverloads constructor(
     val error: String? = null,
 ) : Exception(error)
