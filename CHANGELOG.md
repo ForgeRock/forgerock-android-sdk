@@ -4,6 +4,7 @@
 - Deserializing an object with whitelist to prevent deserialization of untrusted data.  [SDKS-1818]
 - Updated `authenticator` module and sample app to handle the new `POST_NOTIFICATIONS` permission. [SDKS-2033]
 - DefaultTokenManager does not cache AccessToken in memory upon retrieval from Shared Preferences.  [SDKS-2066]
+- Align forgerock_logout_endpoint configuration name with iOS [SDKS-2085]
 
 ## [3.3.3]
 #### Fixed

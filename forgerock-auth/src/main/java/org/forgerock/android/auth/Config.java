@@ -58,7 +58,7 @@ public class Config {
     private String tokenEndpoint;
     private String revokeEndpoint;
     private String userinfoEndpoint;
-    private String logoutEndpoint;
+    private String sessionEndpoint;
     private String endSessionEndpoint;
 
     //service
@@ -146,7 +146,10 @@ public class Config {
         tokenEndpoint = options.getUrlPath().getTokenEndpoint();
         revokeEndpoint = options.getUrlPath().getRevokeEndpoint();
         userinfoEndpoint = options.getUrlPath().getUserinfoEndpoint();
-        logoutEndpoint = options.getUrlPath().getLogoutEndpoint();
+        sessionEndpoint = options.getUrlPath().getSessionEndpoint();
+        if (StringUtils.isEmpty(sessionEndpoint)) {
+            sessionEndpoint = context.getString(R.string.forgerock_logout_endpoint);
+        }
         endSessionEndpoint = options.getUrlPath().getEndSessionEndpoint();
         identifier = UUID.randomUUID().toString();
         FRLogger customLogger = options.getLogger().getCustomLogger();
@@ -179,7 +182,7 @@ public class Config {
                 .tokenEndpoint(tokenEndpoint)
                 .revokeEndpoint(revokeEndpoint)
                 .userInfoEndpoint(userinfoEndpoint)
-                .logoutEndpoint(logoutEndpoint)
+                .sessionEndpoint(sessionEndpoint)
                 .endSessionEndpoint(endSessionEndpoint)
                 .build();
     }

@@ -23,7 +23,7 @@ internal class ConfigHelper {
         private const val clientId = "client_id"
         private const val revokeEndpoint = "revoke_endpoint"
         private const val endSessionEndpoint = "end_session_endpoint"
-        private const val logoutEndpoint = "logout_endpoint"
+        private const val sessionEndpoint = "session_endpoint"
         private const val scope = "scope"
         private const val redirectUri = "redirect_uri"
 
@@ -47,7 +47,7 @@ internal class ConfigHelper {
                 .putString(clientId, frOptions.oauth.oauthClientId)
                 .putString(revokeEndpoint, frOptions.urlPath.revokeEndpoint)
                 .putString(endSessionEndpoint, frOptions.urlPath.endSessionEndpoint)
-                .putString(logoutEndpoint, frOptions.urlPath.logoutEndpoint)
+                .putString(sessionEndpoint, frOptions.urlPath.sessionEndpoint)
                 .putString(scope, frOptions.oauth.oauthScope)
                 .putString(redirectUri, frOptions.oauth.oauthRedirectUri)
                 .apply()
@@ -79,7 +79,7 @@ internal class ConfigHelper {
                     endSessionEndpoint =
                         sharedPreferences.getString(ConfigHelper.endSessionEndpoint, null)
                     revokeEndpoint = sharedPreferences.getString(ConfigHelper.revokeEndpoint, null)
-                    logoutEndpoint = sharedPreferences.getString(ConfigHelper.logoutEndpoint, null)
+                    sessionEndpoint = sharedPreferences.getString(ConfigHelper.sessionEndpoint, null)
                 }
             }
         }
@@ -174,7 +174,7 @@ internal class ConfigHelper {
                     tokenEndpoint = context.getString(R.string.forgerock_token_endpoint)
                     revokeEndpoint = context.getString(R.string.forgerock_revoke_endpoint)
                     userinfoEndpoint = context.getString(R.string.forgerock_userinfo_endpoint)
-                    logoutEndpoint = context.getString(R.string.forgerock_logout_endpoint)
+                    sessionEndpoint = context.getString(R.string.forgerock_session_endpoint)
                     endSessionEndpoint = context.getString(
                         R.string.forgerock_endsession_endpoint
                     )

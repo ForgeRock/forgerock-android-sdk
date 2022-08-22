@@ -45,7 +45,7 @@ public class ServerConfig extends NetworkConfig {
     private String tokenEndpoint;
     private String revokeEndpoint;
     private String userInfoEndpoint;
-    private String logoutEndpoint;
+    private String sessionEndpoint;
     private String endSessionEndpoint;
 
     @lombok.Builder
@@ -64,7 +64,7 @@ public class ServerConfig extends NetworkConfig {
                          String tokenEndpoint,
                          String revokeEndpoint,
                          String userInfoEndpoint,
-                         String logoutEndpoint,
+                         String sessionEndpoint,
                          String endSessionEndpoint) {
         super(identifier,
                 getHost(context, url),
@@ -81,7 +81,7 @@ public class ServerConfig extends NetworkConfig {
         this.tokenEndpoint = tokenEndpoint;
         this.revokeEndpoint = revokeEndpoint;
         this.userInfoEndpoint = userInfoEndpoint;
-        this.logoutEndpoint = logoutEndpoint;
+        this.sessionEndpoint = sessionEndpoint;
         this.endSessionEndpoint = endSessionEndpoint;
 
     }
