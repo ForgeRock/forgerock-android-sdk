@@ -241,15 +241,14 @@ public class FRAuthMockTest extends BaseTest {
                 serverBuilder.setUrl("https://forgerocker.com");
                 serverBuilder.setRealm("realm");
                 serverBuilder.setCookieName("planet");
+                serverBuilder.setCookieCacheSeconds(5000);
                 serverBuilder.setTimeout(50);
                 return null;
             });
             frOptionsBuilder.oauth(oAuthBuilder -> {
                 oAuthBuilder.setOauthClientId("client_id");
                 oAuthBuilder.setOauthRedirectUri("https://redirecturi");
-                oAuthBuilder.setCookieCacheSeconds(5000);
-                oAuthBuilder.setCookieCacheSeconds(5000);
-                oAuthBuilder.setOauthScope("scope");
+               oAuthBuilder.setOauthScope("scope");
                 oAuthBuilder.setOauthThresholdSeconds(5000);
                 return null;
             });
@@ -292,6 +291,9 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getRegistrationServiceName(), frOptions.getService().getRegistrationServiceName());
 
         assertEquals(Config.getInstance().getCookieName(), frOptions.getServer().getCookieName());
+        Long millisCookieCache = frOptions.getServer().getCookieCacheSeconds() * 1000;
+        assertEquals(Config.getInstance().getCookieCacheMillis(), millisCookieCache);
+
         assertEquals(Config.getInstance().getRealm(), frOptions.getServer().getRealm());
         assertEquals(Config.getInstance().getTimeout(), frOptions.getServer().getTimeout());
         assertEquals(Config.getInstance().getUrl(), frOptions.getServer().getUrl());
@@ -311,8 +313,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getOauthCacheMillis(), millisOauthCache);
         Long thresholdSeconds = frOptions.getOauth().getOauthThresholdSeconds();
         assertEquals(Config.getInstance().getOauthThreshold(), thresholdSeconds);
-        Long millisCookieCache = frOptions.getOauth().getCookieCacheSeconds() * 1000;
-        assertEquals(Config.getInstance().getCookieCacheMillis(), millisCookieCache);
 
         FRAuth.start(context, null);
         SharedPreferences sharedPreferences1 = context.getSharedPreferences(ConfigHelper.ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);

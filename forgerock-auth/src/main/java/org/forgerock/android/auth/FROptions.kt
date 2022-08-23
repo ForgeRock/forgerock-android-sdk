@@ -119,7 +119,8 @@ class FROptionsBuilder {
 data class Server(val url: String,
                   val realm: String,
                   val timeout: Int = 30,
-                  val cookieName: String = "iPlanetDirectoryPro")
+                  val cookieName: String = "iPlanetDirectoryPro",
+                  val cookieCacheSeconds: Long = 0)
 
 /**
  * Server builder to build the SDK configuration information specific to server
@@ -129,8 +130,9 @@ class ServerBuilder {
     lateinit var realm: String
     var timeout: Int = 30
     var cookieName: String = "iPlanetDirectoryPro"
+    var cookieCacheSeconds: Long = 0
 
-    fun build(): Server = Server(url, realm, timeout, cookieName)
+    fun build(): Server = Server(url, realm, timeout, cookieName, cookieCacheSeconds)
 }
 
 /**
@@ -140,8 +142,7 @@ data class OAuth(val oauthClientId: String = "",
                  val oauthRedirectUri: String = "",
                  val oauthScope: String = "",
                  val oauthThresholdSeconds: Long = 0,
-                 val oauthCacheSeconds: Long = 0,
-                 val cookieCacheSeconds: Long = 0)
+                 val oauthCacheSeconds: Long = 0)
 
 /**
  * Oauth builder to build the SDK configuration information specific to oauth
@@ -152,9 +153,8 @@ class OAuthBuilder {
     var oauthScope: String = ""
     var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
-    var cookieCacheSeconds: Long = 0
 
-    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthScope, oauthThresholdSeconds, oauthCacheSeconds, cookieCacheSeconds)
+    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
 
 }
 

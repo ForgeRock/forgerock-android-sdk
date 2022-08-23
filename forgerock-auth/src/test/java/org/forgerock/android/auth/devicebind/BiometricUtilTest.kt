@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager
@@ -125,8 +131,7 @@ class BiometricUtilTest {
         val latch = CountDownLatch(1)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = 60) {
-            assertEquals(it, BiometricStatus(true, null, null))
-            assertNull(it.errorType)
+            assertEquals(it, Success)
             latch.countDown()
         }
         testObject.setListener(listener)
@@ -140,9 +145,8 @@ class BiometricUtilTest {
         val latch = CountDownLatch(1)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = -100) {
-            assertEquals(false, it.isSucceeded)
-            assertEquals("Timeout", it.errorType?.name)
-            assertNotNull(it.errorType)
+            assertTrue(it is Timeout)
+            assertEquals("Biometric Timeout", it.message)
             latch.countDown()
         }
         testObject.setListener(listener)
@@ -155,9 +159,8 @@ class BiometricUtilTest {
         val latch = CountDownLatch(1)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = 60) {
-            assertEquals(false, it.isSucceeded)
-            assertEquals("Abort", it.errorType?.name)
-            assertNotNull(it.errorType)
+            assertTrue(it is Abort)
+            assertEquals("invalid credential", it.message)
             latch.countDown()
         }
         testObject.setListener(listener)

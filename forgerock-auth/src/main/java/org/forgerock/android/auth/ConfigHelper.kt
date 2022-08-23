@@ -143,6 +143,9 @@ internal class ConfigHelper {
                     realm = context.getString(R.string.forgerock_realm)
                     timeout = context.resources.getInteger(R.integer.forgerock_timeout)
                     cookieName = context.getString(R.string.forgerock_cookie_name)
+                    cookieCacheSeconds =
+                        context.resources.getInteger(R.integer.forgerock_cookie_cache)
+                            .toLong()
                 }
                 oauth {
                     oauthClientId = context.getString(R.string.forgerock_oauth_client_id)
@@ -153,10 +156,7 @@ internal class ConfigHelper {
                     oauthCacheSeconds =
                         context.resources.getInteger(R.integer.forgerock_oauth_cache)
                             .toLong()
-                    cookieCacheSeconds =
-                        context.resources.getInteger(R.integer.forgerock_cookie_cache)
-                            .toLong()
-                }
+               }
                 sslPinning {
                     pins = context.resources
                         .getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes).toList()

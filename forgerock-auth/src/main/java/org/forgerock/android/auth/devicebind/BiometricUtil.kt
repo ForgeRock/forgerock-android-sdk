@@ -1,5 +1,12 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.devicebind
 
+import android.os.Build
 import androidx.biometric.BiometricManager.Authenticators.*
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
@@ -12,11 +19,35 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 interface BiometricInterface {
+    /**
+     * check support for Biometric only authentication type
+     */
     fun isSupportedForBiometricOnly(): Boolean
+    /**
+     * check support for Biometric and device credential authentication type
+     */
     fun isSupportedForBiometricAndDeviceCredential(): Boolean
+    /**
+     * set the biometric auth listener
+     * @param listener Listener for receiving Biometric changes
+     */
     fun setListener(listener: BiometricAuthCompletionHandler?)
-    fun getBiometricListener(timeout: Int, statusResult: (BiometricStatus) -> Unit): BiometricAuthCompletionHandler
+    /**
+     * Create biometric listener and produce the result
+     * @param timeout Timeout for the biometric prompt.
+     * @param statusResult Result of biometric action.
+     */
+    fun getBiometricListener(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit): BiometricAuthCompletionHandler
+    /**
+     * To display biometric prompt
+     */
     fun authenticate()
+    /**
+     * check the device running on R and above
+     */
+    fun isApi30AndAbove(): Boolean  {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+    }
 }
 
 /**
@@ -39,24 +70,28 @@ class BiometricUtil(titleValue: String,
             descriptionValue)
     }
 
-    override fun getBiometricListener(timeout: Int, statusResult: (BiometricStatus) -> Unit): BiometricAuthCompletionHandler {
+
+    override fun getBiometricListener(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit): BiometricAuthCompletionHandler {
         val startTime = Date().time
         val biometricListener = object: BiometricAuthCompletionHandler {
             override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {
                 val endTime =  TimeUnit.MILLISECONDS.toSeconds(Date().time - startTime)
                 if(endTime > (timeout.toLong())) {
-                    statusResult(BiometricStatus(false, DeviceBindingError.Timeout, DeviceBindingError.Timeout.message))
+                    statusResult(Timeout())
                 } else {
-                    statusResult(BiometricStatus(true, null, null))
+                    statusResult(Success)
                 }
             }
             override fun onError(errorCode: Int, errorMessage: String?) {
-                statusResult(BiometricStatus(false, DeviceBindingError.Abort, errorMessage, errorCode))
+                statusResult(Abort(errorMessage ?: "User Terminates the biometric Authentication", code = errorCode))
             }
         }
         return biometricListener
     }
 
+    /**
+     * check support for Biometric and device credential
+     */
     override fun isSupportedForBiometricAndDeviceCredential(): Boolean {
         biometricAuth?.apply {
             when {
@@ -84,6 +119,9 @@ class BiometricUtil(titleValue: String,
         return false
     }
 
+    /**
+     * check support for Biometric only
+     */
     override fun isSupportedForBiometricOnly(): Boolean {
         biometricAuth?.apply {
             when {
@@ -110,17 +148,20 @@ class BiometricUtil(titleValue: String,
         return false
     }
 
+    /**
+     * set the biometric auth listener
+     * @param listener Listener for receiving Biometric changes
+     */
     override fun setListener(listener: BiometricAuthCompletionHandler?) {
         biometricListener = listener
         biometricAuth?.biometricAuthListener = biometricListener
     }
 
+
+    /**
+     * To display biometric prompt
+     */
     override fun authenticate() {
         biometricAuth?.authenticate()
     }
 }
-
-data class BiometricStatus(val isSucceeded: Boolean,
-                           val errorType: DeviceBindingError? = null,
-                           val errorMessage: String? = null,
-                           val errorCode: Int? = null)

@@ -16,6 +16,9 @@ import org.json.JSONObject
 import java.util.*
 
 interface PreferenceInterface {
+    /**
+     * Persist the data in encrypted shared preference
+     */
     fun persist(userId: String,
                 key: String,
                 authenticationType: DeviceBindingAuthenticationType): String
@@ -30,7 +33,7 @@ class PreferenceUtil(context: Context,
                          EncryptedPreferences.getInstance(context)): PreferenceInterface {
 
     /**
-     * Saved and EncryptedMessage
+     * Persist the data in encrypted shared preference
      */
     override fun persist(userId: String,
                          key: String,

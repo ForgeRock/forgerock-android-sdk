@@ -26,6 +26,15 @@ class DeviceBindingCallbackTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
 
+    private val encryptedPref = mock<PreferenceInterface>()
+    private val keyAware = mock<DeviceBindInterface>()
+    private val publicKey = mock<RSAPublicKey>()
+    private val privateKey = mock<PrivateKey>()
+    private val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
+    private val kid = "kid"
+    private val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
+    private val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
+
     @Test
     fun testValuesAreSetProperly() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ALLOW_FALLBACK\"},{\"name\":\"challenge\",\"value\":\"uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw=\"},{\"name\":\"title\",\"value\":\"jey\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
@@ -33,7 +42,6 @@ class DeviceBindingCallbackTest {
         val testObject = DeviceBindingCallback(obj, 0)
         assertEquals(rawContent, testObject.getContent())
     }
-
 
     @Test
     fun testSetDeviceNameAndJWSAndClientError() {
@@ -53,18 +61,11 @@ class DeviceBindingCallbackTest {
     fun testSuccessPathForNoneType() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw=\"},{\"name\":\"title\",\"value\":\"jey\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
         val authenticationLatch = CountDownLatch(1)
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenReturn(keyPair)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (BiometricStatus) -> Unit).invoke(BiometricStatus(true, null, null))
+            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.NONE)).thenReturn(kid)
@@ -92,18 +93,10 @@ class DeviceBindingCallbackTest {
     @Test
     fun testSuccessPathForBiometricType() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ONLY\"},{\"name\":\"challenge\",\"value\":\"uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw=\"},{\"name\":\"title\",\"value\":\"jey\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenReturn(keyPair)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (BiometricStatus) -> Unit).invoke(BiometricStatus(true, null, null))
+            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)).thenReturn(kid)
@@ -132,18 +125,10 @@ class DeviceBindingCallbackTest {
     @Test
     fun testSuccessPathForBiometricAndCredentialType() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenReturn(keyPair)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (BiometricStatus) -> Unit).invoke(BiometricStatus(true, null, null))
+            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
@@ -169,22 +154,56 @@ class DeviceBindingCallbackTest {
         assertTrue(success)
     }
 
-
     @Test
-    fun testFailurePathForBiometric() {
+    fun testFailurePathForBiometricAbort() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
+        val errorCode = -1
+        val abort = Abort(code = errorCode)
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenReturn(keyPair)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (BiometricStatus) -> Unit).invoke(BiometricStatus(false, DeviceBindingError.Timeout, DeviceBindingError.Timeout.message))
+            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(abort)
+        }
+        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
+        whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
+
+        val authenticationLatch = CountDownLatch(1)
+        val obj = JSONObject(rawContent)
+        val testObject = DeviceBindingCallback(obj, 0)
+
+        var failed = false
+        var exception: Exception? = null
+        val listener = object: FRListener<Void> {
+            override fun onSuccess(result: Void?) {
+                failed = false
+                fail()
+            }
+
+            override fun onException(e: Exception?) {
+                exception = e
+                failed = true
+                authenticationLatch.countDown()
+            }
+        }
+        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+        authenticationLatch.await()
+        assertTrue(failed)
+        assertTrue(exception?.message == abort.message)
+        assertTrue(exception is DeviceBindingException)
+        val deviceBindException = exception as DeviceBindingException
+        assertTrue(deviceBindException.message ==  abort.message)
+        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
+        verify(encryptedPref, times(0)).persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+    }
+
+
+    @Test
+    fun testFailurePathForBiometricTimeout() {
+        val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        whenever(keyAware.isSupported()).thenReturn(true)
+        whenever(keyAware.generateKeys()).thenReturn(keyPair)
+        whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
+            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Timeout())
         }
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
@@ -214,21 +233,11 @@ class DeviceBindingCallbackTest {
         assertTrue(exception is DeviceBindingException)
         verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
         verify(encryptedPref, times(0)).persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-
     }
 
     @Test
     fun testFailurePathForUnsupported() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
-
         whenever(keyAware.isSupported()).thenReturn(false)
 
         val authenticationLatch = CountDownLatch(1)
@@ -252,8 +261,12 @@ class DeviceBindingCallbackTest {
         testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
         authenticationLatch.await()
         assertTrue(failed)
+
         assertTrue(exception?.message == "Device not supported. Please verify the biometric or Pin settings")
         assertTrue(exception is DeviceBindingException)
+
+        val deviceBindException = exception as DeviceBindingException
+        assertTrue(deviceBindException.message == Unsupported().message)
 
         val actualOutput = testObject.getContent()
         val expectedOut = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"Unsupported\"}]}"
@@ -268,14 +281,6 @@ class DeviceBindingCallbackTest {
     @Test
     fun testFailurePathForKeyGeneration() {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<PreferenceInterface>()
-        val keyAware = mock<AuthenticationInterface>()
-        val publicKey = mock<RSAPublicKey>()
-        val privateKey = mock<PrivateKey>()
-        val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
-        val kid = "kid"
-        val userid = "id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org"
-        val challenge = "uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw="
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenThrow(NullPointerException::class.java)
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
@@ -302,6 +307,8 @@ class DeviceBindingCallbackTest {
         testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
         authenticationLatch.await()
         assertTrue(failed)
+        assertTrue(exception is DeviceBindingException)
+        assertTrue(exception?.message == "Failed to generate keypair or sign the transaction")
         assertNotNull(exception)
         verify(keyAware, times(0)).authenticate(eq(20), any())
         verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
