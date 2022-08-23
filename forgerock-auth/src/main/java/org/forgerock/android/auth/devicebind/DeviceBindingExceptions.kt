@@ -3,14 +3,16 @@ package org.forgerock.android.auth.devicebind
 /**
  * Exceptions for device binding
  */
-class BiometricTimeOutException @JvmOverloads constructor(
-    val error: String? = null,
-) : Exception(error)
-
-class BiometricErrorException @JvmOverloads constructor(
-    val error: String? = null,
-) : Exception(error)
 
 class DeviceBindingException @JvmOverloads constructor(
-    val error: String? = null,
+    val error: String? = "",
+    val errorCode: Int? = null,
 ) : Exception(error)
+
+
+enum class DeviceBindingError(val message: String) {
+    Timeout("Biometric Timeout"),
+    Abort("User Terminates the Authentication"),
+    Unsupported("Device not supported. Please verify the biometric or Pin settings"),
+    KeyCreationAndSign("Failed to generate keypair or sign the transaction")
+}

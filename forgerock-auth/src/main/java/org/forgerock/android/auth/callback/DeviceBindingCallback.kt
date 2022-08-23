@@ -64,6 +64,14 @@ open class DeviceBindingCallback: AbstractCallback {
         super.setValue(value, 3)
     }
 
+    private fun mapToServerError(error: DeviceBindingError) {
+        if(error == DeviceBindingError.KeyCreationAndSign) {
+            setClientError(DeviceBindingError.Unsupported.name)
+        } else {
+            setClientError(error.name)
+        }
+    }
+
     fun bind(context: Context,
              listener: FRListener<Void>) {
         execute(context, listener)
@@ -75,40 +83,43 @@ open class DeviceBindingCallback: AbstractCallback {
                          encryptedPreference: PreferenceInterface = PreferenceUtil(context),
                          deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
 
-        when {
-            authInterface.isSupported() -> {
-                try {
-                    val keypair = authInterface.generateKeys(context)
-                    authInterface.authenticate(timeout ?: 60) { result ->
-                        if (result.isSucceeded) {
-                            val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
-                            val jws = authInterface.sign(keypair, kid, userId, challenge)
-                            setJws(jws)
-                            setDeviceId(deviceId)
-                            Listener.onSuccess(listener, null)
-                        } else {
-                            handleException(result.message, result.exception?.message ?: "", listener)
-                        }
-                    }
-                }
-                catch (e: Exception) {
-                    handleException("Abort", e.message ?: "", listener)
+        if(authInterface.isSupported().not()) {
+            handleException(DeviceBindingError.Unsupported, DeviceBindingError.Unsupported.message, listener = listener)
+            return
+        }
+
+        try {
+            val keypair = authInterface.generateKeys()
+            authInterface.authenticate(timeout ?: 60) { result ->
+                if (result.isSucceeded) {
+                    val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
+                    val jws = authInterface.sign(keypair, kid, userId, challenge)
+                    setJws(jws)
+                    setDeviceId(deviceId)
+                    Listener.onSuccess(listener, null)
+                } else {
+                    // All the biometric exception is handled here , it could be Abort or timeout
+                    handleException(result.errorType, result.errorMessage, result.errorCode, listener = listener)
                 }
             }
-            else -> {
-                handleException("Unsupported", "Please verify the biometric or credential settings, we are unable to create key pair", listener)
-            }
+        }
+        catch (e: Exception) {
+            // This  Exception happens only when there is Signing or keypair failed.
+            handleException(DeviceBindingError.KeyCreationAndSign, e.message, listener = listener)
         }
     }
 
-    private fun handleException(serverError: String,
-                                logMessage: String,
-                                listener: FRListener<Void>,) {
-        setClientError(serverError)
+    open fun handleException(serverError: DeviceBindingError?,
+                             logMessage: String?,
+                             errorCode: Int? = null,
+                             listener: FRListener<Void>) {
+        serverError?.let {
+            mapToServerError(it)
+        }
         Logger.error(tag, logMessage)
         Listener.onException(
             listener,
-            DeviceBindingException(logMessage)
+            DeviceBindingException(logMessage, errorCode)
         )
     }
 

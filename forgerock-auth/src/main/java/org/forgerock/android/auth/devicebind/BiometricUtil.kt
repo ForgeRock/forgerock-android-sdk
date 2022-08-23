@@ -45,13 +45,13 @@ class BiometricUtil(titleValue: String,
             override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {
                 val endTime =  TimeUnit.MILLISECONDS.toSeconds(Date().time - startTime)
                 if(endTime > (timeout.toLong())) {
-                    statusResult(BiometricStatus(false, "Timeout", BiometricTimeOutException("Biometric Timeout")))
+                    statusResult(BiometricStatus(false, DeviceBindingError.Timeout, DeviceBindingError.Timeout.message))
                 } else {
-                    statusResult(BiometricStatus(true, "", null))
+                    statusResult(BiometricStatus(true, null, null))
                 }
             }
             override fun onError(errorCode: Int, errorMessage: String?) {
-                statusResult(BiometricStatus(false, "Abort", BiometricErrorException("$errorCode: $errorMessage")))
+                statusResult(BiometricStatus(false, DeviceBindingError.Abort, errorMessage, errorCode))
             }
         }
         return biometricListener
@@ -119,3 +119,8 @@ class BiometricUtil(titleValue: String,
         biometricAuth?.authenticate()
     }
 }
+
+data class BiometricStatus(val isSucceeded: Boolean,
+                           val errorType: DeviceBindingError? = null,
+                           val errorMessage: String? = null,
+                           val errorCode: Int? = null)

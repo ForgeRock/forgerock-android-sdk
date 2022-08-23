@@ -7,11 +7,12 @@
 
 package org.forgerock.android.auth.devicebind
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.annotation.RequiresApi
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
@@ -26,7 +27,7 @@ import java.security.*
 import java.security.interfaces.RSAPublicKey
 
 interface AuthenticationInterface {
-    fun generateKeys(context: Context): KeyPair
+    fun generateKeys(): KeyPair
     fun authenticate(timeout: Int,  statusResult: (BiometricStatus) -> Unit)
     fun sign(keyPair: KeyPair, kid: String, userId: String, challenge: String): String {
         val jwk: JWK = RSAKey.Builder(keyPair.publicKey)
@@ -55,11 +56,6 @@ data class KeyPair(
      var keyAlias: String
 )
 
-data class BiometricStatus(val isSucceeded: Boolean,
-                           val message: String,
-                           val exception: Exception?)
-
-
 class DeviceBindAuthentication(private var userId: String) {
     companion object {
         fun getType(userId: String,
@@ -71,7 +67,7 @@ class DeviceBindAuthentication(private var userId: String) {
             return when (authentication) {
                 DeviceBindingAuthenticationType.BIOMETRIC_ONLY -> BiometricOnly(biometricInterface = BiometricUtil(title, subtitle, description, deviceBindAuthenticationType = authentication), deviceBindAuthentication)
                 DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK -> BiometricAndDeviceCredential(BiometricUtil(title, subtitle, description, deviceBindAuthenticationType = authentication), deviceBindAuthentication)
-                else -> None(null, deviceBindAuthentication)
+                else -> None(deviceBindAuthentication)
             }
         }
     }
@@ -87,6 +83,7 @@ class DeviceBindAuthentication(private var userId: String) {
     private val purpose = KeyProperties.PURPOSE_SIGN or
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
     private val key = getKeyAlias(userId)
+    val isApi30AndAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
      fun keyBuilder(): KeyGenParameterSpec.Builder {
         val key = getKeyAlias()
@@ -114,7 +111,7 @@ class DeviceBindAuthentication(private var userId: String) {
         return KeyPair(publicKey, privateKey, key)
     }
 
-    private fun getKeyAlias(keyName: String = userId): String {
+    internal fun getKeyAlias(keyName: String = userId): String {
         return getHash(keyName)
     }
     /**
@@ -127,7 +124,7 @@ class DeviceBindAuthentication(private var userId: String) {
         return keyStore
     }
 
-    fun getHash(value: String): String {
+    private fun getHash(value: String): String {
         return try {
             val digest: MessageDigest = MessageDigest.getInstance(hashingAlgorithm)
             val hash: ByteArray? = digest.digest(value.toByteArray())
@@ -144,9 +141,10 @@ class DeviceBindAuthentication(private var userId: String) {
 class BiometricOnly(private val biometricInterface: BiometricInterface,
                     private val authentication: DeviceBindAuthentication): AuthenticationInterface {
 
-    override fun generateKeys(context: Context): KeyPair {
+    @SuppressLint("NewApi")
+    override fun generateKeys(): KeyPair {
             val builder = authentication.keyBuilder()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (authentication.isApi30AndAbove) {
                 builder.setUserAuthenticationParameters(authentication.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG)
             } else {
                 builder.setUserAuthenticationValidityDurationSeconds(authentication.timeout)
@@ -167,12 +165,13 @@ class BiometricOnly(private val biometricInterface: BiometricInterface,
 
 }
 
-class BiometricAndDeviceCredential(private val biometricInterface: BiometricInterface? = null,
+class BiometricAndDeviceCredential(private val biometricInterface: BiometricInterface,
                                    private val authentication: DeviceBindAuthentication): AuthenticationInterface {
 
-    override fun generateKeys(context: Context): KeyPair {
+    @SuppressLint("NewApi")
+    override fun generateKeys(): KeyPair {
         val builder = authentication.keyBuilder()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (authentication.isApi30AndAbove) {
             builder.setUserAuthenticationParameters(authentication.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         } else {
             builder.setUserAuthenticationValidityDurationSeconds(authentication.timeout)
@@ -182,19 +181,18 @@ class BiometricAndDeviceCredential(private val biometricInterface: BiometricInte
     }
 
     override fun isSupported(): Boolean {
-        return biometricInterface?.isSupportedForBiometricOnly() == true
+        return biometricInterface.isSupportedForBiometricOnly()
     }
 
     override fun authenticate(timeout: Int,  statusResult: (BiometricStatus) -> Unit) {
-        val listener = biometricInterface?.getBiometricListener(timeout, statusResult)
-        biometricInterface?.setListener(listener)
-        biometricInterface?.authenticate()
+        val listener = biometricInterface.getBiometricListener(timeout, statusResult)
+        biometricInterface.setListener(listener)
+        biometricInterface.authenticate()
     }
 }
 
-class None(private val biometricInterface: BiometricInterface? = null,
-           private val authentication: DeviceBindAuthentication): AuthenticationInterface {
-    override fun generateKeys(context: Context): KeyPair {
+class None(private val authentication: DeviceBindAuthentication): AuthenticationInterface {
+    override fun generateKeys(): KeyPair {
         val builder = authentication.keyBuilder()
         return authentication.createKeyPair(builder)
     }
@@ -206,6 +204,6 @@ class None(private val biometricInterface: BiometricInterface? = null,
     override fun authenticate(
         timeout: Int,
         result: (BiometricStatus) -> Unit) {
-        result(BiometricStatus(true, "", null))
+        result(BiometricStatus(true, null, null))
     }
 }

@@ -125,8 +125,8 @@ class BiometricUtilTest {
         val latch = CountDownLatch(1)
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = 60) {
-            assertEquals(it, BiometricStatus(true, "", null))
-            assertNull(it.exception)
+            assertEquals(it, BiometricStatus(true, null, null))
+            assertNull(it.errorType)
             latch.countDown()
         }
         testObject.setListener(listener)
@@ -141,8 +141,8 @@ class BiometricUtilTest {
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = -100) {
             assertEquals(false, it.isSucceeded)
-            assertEquals("Timeout", it.message)
-            assertNotNull(it.exception)
+            assertEquals("Timeout", it.errorType?.name)
+            assertNotNull(it.errorType)
             latch.countDown()
         }
         testObject.setListener(listener)
@@ -156,8 +156,8 @@ class BiometricUtilTest {
         val testObject = BiometricUtil("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
         val listener = testObject.getBiometricListener(timeout = 60) {
             assertEquals(false, it.isSucceeded)
-            assertEquals("Abort", it.message)
-            assertNotNull(it.exception)
+            assertEquals("Abort", it.errorType?.name)
+            assertNotNull(it.errorType)
             latch.countDown()
         }
         testObject.setListener(listener)
