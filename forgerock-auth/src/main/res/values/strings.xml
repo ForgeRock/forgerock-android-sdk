@@ -30,7 +30,9 @@
     <string name="forgerock_token_endpoint" translatable="false" />
     <string name="forgerock_revoke_endpoint" translatable="false" />
     <string name="forgerock_userinfo_endpoint" translatable="false" />
+    <!-- deprecated, use forgerock_session_endpoint -->
     <string name="forgerock_logout_endpoint" translatable="false" />
+    <string name="forgerock_session_endpoint" translatable="false" />
     <string name="forgerock_endsession_endpoint" translatable="false" />
 
     <!-- SSO -->

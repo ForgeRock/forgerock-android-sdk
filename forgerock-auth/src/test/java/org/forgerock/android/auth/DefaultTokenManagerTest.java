@@ -103,7 +103,7 @@ public class DefaultTokenManagerTest extends BaseTest {
                 .scope(AccessToken.Scope.parse("openid test"))
                 .tokenType("Bearer")
                 .refreshToken("refresh token")
-                .expiresIn(100)
+                .expiresIn(300)
                 .build();
 
         tokenManager.persist(accessToken);
@@ -115,7 +115,7 @@ public class DefaultTokenManagerTest extends BaseTest {
         assertSame(storedAccessToken1, storedAccessToken2);
 
         //Let the cache expired
-        Thread.sleep(100L);
+        Thread.sleep(200L);
         AccessToken storedAccessToken3 = getAccessToken(tokenManager);
         //The cache is expired, should re-cache and token should not have the same references
         assertNotSame(storedAccessToken1, storedAccessToken3);

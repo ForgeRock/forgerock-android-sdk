@@ -150,8 +150,8 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
     private URL getLogoutUrl() throws MalformedURLException {
         Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
-        if (isNotEmpty(serverConfig.getLogoutEndpoint())) {
-            builder.appendEncodedPath(serverConfig.getLogoutEndpoint());
+        if (isNotEmpty(serverConfig.getSessionEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getSessionEndpoint());
         } else {
             builder.appendPath("json")
                     .appendPath("realms")

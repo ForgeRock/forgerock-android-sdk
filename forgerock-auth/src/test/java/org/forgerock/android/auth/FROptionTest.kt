@@ -50,7 +50,7 @@ class FROptionTest {
         assertTrue(option.service.registrationServiceName == "Registration")
         assertTrue(option.urlPath.authorizeEndpoint == null)
         assertTrue(option.urlPath.revokeEndpoint == null)
-        assertTrue(option.urlPath.logoutEndpoint == null)
+        assertTrue(option.urlPath.sessionEndpoint == null)
         assertTrue(option.urlPath.tokenEndpoint == null)
         assertTrue(option.urlPath.userinfoEndpoint == null)
         assertTrue(option.urlPath.authorizeEndpoint == null)
