@@ -142,8 +142,8 @@ class ConfigHelperTest {
     @Test
     fun loadDefaultFROptionWithNull() {
        val defaultOption = ConfigHelper.load(context, null)
-       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, sessionEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
-        assertTrue(defaultOption.toString() == expectedResult)
+       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, sessionEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
+       assertTrue(defaultOption.toString() == expectedResult)
     }
 
     @Test
@@ -163,7 +163,7 @@ class ConfigHelperTest {
             }
         }
         val defaultOption = ConfigHelper.load(context, frOptions)
-        val expectedResult = "FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=0, oauthCacheSeconds=0, cookieCacheSeconds=0), service=Service(authServiceName=Login, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, sessionEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
+        val expectedResult = "FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=0, oauthCacheSeconds=0), service=Service(authServiceName=Login, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, sessionEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
         assertTrue(defaultOption.toString() == expectedResult)
     }
 }

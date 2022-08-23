@@ -131,12 +131,12 @@ public class Config {
         scope = options.getOauth().getOauthScope();
         oauthCacheMillis = options.getOauth().getOauthCacheSeconds() * 1000;
         oauthThreshold = options.getOauth().getOauthThresholdSeconds();
-        cookieCacheMillis = options.getOauth().getCookieCacheSeconds() * 1000;
         cookieJar = null; // We cannot initialize default cookie jar here
         url = options.getServer().getUrl();
         realm = options.getServer().getRealm();
         timeout = options.getServer().getTimeout();
         cookieName = options.getServer().getCookieName();
+        cookieCacheMillis = options.getServer().getCookieCacheSeconds() * 1000;
         registrationServiceName = options.getService().getRegistrationServiceName();
         authServiceName = options.getService().getAuthServiceName();
         pins = options.getSslPinning().getPins();
