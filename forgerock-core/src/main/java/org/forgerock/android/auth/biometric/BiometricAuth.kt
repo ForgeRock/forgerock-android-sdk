@@ -82,24 +82,29 @@ class BiometricAuth @JvmOverloads constructor(
     private var promptInfo: BiometricPrompt.PromptInfo? = null
 
 
+    private fun handleError(logMessage: String, biometricErrorMessage: String, errorType: Int) {
+        debug(TAG, logMessage)
+        biometricAuthListener?.onError(
+            errorType, biometricErrorMessage)
+    }
+
+    private fun tryDisplayBiometricOnlyPrompt() {
+        if (hasBiometricCapability()) {
+            initBiometricAuthentication()
+        } else {
+            handleError("allowDeviceCredentials is set to false, but no biometric " +
+                    "hardware found or enrolled." ,"It requires " +
+                    "biometric authentication. No biometric hardware found or enrolled.", ERROR_NO_BIOMETRICS)
+        }
+    }
+
     /*
      * Starts authentication process.
      */
     fun authenticate() {
         // if biometric only, try biometric prompt
         if (!allowDeviceCredentials) {
-            if (hasBiometricCapability()) {
-                initBiometricAuthentication()
-            } else {
-                debug(
-                    TAG, "allowDeviceCredentials is set to false, but no biometric " +
-                            "hardware found or enrolled."
-                )
-                biometricAuthListener?.onError(
-                    ERROR_NO_BIOMETRICS, "It requires " +
-                            "biometric authentication. No biometric hardware found or enrolled."
-                )
-            }
+            tryDisplayBiometricOnlyPrompt()
             return
         }
 
@@ -119,15 +124,10 @@ class BiometricAuth @JvmOverloads constructor(
         if (hasDeviceCredential()) {
             initDeviceCredentialAuthentication()
         } else {
-            debug(
-                TAG, "This device does not support required security features." +
-                        " No Biometric, device PIN, pattern, or password registered."
-            )
-            biometricAuthListener?.onError(
-                ERROR_NO_DEVICE_CREDENTIAL, "This device does " +
-                        "not support required security features. No Biometric, device PIN, pattern, " +
-                        "or password registered."
-            )
+            handleError("This device does not support required security features." +
+                    " No Biometric, device PIN, pattern, or password registered." ,"This device does " +
+                    "not support required security features. No Biometric, device PIN, pattern, " +
+                    "or password registered.", ERROR_NO_DEVICE_CREDENTIAL)
         }
     }
 

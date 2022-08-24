@@ -123,8 +123,8 @@ open class DeviceBindingCallback: AbstractCallback {
      */
     internal fun execute(context: Context,
                          listener: FRListener<Void>,
-                         authInterface: DeviceBindInterface = getDeviceBindInterface(),
-                         encryptedPreference: PreferenceInterface = PreferenceUtil(context),
+                         authInterface: Authenticator = getDeviceBindInterface(),
+                         encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),
                          deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
 
         if(authInterface.isSupported().not()) {
@@ -159,7 +159,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-    open fun handleException(status: DeviceBindingStatus,
+      open fun handleException(status: DeviceBindingStatus,
                              listener: FRListener<Void>) {
 
         setClientError(status.clientError)
@@ -173,11 +173,14 @@ open class DeviceBindingCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    open fun getDeviceBindInterface(): DeviceBindInterface {
+    open fun getDeviceBindInterface(): Authenticator {
         return BindingFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
     }
 }
 
+/**
+ * convert authentication string received from server to authentication enum
+ */
 enum class DeviceBindingAuthenticationType constructor(val serializedValue: String?) {
     BIOMETRIC_ONLY("BIOMETRIC_ONLY"),
     BIOMETRIC_ALLOW_FALLBACK("BIOMETRIC_ALLOW_FALLBACK"),

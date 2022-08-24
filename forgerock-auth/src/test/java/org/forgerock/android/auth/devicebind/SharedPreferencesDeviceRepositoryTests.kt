@@ -11,7 +11,6 @@ import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.forgerock.android.auth.devicebind.PreferenceUtil
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +19,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
-class PreferenceUtilTests {
+class SharedPreferencesDeviceRepositoryTests {
 
     private val sharedPreferences = mock<SharedPreferences>()
     private val editor = mock<SharedPreferences.Editor>()
@@ -37,7 +36,7 @@ class PreferenceUtilTests {
 
     @Test
     fun persistData() {
-        val testObject = PreferenceUtil(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
+        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
         testObject.persist( "userid", "key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
         verify(editor).putString("key", result)
     }

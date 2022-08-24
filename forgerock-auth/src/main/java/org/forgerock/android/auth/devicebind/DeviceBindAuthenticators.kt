@@ -7,7 +7,10 @@
 
 package org.forgerock.android.auth.devicebind
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.security.keystore.KeyProperties
+import androidx.biometric.BiometricManager.Authenticators.*
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
@@ -23,7 +26,7 @@ import java.security.interfaces.RSAPublicKey
 /**
  * Interface to override keypair keys, biometric display, sign
  */
-interface DeviceBindInterface {
+interface Authenticator {
     /**
      * generate the public and private keypair
      */
@@ -74,15 +77,17 @@ data class KeyPair(
 /**
  * Settings  for all the biometric authentication is configured
  */
-class BiometricOnly(private val biometricInterface: BiometricInterface,
-                    private val authentication: KeyAware): DeviceBindInterface {
+class BiometricOnly(private val biometricInterface: BiometricHandler,
+                    private val authentication: KeyAware,
+                    private val isApi30OrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R): Authenticator {
 
     /**
      * generate the public and private keypair
      */
+    @SuppressLint("NewApi")
     override fun generateKeys(): KeyPair {
         val builder = authentication.keyBuilder()
-        if (biometricInterface.isApi30AndAbove()) {
+        if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(authentication.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG)
         } else {
             builder.setUserAuthenticationValidityDurationSeconds(authentication.timeout)
@@ -95,7 +100,7 @@ class BiometricOnly(private val biometricInterface: BiometricInterface,
      * check biometric is supported
      */
     override fun isSupported(): Boolean {
-        return biometricInterface.isSupportedForBiometricOnly()
+        return biometricInterface.isSupported(BIOMETRIC_STRONG, BIOMETRIC_WEAK)
     }
 
     /**
@@ -104,9 +109,7 @@ class BiometricOnly(private val biometricInterface: BiometricInterface,
      * @param statusResult Listener for receiving Biometric changes
      */
     override fun authenticate(timeout: Int,  statusResult: (DeviceBindingStatus) -> Unit) {
-        val listener = biometricInterface.getBiometricListener(timeout, statusResult)
-        biometricInterface.setListener(listener)
-        biometricInterface.authenticate()
+        biometricInterface.authenticate(timeout, statusResult)
     }
 
 }
@@ -114,15 +117,17 @@ class BiometricOnly(private val biometricInterface: BiometricInterface,
 /**
  * Settings for all the biometric authentication and device credential is configured
  */
-class BiometricAndDeviceCredential(private val biometricInterface: BiometricInterface,
-                                   private val authentication: KeyAware): DeviceBindInterface {
+class BiometricAndDeviceCredential(private val biometricInterface: BiometricHandler,
+                                   private val authentication: KeyAware,
+                                   private val isApi30OrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R): Authenticator {
 
     /**
      * generate the public and private keypair
      */
+    @SuppressLint("NewApi")
     override fun generateKeys(): KeyPair {
         val builder = authentication.keyBuilder()
-        if (biometricInterface.isApi30AndAbove()) {
+        if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(authentication.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         } else {
             builder.setUserAuthenticationValidityDurationSeconds(authentication.timeout)
@@ -135,7 +140,7 @@ class BiometricAndDeviceCredential(private val biometricInterface: BiometricInte
      * check biometric is supported
      */
     override fun isSupported(): Boolean {
-        return biometricInterface.isSupportedForBiometricAndDeviceCredential()
+        return biometricInterface.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
     }
 
     /**
@@ -144,16 +149,14 @@ class BiometricAndDeviceCredential(private val biometricInterface: BiometricInte
      * @param statusResult Listener for receiving Biometric changes
      */
     override fun authenticate(timeout: Int,  statusResult: (DeviceBindingStatus) -> Unit) {
-        val listener = biometricInterface.getBiometricListener(timeout, statusResult)
-        biometricInterface.setListener(listener)
-        biometricInterface.authenticate()
+        biometricInterface.authenticate(timeout, statusResult)
     }
 }
 
 /**
  * Settings for all the none authentication is configured
  */
-class None(private val authentication: KeyAware): DeviceBindInterface {
+class None(private val authentication: KeyAware): Authenticator {
     /**
      * generate the public and private keypair
      */
@@ -189,10 +192,10 @@ class BindingFactory {
             subtitle: String,
             description: String,
             keyAware: KeyAware = KeyAware(userId)
-        ): DeviceBindInterface {
+        ): Authenticator {
             return when (authentication) {
                 DeviceBindingAuthenticationType.BIOMETRIC_ONLY -> BiometricOnly(
-                    biometricInterface = BiometricUtil(
+                    biometricInterface = BiometricBindingHandler(
                         title,
                         subtitle,
                         description,
@@ -200,7 +203,7 @@ class BindingFactory {
                     ), keyAware
                 )
                 DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK -> BiometricAndDeviceCredential(
-                    BiometricUtil(
+                    BiometricBindingHandler(
                         title,
                         subtitle,
                         description,

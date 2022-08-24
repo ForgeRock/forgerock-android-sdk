@@ -15,7 +15,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-interface PreferenceInterface {
+interface DeviceRepository {
     /**
      * Persist the data in encrypted shared preference
      */
@@ -27,10 +27,10 @@ interface PreferenceInterface {
 /**
  * Helper class to save and retrieve EncryptedMessage
  */
-class PreferenceUtil(context: Context,
-                     private val uuid: String = UUID.randomUUID().toString(),
-                     private val sharedPreferences: SharedPreferences =
-                         EncryptedPreferences.getInstance(context)): PreferenceInterface {
+class SharedPreferencesDeviceRepository(context: Context,
+                                        private val uuid: String = UUID.randomUUID().toString(),
+                                        private val sharedPreferences: SharedPreferences =
+                         EncryptedPreferences.getInstance(context)): DeviceRepository {
 
     /**
      * Persist the data in encrypted shared preference
