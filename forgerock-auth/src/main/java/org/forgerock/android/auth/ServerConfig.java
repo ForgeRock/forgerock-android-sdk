@@ -76,15 +76,20 @@ public class ServerConfig extends NetworkConfig {
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
         this.cookieName = cookieName;
-        this.authenticateEndpoint = authenticateEndpoint;
-        this.authorizeEndpoint = authorizeEndpoint;
-        this.tokenEndpoint = tokenEndpoint;
-        this.revokeEndpoint = revokeEndpoint;
-        this.userInfoEndpoint = userInfoEndpoint;
-        this.sessionEndpoint = sessionEndpoint;
-        this.endSessionEndpoint = endSessionEndpoint;
+        this.authenticateEndpoint = trimLeadingSlash(authenticateEndpoint);
+        this.authorizeEndpoint = trimLeadingSlash(authorizeEndpoint);
+        this.tokenEndpoint = trimLeadingSlash(tokenEndpoint);
+        this.revokeEndpoint = trimLeadingSlash(revokeEndpoint);
+        this.userInfoEndpoint = trimLeadingSlash(userInfoEndpoint);
+        this.sessionEndpoint = trimLeadingSlash(sessionEndpoint);
+        this.endSessionEndpoint = trimLeadingSlash(endSessionEndpoint);
 
     }
+
+    private String trimLeadingSlash(final String str) {
+        return str == null ? str : str.replaceAll("^/+", "");
+    }
+
 
     private static String getHost(Context context, String url) {
         try {
