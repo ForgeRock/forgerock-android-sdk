@@ -858,7 +858,7 @@ public class FRUserMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_token_endpoint)).thenReturn("dummy/token");
         when(mockContext.getString(R.string.forgerock_userinfo_endpoint)).thenReturn("dummy/userinfo");
         when(mockContext.getString(R.string.forgerock_revoke_endpoint)).thenReturn("dummy/revoke");
-        when(mockContext.getString(R.string.forgerock_logout_endpoint)).thenReturn("dummy/logout");
+        when(mockContext.getString(R.string.forgerock_session_endpoint)).thenReturn("dummy/logout");
         when(mockContext.getString(R.string.forgerock_endsession_endpoint)).thenReturn("dummy/endSession");
         when(mockContext.getString(R.string.forgerock_cookie_name)).thenReturn("testCookieName");
         when(mockContext.getString(R.string.forgerock_auth_service)).thenReturn("UsernamePassword");

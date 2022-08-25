@@ -7,15 +7,16 @@
 package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
-import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.junit.Assert.*
 import org.junit.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.util.concurrent.CountDownLatch
 
 class BiometricBindingHandlerTests {

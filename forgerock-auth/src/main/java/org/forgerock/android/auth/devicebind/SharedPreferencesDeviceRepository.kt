@@ -27,7 +27,7 @@ interface DeviceRepository {
 /**
  * Helper class to save and retrieve EncryptedMessage
  */
-class SharedPreferencesDeviceRepository(context: Context,
+internal class SharedPreferencesDeviceRepository(context: Context,
                                         private val uuid: String = UUID.randomUUID().toString(),
                                         private val sharedPreferences: SharedPreferences =
                          EncryptedPreferences.getInstance(context)): DeviceRepository {

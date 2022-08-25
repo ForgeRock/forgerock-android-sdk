@@ -68,6 +68,13 @@ interface Authenticator {
     fun isSupported(): Boolean
 }
 
+/**
+ * Create public and private keypair
+ * @param publicKey The RSA Public key
+ * @param privateKey The RSA Private key
+ * @param keyAlias KeyAlias for
+ */
+
 data class KeyPair(
     val publicKey: RSAPublicKey,
     val privateKey: PrivateKey,
@@ -77,9 +84,9 @@ data class KeyPair(
 /**
  * Settings  for all the biometric authentication is configured
  */
-class BiometricOnly(private val biometricInterface: BiometricHandler,
+internal class BiometricOnly(private val biometricInterface: BiometricHandler,
                     private val authentication: KeyAware,
-                    private val isApi30OrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R): Authenticator {
+                    private val isApi30OrAbove: Boolean): Authenticator {
 
     /**
      * generate the public and private keypair
@@ -117,9 +124,9 @@ class BiometricOnly(private val biometricInterface: BiometricHandler,
 /**
  * Settings for all the biometric authentication and device credential is configured
  */
-class BiometricAndDeviceCredential(private val biometricInterface: BiometricHandler,
+internal class BiometricAndDeviceCredential(private val biometricInterface: BiometricHandler,
                                    private val authentication: KeyAware,
-                                   private val isApi30OrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R): Authenticator {
+                                   private val isApi30OrAbove: Boolean): Authenticator {
 
     /**
      * generate the public and private keypair
@@ -156,7 +163,7 @@ class BiometricAndDeviceCredential(private val biometricInterface: BiometricHand
 /**
  * Settings for all the none authentication is configured
  */
-class None(private val authentication: KeyAware): Authenticator {
+internal class None(private val authentication: KeyAware): Authenticator {
     /**
      * generate the public and private keypair
      */
@@ -182,8 +189,10 @@ class None(private val authentication: KeyAware): Authenticator {
     }
 }
 
-
-class BindingFactory {
+/**
+ * Internal AuthenticatorFactory to create the authentication type.
+ */
+internal class AuthenticatorFactory {
     companion object {
         fun getType(
             userId: String,
@@ -191,7 +200,8 @@ class BindingFactory {
             title: String,
             subtitle: String,
             description: String,
-            keyAware: KeyAware = KeyAware(userId)
+            keyAware: KeyAware = KeyAware(userId),
+            isApi30OrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
         ): Authenticator {
             return when (authentication) {
                 DeviceBindingAuthenticationType.BIOMETRIC_ONLY -> BiometricOnly(
@@ -200,7 +210,9 @@ class BindingFactory {
                         subtitle,
                         description,
                         deviceBindAuthenticationType = authentication
-                    ), keyAware
+                    ),
+                    keyAware,
+                    isApi30OrAbove
                 )
                 DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK -> BiometricAndDeviceCredential(
                     BiometricBindingHandler(
@@ -209,7 +221,8 @@ class BindingFactory {
                         description,
                         deviceBindAuthenticationType = authentication
                     ),
-                    keyAware
+                    keyAware,
+                    isApi30OrAbove
                 )
                 else -> None(keyAware)
             }

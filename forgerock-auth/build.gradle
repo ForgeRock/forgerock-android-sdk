@@ -80,14 +80,14 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.biometric:biometric:1.1.0'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     //Make it optional for developer
     compileOnly 'com.google.android.gms:play-services-location:17.1.0'
     compileOnly 'com.google.android.gms:play-services-safetynet:17.0.0'
     compileOnly 'net.openid:appauth:0.7.1'
     compileOnly 'com.google.android.gms:play-services-fido:18.1.0'
+    compileOnly 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
+    compileOnly 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     //Social Login
     compileOnly 'com.google.android.gms:play-services-auth:19.2.0'
@@ -102,11 +102,14 @@ dependencies {
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
     androidTestImplementation 'com.google.android.gms:play-services-fido:18.1.0'
+    androidTestImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
+    androidTestImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     testImplementation 'androidx.test:core:1.4.0'
     testImplementation 'androidx.test.ext:junit:1.1.3'
     testImplementation 'androidx.test:runner:1.4.0'
     testImplementation 'androidx.fragment:fragment-testing:1.4.1'
+    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.7.3'
@@ -120,6 +123,7 @@ dependencies {
     testImplementation 'com.facebook.android:facebook-login:7.1.0'
     testImplementation 'com.google.android.gms:play-services-safetynet:17.0.0'
     testImplementation 'org.jeasy:easy-random-core:4.0.0'
+    testImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
 
     testImplementation 'org.mockito:mockito-core:4.0.0'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'

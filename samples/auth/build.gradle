@@ -72,6 +72,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'net.openid:appauth:0.7.1'
     implementation 'com.google.android.gms:play-services-fido:18.1.0'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
 
     //SocialLogin

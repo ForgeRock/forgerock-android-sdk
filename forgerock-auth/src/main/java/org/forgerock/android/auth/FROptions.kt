@@ -197,7 +197,7 @@ class SSLPinningBuilder {
  */
 data class UrlPath(val authenticateEndpoint: String? = null,
                    val revokeEndpoint: String? = null,
-                   val logoutEndpoint: String? = null,
+                   val sessionEndpoint: String? = null,
                    val tokenEndpoint: String? = null,
                    val userinfoEndpoint: String? = null,
                    val authorizeEndpoint: String? = null,
@@ -209,13 +209,13 @@ data class UrlPath(val authenticateEndpoint: String? = null,
 class UrlPathBuilder {
     var authenticateEndpoint: String? = null
     var revokeEndpoint: String? = null
-    var logoutEndpoint: String? = null
+    var sessionEndpoint: String? = null
     var tokenEndpoint: String? = null
     var userinfoEndpoint: String? = null
     var authorizeEndpoint: String? = null
     var endSessionEndpoint: String? = null
 
-    fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, logoutEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint, endSessionEndpoint)
+    fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, sessionEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint, endSessionEndpoint)
 
 }
 

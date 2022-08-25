@@ -17,15 +17,24 @@ import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+
+/**
+ * Interface to display biometric and verify the device supported for biometric
+ */
+
 interface BiometricHandler {
 
     /**
-     * check support for Biometric or device credential authentication type
+     * check support for Biometric and device credential
+     * @param strongAuthenticators accept different strong authenticators like BIOMETRIC_STRONG
+     * @param weakAuthenticators accept different strong authenticators like BIOMETRIC_WEAK
      */
     fun isSupported(strongAuthenticators: Int = BIOMETRIC_STRONG, weakAuthenticators: Int = BIOMETRIC_WEAK): Boolean
 
     /**
-     * To display biometric prompt
+     * display biometric prompt  for Biometric and device credential
+     * @param timeout Timeout for the biometric prompt
+     * @param statusResult Result of biometric action in callback
      */
     fun authenticate(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit)
 
@@ -33,8 +42,14 @@ interface BiometricHandler {
 
 /**
  * Helper class for managing Biometric configuration.
+ * @param titleValue Title displayed in biometric prompt
+ * @param subtitleValue Subtitle displayed in biometric prompt
+ * @param descriptionValue  Description displayed in biometric prompt
+ * @param fragmentActivity Activity that uses biometric to be displayed
+ * @param biometricListener callback for biometric success or failure
+ * @param biometricAuth Return the BiometricAuth instance
  */
-class BiometricBindingHandler(titleValue: String,
+internal class BiometricBindingHandler(titleValue: String,
                               subtitleValue: String,
                               descriptionValue: String,
                               fragmentActivity: FragmentActivity =  InitProvider.getCurrentActivityAsFragmentActivity(),
@@ -52,6 +67,11 @@ class BiometricBindingHandler(titleValue: String,
     }
 
 
+    /**
+     * display biometric prompt  for Biometric and device credential
+     * @param timeout Timeout for the biometric prompt
+     * @param statusResult Result of biometric action in callback
+     */
     override fun authenticate(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit) {
         val startTime = Date().time
         val listener = object: BiometricAuthCompletionHandler {
@@ -74,6 +94,8 @@ class BiometricBindingHandler(titleValue: String,
 
     /**
      * check support for Biometric and device credential
+     * @param strongAuthenticators accept different strong authenticators like BIOMETRIC_STRONG
+     * @param weakAuthenticators accept different strong authenticators like BIOMETRIC_WEAK
      */
     override fun isSupported(strongAuthenticators: Int, weakAuthenticators: Int): Boolean {
         biometricAuth?.apply {

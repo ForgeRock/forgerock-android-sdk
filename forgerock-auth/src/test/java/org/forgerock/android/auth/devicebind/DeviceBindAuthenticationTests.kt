@@ -8,7 +8,6 @@ package org.forgerock.android.auth.devicebind
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -27,7 +26,7 @@ class DeviceBindAuthenticationTests {
 
     @Test
     fun testSigningData() {
-       val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware)
+       val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware, false)
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
         kpg.initialize(2048)
         val keys = kpg.generateKeyPair()
@@ -99,21 +98,21 @@ class DeviceBindAuthenticationTests {
     @Test
     fun testIsNotSupported() {
         whenever(mockBiometricInterface.isSupported()).thenReturn(false)
-        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware)
+        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware, false)
         assertFalse(testObject.isSupported())
     }
 
     @Test
     fun testSupportedDeviceCred() {
         whenever(mockBiometricInterface.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL)).thenReturn(true)
-        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware)
+        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware, false)
         assertTrue(testObject.isSupported())
     }
 
     @Test
     fun testSupportedBiometricOnly() {
         whenever(mockBiometricInterface.isSupported()).thenReturn(true)
-        val testObject = BiometricOnly(mockBiometricInterface, keyAware)
+        val testObject = BiometricOnly(mockBiometricInterface, keyAware, false)
         assertTrue(testObject.isSupported())
     }
 
@@ -127,7 +126,7 @@ class DeviceBindAuthenticationTests {
     fun testAuthenticateForBiometric() {
 
         val result: (DeviceBindingStatus) -> (Unit) = {}
-        val testObject = BiometricOnly(mockBiometricInterface, keyAware)
+        val testObject = BiometricOnly(mockBiometricInterface, keyAware, false)
         testObject.authenticate(60, result)
         verify(mockBiometricInterface).authenticate(60, result)
     }
@@ -135,7 +134,7 @@ class DeviceBindAuthenticationTests {
     @Test
     fun testAuthenticateForBiometricAndCredential() {
         val result: (DeviceBindingStatus) -> (Unit) = {}
-        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware)
+        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware, false)
         testObject.authenticate(60, result)
         verify(mockBiometricInterface).authenticate(60, result)
     }

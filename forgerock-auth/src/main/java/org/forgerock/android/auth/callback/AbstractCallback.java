@@ -119,10 +119,16 @@ public abstract class AbstractCallback implements Callback {
 
     }
 
+    /**
+     * Get the callback content
+     */
     public String getContent() {
         return this.content;
     }
 
+    /**
+     * Get the _id received from server
+     */
     public int get_id() {
         return this._id;
     }

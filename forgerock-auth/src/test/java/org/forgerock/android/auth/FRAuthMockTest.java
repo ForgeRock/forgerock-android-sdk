@@ -257,7 +257,7 @@ public class FRAuthMockTest extends BaseTest {
                 urlPathBuilder.setEndSessionEndpoint("https://endSessionEndpoint.com");
                 urlPathBuilder.setAuthenticateEndpoint("https://authenticateEndpoint.com");
                 urlPathBuilder.setAuthorizeEndpoint("https://authorizeEndpoint.com");
-                urlPathBuilder.setLogoutEndpoint("https://logoutEndpoint.com");
+                urlPathBuilder.setSessionEndpoint("https://logoutEndpoint.com");
                 urlPathBuilder.setTokenEndpoint("https://tokenEndpoint.com");
                 return null;
             });
@@ -301,7 +301,7 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getAuthorizeEndpoint(), frOptions.getUrlPath().getAuthorizeEndpoint());
         assertEquals(Config.getInstance().getRevokeEndpoint(), frOptions.getUrlPath().getRevokeEndpoint());
         assertEquals(Config.getInstance().getAuthenticateEndpoint(), frOptions.getUrlPath().getAuthenticateEndpoint());
-        assertEquals(Config.getInstance().getLogoutEndpoint(), frOptions.getUrlPath().getLogoutEndpoint());
+        assertEquals(Config.getInstance().getSessionEndpoint(), frOptions.getUrlPath().getSessionEndpoint());
         assertEquals(Config.getInstance().getUserinfoEndpoint(), frOptions.getUrlPath().getUserinfoEndpoint());
         assertEquals(Config.getInstance().getEndSessionEndpoint(), frOptions.getUrlPath().getEndSessionEndpoint());
         assertEquals(Config.getInstance().getTokenEndpoint(), frOptions.getUrlPath().getTokenEndpoint());
@@ -340,7 +340,7 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getAuthorizeEndpoint(), "");
         assertEquals(Config.getInstance().getRevokeEndpoint(), "");
         assertEquals(Config.getInstance().getAuthenticateEndpoint(),"");
-        assertEquals(Config.getInstance().getLogoutEndpoint(), "");
+        assertEquals(Config.getInstance().getSessionEndpoint(), "");
         assertEquals(Config.getInstance().getUserinfoEndpoint(), "");
         assertEquals(Config.getInstance().getEndSessionEndpoint(), "");
         assertEquals(Config.getInstance().getTokenEndpoint(), "");

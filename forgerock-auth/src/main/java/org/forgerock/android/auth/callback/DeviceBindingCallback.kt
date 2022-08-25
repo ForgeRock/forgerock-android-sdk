@@ -174,7 +174,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
     open fun getDeviceBindInterface(): Authenticator {
-        return BindingFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
+        return AuthenticatorFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
     }
 }
 

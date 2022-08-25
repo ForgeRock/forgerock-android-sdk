@@ -41,6 +41,9 @@ public class DeviceIdentifier {
 
     }
 
+    /**
+     * Initiate the DeviceIdentifierBuilder class
+     */
     public static DeviceIdentifierBuilder builder() {
         return new DeviceIdentifierBuilder();
     }
@@ -103,6 +106,9 @@ public class DeviceIdentifier {
         return result.toString();
     }
 
+    /**
+     * Builder class to build the device identifier
+     */
     public static class DeviceIdentifierBuilder {
         private Context context;
         private KeyStoreManager keyStoreManager;
