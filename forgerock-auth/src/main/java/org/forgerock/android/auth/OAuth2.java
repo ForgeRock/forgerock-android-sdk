@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -31,6 +31,7 @@ class OAuth2 {
     public static final String CODE_VERIFIER = "code_verifier";
     public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String CSRF = "csrf";
+    public static final String STATE = "state";
 
     private OAuth2() {
     }

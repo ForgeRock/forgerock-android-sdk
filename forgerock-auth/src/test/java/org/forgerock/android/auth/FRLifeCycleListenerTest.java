@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,8 +10,10 @@ package org.forgerock.android.auth;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.callback.NameCallback;
@@ -114,11 +116,6 @@ public class FRLifeCycleListenerTest extends BaseTest{
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Set-Cookie", "iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*; Path=/; Domain=localhost; HttpOnly")
                 .setBody(getJson("/authTreeMockTest_Authenticate_success.json")));
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
-        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -142,6 +139,18 @@ public class FRLifeCycleListenerTest extends BaseTest{
         };
 
         FRUser.login(context, nodeListenerFuture);
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        RecordedRequest request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK);
+
 
         assertNotNull(nodeListenerFuture.get());
         assertNotNull(FRUser.getCurrentUser());
