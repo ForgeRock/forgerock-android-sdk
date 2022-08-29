@@ -52,6 +52,7 @@ public class OAuth2Client {
     private static final Action REFRESH_TOKEN = new Action(Action.REFRESH_TOKEN);
     private static final Action REVOKE_TOKEN = new Action(Action.REVOKE_TOKEN);
     private static final Action END_SESSION = new Action(Action.END_SESSION);
+    private static final int STATE_LENGTH = 16;
 
     /**
      * The registered client identifier
@@ -100,10 +101,12 @@ public class OAuth2Client {
             }
 
             final PKCE pkce = generateCodeChallenge();
+            final String state = generateState();
 
             Logger.debug(TAG, "Exchanging Authorization Code with SSO Token.");
+
             okhttp3.Request request = new okhttp3.Request.Builder()
-                    .url(getAuthorizeUrl(token, pkce, additionalParameters))
+                    .url(getAuthorizeUrl(token, pkce, state, additionalParameters))
                     .get()
                     .header(ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                     .header(serverConfig.getCookieName(), token.getValue() )
@@ -120,7 +123,7 @@ public class OAuth2Client {
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-                    handler.handleAuthorizeResponse(response, new FRListener<String>() {
+                    handler.handleAuthorizeResponse(response, state, new FRListener<String>() {
                         @Override
                         public void onException(Exception e) {
                             Logger.debug(TAG, "Failed to exchange for Authorization Code: %s", e.getMessage());
@@ -141,6 +144,14 @@ public class OAuth2Client {
             listener.onException(e);
         }
     }
+
+    static String generateState() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] random = new byte[STATE_LENGTH];
+        secureRandom.nextBytes(random);
+        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
+    }
+
 
     /**
      * Refresh the Access Token with the provided Refresh Token
@@ -343,7 +354,9 @@ public class OAuth2Client {
         }
     }
 
-    private URL getAuthorizeUrl(Token token, PKCE pkce, Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
+    private URL getAuthorizeUrl(Token token, PKCE pkce, String state, Map<String, String> additionalParameters)
+            throws MalformedURLException, UnsupportedEncodingException {
+
         Uri.Builder builder = Uri.parse(getAuthorizeUrl().toString()).buildUpon();
         for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
             builder.appendQueryParameter(entry.getKey(), entry.getValue());
@@ -355,6 +368,7 @@ public class OAuth2Client {
                 .appendQueryParameter(OAuth2.REDIRECT_URI, redirectUri)
                 .appendQueryParameter(OAuth2.CODE_CHALLENGE, pkce.getCodeChallenge())
                 .appendQueryParameter(OAuth2.CODE_CHALLENGE_METHOD, pkce.getCodeChallengeMethod())
+                .appendQueryParameter(OAuth2.STATE, state)
                 .build().toString());
     }
 
