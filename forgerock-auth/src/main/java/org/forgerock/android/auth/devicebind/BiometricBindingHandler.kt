@@ -52,7 +52,7 @@ interface BiometricHandler {
 internal class BiometricBindingHandler(titleValue: String,
                               subtitleValue: String,
                               descriptionValue: String,
-                              fragmentActivity: FragmentActivity =  InitProvider.getCurrentActivityAsFragmentActivity(),
+                              fragmentActivity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity(),
                               deviceBindAuthenticationType: DeviceBindingAuthenticationType,
                               var biometricListener: BiometricAuthCompletionHandler? = null,
                               private var biometricAuth: BiometricAuth? = null): BiometricHandler {

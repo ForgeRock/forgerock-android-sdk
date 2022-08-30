@@ -19,11 +19,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
-import org.forgerock.android.auth.callback.DeviceBindingCallback
-import org.forgerock.android.auth.callback.IdPCallback
-import org.forgerock.android.auth.callback.SelectIdPCallback
-import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
-import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
+import org.forgerock.android.auth.callback.*
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -62,7 +58,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
-        
+
         if(FRUser.getCurrentUser() == null) {
             updateStatus(true)
         } else {
@@ -190,10 +186,24 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                                 override fun onException(e: java.lang.Exception?) {
                                     node.next(activity, activity)
                                 }
-
                             })
                         }
+                    }
+                    "DeviceSigningVerifierCallback" -> {
+                        runOnUiThread {
+                            val deviceBindingCallback = node.getCallback(
+                                DeviceSigningVerifierCallback::class.java
+                            )
+                            deviceBindingCallback.sign(activity, object : FRListener<Void> {
+                                override fun onSuccess(result: Void?) {
+                                    node.next(activity, activity)
+                                }
 
+                                override fun onException(e: java.lang.Exception?) {
+                                    node.next(activity, activity)
+                                }
+                            })
+                        }
                     }
                     "WebAuthnAuthenticationCallback" -> {
                         val webAuthCallback = node.getCallback(
@@ -244,10 +254,21 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                         idp.setValue("google_andy")
                         node.next(activity, activity)
                     }
-                    "NameCallback", "PasswordCallback", "ChoiceCallback" -> {
-                    nodeDialog = NodeDialogFragment.newInstance(it)
-                    nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
-                }
+                    "NameCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                    "PasswordCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                    "ChoiceCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
                 }
             }
 

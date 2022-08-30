@@ -79,4 +79,9 @@ class KeyAware(private var userId: String) {
         return keyStore
     }
 
+    fun getPrivateKey(keyAlias: String): PrivateKey? {
+        val keyStore: KeyStore = getKeyStore()
+        return keyStore.getKey(keyAlias, null) as? PrivateKey
+    }
+
 }

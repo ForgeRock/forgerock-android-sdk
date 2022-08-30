@@ -9,7 +9,10 @@ package org.forgerock.android.auth.devicebind
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.EncryptedPreferences
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,7 +25,13 @@ interface DeviceRepository {
     fun persist(userId: String,
                 key: String,
                 authenticationType: DeviceBindingAuthenticationType): String
+
+    fun getAllUsers(): MutableMap<String, *>?
 }
+
+const val userIdKey = "userId"
+const val kidKey = "kid"
+const val authTypeKey = "authType"
 
 /**
  * Helper class to save and retrieve EncryptedMessage
@@ -40,14 +49,18 @@ internal class SharedPreferencesDeviceRepository(context: Context,
                          authenticationType: DeviceBindingAuthenticationType): String {
             val jsonObject = JSONObject()
             try {
-                jsonObject.put("userId", userId)
-                jsonObject.put("kid", uuid)
-                jsonObject.put("authType", authenticationType.serializedValue)
+                jsonObject.put(userIdKey, userId)
+                jsonObject.put(kidKey, uuid)
+                jsonObject.put(authTypeKey, authenticationType.serializedValue)
             } catch (e: JSONException) {
                 throw RuntimeException(e)
             }
             sharedPreferences.edit().putString(key, jsonObject.toString())?.apply()
         return this.uuid
+    }
+
+    override fun getAllUsers(): MutableMap<String, *>? {
+        return sharedPreferences.all
     }
 }
 

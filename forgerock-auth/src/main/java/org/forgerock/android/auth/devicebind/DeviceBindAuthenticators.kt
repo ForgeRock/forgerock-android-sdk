@@ -23,6 +23,7 @@ import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
 
+
 /**
  * Interface to override keypair keys, biometric display, sign
  */
@@ -62,10 +63,26 @@ interface Authenticator {
         signedJWT.sign(RSASSASigner(keyPair.privateKey))
         return signedJWT.serialize()
     }
+
+    fun sign(privateKey: PrivateKey, user: UserKey, challenge: String): String {
+        val signedJWT = SignedJWT(
+            JWSHeader.Builder(JWSAlgorithm.RS512)
+                .keyID(user.kid)
+                .build(), JWTClaimsSet.Builder()
+                .subject(user.userId)
+                .claim("challenge", challenge)
+                .build()
+        )
+        signedJWT.sign(RSASSASigner(privateKey))
+        return signedJWT.serialize()
+    }
     /**
      * check biometric is supported
      */
     fun isSupported(): Boolean
+
+    fun getPrivateKey(keyAlias: String): PrivateKey?
+
 }
 
 /**
@@ -119,6 +136,10 @@ internal class BiometricOnly(private val biometricInterface: BiometricHandler,
         biometricInterface.authenticate(timeout, statusResult)
     }
 
+    override fun getPrivateKey(keyAlias: String): PrivateKey? {
+        return authentication.getPrivateKey(keyAlias)
+    }
+
 }
 
 /**
@@ -158,6 +179,10 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
     override fun authenticate(timeout: Int,  statusResult: (DeviceBindingStatus) -> Unit) {
         biometricInterface.authenticate(timeout, statusResult)
     }
+
+    override fun getPrivateKey(keyAlias: String): PrivateKey? {
+        return authentication.getPrivateKey(keyAlias)
+    }
 }
 
 /**
@@ -186,6 +211,10 @@ internal class None(private val authentication: KeyAware): Authenticator {
         timeout: Int,
         result: (DeviceBindingStatus) -> Unit) {
         result(Success)
+    }
+
+    override fun getPrivateKey(keyAlias: String): PrivateKey? {
+        return authentication.getPrivateKey(keyAlias)
     }
 }
 
