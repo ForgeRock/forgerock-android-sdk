@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -172,7 +172,7 @@ public class SocialLoginTest extends BaseTest {
             }
         });
 
-        SignInCredential signInCredential = new SignInCredential("1234", "", "", "", null, "", "dummy_id_token");
+        SignInCredential signInCredential = new SignInCredential("1234", "", "", "", null, "", "dummy_id_token", "");
 
         Status status = Status.RESULT_SUCCESS;
         Parcel statusParcel = Parcel.obtain();
