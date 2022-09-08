@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,14 +34,18 @@ public class OAuth2MockTest extends BaseTest {
     @Test
     public void oAuth2Success() throws ExecutionException, InterruptedException {
 
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
+        RecordedRequest recordedRequest = server.takeRequest(); //authorize
+        Assertions.assertThat(recordedRequest.getHeader(serverConfig.getCookieName())).isEqualTo(token.getValue());
+        String state = Uri.parse(recordedRequest.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state="+ state +"&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         assertNotNull(oAuth2TokenListenerFuture.get());
         AccessToken accessToken = oAuth2TokenListenerFuture.get();
@@ -55,8 +59,9 @@ public class OAuth2MockTest extends BaseTest {
         assertEquals("Bearer", accessToken.getTokenType());
         assertEquals(3599, accessToken.getExpiresIn());
 
+        /*
         RecordedRequest recordedRequest = server.takeRequest(); //authorize
-        Assertions.assertThat(recordedRequest.getHeader(serverConfig.getCookieName())).isEqualTo(token.getValue());
+         */
 
     }
 
@@ -82,15 +87,18 @@ public class OAuth2MockTest extends BaseTest {
     }
 
     @Test
-    public void oAuth2FailedOnInvalidSession() {
-
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?error_description=Failed%20to%20get%20resource%20owner%20session%20from%20request&state=abc123&error=invalid_request")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+    public void oAuth2FailedOnInvalidSession() throws InterruptedException {
 
         SSOToken token = new SSOToken("ssoToken");
         OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
         oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
+
+        RecordedRequest recordedRequest = server.takeRequest(); //authorize
+        String state = Uri.parse(recordedRequest.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?error_description=Failed%20to%20get%20resource%20owner%20session%20from%20request&" +
+                        "state="+ state +"&error=invalid_request")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
 
         try {
             assertNotNull(oAuth2TokenListenerFuture.get());
@@ -105,24 +113,30 @@ public class OAuth2MockTest extends BaseTest {
     }
 
     @Test
-    public void oAuth2FailedWithInvalidAuthCode() {
+    public void oAuth2FailedWithInvalidAuthCode() throws InterruptedException {
 
         String errorMessage = "{\n" +
                 "    \"error_description\": \"The provided access grant is invalid, expired, or revoked.\",\n" +
                 "    \"error\": \"invalid_grant\"\n" +
                 "}";
 
+
+        SSOToken token = new SSOToken("ssoToken");
+        OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
+
+        RecordedRequest recordedRequest = server.takeRequest(); //authorize
+        String state = Uri.parse(recordedRequest.getPath()).getQueryParameter("state");
         server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state="+ state +"&client_id=andy_app")
                 .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
         server.enqueue(new MockResponse()
                 .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
                 .setBody(errorMessage)
         );
 
-        SSOToken token = new SSOToken("ssoToken");
-        OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
-        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
+
 
         try {
             oAuth2TokenListenerFuture.get();
@@ -134,6 +148,30 @@ public class OAuth2MockTest extends BaseTest {
         } catch (InterruptedException e) {
             fail();
         }
+    }
+
+    @Test
+    public void oAuth2InvalidState() {
+
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        SSOToken token = new SSOToken("ssoToken");
+        OAuth2TokenListenerFuture oAuth2TokenListenerFuture = new OAuth2TokenListenerFuture();
+        oAuth2Client.exchangeToken(token, emptyMap(), oAuth2TokenListenerFuture);
+
+        try {
+            oAuth2TokenListenerFuture.get();
+            fail();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof AuthorizeException);
+            assertTrue(e.getCause().getCause() instanceof IllegalStateException);
+        } catch (InterruptedException e) {
+            fail();
+        }
+
     }
 
 

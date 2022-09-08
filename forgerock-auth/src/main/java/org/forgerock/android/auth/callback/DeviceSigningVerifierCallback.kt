@@ -103,16 +103,18 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
-
-
-    private fun authenticate(key: UserKey, listener: FRListener<Void>) {
-        val authInterface =  getDeviceBindInterface(key)
+    private fun authenticate(userKey: UserKey, keyAware: KeyAware = KeyAware(userKey.userId), listener: FRListener<Void>) {
+        val authInterface =  getDeviceBindInterface(userKey, keyAware)
+        if(authInterface.isSupported().not()) {
+            handleException(Unsupported(), listener)
+            return
+        }
         try {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val privateKey = authInterface.getPrivateKey(key.keyAlias)
+                    val privateKey = authInterface.getPrivateKey(userKey.keyAlias, keyAware)
                     privateKey?.let {
-                        val jws = authInterface.sign(privateKey = it, key, challenge)
+                        val jws = authInterface.sign(privateKey = it, userKey, challenge)
                         setJws(jws)
                         Listener.onSuccess(listener, null)
                     } ?: handleException(UnRegister(), listener)
@@ -128,19 +130,17 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         }
     }
 
-
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-
     internal fun execute(context: Context,
                          viewModel: ViewModelHandler = deviceBindingViewModel(context),
                          listener: FRListener<Void>) {
 
         when(val status = viewModel.getKeyStatus(userId)) {
-            is NoKey -> handleException(UnRegister(), listener)
-            is SingleKey -> authenticate(status.key , listener)
-            is MultipleKeys -> showKeysFragment(status.activity, viewModel, listener)
+            is NoKeysFound -> handleException(UnRegister(), listener)
+            is SingleKeyFound -> authenticate(status.key , listener = listener)
+            is MultipleKeysFound -> showKeysFragment(status.activity, viewModel, listener)
         }
     }
 
@@ -154,7 +154,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
 
         val fragment =  DeviceBindFragment(viewModel)
         viewModel.callback = {
-            authenticate(it, listener)
+            authenticate(it, listener = listener)
         }
         fragment.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
     }
@@ -162,10 +162,9 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    open fun getDeviceBindInterface(key: UserKey): Authenticator {
-        return AuthenticatorFactory.getType(key.userId, key.authType, title, subtitle, description)
+    open fun getDeviceBindInterface(key: UserKey,  keyAware: KeyAware): Authenticator {
+        return AuthenticatorFactory.getType(key.userId, key.authType, title, subtitle, description, keyAware = keyAware)
     }
-
 
     /**
      * Handle all the errors for the device binding.
@@ -175,7 +174,6 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      */
     open fun handleException(status: DeviceBindingStatus,
                              listener: FRListener<Void>) {
-
         setClientError(status.clientError)
         Logger.error(tag, status.message, status.errorCode)
         Listener.onException(

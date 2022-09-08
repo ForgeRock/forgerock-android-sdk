@@ -26,7 +26,7 @@ interface DeviceRepository {
                 key: String,
                 authenticationType: DeviceBindingAuthenticationType): String
 
-    fun getAllUsers(): MutableMap<String, *>?
+    fun getAllKeys(): MutableMap<String, *>?
 }
 
 const val userIdKey = "userId"
@@ -59,7 +59,7 @@ internal class SharedPreferencesDeviceRepository(context: Context,
         return this.uuid
     }
 
-    override fun getAllUsers(): MutableMap<String, *>? {
+    override fun getAllKeys(): MutableMap<String, *>? {
         return sharedPreferences.all
     }
 }

@@ -6,6 +6,7 @@
 - DefaultTokenManager does not cache AccessToken in memory upon retrieval from Shared Preferences.  [SDKS-2066]
 - Align forgerock_logout_endpoint configuration name with iOS [SDKS-2085]
 - Allow leading slash on custom endpoint path [SDKS-2074]
+- State value is not verified when calling the Authorize endpoint [SDKS-2078]
 
 ## [3.3.3]
 #### Fixed

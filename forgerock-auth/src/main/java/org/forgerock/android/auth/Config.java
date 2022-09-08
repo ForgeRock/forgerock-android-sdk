@@ -213,6 +213,7 @@ public class Config {
                 .serverConfig(getServerConfig())
                 .context(context)
                 .encryptor(encryptor)
+                .ssoBroadcastModel(getSSOBroadcastModel())
                 .build();
     }
 
@@ -246,7 +247,7 @@ public class Config {
 
     SSOBroadcastModel getSSOBroadcastModel() {
         if (ssoBroadcastModel == null) {
-            return ssoBroadcastModel = new SSOBroadcastModel();
+            return ssoBroadcastModel = new SSOBroadcastModel(context);
         } else {
             return ssoBroadcastModel;
         }

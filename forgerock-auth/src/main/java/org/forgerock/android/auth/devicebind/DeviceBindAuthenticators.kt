@@ -81,7 +81,9 @@ interface Authenticator {
      */
     fun isSupported(): Boolean
 
-    fun getPrivateKey(keyAlias: String): PrivateKey?
+    fun getPrivateKey(keyAlias: String, keyAware: KeyAware): PrivateKey? {
+        return keyAware.getPrivateKey(keyAlias)
+    }
 
 }
 
@@ -136,9 +138,6 @@ internal class BiometricOnly(private val biometricInterface: BiometricHandler,
         biometricInterface.authenticate(timeout, statusResult)
     }
 
-    override fun getPrivateKey(keyAlias: String): PrivateKey? {
-        return authentication.getPrivateKey(keyAlias)
-    }
 
 }
 
@@ -146,7 +145,7 @@ internal class BiometricOnly(private val biometricInterface: BiometricHandler,
  * Settings for all the biometric authentication and device credential is configured
  */
 internal class BiometricAndDeviceCredential(private val biometricInterface: BiometricHandler,
-                                   private val authentication: KeyAware,
+                                   private val keyAware: KeyAware,
                                    private val isApi30OrAbove: Boolean): Authenticator {
 
     /**
@@ -154,14 +153,14 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
      */
     @SuppressLint("NewApi")
     override fun generateKeys(): KeyPair {
-        val builder = authentication.keyBuilder()
+        val builder = keyAware.keyBuilder()
         if (isApi30OrAbove) {
-            builder.setUserAuthenticationParameters(authentication.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
+            builder.setUserAuthenticationParameters(keyAware.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         } else {
-            builder.setUserAuthenticationValidityDurationSeconds(authentication.timeout)
+            builder.setUserAuthenticationValidityDurationSeconds(keyAware.timeout)
         }
         builder.setUserAuthenticationRequired(true)
-        return authentication.createKeyPair(builder)
+        return keyAware.createKeyPair(builder)
     }
 
     /**
@@ -180,21 +179,18 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
         biometricInterface.authenticate(timeout, statusResult)
     }
 
-    override fun getPrivateKey(keyAlias: String): PrivateKey? {
-        return authentication.getPrivateKey(keyAlias)
-    }
 }
 
 /**
  * Settings for all the none authentication is configured
  */
-internal class None(private val authentication: KeyAware): Authenticator {
+internal class None(private val keyAware: KeyAware): Authenticator {
     /**
      * generate the public and private keypair
      */
     override fun generateKeys(): KeyPair {
-        val builder = authentication.keyBuilder()
-        return authentication.createKeyPair(builder)
+        val builder = keyAware.keyBuilder()
+        return keyAware.createKeyPair(builder)
     }
 
     /**
@@ -213,9 +209,6 @@ internal class None(private val authentication: KeyAware): Authenticator {
         result(Success)
     }
 
-    override fun getPrivateKey(keyAlias: String): PrivateKey? {
-        return authentication.getPrivateKey(keyAlias)
-    }
 }
 
 /**

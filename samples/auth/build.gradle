@@ -8,14 +8,21 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "org.forgerock.auth"
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue "string", "forgerock_sso_permission", "com.forgerock.permission"
+
+        manifestPlaceholders = [
+                forgerock_sso_permission :"com.forgerock.permission"
+        ]
+
 
     }
     buildTypes {

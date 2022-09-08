@@ -11,7 +11,7 @@ import org.json.JSONObject
 
 interface ViewModelHandler {
     fun set(key: UserKey)
-    fun getKeyStatus(userId: String?): KeyStatus
+    fun getKeyStatus(userId: String?): KeyFound
     val userKeys: MutableList<UserKey>
     var callback: ((UserKey) -> (Unit))?
 }
@@ -29,7 +29,7 @@ class DeviceBindViewModel(context: Context,
     }
 
     private fun getAllUsers(): MutableList<UserKey>? {
-        return encryptedPreference.getAllUsers()?.mapNotNull {
+        return encryptedPreference.getAllKeys()?.mapNotNull {
             val json = JSONObject(it.value as String)
             UserKey(
                 json.getString(userIdKey),
@@ -40,30 +40,30 @@ class DeviceBindViewModel(context: Context,
         }?.toMutableList()
     }
 
-    override fun getKeyStatus(userId: String?): KeyStatus {
+    override fun getKeyStatus(userId: String?): KeyFound {
 
         val users: MutableList<UserKey>? = getAllUsers()
 
         if (userId.isNullOrEmpty().not()) {
             val key = users?.firstOrNull { it.userId == userId }
-            return key?.let { SingleKey(it) } ?: NoKey
+            return key?.let { SingleKeyFound(it) } ?: NoKeysFound
         }
 
         return users?.let {
             userKeys = it
             when (it.size) {
-                0 -> NoKey
-                1 -> SingleKey(it.first())
-                else -> MultipleKeys(it, InitProvider.getCurrentActivityAsFragmentActivity())
+                0 -> NoKeysFound
+                1 -> SingleKeyFound(it.first())
+                else -> MultipleKeysFound(it, InitProvider.getCurrentActivityAsFragmentActivity())
             }
-        } ?: NoKey
+        } ?: NoKeysFound
     }
 }
 
-sealed class KeyStatus
-data class SingleKey(val key: UserKey): KeyStatus()
-data class MultipleKeys(val keys: MutableList<UserKey>, val activity: FragmentActivity): KeyStatus()
-object NoKey: KeyStatus()
+sealed class KeyFound
+data class SingleKeyFound(val key: UserKey): KeyFound()
+data class MultipleKeysFound(val keys: MutableList<UserKey>, val activity: FragmentActivity): KeyFound()
+object NoKeysFound: KeyFound()
 
 @Parcelize
 data class UserKey(val userId: String, val kid: String, val authType: DeviceBindingAuthenticationType, val keyAlias: String):

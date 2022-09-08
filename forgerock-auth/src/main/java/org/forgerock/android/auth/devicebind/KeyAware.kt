@@ -54,6 +54,12 @@ class KeyAware(private var userId: String) {
         return KeyPair(publicKey, privateKey, key)
     }
 
+
+    fun getPrivateKey(keyAlias: String): PrivateKey? {
+        val keyStore: KeyStore = getKeyStore()
+        return keyStore.getKey(keyAlias, null) as? PrivateKey
+    }
+
     /**
      * get hash for the given user
      */
@@ -77,11 +83,6 @@ class KeyAware(private var userId: String) {
         val keyStore = KeyStore.getInstance(androidKeyStore)
         keyStore.load(null)
         return keyStore
-    }
-
-    fun getPrivateKey(keyAlias: String): PrivateKey? {
-        val keyStore: KeyStore = getKeyStore()
-        return keyStore.getKey(keyAlias, null) as? PrivateKey
     }
 
 }
