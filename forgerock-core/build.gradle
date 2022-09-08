@@ -77,7 +77,6 @@ dependencies {
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    androidTestImplementation 'com.google.android.gms:play-services-location:17.1.0'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:4.7.3'
