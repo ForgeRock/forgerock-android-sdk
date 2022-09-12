@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -44,10 +44,6 @@ public class AuthServiceMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
 
         final AuthService authService = AuthService.builder()
@@ -80,18 +76,6 @@ public class AuthServiceMockTest extends BaseTest {
         oAuth2Client.exchangeToken(nodeListenerFuture.get(), emptyMap(), oAuth2TokenListenerFuture);
 
         RecordedRequest recordedRequest = server.takeRequest();
-        //Assert OAuth Token
-        assertNotNull(oAuth2TokenListenerFuture.get());
-        AccessToken accessToken = oAuth2TokenListenerFuture.get();
-        assertNotNull(accessToken.getValue());
-        assertNotNull(accessToken.getRefreshToken());
-        assertNotNull(accessToken.getIdToken());
-        assertEquals(3, accessToken.getScope().size());
-        assertTrue(accessToken.getScope().contains("openid"));
-        assertTrue(accessToken.getScope().contains("email"));
-        assertTrue(accessToken.getScope().contains("address"));
-        assertEquals("Bearer", accessToken.getTokenType());
-        assertEquals(3599, accessToken.getExpiresIn());
 
         assertEquals("/json/realms/root/authenticate?authIndexType=service&authIndexValue=Example", recordedRequest.getPath());
         assertEquals("POST", recordedRequest.getMethod());
@@ -116,6 +100,27 @@ public class AuthServiceMockTest extends BaseTest {
         assertEquals("GET", recordedRequest.getMethod());
         //assertEquals("scope=write&state=abc123&client_id=andy_app&csrf=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*&response_type=code&redirect_uri=http%3A%2F%2Fwww.example.com%3A8080%2Fcallback&decision=allow&code_challenge=IpSeJZQ9QOUL0TIn3rX_eZTYiq-zOXgaaZQBUX8G-I4&code_challenge_method=S256"
         //        , recordedRequest.getBody().readString(Charset.defaultCharset());
+
+        String state = Uri.parse(recordedRequest.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        //Assert OAuth Token
+        assertNotNull(oAuth2TokenListenerFuture.get());
+        AccessToken accessToken = oAuth2TokenListenerFuture.get();
+        assertNotNull(accessToken.getValue());
+        assertNotNull(accessToken.getRefreshToken());
+        assertNotNull(accessToken.getIdToken());
+        assertEquals(3, accessToken.getScope().size());
+        assertTrue(accessToken.getScope().contains("openid"));
+        assertTrue(accessToken.getScope().contains("email"));
+        assertTrue(accessToken.getScope().contains("address"));
+        assertEquals("Bearer", accessToken.getTokenType());
+        assertEquals(3599, accessToken.getExpiresIn());
+
     }
 
     @Test

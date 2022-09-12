@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
@@ -28,7 +29,8 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
-public class FRAuthRegistrationMockTest extends BaseTest {
+public class
+FRAuthRegistrationMockTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
 
@@ -42,10 +44,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK);
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -144,8 +142,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
         FRUser.register(context, nodeListenerFuture);
 
-        assertNotNull(nodeListenerFuture.get());
-
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Password Collector
@@ -178,6 +174,16 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .getJSONArray("input")
                 .getJSONObject(0).getBoolean("value")).isTrue();
 
+        request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+        assertNotNull(nodeListenerFuture.get());
+
     }
 
     /**
@@ -191,10 +197,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK);
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -263,6 +265,20 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
         FRUser.register(context, nodeListenerFuture);
 
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        RecordedRequest request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+
+
         assertNotNull(nodeListenerFuture.get());
 
     }
@@ -278,10 +294,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK);
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -349,6 +361,18 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         };
 
         FRUser.register(context, nodeListenerFuture);
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        server.takeRequest();
+        RecordedRequest request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         assertNotNull(nodeListenerFuture.get());
 
@@ -365,10 +389,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK);
         enqueue("/registration_kba_definition.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -420,7 +440,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
         FRUser.register(context, nodeListenerFuture);
 
-        assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector
@@ -450,7 +469,14 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .getJSONArray("input")
                 .getJSONObject(1).getString("value"));
 
-
+        request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        assertNotNull(nodeListenerFuture.get());
     }
 
     /**
@@ -464,10 +490,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK);
         enqueue("/registration_accept_terms_and_conditions.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
-        server.enqueue(new MockResponse()
-                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app")
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
@@ -516,7 +538,6 @@ public class FRAuthRegistrationMockTest extends BaseTest {
 
         FRUser.register(context, nodeListenerFuture);
 
-        Assert.assertNotNull(nodeListenerFuture.get());
         server.takeRequest(); //start
         server.takeRequest(); //Platform Username
         server.takeRequest(); //Attribute Collector
@@ -530,6 +551,15 @@ public class FRAuthRegistrationMockTest extends BaseTest {
                 .getJSONObject(0)
                 .getJSONArray("input")
                 .getJSONObject(0).getBoolean("value"));
+
+        request = server.takeRequest();
+        String state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(new MockResponse()
+                .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK);
+        Assert.assertNotNull(nodeListenerFuture.get());
 
     }
 

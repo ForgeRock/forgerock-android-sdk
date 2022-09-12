@@ -62,4 +62,11 @@ public interface SingleSignOnManager {
      */
     void revoke(FRListener<Void> listener);
 
+    /**
+     * Check if broadcast to other Apps in the SSO Group is enabled.
+     */
+    default boolean isBroadcastEnabled() {
+        return false;
+    }
+
 }
