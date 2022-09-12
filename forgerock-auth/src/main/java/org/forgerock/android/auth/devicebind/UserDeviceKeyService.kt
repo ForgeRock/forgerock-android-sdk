@@ -9,24 +9,18 @@ import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.json.JSONObject
 
-interface ViewModelHandler {
+interface UserKeyService {
     fun set(key: UserKey)
-    fun getKeyStatus(userId: String?): KeyFound
+    fun getKeyStatus(userId: String?): KeyFoundStatus
     val userKeys: MutableList<UserKey>
     var callback: ((UserKey) -> (Unit))?
 }
 
-class DeviceBindViewModel(context: Context,
-                          private val encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context)): ViewModel(), ViewModelHandler {
+internal class UserDeviceKeyService(context: Context,
+                          private val encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context)): UserKeyService {
 
     override lateinit var userKeys: MutableList<UserKey>
     override var callback: ((UserKey) -> (Unit))? = null
-
-    override fun set(key: UserKey) {
-        callback?.let {
-            it(key)
-        }
-    }
 
     private fun getAllUsers(): MutableList<UserKey>? {
         return encryptedPreference.getAllKeys()?.mapNotNull {
@@ -40,7 +34,13 @@ class DeviceBindViewModel(context: Context,
         }?.toMutableList()
     }
 
-    override fun getKeyStatus(userId: String?): KeyFound {
+    override fun set(key: UserKey) {
+        callback?.let {
+            it(key)
+        }
+    }
+
+    override fun getKeyStatus(userId: String?): KeyFoundStatus {
 
         val users: MutableList<UserKey>? = getAllUsers()
 
@@ -54,16 +54,16 @@ class DeviceBindViewModel(context: Context,
             when (it.size) {
                 0 -> NoKeysFound
                 1 -> SingleKeyFound(it.first())
-                else -> MultipleKeysFound(it, InitProvider.getCurrentActivityAsFragmentActivity())
+                else -> MultipleKeysFound(it)
             }
         } ?: NoKeysFound
     }
 }
 
-sealed class KeyFound
-data class SingleKeyFound(val key: UserKey): KeyFound()
-data class MultipleKeysFound(val keys: MutableList<UserKey>, val activity: FragmentActivity): KeyFound()
-object NoKeysFound: KeyFound()
+sealed class KeyFoundStatus
+data class SingleKeyFound(val key: UserKey): KeyFoundStatus()
+data class MultipleKeysFound(val keys: MutableList<UserKey>): KeyFoundStatus()
+object NoKeysFound: KeyFoundStatus()
 
 @Parcelize
 data class UserKey(val userId: String, val kid: String, val authType: DeviceBindingAuthenticationType, val keyAlias: String):

@@ -26,7 +26,6 @@ class KeyAware(private var userId: String) {
     private val key = getKeyAlias(userId)
 
     fun keyBuilder(): KeyGenParameterSpec.Builder {
-        val key = getKeyAlias()
         return KeyGenParameterSpec.Builder(
             key,
             purpose
@@ -55,7 +54,7 @@ class KeyAware(private var userId: String) {
     }
 
 
-    fun getPrivateKey(keyAlias: String): PrivateKey? {
+    fun getPrivateKey(keyAlias: String = key): PrivateKey? {
         val keyStore: KeyStore = getKeyStore()
         return keyStore.getKey(keyAlias, null) as? PrivateKey
     }

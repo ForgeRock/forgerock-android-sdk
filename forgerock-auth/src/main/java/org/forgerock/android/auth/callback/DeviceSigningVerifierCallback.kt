@@ -7,6 +7,7 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 
 import org.forgerock.android.auth.*
@@ -103,8 +104,10 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
-    private fun authenticate(userKey: UserKey, keyAware: KeyAware = KeyAware(userKey.userId), listener: FRListener<Void>) {
-        val authInterface =  getDeviceBindInterface(userKey, keyAware)
+    protected open fun authenticate(userKey: UserKey,
+                                    listener: FRListener<Void>,
+                                    authInterface: Authenticator = getAuthenticator(userKey)) {
+
         if(authInterface.isSupported().not()) {
             handleException(Unsupported(), listener)
             return
@@ -112,12 +115,9 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         try {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val privateKey = authInterface.getPrivateKey(userKey.keyAlias, keyAware)
-                    privateKey?.let {
-                        val jws = authInterface.sign(privateKey = it, userKey, challenge)
-                        setJws(jws)
-                        Listener.onSuccess(listener, null)
-                    } ?: handleException(UnRegister(), listener)
+                    val jws = authInterface.sign(userKey, challenge)
+                    setJws(jws)
+                    Listener.onSuccess(listener, null)
                 } else {
                     // All the biometric exception is handled here , it could be Abort or timeout
                     handleException(result, listener = listener)
@@ -133,27 +133,23 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    internal fun execute(context: Context,
-                         viewModel: ViewModelHandler = deviceBindingViewModel(context),
-                         listener: FRListener<Void>) {
+    protected open fun execute(context: Context,
+                               userKeyService: UserKeyService = UserDeviceKeyService(context),
+                               listener: FRListener<Void>) {
 
-        when(val status = viewModel.getKeyStatus(userId)) {
+        when(val status = userKeyService.getKeyStatus(userId)) {
             is NoKeysFound -> handleException(UnRegister(), listener)
             is SingleKeyFound -> authenticate(status.key , listener = listener)
-            is MultipleKeysFound -> showKeysFragment(status.activity, viewModel, listener)
+            else -> { showKeysFragment(InitProvider.getCurrentActivityAsFragmentActivity(), userKeyService, listener =  listener) }
         }
     }
 
-    open fun deviceBindingViewModel(context: Context): ViewModelHandler {
-        return DeviceBindViewModel(context)
-    }
+    protected open fun showKeysFragment(activity: FragmentActivity,
+                                        userKeyService: UserKeyService = UserDeviceKeyService(activity),
+                                        fragment: DialogFragment =  DeviceBindFragment(userKeyService),
+                                        listener: FRListener<Void>) {
 
-    open fun showKeysFragment(activity: FragmentActivity,
-                              viewModel: ViewModelHandler,
-                              listener: FRListener<Void>) {
-
-        val fragment =  DeviceBindFragment(viewModel)
-        viewModel.callback = {
+        userKeyService.callback = {
             authenticate(it, listener = listener)
         }
         fragment.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
@@ -162,8 +158,8 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    open fun getDeviceBindInterface(key: UserKey,  keyAware: KeyAware): Authenticator {
-        return AuthenticatorFactory.getType(key.userId, key.authType, title, subtitle, description, keyAware = keyAware)
+    protected open fun getAuthenticator(key: UserKey): Authenticator {
+        return AuthenticatorFactory.getType(key.userId, key.authType, title, subtitle, description)
     }
 
     /**
@@ -172,7 +168,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-    open fun handleException(status: DeviceBindingStatus,
+    protected open fun handleException(status: DeviceBindingStatus,
                              listener: FRListener<Void>) {
         setClientError(status.clientError)
         Logger.error(tag, status.message, status.errorCode)

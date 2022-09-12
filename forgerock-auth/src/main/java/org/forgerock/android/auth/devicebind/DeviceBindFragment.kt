@@ -14,7 +14,7 @@ import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import org.forgerock.android.auth.R
 
-open class DeviceBindFragment(private val viewModel: ViewModelHandler): DialogFragment() {
+open class DeviceBindFragment(private val userKeyService: UserKeyService): DialogFragment() {
 
     companion object {
         const val TAG: String = "DeviceBindFragment"
@@ -38,7 +38,7 @@ open class DeviceBindFragment(private val viewModel: ViewModelHandler): DialogFr
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, viewModel.userKeys.map { it.userId })
+            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyService.userKeys.map { it.userId })
             val keyListView = view.findViewById<ListView>(R.id.key_list)
             val submitButton = view.findViewById<Button>(R.id.submit)
             var selectedView: View? = null
@@ -52,7 +52,7 @@ open class DeviceBindFragment(private val viewModel: ViewModelHandler): DialogFr
             keyListView.adapter = arrayAdapter
             submitButton.setOnClickListener {
                 selectedView?.let {
-                    viewModel.set(viewModel.userKeys[it.tag as Int])
+                    userKeyService.set(userKeyService.userKeys[it.tag as Int])
                 }
                 this@DeviceBindFragment.dismiss()
             }

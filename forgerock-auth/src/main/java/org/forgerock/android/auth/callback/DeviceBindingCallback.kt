@@ -25,7 +25,7 @@ open class DeviceBindingCallback: AbstractCallback {
     @JvmOverloads constructor(): super()
 
     /**
-     * The userId of the received from server
+     * The userId received from server
      */
     private lateinit var userId: String
     /**
@@ -121,9 +121,9 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
-    internal fun execute(context: Context,
+    protected open fun execute(context: Context,
                          listener: FRListener<Void>,
-                         authInterface: Authenticator = getDeviceBindInterface(),
+                         authInterface: Authenticator = getAuthenticator(),
                          encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),
                          deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
 
@@ -159,7 +159,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-      open fun handleException(status: DeviceBindingStatus,
+     protected open fun handleException(status: DeviceBindingStatus,
                              listener: FRListener<Void>) {
 
         setClientError(status.clientError)
@@ -173,7 +173,7 @@ open class DeviceBindingCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    open fun getDeviceBindInterface(): Authenticator {
+    protected open fun getAuthenticator(): Authenticator {
         return AuthenticatorFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
     }
 }

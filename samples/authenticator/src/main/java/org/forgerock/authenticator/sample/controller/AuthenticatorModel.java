@@ -10,12 +10,7 @@ package org.forgerock.authenticator.sample.controller;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.Account;
@@ -81,25 +76,22 @@ public class AuthenticatorModel {
         listeners = new ArrayList<>();
 
         // Retrieve the FCM token
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.e(TAG, "getInstanceId failed", task.getException());
-                            return;
-                        }
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.e(TAG, "getInstanceId failed", task.getException());
+                        return;
+                    }
 
-                        // Get new Instance ID token
-                        fcmToken = task.getResult().getToken();
-                        Log.v("FCM token:", fcmToken);
+                    // Get new Instance ID token
+                    fcmToken = task.getResult();
+                    Log.v("FCM token:", fcmToken);
 
-                        // Register the token with the SDK to enable Push mechanisms
-                        try {
-                            fraClient.registerForRemoteNotifications(fcmToken);
-                        } catch (AuthenticatorException e) {
-                            Log.e(TAG,"Error registering FCM token: ", e);
-                        }
+                    // Register the token with the SDK to enable Push mechanisms
+                    try {
+                        fraClient.registerForRemoteNotifications(fcmToken);
+                    } catch (AuthenticatorException e) {
+                        Log.e(TAG,"Error registering FCM token: ", e);
                     }
                 });
 

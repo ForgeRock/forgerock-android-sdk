@@ -70,9 +70,6 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.NONE)).thenReturn(kid)
 
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
-
         var success = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -85,7 +82,10 @@ class DeviceBindingCallbackTest {
                 fail()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
+
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
         authenticationLatch.await()
         assertTrue(success)
     }
@@ -102,8 +102,6 @@ class DeviceBindingCallbackTest {
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
 
         var success = false
         val listener = object: FRListener<Void> {
@@ -117,7 +115,8 @@ class DeviceBindingCallbackTest {
                 fail()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
         authenticationLatch.await()
         assertTrue(success)
     }
@@ -134,8 +133,7 @@ class DeviceBindingCallbackTest {
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
+
 
         var success = false
         val listener = object: FRListener<Void> {
@@ -149,7 +147,10 @@ class DeviceBindingCallbackTest {
                 fail()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
         authenticationLatch.await()
         assertTrue(success)
     }
@@ -168,8 +169,6 @@ class DeviceBindingCallbackTest {
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
 
         var failed = false
         var exception: Exception? = null
@@ -185,7 +184,9 @@ class DeviceBindingCallbackTest {
                 authenticationLatch.countDown()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
         authenticationLatch.await()
         assertTrue(failed)
         assertTrue(exception?.message == abort.message)
@@ -209,8 +210,6 @@ class DeviceBindingCallbackTest {
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
 
         var failed = false
         var exception: Exception? = null
@@ -226,7 +225,10 @@ class DeviceBindingCallbackTest {
                 authenticationLatch.countDown()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
         authenticationLatch.await()
         assertTrue(failed)
         assertTrue(exception?.message == "Biometric Timeout")
@@ -241,8 +243,6 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.isSupported()).thenReturn(false)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
 
         var failed = false
         var exception: Exception? = null
@@ -258,7 +258,9 @@ class DeviceBindingCallbackTest {
                 authenticationLatch.countDown()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
         authenticationLatch.await()
         assertTrue(failed)
 
@@ -287,8 +289,6 @@ class DeviceBindingCallbackTest {
         whenever(encryptedPref.persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
-        val obj = JSONObject(rawContent)
-        val testObject = DeviceBindingCallback(obj, 0)
 
         var failed = false
         var exception: Exception? = null
@@ -304,7 +304,9 @@ class DeviceBindingCallbackTest {
                 authenticationLatch.countDown()
             }
         }
-        testObject.execute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+        val testObject: DeviceBindingCallbackMockTest = DeviceBindingCallbackMockTest(rawContent)
+        testObject.testExecute(context, listener, authInterface = keyAware, encryptedPreference = encryptedPref, "device_id")
+
         authenticationLatch.await()
         assertTrue(failed)
         assertTrue(exception is DeviceBindingException)
@@ -313,5 +315,29 @@ class DeviceBindingCallbackTest {
         verify(keyAware, times(0)).authenticate(eq(20), any())
         verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
         verify(encryptedPref, times(0)).persist(userid, "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+    }
+}
+
+
+class DeviceBindingCallbackMockTest constructor(rawContent: String, jsonObject: JSONObject = JSONObject(rawContent), value: Int = 0): DeviceBindingCallback(jsonObject, value) {
+
+     fun testExecute(
+        context: Context,
+        listener: FRListener<Void>,
+        authInterface: Authenticator,
+        encryptedPreference: DeviceRepository,
+        deviceId: String
+    ) {
+        execute(context, listener, authInterface, encryptedPreference, deviceId)
+    }
+
+    override fun execute(
+        context: Context,
+        listener: FRListener<Void>,
+        authInterface: Authenticator,
+        encryptedPreference: DeviceRepository,
+        deviceId: String
+    ) {
+        super.execute(context, listener, authInterface, encryptedPreference, deviceId)
     }
 }
