@@ -27,7 +27,7 @@ class DeviceBindingCallbackTest {
     val context: Context = ApplicationProvider.getApplicationContext()
 
     private val encryptedPref = mock<DeviceRepository>()
-    private val keyAware = mock<Authenticator>()
+    private val keyAware = mock<DeviceAuthenticator>()
     private val publicKey = mock<RSAPublicKey>()
     private val privateKey = mock<PrivateKey>()
     private val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
@@ -322,11 +322,11 @@ class DeviceBindingCallbackTest {
 class DeviceBindingCallbackMockTest constructor(rawContent: String, jsonObject: JSONObject = JSONObject(rawContent), value: Int = 0): DeviceBindingCallback(jsonObject, value) {
 
      fun testExecute(
-        context: Context,
-        listener: FRListener<Void>,
-        authInterface: Authenticator,
-        encryptedPreference: DeviceRepository,
-        deviceId: String
+         context: Context,
+         listener: FRListener<Void>,
+         authInterface: DeviceAuthenticator,
+         encryptedPreference: DeviceRepository,
+         deviceId: String
     ) {
         execute(context, listener, authInterface, encryptedPreference, deviceId)
     }
@@ -334,7 +334,7 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String, jsonObject: 
     override fun execute(
         context: Context,
         listener: FRListener<Void>,
-        authInterface: Authenticator,
+        authInterface: DeviceAuthenticator,
         encryptedPreference: DeviceRepository,
         deviceId: String
     ) {

@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -11,8 +16,10 @@ import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.*
-import java.security.PrivateKey
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -20,8 +27,7 @@ class DeviceSigningVerifierCallbackTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
     private val userKeyService= mock<UserKeyService>()
-    private val keyAware = mock<Authenticator>()
-    private val privateKey = mock<PrivateKey>()
+    private val keyAware = mock<DeviceAuthenticator>()
 
     @Test
     fun testValuesAreSetProperly() {
@@ -112,16 +118,13 @@ class DeviceSigningVerifierCallbackTest {
             }
         }
 
-        var callback: ((UserKey) -> (Unit))? = {
+
+        testObject.executeGetUserKey(mockFragmentActivity, userKeyService) {
             testObject.executeAuthenticate(it, listener, keyAware)
         }
-        whenever(userKeyService.callback).thenReturn(callback)
 
-        testObject.executeShowKeysFragment(mockFragmentActivity, userKeyService, fragment, listener)
-        callback?.let { it(userKey) }
         authenticationLatch.await()
         assertTrue(success)
-        verify(fragment).show(mockFragmentActivity.supportFragmentManager, DeviceBindFragment.TAG)
     }
 
 
@@ -163,18 +166,17 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
     fun executeAuthenticate(
         userKey: UserKey,
         listener: FRListener<Void>,
-        authInterface: Authenticator
+        authInterface: DeviceAuthenticator
     ) {
         authenticate(userKey ,listener,  authInterface)
     }
 
-    fun executeShowKeysFragment(
+    fun executeGetUserKey(
         activity: FragmentActivity,
         viewModel: UserKeyService,
-        fragment: DialogFragment,
-        listener: FRListener<Void>
+        listener: (UserKey) -> (Unit)
     ) {
-        showKeysFragment(activity ,viewModel,  fragment,listener)
+        getUserKey(activity ,viewModel ,listener)
     }
 
     fun executeAllKey(
@@ -193,18 +195,18 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
         super.execute(context, userKeyService, listener)
     }
 
-    override fun  showKeysFragment(activity: FragmentActivity,
-                                   viewModel: UserKeyService,
-                                   fragment: DialogFragment,
-                                   listener: FRListener<Void>) {
+    override fun getUserKey(activity: FragmentActivity,
+                             userKeyService: UserKeyService,
+                             listener: (UserKey) -> (Unit)) {
 
-        super.showKeysFragment(activity, viewModel, fragment, listener)
+        val userKey = UserKey("jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        listener(userKey)
     }
 
     override fun authenticate(
         userKey: UserKey,
         listener: FRListener<Void>,
-        authInterface: Authenticator
+        authInterface: DeviceAuthenticator
     ) {
         super.authenticate(userKey, listener, authInterface)
     }

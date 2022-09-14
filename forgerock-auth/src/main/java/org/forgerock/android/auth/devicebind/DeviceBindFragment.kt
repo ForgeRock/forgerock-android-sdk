@@ -14,11 +14,16 @@ import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import org.forgerock.android.auth.R
 
-open class DeviceBindFragment(private val userKeyService: UserKeyService): DialogFragment() {
+/**
+ * internal Fragment to display the list of users keys
+ */
+class DeviceBindFragment(private val userKeyList: List<UserKey>): DialogFragment() {
 
     companion object {
         const val TAG: String = "DeviceBindFragment"
     }
+
+    var getUserKey: ((UserKey) -> (Unit))? = null
 
     override fun onResume() {
         super.onResume()
@@ -38,7 +43,7 @@ open class DeviceBindFragment(private val userKeyService: UserKeyService): Dialo
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyService.userKeys.map { it.userId })
+            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyList.map { it.userId })
             val keyListView = view.findViewById<ListView>(R.id.key_list)
             val submitButton = view.findViewById<Button>(R.id.submit)
             var selectedView: View? = null
@@ -52,7 +57,7 @@ open class DeviceBindFragment(private val userKeyService: UserKeyService): Dialo
             keyListView.adapter = arrayAdapter
             submitButton.setOnClickListener {
                 selectedView?.let {
-                    userKeyService.set(userKeyService.userKeys[it.tag as Int])
+                    getUserKey?.invoke(userKeyList[it.tag as Int])
                 }
                 this@DeviceBindFragment.dismiss()
             }

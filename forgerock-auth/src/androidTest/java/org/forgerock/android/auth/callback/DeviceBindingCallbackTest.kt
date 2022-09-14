@@ -8,9 +8,7 @@ package org.forgerock.android.auth.callback
 
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.*
-import org.junit.Assert.assertEquals
 import org.junit.Ignore
-import java.lang.Exception
 import java.util.concurrent.ExecutionException
 
 @Ignore
@@ -41,6 +39,22 @@ class DeviceBindingCallbackTest : TreeTest() {
                     hit++
                     return
                 }
+                else  if (node.getCallback(DeviceSigningVerifierCallback::class.java) != null) {
+                    val callback = node.getCallback(
+                        DeviceSigningVerifierCallback::class.java
+                    )
+                    callback.sign(context, object: FRListener<Void> {
+                        override fun onSuccess(result: Void?) {
+                            node.next(context, listener)
+                        }
+
+                        override fun onException(e: Exception?) {
+                            node.next(context, listener)
+                        }
+                    })
+                    hit++
+                    return
+                }
                 super.onCallbackReceived(node)
             }
         }
@@ -49,6 +63,6 @@ class DeviceBindingCallbackTest : TreeTest() {
     @Throws(ExecutionException::class, InterruptedException::class)
     override fun testTree() {
         super.testTree()
-        Assertions.assertThat(hit).isEqualTo(1)
+        Assertions.assertThat(hit).isEqualTo(2)
     }
 }

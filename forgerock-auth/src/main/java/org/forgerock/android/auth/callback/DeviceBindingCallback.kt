@@ -121,11 +121,12 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
+    @JvmOverloads
     protected open fun execute(context: Context,
-                         listener: FRListener<Void>,
-                         authInterface: Authenticator = getAuthenticator(),
-                         encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),
-                         deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
+                               listener: FRListener<Void>,
+                               authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(),
+                               encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),
+                               deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
 
         if(authInterface.isSupported().not()) {
             handleException(Unsupported(), listener = listener)
@@ -159,8 +160,8 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-     protected open fun handleException(status: DeviceBindingStatus,
-                             listener: FRListener<Void>) {
+    protected open fun handleException(status: DeviceBindingStatus,
+                                       listener: FRListener<Void>) {
 
         setClientError(status.clientError)
         Logger.error(tag, status.message, status.errorCode)
@@ -173,7 +174,7 @@ open class DeviceBindingCallback: AbstractCallback {
     /**
      * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      */
-    protected open fun getAuthenticator(): Authenticator {
+    protected open fun getDeviceBindAuthenticator(): DeviceAuthenticator {
         return AuthenticatorFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
     }
 }

@@ -7,7 +7,6 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 
 import org.forgerock.android.auth.*
@@ -16,7 +15,7 @@ import org.json.JSONObject
 
 
 /**
- * Callback to collect the device binding information
+ * Callback to collect the device signing information
  */
 open class DeviceSigningVerifierCallback: AbstractCallback {
 
@@ -51,7 +50,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      */
     private var timeout: Int? = null
 
-    private val tag = DeviceBindingCallback::class.java.simpleName
+    private val tag = DeviceSigningVerifierCallback::class.java.simpleName
 
     override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" ->  userId = value as? String
@@ -78,35 +77,34 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
 
     /**
      * Input the Client Error to the server
-     * @param value DeviceBind ErrorType .
+     * @param value DeviceSign ErrorType .
      */
     fun setClientError(value: String?) {
         super.setValue(value, 1)
     }
 
     /**
-     * Bind the device.
+     * Sign the device.
      *
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    @JvmOverloads
     fun sign(context: Context,
              listener: FRListener<Void>) {
         execute(context, listener = listener)
     }
 
     /**
-     * Helper method to execute binding , signing, show biometric prompt.
+     * Helper method to execute signing, show biometric prompt.
      *
-     * @param context  The Application Context
+     * @param userKey User Information
      * @param listener The Listener to listen for the result
      * @param authInterface Interface to find the Authentication Type
-     * @param encryptedPreference Persist the values in encrypted shared preference
      */
+    @JvmOverloads
     protected open fun authenticate(userKey: UserKey,
                                     listener: FRListener<Void>,
-                                    authInterface: Authenticator = getAuthenticator(userKey)) {
+                                    authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(userKey)) {
 
         if(authInterface.isSupported().not()) {
             handleException(Unsupported(), listener)
@@ -131,8 +129,12 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     }
 
     /**
-     * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
+     * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
+     * @param context application or activity context
+     * @param userKeyService service to sort and fetch the keys stored in the device
+     * @param listener The Listener to listen for the result
      */
+    @JvmOverloads
     protected open fun execute(context: Context,
                                userKeyService: UserKeyService = UserDeviceKeyService(context),
                                listener: FRListener<Void>) {
@@ -140,36 +142,45 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         when(val status = userKeyService.getKeyStatus(userId)) {
             is NoKeysFound -> handleException(UnRegister(), listener)
             is SingleKeyFound -> authenticate(status.key , listener = listener)
-            else -> { showKeysFragment(InitProvider.getCurrentActivityAsFragmentActivity(), userKeyService, listener =  listener) }
+            else -> {
+                getUserKey(InitProvider.getCurrentActivityAsFragmentActivity(), userKeyService) {
+                    authenticate(it, listener)
+                }
+            }
         }
-    }
-
-    protected open fun showKeysFragment(activity: FragmentActivity,
-                                        userKeyService: UserKeyService = UserDeviceKeyService(activity),
-                                        fragment: DialogFragment =  DeviceBindFragment(userKeyService),
-                                        listener: FRListener<Void>) {
-
-        userKeyService.callback = {
-            authenticate(it, listener = listener)
-        }
-        fragment.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
     }
 
     /**
-     * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
+     * Display fragment to select a user key from the list
+     * @param activity activity to be used to display the Fragment
+     * @param userKeyService service to sort and fetch the keys stored in the device
+     * @param listener The Listener to listen for the result
      */
-    protected open fun getAuthenticator(key: UserKey): Authenticator {
-        return AuthenticatorFactory.getType(key.userId, key.authType, title, subtitle, description)
+    protected open fun getUserKey(activity: FragmentActivity,
+                                  userKeyService: UserKeyService,
+                                  listener: (UserKey) -> (Unit)) {
+        DeviceBindFragment(userKeyService.userKeys).apply {
+            this.getUserKey = { listener(it) }
+            this.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
+        }
     }
 
     /**
-     * Handle all the errors for the device binding.
+     * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
+     * @param userKey selected UserKey from the device
+     */
+    protected open fun getDeviceBindAuthenticator(userKey: UserKey): DeviceAuthenticator {
+        return AuthenticatorFactory.getType(userKey.userId, userKey.authType, title, subtitle, description)
+    }
+
+    /**
+     * Handle all the errors for the device Signing.
      *
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
     protected open fun handleException(status: DeviceBindingStatus,
-                             listener: FRListener<Void>) {
+                                       listener: FRListener<Void>) {
         setClientError(status.clientError)
         Logger.error(tag, status.message, status.errorCode)
         Listener.onException(

@@ -49,7 +49,7 @@
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
 
     <string name="asset_statements" translatable="false">           [{
-             "include": "https://openam-forgerrock-sdks.forgeblocks.com/.well-known/assetlinks.json"
+             "include": "https://openam.example.com/.well-known/assetlinks.json"
            }]</string>
 
     <!-- Facebook -->
