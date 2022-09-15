@@ -13,7 +13,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 
 android {
-
     compileSdkVersion 33
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
