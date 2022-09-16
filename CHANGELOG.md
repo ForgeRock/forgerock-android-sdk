@@ -1,12 +1,17 @@
-## [Unreleased]
+## [3.3.4]
+#### Added
+- Dynamic SDK Configuration [SDKS-1759]
+- Android 13 support. [SDKS-1944]
+
 #### Fixed
-- Changed Activity type used as parameter in 'PushNotification.accept' [SDKS-1968]
-- Deserializing an object with whitelist to prevent deserialization of untrusted data.  [SDKS-1818]
-- Updated `authenticator` module and sample app to handle the new `POST_NOTIFICATIONS` permission. [SDKS-2033]
-- DefaultTokenManager does not cache AccessToken in memory upon retrieval from Shared Preferences.  [SDKS-2066]
-- Align forgerock_logout_endpoint configuration name with iOS [SDKS-2085]
+- Changed Activity type used as parameter in `PushNotification.accept`. [SDKS-1968]
+- Deserializing an object with whitelist to prevent deserialization of untrusted data. [SDKS-1818]
+- Updated the `Authenticator` module and sample app to handle the new `POST_NOTIFICATIONS` permission in Android 13. [SDKS-2033]
+- Fixed issue where the `DefaultTokenManager` was not caching the `AccessToken` in memory upon retrieval from Shared Preferences. [SDKS-2066]
+- Deprecated the `forgerock_enable_cookie` configuration [SDKS-2069]
+- Align `forgerock_logout_endpoint` configuration name with the ForgeRock iOS SDK [SDKS-2085]
 - Allow leading slash on custom endpoint path [SDKS-2074]
-- State value is not verified when calling the Authorize endpoint [SDKS-2078]
+- Fixed bug where `state` parameter value was not being verified upon calling the `Authorize` endpoint [SDKS-2078]
 
 ## [3.3.3]
 #### Fixed

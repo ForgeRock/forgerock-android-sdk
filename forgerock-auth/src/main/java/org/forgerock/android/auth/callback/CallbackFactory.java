@@ -50,6 +50,7 @@ public class CallbackFactory {
         register(SelectIdPCallback.class);
         register(IdPCallback.class);
         register(DeviceBindingCallback.class);
+        register(DeviceSigningVerifierCallback.class);
     }
 
     /**

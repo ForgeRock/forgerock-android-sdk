@@ -41,4 +41,11 @@ class SharedPreferencesDeviceRepositoryTests {
         verify(editor).putString("key", result)
     }
 
+    @Test
+    fun getAllTheData() {
+        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
+        testObject.getAllKeys()
+        verify(sharedPreferences).all
+    }
+
 }

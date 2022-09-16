@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.devicebind
 
 import android.security.keystore.KeyGenParameterSpec
@@ -11,7 +17,9 @@ import java.security.interfaces.RSAPublicKey
 /**
  * Helper class to generate and sign the keys
  */
-class KeyAware(private var userId: String) {
+internal class KeyAware(private var userId: String) {
+
+    constructor() : this("")
 
     private val hashingAlgorithm = "SHA-256"
     private val keySize = 2048
@@ -25,8 +33,10 @@ class KeyAware(private var userId: String) {
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
     private val key = getKeyAlias(userId)
 
+    /**
+     * Builder to create a keypair
+     */
     fun keyBuilder(): KeyGenParameterSpec.Builder {
-        val key = getKeyAlias()
         return KeyGenParameterSpec.Builder(
             key,
             purpose
@@ -39,6 +49,7 @@ class KeyAware(private var userId: String) {
 
     /**
      * Creates Keypair for the given builder
+     * @param builder keygen parameter as input to get the keypair
      */
     fun createKeyPair(builder: KeyGenParameterSpec.Builder): KeyPair {
         val keyPairGenerator: KeyPairGenerator = KeyPairGenerator.getInstance(
@@ -54,8 +65,19 @@ class KeyAware(private var userId: String) {
         return KeyPair(publicKey, privateKey, key)
     }
 
+
+    /**
+     * Get the private key from the Keypair for the given builder
+     * @param keyAlias key hash of the user
+     */
+    fun getSecureKey(keyAlias: String = key): PrivateKey? {
+        val keyStore: KeyStore = getKeyStore()
+        return keyStore.getKey(keyAlias, null) as? PrivateKey
+    }
+
     /**
      * get hash for the given user
+     * @param keyName username as a key
      */
     private fun getKeyAlias(keyName: String = userId): String {
         return try {

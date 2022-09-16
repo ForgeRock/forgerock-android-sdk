@@ -12,14 +12,14 @@ apply plugin: 'signing'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 33
         buildConfigField 'String', 'VERSION_NAME', "\"" + VERSION + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
