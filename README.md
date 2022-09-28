@@ -29,7 +29,7 @@ Use the SDKs to leverage _[Intelligent Authentication](https://www.forgerock.com
     * Access Management (AM) 6.5.2+
 
 * Android API level 23+
-    * Android 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0, 12.0
+    * Android 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0, 12.0, 13.0
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- INSTALLATION - If you want to start quickly with minimal assistance. -->
