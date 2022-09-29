@@ -34,6 +34,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ForgeRockAndroid">
 
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+
         <service
             android:name="org.forgerock.android.auth.authenticator.AuthenticatorService"
             android:exported="false">

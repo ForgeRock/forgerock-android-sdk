@@ -68,6 +68,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.security:security-crypto:1.0.0'
+
+    // Biometric
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
 
     testImplementation 'androidx.test:core:1.4.0'
     testImplementation 'androidx.test:runner:1.4.0'

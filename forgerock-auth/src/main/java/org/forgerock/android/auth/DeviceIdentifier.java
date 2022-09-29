@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -19,8 +19,6 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
 
-import lombok.Builder;
-
 /**
  * Model of Device Identifier
  */
@@ -33,7 +31,6 @@ public class DeviceIdentifier {
      * @param context
      * @param keyStoreManager
      */
-    @Builder
     public DeviceIdentifier(@NotNull Context context, KeyStoreManager keyStoreManager) {
 
         this.keyAlias = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -42,6 +39,13 @@ public class DeviceIdentifier {
             this.keyStoreManager = KeyStoreManager.builder().context(context).build();
         }
 
+    }
+
+    /**
+     * Initiate the DeviceIdentifierBuilder class
+     */
+    public static DeviceIdentifierBuilder builder() {
+        return new DeviceIdentifierBuilder();
     }
 
     /**
@@ -100,5 +104,34 @@ public class DeviceIdentifier {
             result.append(Integer.toHexString(theByte).substring(6));
         }
         return result.toString();
+    }
+
+    /**
+     * Builder class to build the device identifier
+     */
+    public static class DeviceIdentifierBuilder {
+        private Context context;
+        private KeyStoreManager keyStoreManager;
+
+        DeviceIdentifierBuilder() {
+        }
+
+        public DeviceIdentifierBuilder context(Context context) {
+            this.context = context;
+            return this;
+        }
+
+        public DeviceIdentifierBuilder keyStoreManager(KeyStoreManager keyStoreManager) {
+            this.keyStoreManager = keyStoreManager;
+            return this;
+        }
+
+        public DeviceIdentifier build() {
+            return new DeviceIdentifier(context, keyStoreManager);
+        }
+
+        public String toString() {
+            return "DeviceIdentifier.DeviceIdentifierBuilder(context=" + this.context + ", keyStoreManager=" + this.keyStoreManager + ")";
+        }
     }
 }

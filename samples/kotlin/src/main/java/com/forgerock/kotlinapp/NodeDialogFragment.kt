@@ -18,6 +18,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.callback.ChoiceCallback
 import org.forgerock.android.auth.callback.NameCallback
@@ -67,18 +68,25 @@ class NodeDialogFragment: DialogFragment() {
                 node?.getCallback(ChoiceCallback::class.java)?.setSelectedIndex(1)
             }
         }
-        node?.callbacks?.forEach {
-            when (it.type) {
-                "NameCallback" -> {
-                    (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "PasswordCallback" -> {
-                    (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "ChoiceCallback" -> {
-                    choiceNode.visibility = View.VISIBLE
+        try {
+            node?.callbacks?.iterator()?.forEach {
+                when (it.type) {
+                    "NameCallback" -> {
+                        (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                    }
+                    "PasswordCallback" -> {
+                        (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                    }
+                    "ChoiceCallback" -> {
+                        choiceNode.visibility = View.VISIBLE
+                    }
                 }
             }
+        }
+        catch (e: Exception) {
+          Logger.error("",e.message)
         }
         val username: TextInputEditText = view.findViewById(R.id.username)
         val password: TextInputEditText = view.findViewById(R.id.password)

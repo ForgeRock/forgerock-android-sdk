@@ -7,16 +7,19 @@
 package com.forgerock.kotlinapp
 
 import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
 import org.forgerock.android.auth.*
+import org.forgerock.android.auth.callback.*
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -55,7 +58,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         userInfoFragment?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
-        
+
         if(FRUser.getCurrentUser() == null) {
             updateStatus(true)
         } else {
@@ -163,11 +166,113 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCallbackReceived(node: Node?) {
+        val activity = this
         nodeDialog?.dismiss()
-        nodeDialog = NodeDialogFragment.newInstance(node)
-        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+        node?.takeUnless { it.callbacks.isEmpty() }?.let {
+            it.callbacks.forEach { typer ->
+                when(typer.type) {
+                    "DeviceBindingCallback" -> {
+                        runOnUiThread {
+                            val deviceBindingCallback = node.getCallback(
+                                DeviceBindingCallback::class.java
+                            )
+                            deviceBindingCallback.bind(activity, object : FRListener<Void> {
+                                override fun onSuccess(result: Void?) {
+                                    node.next(activity, activity)
+                                }
 
+                                override fun onException(e: java.lang.Exception?) {
+                                    node.next(activity, activity)
+                                }
+                            })
+                        }
+                    }
+                    "DeviceSigningVerifierCallback" -> {
+                        runOnUiThread {
+                            val deviceBindingCallback = node.getCallback(
+                                DeviceSigningVerifierCallback::class.java
+                            )
+                            deviceBindingCallback.sign(activity, object : FRListener<Void> {
+                                override fun onSuccess(result: Void?) {
+                                    node.next(activity, activity)
+                                }
+
+                                override fun onException(e: java.lang.Exception?) {
+                                    node.next(activity, activity)
+                                }
+                            })
+                        }
+                    }
+                    "WebAuthnAuthenticationCallback" -> {
+                        val webAuthCallback = node.getCallback(
+                            WebAuthnAuthenticationCallback::class.java
+                        )
+                        webAuthCallback?.authenticate(node, null, object : FRListener<Void?> {
+                            override fun onException(e: Exception) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    }
+                    "WebAuthnRegistrationCallback" -> {
+                        val callback = node.getCallback(
+                            WebAuthnRegistrationCallback::class.java
+                        )
+                        callback?.register(node, object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onException(e: java.lang.Exception?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    }
+                    "IdPCallback" -> {
+                        val idp: IdPCallback = node.getCallback(
+                            IdPCallback::class.java
+                        )
+                        idp.signIn(null, object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onException(e: java.lang.Exception?) {
+                            }
+
+                        })
+                    }
+                    "SelectIdPCallback" -> {
+                        val idp: SelectIdPCallback = node.getCallback(
+                            SelectIdPCallback::class.java
+                        )
+                        idp.setValue("google_andy")
+                        node.next(activity, activity)
+                    }
+                    "NameCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                    "PasswordCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                    "ChoiceCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                    }
+                }
+            }
+
+        }
     }
 
     override fun logout() {

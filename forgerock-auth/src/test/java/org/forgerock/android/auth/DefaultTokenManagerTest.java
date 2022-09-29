@@ -7,27 +7,35 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
+
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import com.squareup.okhttp.mockwebserver.MockResponse;
+
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidGrantException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.*;
 
 /**
  * Instrumented test, which will execute on an Android device.
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DefaultTokenManagerTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
