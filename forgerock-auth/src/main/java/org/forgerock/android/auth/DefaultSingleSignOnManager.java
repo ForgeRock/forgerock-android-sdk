@@ -40,12 +40,14 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     private static final String TAG = DefaultSingleSignOnManager.class.getSimpleName();
 
     private SingleSignOnManager singleSignOnManager;
-    private ServerConfig serverConfig;
+    private final ServerConfig serverConfig;
+    private final SSOBroadcastModel ssoBroadcastModel;
     private static final Action LOGOUT = new Action(Action.LOGOUT);
 
     @Builder
     private DefaultSingleSignOnManager(@NonNull Context context,
                                        ServerConfig serverConfig,
+                                       SSOBroadcastModel ssoBroadcastModel,
                                        String accountName,
                                        Encryptor encryptor,
                                        SharedPreferences sharedPreferences) {
@@ -62,6 +64,7 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                     .sharedPreferences(sharedPreferences).build();
         }
 
+        this.ssoBroadcastModel = ssoBroadcastModel;
         this.serverConfig = serverConfig;
     }
 
@@ -146,12 +149,16 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
                 }
             }
         });
+
+        if (ssoBroadcastModel != null) {
+            ssoBroadcastModel.sendLogoutBroadcast();
+        }
     }
 
     private URL getLogoutUrl() throws MalformedURLException {
         Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
-        if (isNotEmpty(serverConfig.getLogoutEndpoint())) {
-            builder.appendEncodedPath(serverConfig.getLogoutEndpoint());
+        if (isNotEmpty(serverConfig.getSessionEndpoint())) {
+            builder.appendEncodedPath(serverConfig.getSessionEndpoint());
         } else {
             builder.appendPath("json")
                     .appendPath("realms")
@@ -161,4 +168,14 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
         builder.appendQueryParameter("_action", "logout");
         return new URL(builder.build().toString());
     }
+
+    @Override
+    public boolean isBroadcastEnabled() {
+        if (ssoBroadcastModel != null) {
+            return ssoBroadcastModel.isBroadcastEnabled();
+        } else {
+            return SingleSignOnManager.super.isBroadcastEnabled();
+        }
+    }
+
 }

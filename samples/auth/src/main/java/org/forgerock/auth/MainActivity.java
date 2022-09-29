@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                     SSLContext sslContext = SSLContext.getInstance("SSL");
                     sslContext.init(null, new TrustManager[] { trustManager }, new java.security.SecureRandom());
                     Config.getInstance().reset();
-                    Config.getInstance().init(this);
+                    Config.getInstance().init(this, null);
                     Config.getInstance().setBuildSteps(Collections.singletonList(builder1 -> {
                         builder1.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager);
                         builder1.hostnameVerifier((s, sslSession) -> true);

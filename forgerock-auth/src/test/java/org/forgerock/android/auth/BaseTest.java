@@ -47,7 +47,7 @@ public class BaseTest {
         server = new MockWebServer();
         server.start();
 
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         Config.getInstance().setUrl(getUrl());
         Config.getInstance().setEncryptor(new MockEncryptor());
 

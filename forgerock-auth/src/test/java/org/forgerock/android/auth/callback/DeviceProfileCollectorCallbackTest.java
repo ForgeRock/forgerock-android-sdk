@@ -1,11 +1,15 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth.callback;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
@@ -24,10 +28,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.security.PublicKey;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @RunWith(RobolectricTestRunner.class)
 public class DeviceProfileCollectorCallbackTest {
 
@@ -45,7 +45,7 @@ public class DeviceProfileCollectorCallbackTest {
         byte[] encoded = "public key".getBytes();
         when(publicKey.getEncoded()).thenReturn(encoded);
         when(keyStoreManager.getIdentifierKey(any())).thenReturn(publicKey);
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         Config.getInstance().setKeyStoreManager(keyStoreManager);
     }
 

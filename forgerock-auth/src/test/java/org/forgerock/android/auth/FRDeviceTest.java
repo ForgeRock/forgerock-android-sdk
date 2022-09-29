@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -44,7 +44,7 @@ public class FRDeviceTest {
 
     @Before
     public void setUp() {
-        Config.getInstance().init(context);
+        Config.getInstance().init(context,null);
         Application application = ApplicationProvider.getApplicationContext();
         ShadowApplication app = Shadows.shadowOf(application);
         app.grantPermissions(Manifest.permission.ACCESS_FINE_LOCATION,

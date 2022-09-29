@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -15,6 +16,7 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class ServerConfigTest {
 
     @Test
     public void testCachedOkHttpClient() {
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -57,11 +59,11 @@ public class ServerConfigTest {
 
     @Test
     public void testOkHttpCachedWithDifferentIdentifier() {
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client1 = OkHttpClientProvider.getInstance().lookup(serverConfig);
         Config.reset();
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         ServerConfig serverConfig2 = Config.getInstance().getServerConfig();
         OkHttpClient client2 = OkHttpClientProvider.getInstance().lookup(serverConfig2);
         assertThat(client1 != client2).isTrue();
@@ -199,7 +201,7 @@ public class ServerConfigTest {
 
     @Test
     public void testPinningConfig() {
-        Config.getInstance().init(context);
+        Config.getInstance().init(context, null);
         ServerConfig serverConfig = Config.getInstance().getServerConfig();
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
         assertThat(client.certificatePinner().getPins())
@@ -290,4 +292,24 @@ public class ServerConfigTest {
 
     }
 
+    @Test
+    public void testCustomPath() {
+        ServerConfig serverConfig = ServerConfig.builder()
+                .context(context)
+                .authenticateEndpoint("//////authenticate")
+                .authorizeEndpoint("authorize")
+                .tokenEndpoint("/token")
+                .revokeEndpoint("//revoke/test")
+                .userInfoEndpoint("//userInfo/test/")
+                .sessionEndpoint("//session")
+                .build();
+
+        assertThat(serverConfig.getAuthenticateEndpoint()).isEqualTo("authenticate");
+        assertThat(serverConfig.getAuthorizeEndpoint()).isEqualTo("authorize");
+        assertThat(serverConfig.getTokenEndpoint()).isEqualTo("token");
+        assertThat(serverConfig.getRevokeEndpoint()).isEqualTo("revoke/test");
+        assertThat(serverConfig.getUserInfoEndpoint()).isEqualTo("userInfo/test/");
+        assertThat(serverConfig.getSessionEndpoint()).isEqualTo("session");
+        assertThat(serverConfig.getEndSessionEndpoint()).isNull();
+    }
 }

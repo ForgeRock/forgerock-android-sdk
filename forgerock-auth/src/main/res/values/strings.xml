@@ -20,7 +20,6 @@
     <string name="forgerock_url" translatable="false">place holder</string>
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
-    <bool name="forgerock_enable_cookie" translatable="false">true</bool>
     <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
     <string-array name="forgerock_ssl_pinning_public_key_hashes"></string-array>
@@ -31,7 +30,9 @@
     <string name="forgerock_token_endpoint" translatable="false" />
     <string name="forgerock_revoke_endpoint" translatable="false" />
     <string name="forgerock_userinfo_endpoint" translatable="false" />
+    <!-- deprecated, use forgerock_session_endpoint -->
     <string name="forgerock_logout_endpoint" translatable="false" />
+    <string name="forgerock_session_endpoint" translatable="false" />
     <string name="forgerock_endsession_endpoint" translatable="false" />
 
     <!-- SSO -->

@@ -12,6 +12,7 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import com.squareup.okhttp.mockwebserver.Dispatcher
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.RecordedRequest
@@ -42,20 +43,11 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     }
 
     private fun login() {
+
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        server.enqueue(
-            MockResponse()
-                .addHeader(
-                    "Location",
-                    "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&state=abc123&client_id=andy_app"
-                )
-                .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        )
-        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK)
-        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences =
+       Config.getInstance().sharedPreferences =
             context.getSharedPreferences(
                 defaultTokenManagerTest,
                 Context.MODE_PRIVATE
@@ -83,6 +75,21 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
                 }
             }
         FRUser.login(context, nodeListenerFuture)
+        server.takeRequest()
+        server.takeRequest()
+        server.takeRequest()
+
+        val request = server.takeRequest();
+
+        val state = Uri.parse(request.getPath()).getQueryParameter("state");
+        server.enqueue(MockResponse()
+            .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                    "state=" + state + "&client_id=andy_app")
+            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP));
+
+        enqueue("/authTreeMockTest_Authenticate_accessToken.json", HttpURLConnection.HTTP_OK)
+        enqueue("/userinfo_success.json", HttpURLConnection.HTTP_OK)
+
         assertNotNull(nodeListenerFuture.get())
         assertNotNull(FRUser.getCurrentUser())
         val future = FRListenerFuture<UserInfo>()
@@ -95,6 +102,9 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
     fun whenBroadcastReceiverGetsLogoutEventThenVerifyRevokeTokenInvoked() {
         login()
 
+        val options = ConfigHelper.load(context, null).copy(Server(url, "root"))
+        ConfigHelper.persist(context, options)
+
         val latch = CountDownLatch(1)
         val mockHttpDispatcher = MockHttpDispatcher(latch)
         server.setDispatcher(mockHttpDispatcher)
@@ -102,7 +112,18 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val accessToken = FRUser.getCurrentUser().accessToken
         assertNotNull(FRUser.getCurrentUser())
 
-        val testObject = SSOBroadcastReceiver()
+        val config = ConfigHelper.getPersistedConfig(context, null)
+        config.sharedPreferences =  context.getSharedPreferences(
+            defaultTokenManagerTest,
+            Context.MODE_PRIVATE
+        )
+        config.ssoSharedPreferences =
+            context.getSharedPreferences(
+                defaultSSOTokenManagerTest,
+                Context.MODE_PRIVATE
+            )
+
+        val testObject = SSOBroadcastReceiver(config)
         val intent = Intent("org.forgerock.android.auth.broadcast.SSO_LOGOUT")
         intent.putExtra("BROADCAST_PACKAGE_KEY", "com.test.forgerock")
         testObject.onReceive(context, intent)
@@ -120,7 +141,6 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
         assertTrue(body.contains(accessToken.refreshToken))
-
     }
 }
 

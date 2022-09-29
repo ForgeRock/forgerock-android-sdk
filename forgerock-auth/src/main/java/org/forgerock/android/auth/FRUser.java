@@ -79,7 +79,6 @@ public class FRUser {
         current.set(null);
         sessionManager.close();
         FRLifecycle.dispatchLogout();
-        Config.getInstance().getSSOBroadcastModel().sendLogoutBroadcast();
     }
 
     /**
@@ -184,7 +183,7 @@ public class FRUser {
             return;
         }
 
-        createFRAuth(context, context.getString(R.string.forgerock_auth_service), sessionManager)
+        createFRAuth(context, Config.getInstance().getAuthServiceName(), sessionManager)
                 .next(context, listener);
 
     }
@@ -228,7 +227,7 @@ public class FRUser {
             return;
         }
 
-        createFRAuth(context, context.getString(R.string.forgerock_registration_service), sessionManager)
+        createFRAuth(context, Config.getInstance().getRegistrationServiceName(), sessionManager)
                 .next(context, listener);
     }
 

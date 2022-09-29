@@ -20,6 +20,8 @@ import java.util.Objects;
 
 import static org.forgerock.android.auth.OAuth2.*;
 
+import androidx.annotation.NonNull;
+
 /**
  * Implementation for handling {@link OAuth2Client} response, and provide feedback to the registered {@link FRListener}
  */
@@ -31,22 +33,33 @@ class OAuth2ResponseHandler implements ResponseHandler {
      * Handle Authorization response.
      *
      * @param response The response from /authorize endpoint
+     * @param state The state parameter included with the /authorize endpoint
      * @param listener Listener for receiving OAuth APIs related changes
      */
-    void handleAuthorizeResponse(Response response, FRListener<String> listener) {
-        if (response.isRedirect()) {
-            String location = response.header("Location");
-            Uri redirect = Uri.parse(location);
-            String code = redirect.getQueryParameter("code");
-            if (code != null) {
-                Listener.onSuccess(listener, code);
+    void handleAuthorizeResponse(Response response, @NonNull String state, FRListener<String> listener) {
+        try {
+            if (response.isRedirect()) {
+                String location = response.header("Location");
+                Uri redirect = Uri.parse(location);
+                String code = redirect.getQueryParameter("code");
+                String responseState = redirect.getQueryParameter("state");
+                if (responseState == null || !responseState.equals(state)) {
+                    Listener.onException(listener, new IllegalStateException("OAuth2 state mismatch"));
+                    return;
+                }
+                if (code != null) {
+                    Listener.onSuccess(listener, code);
+                } else {
+                    String errorDescription = redirect.getQueryParameter("error_description");
+                    Listener.onException(listener, new ApiException(response.code(), response.message(), errorDescription));
+                }
             } else {
-                String errorDescription = redirect.getQueryParameter("error_description");
-                Listener.onException(listener, new ApiException(response.code(), response.message(), errorDescription));
+                handleError(response, listener);
             }
-            close(response);
-        } else {
-            handleError(response, listener);
+        } finally {
+            if (response != null) {
+                close(response);
+            }
         }
     }
 

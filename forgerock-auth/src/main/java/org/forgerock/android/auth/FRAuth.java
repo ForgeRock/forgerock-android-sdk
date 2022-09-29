@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,8 +8,9 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.List;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Model of an FRAuth.
@@ -34,24 +33,32 @@ public class FRAuth {
     private AuthService authService;
     private SessionManager sessionManager;
 
-    //Alias to store Previous Configure Host
-    public static final String ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS";
     private static boolean started;
 
-    public static void start(Context context) {
-        if (!started) {
+    private static FROptions cachedOptions;
+
+    /**
+     * Start the SDK
+     *
+     * @param context  The Application Context
+     * @param options  The FROptions is a nullable field which takes either a null or config. If the caller passes null it fetches the default values from strings.xml .
+     */
+    public static synchronized void start(Context context, @Nullable FROptions options) {
+        if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
-            Config.getInstance().init(context);
-            //Clean up when server switch
-            SharedPreferences sharedPreferences = context.getSharedPreferences(ORG_FORGEROCK_V_1_HOSTS, MODE_PRIVATE);
-            String previousHost = sharedPreferences.getString("url", null);
-            if (previousHost != null) {
-                if (!Config.getInstance().getUrl().equals(previousHost)) {
-                    Config.getInstance().getSessionManager().close();
-                }
+            FROptions currentOptions = ConfigHelper.load(context, options);
+            if (ConfigHelper.isConfigDifferentFromPersistedValue(context, currentOptions)) {
+               SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
+               sessionManager.close();
             }
-            sharedPreferences.edit().putString("url", Config.getInstance().getUrl()).apply();
+            Config.getInstance().init(context, currentOptions);
+            ConfigHelper.persist(context, currentOptions);
+            cachedOptions = options;
         }
+    }
+
+    public static void start(Context context) {
+       start(context, null);
     }
 
     @Builder
@@ -62,8 +69,6 @@ public class FRAuth {
                    ServerConfig serverConfig,
                    SessionManager sessionManager,
                    @Singular List<Interceptor<?>> interceptors) {
-
-        Config.getInstance().init(context);
 
         this.sessionManager = sessionManager == null ? Config.getInstance().getSessionManager() : sessionManager;
 

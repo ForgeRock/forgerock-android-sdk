@@ -45,7 +45,7 @@ public class ServerConfig extends NetworkConfig {
     private String tokenEndpoint;
     private String revokeEndpoint;
     private String userInfoEndpoint;
-    private String logoutEndpoint;
+    private String sessionEndpoint;
     private String endSessionEndpoint;
 
     @lombok.Builder
@@ -64,7 +64,7 @@ public class ServerConfig extends NetworkConfig {
                          String tokenEndpoint,
                          String revokeEndpoint,
                          String userInfoEndpoint,
-                         String logoutEndpoint,
+                         String sessionEndpoint,
                          String endSessionEndpoint) {
         super(identifier,
                 getHost(context, url),
@@ -76,15 +76,20 @@ public class ServerConfig extends NetworkConfig {
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
         this.cookieName = cookieName;
-        this.authenticateEndpoint = authenticateEndpoint;
-        this.authorizeEndpoint = authorizeEndpoint;
-        this.tokenEndpoint = tokenEndpoint;
-        this.revokeEndpoint = revokeEndpoint;
-        this.userInfoEndpoint = userInfoEndpoint;
-        this.logoutEndpoint = logoutEndpoint;
-        this.endSessionEndpoint = endSessionEndpoint;
+        this.authenticateEndpoint = trimLeadingSlash(authenticateEndpoint);
+        this.authorizeEndpoint = trimLeadingSlash(authorizeEndpoint);
+        this.tokenEndpoint = trimLeadingSlash(tokenEndpoint);
+        this.revokeEndpoint = trimLeadingSlash(revokeEndpoint);
+        this.userInfoEndpoint = trimLeadingSlash(userInfoEndpoint);
+        this.sessionEndpoint = trimLeadingSlash(sessionEndpoint);
+        this.endSessionEndpoint = trimLeadingSlash(endSessionEndpoint);
 
     }
+
+    private String trimLeadingSlash(final String str) {
+        return str == null ? str : str.replaceAll("^/+", "");
+    }
+
 
     private static String getHost(Context context, String url) {
         try {

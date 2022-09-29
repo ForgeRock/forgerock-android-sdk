@@ -32,11 +32,14 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
                     //it considers as Centralize login, no validation on session token binding.
                     return true;
                 } else {
-                    if (Config.getInstance().getSSOBroadcastModel().isBroadcastEnabled()) {
+                    if (singleSignOnManager.isBroadcastEnabled()) {
                         //sessionToken may be deleted, restore it.
+                        //If broadcast is enabled, the access token should be removed during logout
                         singleSignOnManager.persist(accessToken.getSessionToken());
                         return true;
                     } else {
+                        //There is no session token but there the access token is bounded to
+                        //a session token, so the access token is no longer valid
                         return false;
                     }
                 }
