@@ -1,4 +1,4 @@
-## [3.3.4]
+## [3.4.0]
 #### Added
 - Dynamic SDK Configuration [SDKS-1759]
 - Android 13 support. [SDKS-1944]
