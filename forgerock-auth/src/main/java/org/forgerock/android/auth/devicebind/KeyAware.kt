@@ -159,10 +159,14 @@ internal class KeyAware(private var userId: String) {
             val keyPair = keyPairGenerator.generateKeyPair()
             val certificate: X509Certificate? = generateCertificate(keyPair)
 
-            val file = File(context.filesDir, "secretdata1")
+            var file = File(context.filesDir, "secretdata1")
 
-            val defaultKeyStore = KeyStore.getInstance("PKCS12")
+            if(file.exists()) {
+                file.delete()
+                file = File(context.filesDir, "secretdata1")
+            }
 
+            val defaultKeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
 
             val publicKey = keyPair.public
             val privateKey = keyPair.private
@@ -181,10 +185,8 @@ internal class KeyAware(private var userId: String) {
                 defaultKeyStore.setKeyEntry(key, keyPair.private, password, arrayOf(certificate))
 
                 val fileOutStream = encryptedFile.openFileOutput()
-                val objectOutputStream = ObjectOutputStream(fileOutStream)
-                defaultKeyStore.store(objectOutputStream, password)
+                defaultKeyStore.store(fileOutStream, password)
 
-                objectOutputStream.close()
                 fileOutStream.flush()
                 fileOutStream.close()
 
@@ -210,10 +212,9 @@ internal class KeyAware(private var userId: String) {
         ).build()
 
         val password: CharArray = charArrayOf('J', 'e', 'Y')
-        val foo = KeyStore.getInstance("PKCS12")
+        val foo = KeyStore.getInstance(KeyStore.getDefaultType())
         val encryptedInputStream = encryptedFile.openFileInput()
-        val objectInputStream = ObjectInputStream(encryptedInputStream)
-        foo.load(objectInputStream, password)
+        foo.load(encryptedInputStream, password)
 
         val protParam: KeyStore.ProtectionParameter = KeyStore.PasswordProtection(password)
         val pkEntry = foo.getEntry(keyAlias, protParam) as KeyStore.PrivateKeyEntry
