@@ -8,6 +8,7 @@
 package org.forgerock.android.auth.devicebind
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager.Authenticators.*
@@ -31,7 +32,7 @@ interface DeviceAuthenticator {
     /**
      * generate the public and private keypair
      */
-    fun generateKeys(): KeyPair
+    fun generateKeys(context: Context): KeyPair
     /**
      * Display biometric prompt for authentication type
      * @param timeout Timeout for biometric prompt
@@ -69,7 +70,7 @@ interface DeviceAuthenticator {
      * @param userKey User Information
      * @param challenge challenge received from server
      */
-    fun sign(userKey: UserKey, challenge: String): String {
+    fun sign(userKey: UserKey, challenge: String, context: Context): String {
         val keyStoreKey = KeyAware().getSecureKey(userKey.keyAlias)
         val signedJWT = SignedJWT(
             JWSHeader.Builder(JWSAlgorithm.RS512)
@@ -113,7 +114,7 @@ internal class BiometricOnly(private val biometricInterface: BiometricHandler,
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override fun generateKeys(): KeyPair {
+    override fun generateKeys(context: Context): KeyPair {
         val builder = keyAware.keyBuilder()
         if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(keyAware.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG)
@@ -153,7 +154,7 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override fun generateKeys(): KeyPair {
+    override fun generateKeys(context: Context): KeyPair {
         val builder = keyAware.keyBuilder()
         if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(keyAware.timeout, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
@@ -189,9 +190,12 @@ internal class None(private val keyAware: KeyAware): DeviceAuthenticator {
     /**
      * generate the public and private keypair
      */
-    override fun generateKeys(): KeyPair {
-        val builder = keyAware.keyBuilder()
-        return keyAware.createKeyPair(builder)
+    override fun generateKeys(context: Context): KeyPair {
+
+        return keyAware.setApplicationKeyWithPassword(context)
+
+//        val builder = keyAware.keyBuilder()
+//        return keyAware.createKeyPair(builder)
     }
 
     /**
@@ -208,6 +212,20 @@ internal class None(private val keyAware: KeyAware): DeviceAuthenticator {
         timeout: Int,
         result: (DeviceBindingStatus) -> Unit) {
         result(Success)
+    }
+
+    override fun sign(userKey: UserKey, challenge: String, context: Context): String {
+        val keyStoreKey = KeyAware().getSecureKey(userKey.keyAlias, context)
+        val signedJWT = SignedJWT(
+            JWSHeader.Builder(JWSAlgorithm.RS512)
+                .keyID(userKey.kid)
+                .build(), JWTClaimsSet.Builder()
+                .subject(userKey.userId)
+                .claim("challenge", challenge)
+                .build()
+        )
+        signedJWT.sign(RSASSASigner(keyStoreKey))
+        return signedJWT.serialize()
     }
 
 }

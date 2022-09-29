@@ -134,7 +134,7 @@ open class DeviceBindingCallback: AbstractCallback {
         }
 
         try {
-            val keypair = authInterface.generateKeys()
+            val keypair = authInterface.generateKeys(context)
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
                     val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)

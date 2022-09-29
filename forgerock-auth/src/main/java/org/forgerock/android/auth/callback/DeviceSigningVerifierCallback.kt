@@ -104,6 +104,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     @JvmOverloads
     protected open fun authenticate(userKey: UserKey,
                                     listener: FRListener<Void>,
+                                    context: Context,
                                     authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(userKey)) {
 
         if(authInterface.isSupported().not()) {
@@ -113,7 +114,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         try {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val jws = authInterface.sign(userKey, challenge)
+                    val jws = authInterface.sign(userKey, challenge, context)
                     setJws(jws)
                     Listener.onSuccess(listener, null)
                 } else {
@@ -141,10 +142,10 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
 
         when(val status = userKeyService.getKeyStatus(userId)) {
             is NoKeysFound -> handleException(UnRegister(), listener)
-            is SingleKeyFound -> authenticate(status.key , listener = listener)
+            is SingleKeyFound -> authenticate(status.key , listener = listener, context)
             else -> {
                 getUserKey(InitProvider.getCurrentActivityAsFragmentActivity(), userKeyService) {
-                    authenticate(it, listener)
+                    authenticate(it, listener, context)
                 }
             }
         }

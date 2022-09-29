@@ -9,7 +9,7 @@
     <string name="app_name">ForgeRockApp-Kotlin</string>
     <!-- OAuth 2.0 Client Details -->
 
-    <string name="forgerock_oauth_client_id" translatable="false">jeyonboarding</string>
+    <string name="forgerock_oauth_client_id" translatable="false">AndroidTest</string>
 
 
     <string name="forgerock_oauth_redirect_uri" translatable="false">org.forgerock.demo:/oauth2redirect</string>
@@ -19,10 +19,10 @@
     <!-- AM Instance Details -->
 
 
-    <string name="forgerock_url" translatable="false">http://192.168.1.93:8080/openam</string>
+    <string name="forgerock_url" translatable="false">https://openam-forgerrock-luis.forgeblocks.com/am</string>
 
     <string name="forgerock_cookie_name" translatable="false">ff55694c448e26e</string>
-    <string name="forgerock_realm" translatable="false">root</string>
+    <string name="forgerock_realm" translatable="false">alpha</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
 
     <!-- Single Sign-On Details -->
@@ -37,7 +37,7 @@
 
     <!-- AM Tree Details -->
 
-    <string name="forgerock_auth_service" translatable="false">devicebind</string>
+    <string name="forgerock_auth_service" translatable="false">binding</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
