@@ -146,12 +146,19 @@ internal class KeyAware(private var userId: String) {
     /**
      * Creates centralised SecretKey using the KeyStore
      */
+
+    fun toCharacterArray(str: String): Array<Char> {
+        return str.toCharArray().toTypedArray()
+    }
+
     @Throws(GeneralSecurityException::class, IOException::class)
-    fun setApplicationKeyWithPassword(context: Context): KeyPair {
+    fun setApplicationKeyWithPassword( context: Context, pin: String): KeyPair {
         var keyStore: KeyStore? = null
         try {
             // Storing
-            val password: CharArray = charArrayOf('J', 'e', 'Y')
+            val password = pin.toCharArray()
+
+           // val password = pin.trim().toCharArray()
 
             val keyPairGenerator: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
             keyPairGenerator.initialize(2048)
@@ -171,6 +178,7 @@ internal class KeyAware(private var userId: String) {
             val publicKey = keyPair.public
             val privateKey = keyPair.private
 
+
             val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
             val encryptedFile = EncryptedFile.Builder(
                 file,
@@ -182,7 +190,7 @@ internal class KeyAware(private var userId: String) {
             certificate?.let {
 
                 defaultKeyStore.load(null)
-                defaultKeyStore.setKeyEntry(key, keyPair.private, password, arrayOf(certificate))
+                defaultKeyStore.setKeyEntry("alias", keyPair.private, password, arrayOf(certificate))
 
                 val fileOutStream = encryptedFile.openFileOutput()
                 defaultKeyStore.store(fileOutStream, password)
@@ -200,8 +208,10 @@ internal class KeyAware(private var userId: String) {
         }
     }
 
-    fun getSecureKey(keyAlias: String = key, context: Context): PrivateKey {
+    fun getSecureKey(keyAlias: String = key, context: Context, pin: String): PrivateKey {
         val file = File(context.filesDir, "secretdata1")
+
+        val password = pin.toCharArray()
 
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
         val encryptedFile = EncryptedFile.Builder(
@@ -211,13 +221,12 @@ internal class KeyAware(private var userId: String) {
             EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
         ).build()
 
-        val password: CharArray = charArrayOf('J', 'e', 'Y')
         val foo = KeyStore.getInstance(KeyStore.getDefaultType())
         val encryptedInputStream = encryptedFile.openFileInput()
         foo.load(encryptedInputStream, password)
 
         val protParam: KeyStore.ProtectionParameter = KeyStore.PasswordProtection(password)
-        val pkEntry = foo.getEntry(keyAlias, protParam) as KeyStore.PrivateKeyEntry
+        val pkEntry = foo.getEntry("alias", protParam) as KeyStore.PrivateKeyEntry
         return pkEntry.privateKey
     }
 

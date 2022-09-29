@@ -112,16 +112,26 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
             return
         }
         try {
-            authInterface.authenticate(timeout ?: 60) { result ->
-                if (result is Success) {
-                    val jws = authInterface.sign(userKey, challenge, context)
-                    setJws(jws)
-                    Listener.onSuccess(listener, null)
-                } else {
-                    // All the biometric exception is handled here , it could be Abort or timeout
-                    handleException(result, listener = listener)
+
+            val activity = InitProvider.getCurrentActivityAsFragmentActivity()
+            EditNameDialogFragment.newInstance("Enter PIN") .apply {
+                this.getText = {
+                    authInterface.pin = it
+                    authInterface.authenticate(timeout ?: 60) { result ->
+                        if (result is Success) {
+                            val jws = authInterface.sign(userKey, challenge, context)
+                            setJws(jws)
+                            Listener.onSuccess(listener, null)
+                        } else {
+                            // All the biometric exception is handled here , it could be Abort or timeout
+                            handleException(result, listener = listener)
+                        }
+                    }
                 }
+                this.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
             }
+
+
         }
         catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.

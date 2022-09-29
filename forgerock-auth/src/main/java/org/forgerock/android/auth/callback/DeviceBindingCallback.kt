@@ -7,10 +7,7 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import org.forgerock.android.auth.DeviceIdentifier
-import org.forgerock.android.auth.FRListener
-import org.forgerock.android.auth.Listener
-import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.*
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
 
@@ -134,19 +131,28 @@ open class DeviceBindingCallback: AbstractCallback {
         }
 
         try {
-            val keypair = authInterface.generateKeys(context)
-            authInterface.authenticate(timeout ?: 60) { result ->
-                if (result is Success) {
-                    val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
-                    val jws = authInterface.sign(keypair, kid, userId, challenge)
-                    setJws(jws)
-                    setDeviceId(deviceId)
-                    Listener.onSuccess(listener, null)
-                } else {
-                    // All the biometric exception is handled here , it could be Abort or timeout
-                    handleException(result, listener = listener)
+            val activity = InitProvider.getCurrentActivityAsFragmentActivity()
+            EditNameDialogFragment.newInstance("Enter PIN") .apply {
+                this.getText = {
+                    authInterface.pin = it
+                    val keypair = authInterface.generateKeys(context)
+                    authInterface.authenticate(timeout ?: 60) { result ->
+                        if (result is Success) {
+                            val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
+                            val jws = authInterface.sign(keypair, kid, userId, challenge)
+                            setJws(jws)
+                            setDeviceId(deviceId)
+                            Listener.onSuccess(listener, null)
+                        } else {
+                            // All the biometric exception is handled here , it could be Abort or timeout
+                            handleException(result, listener = listener)
+                        }
+                    }
                 }
+                this.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
             }
+
+
         }
         catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.

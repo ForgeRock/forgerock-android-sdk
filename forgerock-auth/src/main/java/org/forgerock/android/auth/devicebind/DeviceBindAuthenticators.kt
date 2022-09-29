@@ -20,6 +20,7 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -88,6 +89,8 @@ interface DeviceAuthenticator {
      */
     fun isSupported(): Boolean
 
+    var pin: String?
+
 }
 
 /**
@@ -132,6 +135,8 @@ internal class BiometricOnly(private val biometricInterface: BiometricHandler,
         return biometricInterface.isSupported(BIOMETRIC_STRONG, BIOMETRIC_WEAK)
     }
 
+    override var pin: String? = null
+
     /**
      * Display biometric prompt for authentication type
      * @param timeout Timeout for biometric prompt
@@ -165,6 +170,8 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
         return keyAware.createKeyPair(builder)
     }
 
+    override var pin: String? = null
+
     /**
      * check biometric is supported
      */
@@ -187,16 +194,19 @@ internal class BiometricAndDeviceCredential(private val biometricInterface: Biom
  * Settings for all the none authentication is configured
  */
 internal class None(private val keyAware: KeyAware): DeviceAuthenticator {
+
+    override var pin: String? = null
+
     /**
      * generate the public and private keypair
      */
     override fun generateKeys(context: Context): KeyPair {
-
-        return keyAware.setApplicationKeyWithPassword(context)
+        return keyAware.setApplicationKeyWithPassword(context, pin ?: "")
 
 //        val builder = keyAware.keyBuilder()
 //        return keyAware.createKeyPair(builder)
     }
+
 
     /**
      * Default is true for None type
@@ -215,7 +225,7 @@ internal class None(private val keyAware: KeyAware): DeviceAuthenticator {
     }
 
     override fun sign(userKey: UserKey, challenge: String, context: Context): String {
-        val keyStoreKey = KeyAware().getSecureKey(userKey.keyAlias, context)
+        val keyStoreKey = KeyAware().getSecureKey(userKey.keyAlias, context, pin ?: "")
         val signedJWT = SignedJWT(
             JWSHeader.Builder(JWSAlgorithm.RS512)
                 .keyID(userKey.kid)
