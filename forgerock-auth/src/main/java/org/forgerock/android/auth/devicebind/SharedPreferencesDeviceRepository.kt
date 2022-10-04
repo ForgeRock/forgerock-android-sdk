@@ -23,6 +23,7 @@ interface DeviceRepository {
      * Persist the data in encrypted shared preference
      */
     fun persist(userId: String,
+                userName: String,
                 key: String,
                 authenticationType: DeviceBindingAuthenticationType): String
 
@@ -32,6 +33,7 @@ interface DeviceRepository {
 const val userIdKey = "userId"
 const val kidKey = "kid"
 const val authTypeKey = "authType"
+const val userNameKey = "username"
 
 /**
  * Helper class to save and retrieve EncryptedMessage
@@ -45,11 +47,13 @@ internal class SharedPreferencesDeviceRepository(context: Context,
      * Persist the data in encrypted shared preference
      */
     override fun persist(userId: String,
+                         userName: String,
                          key: String,
                          authenticationType: DeviceBindingAuthenticationType): String {
             val jsonObject = JSONObject()
             try {
                 jsonObject.put(userIdKey, userId)
+                jsonObject.put(userNameKey, userName)
                 jsonObject.put(kidKey, uuid)
                 jsonObject.put(authTypeKey, authenticationType.serializedValue)
             } catch (e: JSONException) {

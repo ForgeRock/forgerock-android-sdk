@@ -24,8 +24,8 @@ class UserDeviceKeyServiceTest {
     @Test
     fun getAllUsersWithEmptyUserId() {
         val userList = mutableMapOf<String, Any>()
-        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
-        userList["J0gBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=stoyan,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"username\":\"jey\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["J0gBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=stoyan,ou=user,dc=openam,dc=forgerock,dc=org\", \"username\":\"stoyan\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
         whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus("")
@@ -35,8 +35,8 @@ class UserDeviceKeyServiceTest {
     @Test
     fun getAllUsersWithNullUserId() {
         val userList = mutableMapOf<String, Any>()
-        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
-        userList["J0gBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=stoyan,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\", \"username\":\"jey\", \"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["J0gBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=stoyan,ou=user,dc=openam,dc=forgerock,dc=org\",\"username\":\"jey\", \"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
         whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus(null)
@@ -46,7 +46,7 @@ class UserDeviceKeyServiceTest {
     @Test
     fun getSingleUsersWithNullUserId() {
         val userList = mutableMapOf<String, Any>()
-        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\", \"username\":\"jey\", \"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
         whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus(null)
@@ -56,7 +56,7 @@ class UserDeviceKeyServiceTest {
     @Test
     fun getSingleUsersWithUserId() {
         val userList = mutableMapOf<String, Any>()
-        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\", \"username\":\"jey\", \"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
         whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus("id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org")
@@ -66,7 +66,7 @@ class UserDeviceKeyServiceTest {
     @Test
     fun getNoUserUsersWithUserId() {
         val userList = mutableMapOf<String, Any>()
-        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"username\":\"jey\", \"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\"}"
         whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus("id=mockjey,ou=user")
