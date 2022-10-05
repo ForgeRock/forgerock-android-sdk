@@ -44,6 +44,7 @@ internal class UserDeviceKeyService(context: Context,
             val json = JSONObject(it.value as String)
             UserKey(
                 json.getString(userIdKey),
+                json.getString(userNameKey),
                 json.getString(kidKey),
                 DeviceBindingAuthenticationType.valueOf(json.getString(authTypeKey)),
                 it.key
@@ -85,5 +86,8 @@ object NoKeysFound: KeyFoundStatus()
  * UserKey DTO
  */
 @Parcelize
-data class UserKey(val userId: String, val kid: String, val authType: DeviceBindingAuthenticationType, val keyAlias: String):
-    Parcelable
+data class UserKey(val userId: String,
+                   val userName: String,
+                   val kid: String,
+                   val authType: DeviceBindingAuthenticationType,
+                   val keyAlias: String): Parcelable

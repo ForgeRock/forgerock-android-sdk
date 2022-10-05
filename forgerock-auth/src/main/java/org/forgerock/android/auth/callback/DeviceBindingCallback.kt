@@ -28,6 +28,12 @@ open class DeviceBindingCallback: AbstractCallback {
      * The userId received from server
      */
     private lateinit var userId: String
+
+    /**
+     * The userName received from server
+     */
+    private lateinit var userName: String
+
     /**
      * The challenge received from server
      */
@@ -57,6 +63,7 @@ open class DeviceBindingCallback: AbstractCallback {
 
     override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" ->  userId = value as String
+        "username" ->  userName = value as String
         "challenge" -> challenge = value as String
         "authenticationType" -> deviceBindingAuthenticationType = DeviceBindingAuthenticationType.valueOf(value as String)
         "title" -> title = value as? String ?: ""
@@ -137,7 +144,7 @@ open class DeviceBindingCallback: AbstractCallback {
             val keypair = authInterface.generateKeys()
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val kid = encryptedPreference.persist(userId, keypair.keyAlias, deviceBindingAuthenticationType)
+                    val kid = encryptedPreference.persist(userId, userName, keypair.keyAlias, deviceBindingAuthenticationType)
                     val jws = authInterface.sign(keypair, kid, userId, challenge)
                     setJws(jws)
                     setDeviceId(deviceId)

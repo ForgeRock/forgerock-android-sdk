@@ -43,7 +43,7 @@ class DeviceBindFragment(private val userKeyList: List<UserKey>): DialogFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyList.map { it.userId })
+            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyList.map { it.userName })
             val keyListView = view.findViewById<ListView>(R.id.key_list)
             val submitButton = view.findViewById<Button>(R.id.submit)
             var selectedView: View? = null
