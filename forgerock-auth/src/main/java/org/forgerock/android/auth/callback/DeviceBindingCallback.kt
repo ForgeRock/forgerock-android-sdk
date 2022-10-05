@@ -27,37 +27,37 @@ open class DeviceBindingCallback: AbstractCallback {
     /**
      * The userId received from server
      */
-    private lateinit var userId: String
+    lateinit var userId: String
 
     /**
      * The userName received from server
      */
-    private lateinit var userName: String
+    lateinit var userName: String
 
     /**
      * The challenge received from server
      */
-    private lateinit var challenge: String
+    lateinit var challenge: String
     /**
      * The authentication type of the journey
      */
-    private lateinit var deviceBindingAuthenticationType: DeviceBindingAuthenticationType
+    lateinit var deviceBindingAuthenticationType: DeviceBindingAuthenticationType
     /**
      * The title to be displayed in biometric prompt
      */
-    private lateinit var title: String
+    lateinit var title: String
     /**
      * The subtitle to be displayed in biometric prompt
      */
-    private lateinit var subtitle: String
+    lateinit var subtitle: String
     /**
      * The description to be displayed in biometric prompt
      */
-    private lateinit var description: String
+    lateinit var description: String
     /**
      * The timeout to be to expire the biometric authentication
      */
-    private var timeout: Int? = null
+    var timeout: Int? = null
 
     private val tag = DeviceBindingCallback::class.java.simpleName
 
@@ -174,7 +174,7 @@ open class DeviceBindingCallback: AbstractCallback {
         Logger.error(tag, status.message, status.errorCode)
         Listener.onException(
             listener,
-            DeviceBindingException(status.message)
+            DeviceBindingException(status)
         )
     }
 

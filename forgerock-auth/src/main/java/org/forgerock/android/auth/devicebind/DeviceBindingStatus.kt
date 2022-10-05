@@ -23,5 +23,5 @@ object Success: DeviceBindingStatus("", "")
  * Exceptions for device binding
  */
 class DeviceBindingException @JvmOverloads constructor(
-    val error: String? = ""
-) : Exception(error)
+    val status: DeviceBindingStatus?
+) : Exception(status?.message)

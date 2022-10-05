@@ -185,7 +185,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         Logger.error(tag, status.message, status.errorCode)
         Listener.onException(
             listener,
-            DeviceBindingException(status.message)
+            DeviceBindingException(status)
         )
     }
 
