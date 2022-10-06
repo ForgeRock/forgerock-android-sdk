@@ -8,24 +8,75 @@
 package org.forgerock.android.auth.callback;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.DeviceBindingNodeListener;
+import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FROptions;
+import org.forgerock.android.auth.FROptionsBuilder;
 import org.forgerock.android.auth.FRSession;
+import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
-import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.rules.Timeout;
+
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import static org.assertj.core.api.Assertions.assertThat;
+import android.content.Context;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public class DeviceBindingCallbackTest extends AndroidBaseTest {
-    protected final String treeName = "device-bind";
+public class DeviceBindingCallbackTest {
+    protected Context context = ApplicationProvider.getApplicationContext();
+
+    // This test uses dynamic configuration with the following settings:
+    protected final String AM_URL = "https://openam-dbind.forgeblocks.com/am";
+    protected final String REALM = "alpha";
+    protected final String OAUTH_CLIENT = "AndroidTest";
+    protected final String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
+    protected final String SCOPE = "openid profile email address phone";
+    protected final String TREE = "device-bind";
+
+    protected static String USERNAME = "sdkuser";
+    protected static String PASSWORD = "password";
+    protected static String USER_EMAIL = "sdkuser@example.com";
+
+    @Rule
+    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
+
+    @Before
+    public void setUpSDK() {
+        Logger.set(Logger.Level.DEBUG);
+
+        FROptions options = FROptionsBuilder.build(builder -> {
+            builder.server(serverBuilder -> {
+                 serverBuilder.setUrl(AM_URL);
+                 serverBuilder.setRealm(REALM);
+                 return null;
+             });
+             builder.service(service-> {
+                 service.setAuthServiceName(TREE);
+                 return null;
+             });
+             builder.oauth(oauth -> {
+                 oauth.setOauthClientId(OAUTH_CLIENT);
+                 oauth.setOauthRedirectUri(OAUTH_REDIRECT_URI);
+                 oauth.setOauthScope(SCOPE);
+                 return null;
+             });
+             return null;
+         });
+
+        FRAuth.start(context, options);
+    }
 
     @After
     public void logoutSession() {
@@ -63,7 +114,7 @@ public class DeviceBindingCallbackTest extends AndroidBaseTest {
             }
         };
 
-        FRSession.authenticate(context, treeName, nodeListenerFuture);
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
 
         // Ensure that the journey finishes with success
@@ -100,7 +151,7 @@ public class DeviceBindingCallbackTest extends AndroidBaseTest {
             }
         };
 
-        FRSession.authenticate(context, treeName, nodeListenerFuture);
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
 
         // Ensure that the journey finishes with success
@@ -139,7 +190,7 @@ public class DeviceBindingCallbackTest extends AndroidBaseTest {
             }
         };
 
-        FRSession.authenticate(context, treeName, nodeListenerFuture);
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
         assertThat(hit[0]).isEqualTo(1);
 
@@ -176,7 +227,7 @@ public class DeviceBindingCallbackTest extends AndroidBaseTest {
             }
         };
 
-        FRSession.authenticate(context, treeName, nodeListenerFuture);
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
         assertThat(hit[0]).isEqualTo(1);
 
@@ -215,7 +266,7 @@ public class DeviceBindingCallbackTest extends AndroidBaseTest {
             }
         };
 
-        FRSession.authenticate(context, treeName, nodeListenerFuture);
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
         assertThat(hit[0]).isEqualTo(1);
 
