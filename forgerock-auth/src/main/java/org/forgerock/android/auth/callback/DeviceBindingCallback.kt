@@ -13,6 +13,7 @@ import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
+import java.util.*
 
 /**
  * Callback to collect the device binding information
@@ -145,7 +146,7 @@ open class DeviceBindingCallback: AbstractCallback {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
                     val kid = encryptedPreference.persist(userId, userName, keypair.keyAlias, deviceBindingAuthenticationType)
-                    val jws = authInterface.sign(keypair, kid, userId, challenge)
+                    val jws = authInterface.sign(keypair, kid, userId, challenge, getExpiration())
                     setJws(jws)
                     setDeviceId(deviceId)
                     Listener.onSuccess(listener, null)
@@ -183,6 +184,17 @@ open class DeviceBindingCallback: AbstractCallback {
      */
     protected open fun getDeviceBindAuthenticator(): DeviceAuthenticator {
         return AuthenticatorFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
+    }
+
+    /**
+     * Get Expiration date for the signed token, claim "exp" will be set to the JWS.
+     *
+     * @return The expiration date
+     */
+    protected open fun getExpiration(): Date {
+        val date = Calendar.getInstance();
+        date.add(Calendar.SECOND, timeout ?: 60)
+        return date.time;
     }
 }
 

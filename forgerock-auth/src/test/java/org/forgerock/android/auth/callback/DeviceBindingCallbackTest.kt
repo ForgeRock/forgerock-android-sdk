@@ -18,6 +18,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.*
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
+import java.util.*
 import java.util.concurrent.CountDownLatch
 
 
@@ -67,7 +68,7 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
+        whenever(keyAware.sign(keyPair, kid, userid, challenge, getExpiration())).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "keyAlias", "", DeviceBindingAuthenticationType.NONE)).thenReturn(kid)
 
         var success = false
@@ -98,7 +99,7 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
+        whenever(keyAware.sign(keyPair, kid, userid, challenge, getExpiration())).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "jey", "keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
@@ -129,7 +130,7 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
+        whenever(keyAware.sign(keyPair, kid, userid, challenge, getExpiration())).thenReturn("signedJWT")
         whenever(encryptedPref.persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
@@ -165,8 +166,6 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(abort)
         }
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
 
@@ -193,7 +192,7 @@ class DeviceBindingCallbackTest {
         assertTrue(exception is DeviceBindingException)
         val deviceBindException = exception as DeviceBindingException
         assertTrue(deviceBindException.message ==  abort.message)
-        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
+        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
     }
 
@@ -206,8 +205,6 @@ class DeviceBindingCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Timeout())
         }
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
 
@@ -233,7 +230,7 @@ class DeviceBindingCallbackTest {
         assertTrue(failed)
         assertTrue(exception?.message == "Biometric Timeout")
         assertTrue(exception is DeviceBindingException)
-        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
+        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
     }
 
@@ -275,7 +272,7 @@ class DeviceBindingCallbackTest {
         assertEquals(expectedOut, actualOutput)
 
         verify(keyAware, times(0)).authenticate(eq(20), any())
-        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
+        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
 
     }
@@ -285,8 +282,6 @@ class DeviceBindingCallbackTest {
         val rawContent = "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.generateKeys()).thenThrow(NullPointerException::class.java)
-        whenever(keyAware.sign(keyPair, kid, userid, challenge)).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val authenticationLatch = CountDownLatch(1)
 
@@ -313,8 +308,14 @@ class DeviceBindingCallbackTest {
         assertTrue(exception?.message == "Failed to generate keypair or sign the transaction")
         assertNotNull(exception)
         verify(keyAware, times(0)).authenticate(eq(20), any())
-        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge)
+        verify(keyAware, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid, "jey","keyAlias", DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+    }
+
+    fun getExpiration(): Date {
+        val date = Calendar.getInstance();
+        date.add(Calendar.SECOND,  60)
+        return date.time;
     }
 }
 

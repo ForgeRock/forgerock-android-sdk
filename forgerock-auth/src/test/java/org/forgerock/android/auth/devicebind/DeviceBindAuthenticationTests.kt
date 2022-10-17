@@ -9,6 +9,8 @@ package org.forgerock.android.auth.devicebind
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager.Authenticators.*
+import com.nimbusds.jose.JWSObject
+import org.assertj.core.api.Assertions
 import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -17,6 +19,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
+import java.time.Instant
+import java.util.*
 import java.util.concurrent.CountDownLatch
 
 class DeviceBindAuthenticationTests {
@@ -31,8 +35,30 @@ class DeviceBindAuthenticationTests {
         kpg.initialize(2048)
         val keys = kpg.generateKeyPair()
         val keyPair = KeyPair(keys.public as RSAPublicKey, keys.private, "jeyAlias")
-        val output = testObject.sign(keyPair, "1234", "3123123123", "77888")
+        val output = testObject.sign(keyPair, "1234", "3123123123", "77888", getExpiration())
         assertNotNull(output)
+        val jws = JWSObject.parse(output);
+        assertEquals("1234", jws.header.keyID)
+        assertEquals("3123123123", jws.payload.toJSONObject().get("sub"))
+        assertNotNull(jws.payload.toJSONObject().get("exp"))
+    }
+
+    @Test
+    fun testSigningWithExpiration() {
+        val testObject = BiometricAndDeviceCredential(mockBiometricInterface, keyAware, false)
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(2048)
+        val keys = kpg.generateKeyPair()
+        val keyPair = KeyPair(keys.public as RSAPublicKey, keys.private, "jeyAlias")
+        val expectedExp = Calendar.getInstance();
+        expectedExp.add(Calendar.SECOND, 10);
+        val exp = Date.from(Instant.ofEpochSecond(expectedExp.time.time / 1000));
+        val output = testObject.sign(keyPair, "1234", "3123123123", "77888", exp)
+        assertNotNull(output)
+        val jws = JWSObject.parse(output);
+        val actualExp = Calendar.getInstance();
+        actualExp.time = Date.from(Instant.ofEpochSecond(jws.payload.toJSONObject().get("exp") as Long));
+        Assertions.assertThat(actualExp.time).isEqualTo(exp);
     }
 
     @Test
@@ -149,6 +175,12 @@ class DeviceBindAuthenticationTests {
         val testObject = None(keyAware)
         testObject.authenticate(60, result)
         countDownLatch.await()
+    }
+
+    fun getExpiration(): Date {
+        val date = Calendar.getInstance();
+        date.add(Calendar.SECOND,  60)
+        return date.time;
     }
 
 }

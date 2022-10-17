@@ -60,6 +60,7 @@ public class CallbackFragmentFactory {
         register(ConsentMappingCallback.class, ConsentMappingCallbackFragment.class);
         register(DeviceProfileCallback.class, DeviceProfileCallbackFragment.class);
         register(DeviceBindingCallback.class, DeviceBindingCallbackFragment.class);
+        register(DeviceSigningVerifierCallback.class, DeviceSigningVerifierCallbackFragment.class);
         register(WebAuthnRegistrationCallback.class, WebAuthnRegistrationCallbackFragment.class);
         register(WebAuthnAuthenticationCallback.class, WebAuthnAuthenticationCallbackFragment.class);
         register(SelectIdPCallback.class, SelectIdPCallbackFragment.class);

@@ -20,6 +20,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.*
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -61,13 +62,13 @@ class DeviceSigningVerifierCallbackTest {
     fun testSuccessPathForSingeKeyFound() {
         val rawContent = "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val authenticationLatch = CountDownLatch(1)
-        val userKey = UserKey("jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=")).thenReturn("jws")
+        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -94,8 +95,8 @@ class DeviceSigningVerifierCallbackTest {
         val fragment = mock<DeviceBindFragment>()
         val userKeyService = mock<UserKeyService>()
         val authenticationLatch = CountDownLatch(1)
-        val userKey = UserKey("jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
-        val userKey1 = UserKey("andy", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val userKey1 = UserKey("andy", "andy", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
 
         val testObject: DeviceSigningVerifierCallbackMock = DeviceSigningVerifierCallbackMock(rawContent)
 
@@ -104,7 +105,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=")).thenReturn("jws")
+        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -132,13 +133,13 @@ class DeviceSigningVerifierCallbackTest {
     fun testNoKeyFound() {
         val rawContent = "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val authenticationLatch = CountDownLatch(1)
-        val userKey = UserKey("jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(NoKeysFound)
         whenever(keyAware.isSupported()).thenReturn(true)
         whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
             (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=")).thenReturn("jws")
+        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var exception = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -157,6 +158,12 @@ class DeviceSigningVerifierCallbackTest {
         testObject.executeAllKey(context, userKeyService, listener)
         authenticationLatch.await()
         assertTrue(exception)
+    }
+
+    fun getExpiration(): Date {
+        val date = Calendar.getInstance();
+        date.add(Calendar.SECOND,  60)
+        return date.time;
     }
 }
 
@@ -199,7 +206,7 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
                              userKeyService: UserKeyService,
                              listener: (UserKey) -> (Unit)) {
 
-        val userKey = UserKey("jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         listener(userKey)
     }
 
