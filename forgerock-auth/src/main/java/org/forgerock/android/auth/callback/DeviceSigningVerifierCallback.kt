@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.*
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
+import java.util.*
 
 
 /**
@@ -113,7 +114,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
         try {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val jws = authInterface.sign(userKey, challenge)
+                    val jws = authInterface.sign(userKey, challenge, getExpiration())
                     setJws(jws)
                     Listener.onSuccess(listener, null)
                 } else {
@@ -187,6 +188,17 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
             listener,
             DeviceBindingException(status)
         )
+    }
+
+    /**
+     * Get Expiration date for the signed token, claim "exp" will be set to the JWS.
+     *
+     * @return The expiration date
+     */
+    protected open fun getExpiration(): Date {
+        val date = Calendar.getInstance();
+        date.add(Calendar.SECOND, timeout ?: 60)
+        return date.time;
     }
 
 }
