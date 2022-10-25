@@ -1,4 +1,9 @@
-
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.callback;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +13,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
@@ -24,7 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -40,27 +46,25 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class DeviceSigningVerifierCallbackTest {
-    protected Context context = ApplicationProvider.getApplicationContext();
+    private static final String TAG = DeviceSigningVerifierCallbackTest.class.getSimpleName();
+    protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final String AM_URL = "https://openam-dbind.forgeblocks.com/am";
-    protected final String REALM = "alpha";
-    protected final String OAUTH_CLIENT = "AndroidTest";
-    protected final String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
-    protected final String SCOPE = "openid profile email address phone";
-    protected final String TREE = "device-verifier";
+    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
+    protected final static String REALM = "alpha";
+    protected final static String OAUTH_CLIENT = "AndroidTest";
+    protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
+    protected final static String SCOPE = "openid profile email address phone";
+    protected final static String TREE = "device-verifier";
 
-    protected static String USERNAME = "sdkuser";
-
-    protected static boolean BIND_NEEDED = true; // Used to bind a device only once during the tests execution
-    protected static String KID = null; // Store the kid of the key generated during binding
-
+    protected final static String USERNAME = "sdkuser";
+    protected static String KID = null; // Used to store the kid of the key generated during binding
 
     @Rule
     public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
 
-    @Before
-    public void setUpSDK() throws ExecutionException, InterruptedException {
+    @BeforeClass
+    public static void setUpSDK() throws ExecutionException, InterruptedException {
         Logger.set(Logger.Level.DEBUG);
 
         // Prepare dynamic configuration object
@@ -83,56 +87,51 @@ public class DeviceSigningVerifierCallbackTest {
             return null;
         });
 
-        FRAuth.start(this.context, options);
+        FRAuth.start(context, options);
 
-        // Do device binding just once...
-        if(BIND_NEEDED) {
-            final int[] bindSuccess = {0};
-            NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind") {
-                @Override
-                public void onCallbackReceived(Node node) {
-                    if (node.getCallback(DeviceBindingCallback.class) != null) {
-                        DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
-                        NodeListener<FRSession> nodeListener = this;
-                        // Bind the device...
-                        callback.execute(context, new FRListener<Void>() {
-                            @Override
-                            public void onSuccess(Void result) {
-
-                                bindSuccess[0]++;
-                            }
-
-                            @Override
-                            public void onException(Exception e) {
-                                Assertions.fail(e.getMessage());
-                            }
-                        });
-                        node.next(context, nodeListener);
-
-                        // Get the kid
-                        try {
-                            KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                            Logger.debug("Test", KID);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+        final int[] bindSuccess = {0};
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind") {
+            @Override
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceBindingCallback.class) != null) {
+                    DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
+                    NodeListener<FRSession> nodeListener = this;
+                    // Bind the device...
+                    callback.execute(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            bindSuccess[0]++;
                         }
-                        return;
+
+                        @Override
+                        public void onException(Exception e) {
+                            Assertions.fail(e.getMessage());
+                        }
+                    });
+                    node.next(context, nodeListener);
+
+                    // Get the kid
+                    try {
+                        KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
+                        Logger.debug("Test", KID);
+                    } catch (ParseException e) {
+                        Logger.debug(TAG, e.getMessage());
                     }
-                    super.onCallbackReceived(node);
+                    return;
                 }
-            };
-
-            FRSession.authenticate(context, TREE, nodeListenerFuture);
-            Assert.assertNotNull(nodeListenerFuture.get());
-            assertThat(bindSuccess[0]).isEqualTo(1);
-
-            Assert.assertNotNull(FRSession.getCurrentSession());
-            Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
-
-            if (FRSession.getCurrentSession() != null) {
-                FRSession.getCurrentSession().logout();
+                super.onCallbackReceived(node);
             }
-            BIND_NEEDED = false; // No more device binding...
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+        assertThat(bindSuccess[0]).isEqualTo(1);
+
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+
+        if (FRSession.getCurrentSession() != null) {
+            FRSession.getCurrentSession().logout();
         }
     }
 
@@ -264,10 +263,11 @@ public class DeviceSigningVerifierCallbackTest {
                                 expMin.add(Calendar.SECOND, 55);
                                 expMax.add(Calendar.SECOND, 60);
 
-                                String jwtKid = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                                Date jwtExp = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getExpirationTime();
-                                String jwtChallenge = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getStringClaim("challenge");
-                                String jwtSub = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getSubject();
+                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
+                                Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
+                                String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
                                 assertThat(jwtKid).isEqualTo(KID);
                                 assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
@@ -345,10 +345,11 @@ public class DeviceSigningVerifierCallbackTest {
                                 expMin.add(Calendar.SECOND, 85);
                                 expMax.add(Calendar.SECOND, 90);
 
-                                String jwtKid = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                                Date jwtExp = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getExpirationTime();
-                                String jwtChallenge = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getStringClaim("challenge");
-                                String jwtSub = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().getSubject();
+                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
+                                Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
+                                String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
                                 assertThat(jwtKid).isEqualTo(KID);
                                 assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
@@ -652,7 +653,7 @@ public class DeviceSigningVerifierCallbackTest {
                         // Overwrite the JWT input value in the callback to AM...
                         callback.setJws(temperedJwt);
                     } catch (ParseException | JSONException e) {
-                        e.printStackTrace();
+                        Logger.debug(TAG, e.getMessage());
                     }
 
                     NodeListener<FRSession> nodeListener = this;

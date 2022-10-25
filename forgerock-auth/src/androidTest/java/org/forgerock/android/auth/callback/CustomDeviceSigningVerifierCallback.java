@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.callback;
 
 import com.nimbusds.jose.JOSEException;
@@ -8,6 +14,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import org.forgerock.android.auth.Logger;
 import org.json.JSONObject;
 
 import java.security.KeyPair;
@@ -18,6 +25,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class CustomDeviceSigningVerifierCallback extends DeviceSigningVerifierCallback {
+    private static final String TAG = CustomDeviceSigningVerifierCallback.class.getSimpleName();
+
     public CustomDeviceSigningVerifierCallback() {
         super();
     }
@@ -45,7 +54,7 @@ public class CustomDeviceSigningVerifierCallback extends DeviceSigningVerifierCa
         try {
             kpg = KeyPairGenerator.getInstance("RSA");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Logger.debug(TAG, e.getMessage());
         }
         kpg.initialize(2048);
         KeyPair rsaKey = kpg.generateKeyPair();
@@ -64,9 +73,8 @@ public class CustomDeviceSigningVerifierCallback extends DeviceSigningVerifierCa
         SignedJWT signedJWT = new SignedJWT(header, payload);
         try {
             signedJWT.sign(new RSASSASigner((RSAPrivateKey) rsaKey.getPrivate()));
-
         } catch (JOSEException e) {
-            e.printStackTrace();
+            Logger.debug(TAG, e.getMessage());
         }
 
         return signedJWT.serialize();
