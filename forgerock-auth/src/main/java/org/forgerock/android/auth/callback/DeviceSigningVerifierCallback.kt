@@ -28,28 +28,28 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     /**
      * The optional userId
      */
-    private var userId: String? = null
+    var userId: String? = null
 
     /**
      * The challenge received from server
      */
-    private lateinit var challenge: String
+    lateinit var challenge: String
     /**
      * The title to be displayed in biometric prompt
      */
-    private lateinit var title: String
+    lateinit var title: String
     /**
      * The subtitle to be displayed in biometric prompt
      */
-    private lateinit var subtitle: String
+    lateinit var subtitle: String
     /**
      * The description to be displayed in biometric prompt
      */
-    private lateinit var description: String
+    lateinit var description: String
     /**
      * The timeout to be to expire the biometric authentication
      */
-    private var timeout: Int? = null
+    var timeout: Int? = null
 
     private val tag = DeviceSigningVerifierCallback::class.java.simpleName
 
