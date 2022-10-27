@@ -332,13 +332,4 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String, jsonObject: 
         execute(context, listener, authInterface, encryptedPreference, deviceId)
     }
 
-    override fun execute(
-        context: Context,
-        listener: FRListener<Void>,
-        authInterface: DeviceAuthenticator,
-        encryptedPreference: DeviceRepository,
-        deviceId: String
-    ) {
-        super.execute(context, listener, authInterface, encryptedPreference, deviceId)
-    }
 }

@@ -29,27 +29,33 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * The optional userId
      */
     var userId: String? = null
+        private set
 
     /**
      * The challenge received from server
      */
     lateinit var challenge: String
+        private set
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+        private set
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+        private set
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+        private set
     /**
      * The timeout to be to expire the biometric authentication
      */
     var timeout: Int? = null
+        private set
 
     private val tag = DeviceSigningVerifierCallback::class.java.simpleName
 
@@ -90,7 +96,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun sign(context: Context,
+    open fun sign(context: Context,
              listener: FRListener<Void>) {
         execute(context, listener = listener)
     }
@@ -103,7 +109,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      */
     @JvmOverloads
-    protected open fun authenticate(userKey: UserKey,
+    internal fun authenticate(userKey: UserKey,
                                     listener: FRListener<Void>,
                                     authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(userKey)) {
 
@@ -136,7 +142,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param listener The Listener to listen for the result
      */
     @JvmOverloads
-    protected open fun execute(context: Context,
+    internal fun execute(context: Context,
                                userKeyService: UserKeyService = UserDeviceKeyService(context),
                                listener: FRListener<Void>) {
 

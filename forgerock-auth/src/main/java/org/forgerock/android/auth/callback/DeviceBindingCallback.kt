@@ -29,36 +29,49 @@ open class DeviceBindingCallback: AbstractCallback {
      * The userId received from server
      */
     lateinit var userId: String
+      private set
 
     /**
      * The userName received from server
      */
     lateinit var userName: String
+      private set
 
     /**
      * The challenge received from server
      */
     lateinit var challenge: String
+      private set
+
     /**
      * The authentication type of the journey
      */
     lateinit var deviceBindingAuthenticationType: DeviceBindingAuthenticationType
+      private set
+
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+      private set
+
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+      private set
+
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+      private set
+
     /**
      * The timeout to be to expire the biometric authentication
      */
     var timeout: Int? = null
+      private set
 
     private val tag = DeviceBindingCallback::class.java.simpleName
 
@@ -116,7 +129,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun bind(context: Context,
+    open fun bind(context: Context,
              listener: FRListener<Void>) {
         execute(context, listener)
     }
@@ -130,7 +143,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
     @JvmOverloads
-    protected open fun execute(context: Context,
+    internal fun execute(context: Context,
                                listener: FRListener<Void>,
                                authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(),
                                encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),

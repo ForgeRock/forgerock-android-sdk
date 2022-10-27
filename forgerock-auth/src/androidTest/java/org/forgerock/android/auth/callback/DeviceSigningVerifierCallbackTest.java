@@ -97,7 +97,7 @@ public class DeviceSigningVerifierCallbackTest {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
                     NodeListener<FRSession> nodeListener = this;
                     // Bind the device...
-                    callback.execute(context, new FRListener<Void>() {
+                    callback.bind(context, new FRListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             bindSuccess[0]++;
@@ -456,27 +456,20 @@ public class DeviceSigningVerifierCallbackTest {
         final int[] signSuccess = {0};
         final int[] failureOutcome = {0};
 
+        CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
             @Override
             public void onCallbackReceived(Node node)
             {
-                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
-                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
-                    callback.setChallenge("invalid-challenge");
+                if (node.getCallback(CustomDeviceSigningVerifierCallback.class) != null) {
+                    CustomDeviceSigningVerifierCallback callback = node.getCallback(CustomDeviceSigningVerifierCallback.class);
+                    String customJwt = callback.getSignedJwt(
+                            "ala-bala",
+                            callback.getUserId(),
+                            "invalid-challenge");
 
-                    callback.sign(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            signSuccess[0]++;
-                        }
-
-                        @Override
-                        public void onException(Exception e) {
-                            Assertions.fail(e.getMessage());
-                        }
-                    });
-
+                    callback.setJws(customJwt);
                     NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;

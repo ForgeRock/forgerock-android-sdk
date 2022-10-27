@@ -194,28 +194,12 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
         super.execute(context, userKeyService, listener)
     }
 
-    override fun execute(
-        context: Context,
-        userKeyService: UserKeyService,
-        listener: FRListener<Void>
-    ) {
-        super.execute(context, userKeyService, listener)
-    }
-
     override fun getUserKey(activity: FragmentActivity,
                              userKeyService: UserKeyService,
                              listener: (UserKey) -> (Unit)) {
 
         val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         listener(userKey)
-    }
-
-    override fun authenticate(
-        userKey: UserKey,
-        listener: FRListener<Void>,
-        authInterface: DeviceAuthenticator
-    ) {
-        super.authenticate(userKey, listener, authInterface)
     }
 
 }
