@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
@@ -59,9 +60,13 @@ public class DeviceSigningVerifierCallbackTest {
 
     protected final static String USERNAME = "sdkuser";
     protected static String KID = null; // Used to store the kid of the key generated during binding
+    protected static String USER_ID = null; // Used to store the userId of the user who binds the device
 
     @Rule
     public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeClass
     public static void setUpSDK() throws ExecutionException, InterruptedException {
@@ -96,6 +101,7 @@ public class DeviceSigningVerifierCallbackTest {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
                     NodeListener<FRSession> nodeListener = this;
+                    USER_ID = callback.getUserId();
                     // Bind the device...
                     callback.execute(context, new FRListener<Void>() {
                         @Override
@@ -141,6 +147,44 @@ public class DeviceSigningVerifierCallbackTest {
             FRSession.getCurrentSession().logout();
         }
         CallbackFactory.getInstance().register(DeviceSigningVerifierCallback.class);
+    }
+
+    @Test
+    public void testDeviceSigningVerifierUnknownUserError() throws ExecutionException, InterruptedException {
+        final int[] hit = {0};
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
+        {
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    Assertions.fail("Test failed: Received unexpected DeviceSigningVerifierCallback! (see SDKS-2169)" );
+                    return;
+                }
+                if (node.getCallback(NameCallback.class) != null) {
+                    hit[0]++;
+                    node.getCallback(NameCallback.class).setName("UNKNOWN-USER");
+                    node.next(context, this);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+
+        // Ensure that the journey finishes with failure
+        thrown.expect(java.util.concurrent.ExecutionException.class);
+        thrown.expectMessage("org.forgerock.android.auth.exception.AuthenticationException: {\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}");
+
+        Assert.assertNull(nodeListenerFuture.get());
+        Assert.assertNull(FRSession.getCurrentSession());
+        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
+
+        assertThat(hit[0]).isEqualTo(1);
     }
 
     @Test
@@ -273,6 +317,85 @@ public class DeviceSigningVerifierCallbackTest {
                                 assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
                                 assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
                                 assertThat(jwtSub).isEqualTo(callback.getUserId());
+
+                                signSuccess[0]++;
+                            } catch (ParseException e) {
+                                Assertions.fail("Invalid JWT: " + e.getMessage());
+                            }
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            // Signing of the challenge has failed unexpectedly...
+                            Assertions.fail(e.getMessage());
+                        }
+                    });
+
+                    NodeListener<FRSession> nodeListener = this;
+                    node.next(context, nodeListener);
+                    return;
+                }
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
+                    authSuccess[0]++;
+
+                    NodeListener<FRSession> nodeListener = this;
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+        assertThat(signSuccess[0]).isEqualTo(1);
+        assertThat(authSuccess[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+    }
+
+    @Test
+    public void testDeviceVerificationUsernamelessSuccess() throws ExecutionException, InterruptedException {
+        final int[] signSuccess = {0};
+        final int[] authSuccess = {0};
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless")
+        {
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    // In usernameless userId in the callback is empty...
+                    assertThat(callback.getUserId()).isEmpty();
+                    Assert.assertNotNull(callback.getChallenge());
+
+                    callback.sign(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            // Verify the JWT attributes
+                            try {
+                                Calendar expMin = Calendar.getInstance();
+                                Calendar expMax = Calendar.getInstance();
+                                expMin.add(Calendar.SECOND, 55);
+                                expMax.add(Calendar.SECOND, 60);
+
+                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
+                                Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
+                                String jwtSub = jwt.getJWTClaimsSet().getSubject();
+
+                                assertThat(jwtKid).isEqualTo(KID);
+                                assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
+                                assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
+                                assertThat(jwtSub).isEqualTo(USER_ID);
 
                                 signSuccess[0]++;
                             } catch (ParseException e) {
@@ -701,6 +824,13 @@ class DeviceSigningVerifierNodeListener extends NodeListenerFuture<FRSession> {
         if (node.getCallback(ChoiceCallback.class) != null) {
             ChoiceCallback choiceCallback = node.getCallback(ChoiceCallback.class);
             List<String> choices = choiceCallback.getChoices();
+            // Explicitly set the first choice collector to "collectusername" for non "usernameless" flows
+            if (choices.contains("usernameless") && !nodeConfiguration.equals("usernameless")) {
+                int choiceIndex = choices.indexOf("collectusername");
+                choiceCallback.setSelectedIndex(choiceIndex);
+                node.next(context, this);
+                return;
+            }
             int choiceIndex = choices.indexOf(nodeConfiguration);
             choiceCallback.setSelectedIndex(choiceIndex);
             node.next(context, this);
