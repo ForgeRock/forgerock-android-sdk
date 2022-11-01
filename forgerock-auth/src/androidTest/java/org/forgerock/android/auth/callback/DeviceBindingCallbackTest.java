@@ -172,7 +172,7 @@ public class DeviceBindingCallbackTest {
 
                     NodeListener<FRSession> nodeListener = this;
 
-                    callback.execute(context, new FRListener<Void>() {
+                    callback.bind(context, new FRListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             node.next(context, nodeListener);
