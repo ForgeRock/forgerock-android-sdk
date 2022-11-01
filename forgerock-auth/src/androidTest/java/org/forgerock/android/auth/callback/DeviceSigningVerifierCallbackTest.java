@@ -9,6 +9,7 @@ package org.forgerock.android.auth.callback;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import android.content.Context;
+import android.util.Base64;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,7 +39,6 @@ import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -119,9 +119,9 @@ public class DeviceSigningVerifierCallbackTest {
                     // Get the kid
                     try {
                         KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                        Logger.debug("Test", KID);
+                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, KID);
                     } catch (ParseException e) {
-                        Logger.debug(TAG, e.getMessage());
+                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
                     }
                     return;
                 }
@@ -576,7 +576,6 @@ public class DeviceSigningVerifierCallbackTest {
 
     @Test
     public void testDeviceVerificationFailureInvalidChallenge() throws ExecutionException, InterruptedException {
-        final int[] signSuccess = {0};
         final int[] failureOutcome = {0};
 
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
@@ -588,7 +587,7 @@ public class DeviceSigningVerifierCallbackTest {
                 if (node.getCallback(CustomDeviceSigningVerifierCallback.class) != null) {
                     CustomDeviceSigningVerifierCallback callback = node.getCallback(CustomDeviceSigningVerifierCallback.class);
                     String customJwt = callback.getSignedJwt(
-                            "ala-bala",
+                            KID,
                             callback.getUserId(),
                             "invalid-challenge");
 
@@ -614,7 +613,6 @@ public class DeviceSigningVerifierCallbackTest {
         FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
 
-        assertThat(signSuccess[0]).isEqualTo(1);
         assertThat(failureOutcome[0]).isEqualTo(1);
 
         // Ensure that the journey finishes with success
@@ -757,19 +755,19 @@ public class DeviceSigningVerifierCallbackTest {
                         // The Device Signing Verifier node should detect that the payload has been tempered and therefore should fail!
                         JSONObject temperedPayloadJson = new JSONObject(jwtPayload);
                         temperedPayloadJson.put("exp", expTempered.getTime().getTime());
-                        String temperedPayload = Base64.getEncoder().encodeToString(temperedPayloadJson.toString().getBytes());
+                        String temperedPayload = Base64.encodeToString(temperedPayloadJson.toString().getBytes(), Base64.DEFAULT);
                         String temperedJwt = new StringBuilder().
                                 append(jwtHeader).append(".").
                                 append(temperedPayload).append(".").
                                 append(jwtSignature).toString();
 
-                        Logger.debug(DeviceSigningVerifierCallbackTest.class.getSimpleName(), "Original JWT: " + callback.getInputValue(0));
-                        Logger.debug(DeviceSigningVerifierCallbackTest.class.getSimpleName(), "Tempered JWT: " + temperedJwt);
+                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Original JWT: " + callback.getInputValue(0));
+                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Tempered JWT: " + temperedJwt);
 
                         // Overwrite the JWT input value in the callback to AM...
                         callback.setJws(temperedJwt);
                     } catch (ParseException | JSONException e) {
-                        Logger.debug(TAG, e.getMessage());
+                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
                     }
 
                     NodeListener<FRSession> nodeListener = this;
