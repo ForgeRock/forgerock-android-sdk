@@ -12,10 +12,10 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricPrompt;
+import androidx.biometric.BiometricPrompt.AuthenticationCallback;
 import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.biometric.BiometricAuth;
-import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.json.JSONException;
@@ -357,17 +357,24 @@ public class PushNotification extends ModelObject<PushNotification> {
         if (this.pushType == PushType.BIOMETRIC) {
             final PushNotification pushNotification = this;
             BiometricAuth biometricAuth = new BiometricAuth(title,
-                    subtitle, allowDeviceCredentials, activity, new BiometricAuthCompletionHandler() {
+                    subtitle, allowDeviceCredentials, activity, new AuthenticationCallback() {
+
                 @Override
-                public void onSuccess(BiometricPrompt.AuthenticationResult result) {
+                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     Logger.debug(TAG, "Respond the challenge for message: %s", getMessageId());
                     PushResponder.getInstance().authentication(pushNotification, true, listener);
                 }
 
                 @Override
-                public void onError(int errorCode, String errorMessage) {
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                     listener.onException(new PushMechanismException("Error processing the Push " +
-                            "Authentication request. Biometric Authentication failed: " + errorMessage));
+                            "Authentication request. Biometric Authentication failed: " + errString));
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    listener.onException(new PushMechanismException("Error processing the Push " +
+                            "Authentication request. Biometric Authentication failed"));
                 }
             });
             biometricAuth.authenticate();

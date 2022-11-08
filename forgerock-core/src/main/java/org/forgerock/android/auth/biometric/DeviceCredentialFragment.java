@@ -9,14 +9,13 @@ package org.forgerock.android.auth.biometric;
 
 import static android.app.Activity.RESULT_OK;
 
-import static org.forgerock.android.auth.biometric.BiometricAuth.ERROR_NO_DEVICE_CREDENTIAL;
-
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -74,12 +73,12 @@ public class DeviceCredentialFragment extends Fragment {
         }
         if (requestCode == LOCK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                this.biometricAuth.getBiometricAuthListener().onSuccess(null);
+                this.biometricAuth.getBiometricAuthListener().onAuthenticationSucceeded(null);
             } else {
                 Logger.debug(TAG, "Fail to approve using device Credentials. requestCode " +
                         "is %s", resultCode);
-                this.biometricAuth.getBiometricAuthListener().onError(
-                        ERROR_NO_DEVICE_CREDENTIAL,
+                this.biometricAuth.getBiometricAuthListener().onAuthenticationError(
+                        BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                         "Fail to approve using device Credentials.");
             }
         }

@@ -13,17 +13,17 @@ import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
-import java.util.*
 
 /**
  * Callback to collect the device binding information
  */
-open class DeviceBindingCallback: AbstractCallback {
+open class DeviceBindingCallback : AbstractCallback, Binding {
 
-    @JvmOverloads constructor(jsonObject: JSONObject,
-                              index: Int): super(jsonObject, index)
+    @JvmOverloads
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
-    @JvmOverloads constructor(): super()
+    @JvmOverloads
+    constructor() : super()
 
     /**
      * The userId received from server
@@ -39,22 +39,27 @@ open class DeviceBindingCallback: AbstractCallback {
      * The challenge received from server
      */
     lateinit var challenge: String
+
     /**
      * The authentication type of the journey
      */
     lateinit var deviceBindingAuthenticationType: DeviceBindingAuthenticationType
+
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+
     /**
      * The timeout to be to expire the biometric authentication
      */
@@ -63,10 +68,11 @@ open class DeviceBindingCallback: AbstractCallback {
     private val tag = DeviceBindingCallback::class.java.simpleName
 
     override fun setAttribute(name: String, value: Any) = when (name) {
-        "userId" ->  userId = value as String
-        "username" ->  userName = value as String
+        "userId" -> userId = value as String
+        "username" -> userName = value as String
         "challenge" -> challenge = value as String
-        "authenticationType" -> deviceBindingAuthenticationType = DeviceBindingAuthenticationType.valueOf(value as String)
+        "authenticationType" -> deviceBindingAuthenticationType =
+            DeviceBindingAuthenticationType.valueOf(value as String)
         "title" -> title = value as? String ?: ""
         "subtitle" -> subtitle = value as? String ?: ""
         "description" -> description = value as? String ?: ""
@@ -116,8 +122,7 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun bind(context: Context,
-             listener: FRListener<Void>) {
+    fun bind(context: Context, listener: FRListener<Void>) {
         execute(context, listener)
     }
 
@@ -132,34 +137,63 @@ open class DeviceBindingCallback: AbstractCallback {
     @JvmOverloads
     protected open fun execute(context: Context,
                                listener: FRListener<Void>,
-                               authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(),
-                               encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context),
-                               deviceId: String = DeviceIdentifier.builder().context(context).build().identifier) {
+                               authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(
+                                   context,
+                                   deviceBindingAuthenticationType),
+                               encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
+                                   context),
+                               deviceId: String = DeviceIdentifier.builder().context(context)
+                                   .build().identifier) {
 
-        if(authInterface.isSupported().not()) {
-            handleException(Unsupported(), listener = listener)
+
+        initialize(authInterface)
+
+        if (authInterface.isSupported().not()) {
+            handleException(Unsupported(), e = null, listener = listener)
             return
         }
 
         try {
-            val keypair = authInterface.generateKeys()
-            authInterface.authenticate(timeout ?: 60) { result ->
-                if (result is Success) {
-                    val kid = encryptedPreference.persist(userId, userName, keypair.keyAlias, deviceBindingAuthenticationType)
-                    val jws = authInterface.sign(keypair, kid, userId, challenge, getExpiration())
-                    setJws(jws)
-                    setDeviceId(deviceId)
-                    Listener.onSuccess(listener, null)
-                } else {
-                    // All the biometric exception is handled here , it could be Abort or timeout
-                    handleException(result, listener = listener)
+            authInterface.generateKeys { keyPair ->
+                authInterface.authenticate(timeout ?: 60) { result ->
+                    if (result is Success) {
+                        val kid = encryptedPreference.persist(userId,
+                            userName,
+                            keyPair.keyAlias,
+                            deviceBindingAuthenticationType)
+                        val jws = authInterface.sign(keyPair,
+                            kid,
+                            userId,
+                            challenge,
+                            getExpiration(timeout))
+                        setJws(jws)
+                        setDeviceId(deviceId)
+                        Listener.onSuccess(listener, null)
+                    } else {
+                        // All the biometric exception is handled here , it could be Abort or timeout
+                        handleException(result, e = null, listener = listener)
+                    }
                 }
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.
-            handleException(Unsupported(errorMessage = e.message), listener = listener)
+            handleException(Unsupported(errorMessage = e.message), e, listener = listener)
         }
+    }
+
+    /**
+     * Inject crypto related objects to [DeviceAuthenticator]
+     */
+    private fun initialize(deviceAuthenticator: DeviceAuthenticator) {
+        //Inject objects
+        if (deviceAuthenticator is CryptoAware) {
+            deviceAuthenticator.setBiometricHandler(BiometricBindingHandler(title,
+                subtitle,
+                description,
+                deviceBindAuthenticationType = deviceBindingAuthenticationType))
+            deviceAuthenticator.setKeyAware(KeyAware(userId))
+        }
+
     }
 
     /**
@@ -168,41 +202,21 @@ open class DeviceBindingCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-    protected open fun handleException(status: DeviceBindingStatus,
+    protected open fun handleException(status: DeviceBindingStatus<Any>,
+                                       e: Exception?,
                                        listener: FRListener<Void>) {
 
         setClientError(status.clientError)
-        Logger.error(tag, status.message, status.errorCode)
-        Listener.onException(
-            listener,
-            DeviceBindingException(status)
-        )
+        Logger.error(tag, e, status.message)
+        Listener.onException(listener, DeviceBindingException(status, e))
     }
 
-    /**
-     * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
-     */
-    protected open fun getDeviceBindAuthenticator(): DeviceAuthenticator {
-        return AuthenticatorFactory.getType(userId, deviceBindingAuthenticationType, title, subtitle, description)
-    }
-
-    /**
-     * Get Expiration date for the signed token, claim "exp" will be set to the JWS.
-     *
-     * @return The expiration date
-     */
-    protected open fun getExpiration(): Date {
-        val date = Calendar.getInstance();
-        date.add(Calendar.SECOND, timeout ?: 60)
-        return date.time;
-    }
 }
 
 /**
  * convert authentication string received from server to authentication enum
  */
 enum class DeviceBindingAuthenticationType constructor(val serializedValue: String?) {
-    BIOMETRIC_ONLY("BIOMETRIC_ONLY"),
-    BIOMETRIC_ALLOW_FALLBACK("BIOMETRIC_ALLOW_FALLBACK"),
-    NONE("NONE");
+    BIOMETRIC_ONLY("BIOMETRIC_ONLY"), BIOMETRIC_ALLOW_FALLBACK("BIOMETRIC_ALLOW_FALLBACK"), NONE("NONE"), APPLICATION_PIN(
+        "APPLICATION_PIN");
 }

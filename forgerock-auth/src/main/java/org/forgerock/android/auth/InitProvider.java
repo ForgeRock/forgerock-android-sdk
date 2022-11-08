@@ -49,7 +49,7 @@ public class InitProvider extends ContentProvider {
     }
 
     @VisibleForTesting
-    static void setCurrentActivity(Activity activity) {
+    public static void setCurrentActivity(Activity activity) {
         currentActivity = new WeakReference<>(activity);
     }
 

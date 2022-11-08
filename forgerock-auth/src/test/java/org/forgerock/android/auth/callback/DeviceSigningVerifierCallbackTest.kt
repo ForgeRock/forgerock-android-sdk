@@ -20,6 +20,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.security.PrivateKey
+import java.security.interfaces.RSAPublicKey
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -28,7 +30,11 @@ class DeviceSigningVerifierCallbackTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
     private val userKeyService= mock<UserKeyService>()
-    private val keyAware = mock<DeviceAuthenticator>()
+    private val deviceAuthenticator = mock<DeviceAuthenticator>()
+    private val publicKey = mock<RSAPublicKey>()
+    private val privateKey = mock<PrivateKey>()
+    private val keyPair = KeyPair(publicKey, privateKey, "keyAlias")
+
 
     @Test
     fun testValuesAreSetProperly() {
@@ -64,11 +70,11 @@ class DeviceSigningVerifierCallbackTest {
         val authenticationLatch = CountDownLatch(1)
         val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
-        whenever(keyAware.isSupported()).thenReturn(true)
-        whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
+        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
+            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
+        whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -83,7 +89,7 @@ class DeviceSigningVerifierCallbackTest {
         }
 
         val testObject: DeviceSigningVerifierCallbackMock = DeviceSigningVerifierCallbackMock(rawContent)
-        testObject.executeAuthenticate(userKey, listener, keyAware)
+        testObject.executeAuthenticate(context, userKey, listener, deviceAuthenticator)
         authenticationLatch.await()
         assertTrue(success)
     }
@@ -101,11 +107,11 @@ class DeviceSigningVerifierCallbackTest {
         val testObject: DeviceSigningVerifierCallbackMock = DeviceSigningVerifierCallbackMock(rawContent)
 
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(MultipleKeysFound(mutableListOf(userKey, userKey1)))
-        whenever(keyAware.isSupported()).thenReturn(true)
-        whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
+        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
+            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
+        whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -121,7 +127,7 @@ class DeviceSigningVerifierCallbackTest {
 
 
         testObject.executeGetUserKey(mockFragmentActivity, userKeyService) {
-            testObject.executeAuthenticate(it, listener, keyAware)
+            testObject.executeAuthenticate(context, it, listener, deviceAuthenticator)
         }
 
         authenticationLatch.await()
@@ -135,11 +141,11 @@ class DeviceSigningVerifierCallbackTest {
         val authenticationLatch = CountDownLatch(1)
         val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(NoKeysFound)
-        whenever(keyAware.isSupported()).thenReturn(true)
-        whenever(keyAware.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus) -> Unit).invoke(Success)
+        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
+            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
-        whenever(keyAware.sign(userKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
+        whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var exception = false
         val listener = object: FRListener<Void> {
             override fun onSuccess(result: Void?) {
@@ -171,11 +177,12 @@ class DeviceSigningVerifierCallbackTest {
 class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObject: JSONObject = JSONObject(rawContent), value: Int = 0): DeviceSigningVerifierCallback(jsonObject, value) {
 
     fun executeAuthenticate(
+        context: Context,
         userKey: UserKey,
         listener: FRListener<Void>,
         authInterface: DeviceAuthenticator
     ) {
-        authenticate(userKey ,listener,  authInterface)
+        authenticate(context, userKey ,listener,  authInterface)
     }
 
     fun executeGetUserKey(
@@ -210,12 +217,12 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
         listener(userKey)
     }
 
-    override fun authenticate(
+    override fun authenticate(context: Context,
         userKey: UserKey,
         listener: FRListener<Void>,
         authInterface: DeviceAuthenticator
     ) {
-        super.authenticate(userKey, listener, authInterface)
+        super.authenticate(context, userKey, listener, authInterface)
     }
 
 }

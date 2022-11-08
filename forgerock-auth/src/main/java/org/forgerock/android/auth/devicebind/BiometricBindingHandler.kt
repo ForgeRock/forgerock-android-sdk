@@ -7,15 +7,13 @@
 package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager.Authenticators.*
-import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
-import org.forgerock.android.auth.biometric.BiometricAuthCompletionHandler
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 /**
@@ -29,14 +27,15 @@ interface BiometricHandler {
      * @param strongAuthenticators accept different strong authenticators like BIOMETRIC_STRONG
      * @param weakAuthenticators accept different strong authenticators like BIOMETRIC_WEAK
      */
-    fun isSupported(strongAuthenticators: Int = BIOMETRIC_STRONG, weakAuthenticators: Int = BIOMETRIC_WEAK): Boolean
+    fun isSupported(strongAuthenticators: Int = BIOMETRIC_STRONG,
+                    weakAuthenticators: Int = BIOMETRIC_WEAK): Boolean
 
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param timeout Timeout for the biometric prompt
      * @param statusResult Result of biometric action in callback
      */
-    fun authenticate(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit)
+    fun authenticate(authenticationCallback: AuthenticationCallback)
+
 
 }
 
@@ -50,12 +49,13 @@ interface BiometricHandler {
  * @param biometricAuth Return the BiometricAuth instance
  */
 internal class BiometricBindingHandler(titleValue: String,
-                              subtitleValue: String,
-                              descriptionValue: String,
-                              fragmentActivity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity(),
-                              deviceBindAuthenticationType: DeviceBindingAuthenticationType,
-                              var biometricListener: BiometricAuthCompletionHandler? = null,
-                              private var biometricAuth: BiometricAuth? = null): BiometricHandler {
+                                       subtitleValue: String,
+                                       descriptionValue: String,
+                                       fragmentActivity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity(),
+                                       deviceBindAuthenticationType: DeviceBindingAuthenticationType,
+                                       var biometricListener: AuthenticationCallback? = null,
+                                       private var biometricAuth: BiometricAuth? = null) :
+    BiometricHandler {
 
     init {
         biometricAuth = biometricAuth ?: BiometricAuth(titleValue,
@@ -69,26 +69,12 @@ internal class BiometricBindingHandler(titleValue: String,
 
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param timeout Timeout for the biometric prompt
      * @param statusResult Result of biometric action in callback
      */
-    override fun authenticate(timeout: Int, statusResult: (DeviceBindingStatus) -> Unit) {
-        val startTime = Date().time
-        val listener = object: BiometricAuthCompletionHandler {
-            override fun onSuccess(result: BiometricPrompt.AuthenticationResult?) {
-                val endTime =  TimeUnit.MILLISECONDS.toSeconds(Date().time - startTime)
-                if(endTime > (timeout.toLong())) {
-                    statusResult(Timeout())
-                } else {
-                    statusResult(Success)
-                }
-            }
-            override fun onError(errorCode: Int, errorMessage: String?) {
-                statusResult(Abort(errorMessage ?: "User Terminates the biometric Authentication", code = errorCode))
-            }
-        }
-        biometricListener = listener
-        biometricAuth?.biometricAuthListener = listener
+    override fun authenticate(authenticationCallback: AuthenticationCallback) {
+
+        biometricListener = authenticationCallback
+        biometricAuth?.biometricAuthListener = authenticationCallback
         biometricAuth?.authenticate()
     }
 
@@ -123,4 +109,5 @@ internal class BiometricBindingHandler(titleValue: String,
         }
         return false
     }
+
 }

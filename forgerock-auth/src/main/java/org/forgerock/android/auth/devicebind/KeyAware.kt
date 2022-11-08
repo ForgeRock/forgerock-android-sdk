@@ -12,67 +12,60 @@ import android.util.Base64
 import java.io.IOException
 import java.security.*
 import java.security.interfaces.RSAPublicKey
+import java.security.spec.AlgorithmParameterSpec
 
 
 /**
  * Helper class to generate and sign the keys
  */
-internal class KeyAware(private var userId: String) {
-
-    constructor() : this("")
+class KeyAware(private var userId: String) {
 
     private val hashingAlgorithm = "SHA-256"
-    private val keySize = 2048
+    val keySize = 2048
     val timeout = 60
     private val androidKeyStore = "AndroidKeyStore"
     private val encryptionBlockMode = KeyProperties.BLOCK_MODE_ECB
     private val encryptionPadding = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
     private val encryptionAlgorithm = KeyProperties.KEY_ALGORITHM_RSA
     private val signaturePadding = KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
-    private val purpose = KeyProperties.PURPOSE_SIGN or
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-    private val key = getKeyAlias(userId)
+    private val purpose =
+        KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+    val key = getKeyAlias(userId)
 
     /**
      * Builder to create a keypair
      */
     fun keyBuilder(): KeyGenParameterSpec.Builder {
-        return KeyGenParameterSpec.Builder(
-            key,
-            purpose
-        ).setDigests(KeyProperties.DIGEST_SHA512)
-            .setKeySize(keySize)
-            .setSignaturePaddings(signaturePadding)
-            .setBlockModes(encryptionBlockMode)
-            .setEncryptionPaddings(encryptionPadding)
+        return KeyGenParameterSpec.Builder(key, purpose).setDigests(KeyProperties.DIGEST_SHA512)
+            .setKeySize(keySize).setSignaturePaddings(signaturePadding)
+            .setBlockModes(encryptionBlockMode).setEncryptionPaddings(encryptionPadding)
     }
 
     /**
      * Creates Keypair for the given builder
-     * @param builder keygen parameter as input to get the keypair
+     * @param spec keygen parameter as input to get the keypair
      */
-    fun createKeyPair(builder: KeyGenParameterSpec.Builder): KeyPair {
-        val keyPairGenerator: KeyPairGenerator = KeyPairGenerator.getInstance(
-            encryptionAlgorithm, androidKeyStore
-        )
-        keyPairGenerator.initialize(builder.build())
-        keyPairGenerator.generateKeyPair()
+    fun createKeyPair(spec: AlgorithmParameterSpec, useAndroidKeyStore: Boolean = true): KeyPair {
 
-        val keyStore = getKeyStore()
-        val publicKey = keyStore.getCertificate(key).publicKey as RSAPublicKey
-        val privateKey = keyStore.getKey(key, null) as PrivateKey
+        val keyPairGenerator = if (useAndroidKeyStore) {
+            KeyPairGenerator.getInstance(encryptionAlgorithm, androidKeyStore)
+        } else {
+            KeyPairGenerator.getInstance(encryptionAlgorithm)
+        }
 
-        return KeyPair(publicKey, privateKey, key)
+        keyPairGenerator.initialize(spec)
+        val keyPair = keyPairGenerator.generateKeyPair();
+
+        return KeyPair(keyPair.public as RSAPublicKey, keyPair.private, key)
     }
 
 
     /**
      * Get the private key from the Keypair for the given builder
-     * @param keyAlias key hash of the user
      */
-    fun getSecureKey(keyAlias: String = key): PrivateKey? {
+    fun getPrivateKey(): PrivateKey {
         val keyStore: KeyStore = getKeyStore()
-        return keyStore.getKey(keyAlias, null) as? PrivateKey
+        return keyStore.getKey(key, null) as PrivateKey
     }
 
     /**
@@ -83,20 +76,20 @@ internal class KeyAware(private var userId: String) {
         return try {
             val digest: MessageDigest = MessageDigest.getInstance(hashingAlgorithm)
             val hash: ByteArray? = digest.digest(keyName.toByteArray())
-            Base64.encodeToString(hash, Base64.DEFAULT)
+            Base64.encodeToString(hash, Base64.NO_WRAP or Base64.NO_PADDING or Base64.URL_SAFE)
         } catch (e: NoSuchAlgorithmException) {
             throw RuntimeException(e)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             throw RuntimeException(e)
         }
     }
+
     /**
      * Creates centralised SecretKey using the KeyStore
      */
     @Throws(GeneralSecurityException::class, IOException::class)
-    private fun getKeyStore(): KeyStore {
-        val keyStore = KeyStore.getInstance(androidKeyStore)
+    private fun getKeyStore(type: String = androidKeyStore): KeyStore {
+        val keyStore = KeyStore.getInstance(type)
         keyStore.load(null)
         return keyStore
     }

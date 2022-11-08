@@ -57,12 +57,13 @@ android {
             pickFirsts += ['**/*.so']
         }
     }
-
-
     testOptions {
         unitTests.all {
             exclude '**/*TestSuite*'
         }
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
@@ -86,10 +87,15 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
     compileOnly 'net.openid:appauth:0.7.1'
     compileOnly 'com.google.android.gms:play-services-fido:18.1.0'
+    compileOnly 'com.google.android.gms:play-services-basement:18.1.0'
 
+    //For Device Binding
     compileOnly 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
     compileOnly 'com.nimbusds:nimbus-jose-jwt:9.23'
-    compileOnly 'com.google.android.gms:play-services-basement:18.1.0'
+
+    //Application Pin
+    compileOnly 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
+    compileOnly 'androidx.security:security-crypto:1.0.0'
 
     //Social Login
     compileOnly 'com.google.android.gms:play-services-auth:20.3.0'
@@ -128,7 +134,12 @@ dependencies {
     testImplementation 'com.facebook.android:facebook-login:7.1.0'
     testImplementation 'com.google.android.gms:play-services-safetynet:18.0.1'
     testImplementation 'org.jeasy:easy-random-core:4.0.0'
+    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
     testImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
+
+    //Application Pin
+    testImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
+    testImplementation 'androidx.security:security-crypto:1.0.0'
 
     testImplementation 'org.mockito:mockito-core:4.0.0'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'

@@ -9,10 +9,7 @@ package org.forgerock.android.auth.devicebind
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.EncryptedPreferences
-import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.json.JSONException
 import org.json.JSONObject

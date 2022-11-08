@@ -12,18 +12,18 @@ import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.*
 import org.forgerock.android.auth.devicebind.*
 import org.json.JSONObject
-import java.util.*
 
 
 /**
  * Callback to collect the device signing information
  */
-open class DeviceSigningVerifierCallback: AbstractCallback {
+open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
 
-    @JvmOverloads constructor(jsonObject: JSONObject,
-                              index: Int): super(jsonObject, index)
+    @JvmOverloads
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
-    @JvmOverloads constructor(): super()
+    @JvmOverloads
+    constructor() : super()
 
     /**
      * The optional userId
@@ -34,18 +34,22 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * The challenge received from server
      */
     lateinit var challenge: String
+
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+
     /**
      * The timeout to be to expire the biometric authentication
      */
@@ -54,7 +58,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
     private val tag = DeviceSigningVerifierCallback::class.java.simpleName
 
     override fun setAttribute(name: String, value: Any) = when (name) {
-        "userId" ->  userId = value as? String
+        "userId" -> userId = value as? String
         "challenge" -> challenge = value as String
         "title" -> title = value as? String ?: ""
         "subtitle" -> subtitle = value as? String ?: ""
@@ -90,8 +94,7 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun sign(context: Context,
-             listener: FRListener<Void>) {
+    fun sign(context: Context, listener: FRListener<Void>) {
         execute(context, listener = listener)
     }
 
@@ -103,29 +106,36 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param authInterface Interface to find the Authentication Type
      */
     @JvmOverloads
-    protected open fun authenticate(userKey: UserKey,
+    protected open fun authenticate(context: Context,
+                                    userKey: UserKey,
                                     listener: FRListener<Void>,
-                                    authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(userKey)) {
+                                    authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(
+                                        context,
+                                        userKey)) {
 
-        if(authInterface.isSupported().not()) {
-            handleException(Unsupported(), listener)
+        initialize(userKey.userId, title, subtitle, description, userKey.authType, authInterface)
+
+        if (authInterface.isSupported().not()) {
+            handleException(Unsupported(), e = null, listener = listener)
             return
         }
         try {
             authInterface.authenticate(timeout ?: 60) { result ->
                 if (result is Success) {
-                    val jws = authInterface.sign(userKey, challenge, getExpiration())
+                    val jws = authInterface.sign(userKey,
+                        result.privateKey,
+                        challenge,
+                        getExpiration(timeout))
                     setJws(jws)
                     Listener.onSuccess(listener, null)
                 } else {
                     // All the biometric exception is handled here , it could be Abort or timeout
-                    handleException(result, listener = listener)
+                    handleException(result, e = null, listener = listener)
                 }
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.
-            handleException(Unsupported(errorMessage = e.message), listener = listener)
+            handleException(Unsupported(errorMessage = e.message), e, listener = listener)
         }
     }
 
@@ -140,12 +150,12 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
                                userKeyService: UserKeyService = UserDeviceKeyService(context),
                                listener: FRListener<Void>) {
 
-        when(val status = userKeyService.getKeyStatus(userId)) {
-            is NoKeysFound -> handleException(UnRegister(), listener)
-            is SingleKeyFound -> authenticate(status.key , listener = listener)
+        when (val status = userKeyService.getKeyStatus(userId)) {
+            is NoKeysFound -> handleException(UnRegister(), null, listener)
+            is SingleKeyFound -> authenticate(context, status.key, listener = listener)
             else -> {
                 getUserKey(InitProvider.getCurrentActivityAsFragmentActivity(), userKeyService) {
-                    authenticate(it, listener)
+                    authenticate(context, it, listener)
                 }
             }
         }
@@ -170,8 +180,9 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
      * @param userKey selected UserKey from the device
      */
-    protected open fun getDeviceBindAuthenticator(userKey: UserKey): DeviceAuthenticator {
-        return AuthenticatorFactory.getType(userKey.userId, userKey.authType, title, subtitle, description)
+    protected open fun getDeviceBindAuthenticator(context: Context,
+                                                  userKey: UserKey): DeviceAuthenticator {
+        return getDeviceBindAuthenticator(context, userKey.authType)
     }
 
     /**
@@ -180,25 +191,13 @@ open class DeviceSigningVerifierCallback: AbstractCallback {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-    protected open fun handleException(status: DeviceBindingStatus,
+    protected open fun handleException(status: DeviceBindingStatus<Any>,
+                                       e: Exception?,
                                        listener: FRListener<Void>) {
-        setClientError(status.clientError)
-        Logger.error(tag, status.message, status.errorCode)
-        Listener.onException(
-            listener,
-            DeviceBindingException(status)
-        )
-    }
 
-    /**
-     * Get Expiration date for the signed token, claim "exp" will be set to the JWS.
-     *
-     * @return The expiration date
-     */
-    protected open fun getExpiration(): Date {
-        val date = Calendar.getInstance();
-        date.add(Calendar.SECOND, timeout ?: 60)
-        return date.time;
+        setClientError(status.clientError)
+        Logger.error(tag, e, status.message)
+        Listener.onException(listener, DeviceBindingException(status, e))
     }
 
 }
