@@ -204,7 +204,9 @@ class BiometricAuth @JvmOverloads constructor(
     private fun initBiometricAuthentication() {
         val biometricPrompt = initBiometricPrompt()
         promptInfo?.let {
-            biometricPrompt.authenticate(it)
+            activity.runOnUiThread() {
+                biometricPrompt.authenticate(it)
+            }
         }
     }
 

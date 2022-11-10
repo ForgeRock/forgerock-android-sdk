@@ -42,25 +42,33 @@ public class DeviceSigningVerifierCallbackFragment extends CallbackFragment<Devi
         View view = inflater.inflate(R.layout.fragment_device_signing_verifier_callback, container, false);
         message = view.findViewById(R.id.message);
         progressBar = view.findViewById(R.id.signingProgress);
-        proceed();
-
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        proceed();
     }
 
     private void proceed() {
         callback.sign(getContext(), new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                message.setVisibility(GONE);
-                progressBar.setVisibility(GONE);
-                next();
+                getActivity().runOnUiThread(() -> {
+                    message.setVisibility(GONE);
+                    progressBar.setVisibility(GONE);
+                    next();
+                });
             }
 
             @Override
             public void onException(Exception e) {
-                message.setVisibility(GONE);
-                progressBar.setVisibility(GONE);
-                next();
+                getActivity().runOnUiThread(() -> {
+                    message.setVisibility(GONE);
+                    progressBar.setVisibility(GONE);
+                    next();
+                });
             }
         });
     }

@@ -7,29 +7,61 @@
 package org.forgerock.android.auth.devicebind
 
 import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
+import android.os.OperationCanceledException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.TimeoutCancellationException
 import org.forgerock.android.auth.databinding.FragmentApplicationPinBinding
+import org.forgerock.android.auth.exception.IgnorableException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
-/*
-Default Dialog fragment to request user for Application Pin
+private const val ARG_PROMPT = "prompt"
+
+/**
+ * Default Dialog fragment to request user for Application Pin
  */
 class ApplicationPinFragment : DialogFragment() {
 
-    private var _binding: FragmentApplicationPinBinding? = null
-    private val binding get() = _binding!!
+    private var prompt: Prompt? = null
+    private lateinit var binding: FragmentApplicationPinBinding
 
-    var onPinReceived: ((String) -> Unit?)? = null
-    var onCancelled: (() -> Unit)? = null
+    var continuation: CancellableContinuation<CharArray>? = null
+        set(value) {
+            field = value
+            field?.invokeOnCancellation {
+                if (it is TimeoutCancellationException) {
+                    if (this.isVisible) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            prompt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                it.getParcelable(ARG_PROMPT, Prompt::class.java)
+            } else {
+                it.getParcelable(ARG_PROMPT)
+            }
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        _binding = FragmentApplicationPinBinding.inflate(layoutInflater, container, false)
+        binding = FragmentApplicationPinBinding.inflate(layoutInflater, container, false)
+        binding.tvTitle.text = prompt?.title
+        binding.tvSubTitle.text = prompt?.subtitle
+        binding.tvDescription.text = prompt?.description
         val view = binding.root;
         return view
     }
@@ -40,32 +72,40 @@ class ApplicationPinFragment : DialogFragment() {
             WindowManager.LayoutParams.WRAP_CONTENT)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnPositive.setOnClickListener {
-            onPinReceived?.let { it(binding.pin.text.toString()) }
-            dismiss()
+            if (binding.pin.text.toString().isNotEmpty()) {
+                continuation?.resume(binding.pin.text.toString().toCharArray())
+                dismiss()
+            }
         }
         binding.btnNegative.setOnClickListener {
-            onCancelled?.let { it() }
             dismiss()
+            continuation?.resumeWithException(OperationCanceledException())
         }
     }
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        onCancelled?.let { it() }
+        continuation?.resumeWithException(OperationCanceledException())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //throw exception to end the coroutine scope
+        continuation?.takeUnless { it.isCompleted }?.cancel(IgnorableException())
     }
 
     companion object {
-        fun newInstance(): ApplicationPinFragment {
-            return ApplicationPinFragment()
-        }
+        fun newInstance(prompt: Prompt,
+                        continuation: CancellableContinuation<CharArray>): ApplicationPinFragment =
+            ApplicationPinFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_PROMPT, prompt)
+                }
+                this.continuation = continuation
+            }
 
         const val TAG: String = "ApplicationPinFragment"
     }

@@ -6,15 +6,14 @@
  */
 package org.forgerock.android.auth.devicebind
 
+import org.forgerock.android.auth.CryptoKey
+
 
 /**
- * Interface to be implemented by objects that want to be aware of [KeyAware] and [BiometricHandler]
+ * Interface to be implemented by objects that want to be aware of [CryptoKey]
  */
 internal interface CryptoAware {
 
-    fun setKeyAware(keyAware: KeyAware)
-    fun setBiometricHandler(biometricHandler: BiometricHandler) {
-        //do Nothing
-    }
+    fun setKey(cryptoKey: CryptoKey)
 
 }

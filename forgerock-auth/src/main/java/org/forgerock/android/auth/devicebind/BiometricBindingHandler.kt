@@ -32,10 +32,9 @@ interface BiometricHandler {
 
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param statusResult Result of biometric action in callback
+     * @param authenticationCallback Result of biometric action in callback
      */
     fun authenticate(authenticationCallback: AuthenticationCallback)
-
 
 }
 
@@ -66,10 +65,9 @@ internal class BiometricBindingHandler(titleValue: String,
             descriptionValue)
     }
 
-
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param statusResult Result of biometric action in callback
+     * @param authenticationCallback Result of biometric action in callback
      */
     override fun authenticate(authenticationCallback: AuthenticationCallback) {
 
@@ -109,5 +107,4 @@ internal class BiometricBindingHandler(titleValue: String,
         }
         return false
     }
-
 }

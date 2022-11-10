@@ -6,53 +6,42 @@
  */
 package org.forgerock.android.auth.callback
 
-import android.content.Context
-import org.forgerock.android.auth.devicebind.AuthenticatorFactory
-import org.forgerock.android.auth.devicebind.BiometricBindingHandler
-import org.forgerock.android.auth.devicebind.CryptoAware
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
-import org.forgerock.android.auth.devicebind.KeyAware
 import java.util.*
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
+/**
+ * Device Binding interface to provide utility method for [DeviceBindingCallback] and [DeviceSigningVerifierCallback]
+ */
 interface Binding {
 
     /**
-     * Inject crypto related objects to [DeviceAuthenticator]
+     * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
+     * @param type The Device Binding Authentication Type
+     * @return The recommended  [DeviceAuthenticator] that can handle the provided [DeviceBindingAuthenticationType]
      */
-    fun initialize(userId: String,
-                   title: String,
-                   subtitle: String,
-                   description: String,
-                   deviceBindingAuthenticationType: DeviceBindingAuthenticationType,
-                   deviceAuthenticator: DeviceAuthenticator) {
-        //Inject objects
-        if (deviceAuthenticator is CryptoAware) {
-            deviceAuthenticator.setBiometricHandler(BiometricBindingHandler(title,
-                subtitle,
-                description,
-                deviceBindAuthenticationType = deviceBindingAuthenticationType))
-            deviceAuthenticator.setKeyAware(KeyAware(userId))
-        }
-
-    }
-
-    /**
-     * create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
-     */
-    fun getDeviceBindAuthenticator(context: Context,
-                                   deviceBindingAuthenticationType: DeviceBindingAuthenticationType): DeviceAuthenticator {
-        return AuthenticatorFactory.getType(context, deviceBindingAuthenticationType)
-    }
+    fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): DeviceAuthenticator =
+        type.getAuthType()
 
     /**
      * Get Expiration date for the signed token, claim "exp" will be set to the JWS.
      *
      * @return The expiration date
      */
-    fun getExpiration(timeout: Int? ): Date {
+    fun getExpiration(timeout: Int?): Date {
         val date = Calendar.getInstance();
         date.add(Calendar.SECOND, timeout ?: 60)
         return date.time;
+    }
+
+    /**
+     * Convert timeout in seconds to [Duration]
+     * @param timeout the timeout in seconds
+     */
+    fun getDuration(timeout: Int?): Duration {
+        return (timeout?.toLong() ?: 60L).toDuration(DurationUnit.SECONDS)
     }
 
 }

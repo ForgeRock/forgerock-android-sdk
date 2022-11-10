@@ -52,7 +52,10 @@
     <string name="submit">Submit</string>
 
     <!-- Device Binding -->
-    <string name="binding_enter_application_pin">Enter Application PIN</string>
+    <string name="binding_title">Enter Application PIN</string>
+    <string name="binding_subtitle">Cryptography device binding</string>
+    <string name="binding_description">Please complete with application pin</string>
+    <string name="binding_pin">Pin</string>
     <string name="binding_ok">OK</string>
     <string name="binding_cancel">Cancel</string>
 

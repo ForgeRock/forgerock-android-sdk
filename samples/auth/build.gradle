@@ -6,6 +6,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 33
@@ -79,7 +80,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'net.openid:appauth:0.7.1'
     implementation 'com.google.android.gms:play-services-fido:18.1.0'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.23'
     implementation 'com.google.android.gms:play-services-basement:18.1.0'
 
     //SocialLogin
@@ -93,10 +93,5 @@ dependencies {
     //Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
     implementation 'androidx.security:security-crypto:1.0.0'
-
-
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
 }

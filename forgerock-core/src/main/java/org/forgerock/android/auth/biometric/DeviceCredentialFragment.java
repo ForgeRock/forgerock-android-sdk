@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.core.R;
 
 /**
  * Headless Fragment to receive result from KeyguardManager library.
@@ -55,10 +56,10 @@ public class DeviceCredentialFragment extends Fragment {
 
         String title = this.biometricAuth.getTitle() != null
                 ? this.biometricAuth.getTitle()
-                : "Device Credentials for login";
+                : getString(R.string.biometric_title);
         String reason = this.biometricAuth.getSubtitle() != null
                 ? this.biometricAuth.getSubtitle()
-                : "Device credentials required to approve Push authentication request";
+                : getString(R.string.biometric_subtitle);
 
         Intent authIntent = biometricAuth.getKeyguardManager()
                 .createConfirmDeviceCredentialIntent(title, reason);
