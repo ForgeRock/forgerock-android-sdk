@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2021 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.forgerock.quickstart">
 
+    <!--
+    Set usesCleartextTraffic only for test purpose, it is highly recommend to set this attribute
+    to false in production
+    -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

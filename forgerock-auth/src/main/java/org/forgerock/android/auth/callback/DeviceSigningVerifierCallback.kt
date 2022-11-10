@@ -29,31 +29,37 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * The optional userId
      */
     var userId: String? = null
+        private set
 
     /**
      * The challenge received from server
      */
     lateinit var challenge: String
+        private set
 
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+        private set
 
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+        private set
 
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+        private set
 
     /**
      * The timeout to be to expire the biometric authentication
      */
     var timeout: Int? = null
+        private set
 
     private val tag = DeviceSigningVerifierCallback::class.java.simpleName
 
@@ -94,7 +100,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun sign(context: Context, listener: FRListener<Void>) {
+    open fun sign(context: Context, listener: FRListener<Void>) {
         execute(context, listener = listener)
     }
 
@@ -103,26 +109,26 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      *
      * @param userKey User Information
      * @param listener The Listener to listen for the result
-     * @param authInterface Interface to find the Authentication Type
+     * @param deviceAuthenticator Interface to find the Authentication Type
      */
     @JvmOverloads
     protected open fun authenticate(context: Context,
                                     userKey: UserKey,
                                     listener: FRListener<Void>,
-                                    authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(
+                                    deviceAuthenticator: DeviceAuthenticator = getDeviceBindAuthenticator(
                                         context,
                                         userKey)) {
 
-        initialize(userKey.userId, title, subtitle, description, userKey.authType, authInterface)
+        deviceAuthenticator.initialize(userKey.userId, title, subtitle, description)
 
-        if (authInterface.isSupported().not()) {
+        if (deviceAuthenticator.isSupported(context).not()) {
             handleException(Unsupported(), e = null, listener = listener)
             return
         }
         try {
-            authInterface.authenticate(timeout ?: 60) { result ->
+            deviceAuthenticator.authenticate(context, timeout ?: 60) { result ->
                 if (result is Success) {
-                    val jws = authInterface.sign(userKey,
+                    val jws = deviceAuthenticator.sign(userKey,
                         result.privateKey,
                         challenge,
                         getExpiration(timeout))
@@ -146,9 +152,9 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param listener The Listener to listen for the result
      */
     @JvmOverloads
-    protected open fun execute(context: Context,
-                               userKeyService: UserKeyService = UserDeviceKeyService(context),
-                               listener: FRListener<Void>) {
+    internal fun execute(context: Context,
+                         userKeyService: UserKeyService = UserDeviceKeyService(context),
+                         listener: FRListener<Void>) {
 
         when (val status = userKeyService.getKeyStatus(userId)) {
             is NoKeysFound -> handleException(UnRegister(), null, listener)
@@ -182,7 +188,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      */
     protected open fun getDeviceBindAuthenticator(context: Context,
                                                   userKey: UserKey): DeviceAuthenticator {
-        return getDeviceBindAuthenticator(context, userKey.authType)
+        return getDeviceAuthenticator(context, userKey.authType)
     }
 
     /**

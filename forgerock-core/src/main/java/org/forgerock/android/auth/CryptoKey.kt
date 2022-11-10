@@ -4,7 +4,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-package org.forgerock.android.auth.devicebind
+package org.forgerock.android.auth
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -18,8 +18,9 @@ import java.security.spec.AlgorithmParameterSpec
 /**
  * Helper class to generate and sign the keys
  */
-class KeyAware(private var userId: String) {
+class CryptoKey(private var keyId: String) {
 
+    //For hashing the keyId
     private val hashingAlgorithm = "SHA-256"
     val keySize = 2048
     val timeout = 60
@@ -30,15 +31,16 @@ class KeyAware(private var userId: String) {
     private val signaturePadding = KeyProperties.SIGNATURE_PADDING_RSA_PKCS1
     private val purpose =
         KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-    val key = getKeyAlias(userId)
+    val keyAlias = getKeyAlias(keyId)
 
     /**
      * Builder to create a keypair
      */
     fun keyBuilder(): KeyGenParameterSpec.Builder {
-        return KeyGenParameterSpec.Builder(key, purpose).setDigests(KeyProperties.DIGEST_SHA512)
-            .setKeySize(keySize).setSignaturePaddings(signaturePadding)
-            .setBlockModes(encryptionBlockMode).setEncryptionPaddings(encryptionPadding)
+        return KeyGenParameterSpec.Builder(keyAlias, purpose)
+            .setDigests(KeyProperties.DIGEST_SHA512).setKeySize(keySize)
+            .setSignaturePaddings(signaturePadding).setBlockModes(encryptionBlockMode)
+            .setEncryptionPaddings(encryptionPadding)
     }
 
     /**
@@ -56,7 +58,7 @@ class KeyAware(private var userId: String) {
         keyPairGenerator.initialize(spec)
         val keyPair = keyPairGenerator.generateKeyPair();
 
-        return KeyPair(keyPair.public as RSAPublicKey, keyPair.private, key)
+        return KeyPair(keyPair.public as RSAPublicKey, keyPair.private)
     }
 
 
@@ -65,14 +67,14 @@ class KeyAware(private var userId: String) {
      */
     fun getPrivateKey(): PrivateKey {
         val keyStore: KeyStore = getKeyStore()
-        return keyStore.getKey(key, null) as PrivateKey
+        return keyStore.getKey(keyAlias, null) as PrivateKey
     }
 
     /**
      * get hash for the given user
      * @param keyName username as a key
      */
-    private fun getKeyAlias(keyName: String = userId): String {
+    private fun getKeyAlias(keyName: String = keyId): String {
         return try {
             val digest: MessageDigest = MessageDigest.getInstance(hashingAlgorithm)
             val hash: ByteArray? = digest.digest(keyName.toByteArray())

@@ -6,25 +6,27 @@
  */
 package org.forgerock.android.auth.devicebind
 
+import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
+import androidx.test.core.app.ApplicationProvider
 import com.nimbusds.jose.JWSObject
 import org.assertj.core.api.Assertions
+import org.forgerock.android.auth.CryptoKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.util.ReflectionHelpers
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -35,15 +37,25 @@ import java.util.concurrent.CountDownLatch
 class DeviceBindAuthenticationTests {
 
     private val mockBiometricInterface = mock<BiometricHandler>()
-    private val keyAware = mock<KeyAware>()
-    private val authenticationCallback = mock<AuthenticationCallback>()
-    private val keyPair = mock<KeyPair>()
+    private val cryptoKey = mock<CryptoKey>()
+    private val keyPair = mock<java.security.KeyPair>()
+    private var context = mock<Context>()
+
+
+    @Before
+    fun setUp() {
+        val publicKey = mock<RSAPublicKey>()
+        val privateKey = mock<PrivateKey>()
+        whenever(keyPair.public).thenReturn(publicKey)
+        whenever(keyPair.private).thenReturn(privateKey)
+        whenever(cryptoKey.keyAlias).thenReturn("jeyAlias")
+    }
 
     @Test
     fun testSigningData() {
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
         kpg.initialize(2048)
@@ -61,7 +73,7 @@ class DeviceBindAuthenticationTests {
     fun testSigningWithExpiration() {
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
         kpg.initialize(2048)
@@ -84,32 +96,32 @@ class DeviceBindAuthenticationTests {
         val keyGenParameterSpec = mock<KeyGenParameterSpec>()
         val keyBuilder = mock<KeyGenParameterSpec.Builder>()
         whenever(keyBuilder.build()).thenReturn(keyGenParameterSpec)
-        whenever(keyAware.keyBuilder()).thenReturn(keyBuilder)
-        whenever(keyAware.timeout).thenReturn(30)
-        whenever(keyAware.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
+        whenever(cryptoKey.keyBuilder()).thenReturn(keyBuilder)
+        whenever(cryptoKey.timeout).thenReturn(30)
+        whenever(cryptoKey.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
 
         val callback: (KeyPair) -> Unit = {}
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
 
-        testObject.generateKeys(callback)
+        testObject.generateKeys(context, callback)
 
         verify(keyBuilder).setUserAuthenticationValidityDurationSeconds(30)
         verify(keyBuilder).setUserAuthenticationRequired(true)
-        verify(keyAware).createKeyPair(keyBuilder.build())
+        verify(cryptoKey).createKeyPair(keyBuilder.build())
 
         val testObjectBiometric = BiometricAndDeviceCredential()
         testObjectBiometric.setBiometricHandler(mockBiometricInterface)
-        testObjectBiometric.setKeyAware(keyAware)
+        testObjectBiometric.setKey(cryptoKey)
         testObjectBiometric.isApi30OrAbove = false
 
-        testObjectBiometric.generateKeys(callback)
+        testObjectBiometric.generateKeys(context, callback)
 
         verify(keyBuilder, times(2)).setUserAuthenticationValidityDurationSeconds(30)
         verify(keyBuilder, times(2)).setUserAuthenticationRequired(true)
-        verify(keyAware, times(2)).createKeyPair(keyBuilder.build())
+        verify(cryptoKey, times(2)).createKeyPair(keyBuilder.build())
     }
 
     @Test
@@ -117,21 +129,21 @@ class DeviceBindAuthenticationTests {
         val keyGenParameterSpec = mock<KeyGenParameterSpec>()
         val keyBuilder = mock<KeyGenParameterSpec.Builder>()
         whenever(keyBuilder.build()).thenReturn(keyGenParameterSpec)
-        whenever(keyAware.keyBuilder()).thenReturn(keyBuilder)
-        whenever(keyAware.timeout).thenReturn(30)
-        whenever(keyAware.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
+        whenever(cryptoKey.keyBuilder()).thenReturn(keyBuilder)
+        whenever(cryptoKey.timeout).thenReturn(30)
+        whenever(cryptoKey.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
 
         val callback: (KeyPair) -> Unit = {}
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = true
-        testObject.generateKeys(callback)
+        testObject.generateKeys(context, callback)
 
         verify(keyBuilder).setUserAuthenticationParameters(30,
             KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         verify(keyBuilder).setUserAuthenticationRequired(true)
-        verify(keyAware).createKeyPair(keyBuilder.build())
+        verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
 
     @Test
@@ -139,20 +151,20 @@ class DeviceBindAuthenticationTests {
         val keyGenParameterSpec = mock<KeyGenParameterSpec>()
         val keyBuilder = mock<KeyGenParameterSpec.Builder>()
         whenever(keyBuilder.build()).thenReturn(keyGenParameterSpec)
-        whenever(keyAware.keyBuilder()).thenReturn(keyBuilder)
-        whenever(keyAware.timeout).thenReturn(30)
-        whenever(keyAware.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
+        whenever(cryptoKey.keyBuilder()).thenReturn(keyBuilder)
+        whenever(cryptoKey.timeout).thenReturn(30)
+        whenever(cryptoKey.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
 
         val callback: (KeyPair) -> Unit = {}
         val testObject = BiometricOnly()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = true
-        testObject.generateKeys(callback)
+        testObject.generateKeys(context, callback)
 
         verify(keyBuilder).setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
         verify(keyBuilder).setUserAuthenticationRequired(true)
-        verify(keyAware).createKeyPair(keyBuilder.build())
+        verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
 
     @Test
@@ -160,15 +172,15 @@ class DeviceBindAuthenticationTests {
         val keyGenParameterSpec = mock<KeyGenParameterSpec>()
         val keyBuilder = mock<KeyGenParameterSpec.Builder>()
         whenever(keyBuilder.build()).thenReturn(keyGenParameterSpec)
-        whenever(keyAware.keyBuilder()).thenReturn(keyBuilder)
-        whenever(keyAware.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
+        whenever(cryptoKey.keyBuilder()).thenReturn(keyBuilder)
+        whenever(cryptoKey.createKeyPair(keyBuilder.build())).thenReturn(keyPair)
 
         val callback: (KeyPair) -> Unit = {}
         val testObject = None()
-        testObject.setKeyAware(keyAware)
-        testObject.generateKeys(callback)
+        testObject.setKey(cryptoKey)
+        testObject.generateKeys(context, callback)
 
-        verify(keyAware).createKeyPair(keyBuilder.build())
+        verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
 
     @Test
@@ -176,9 +188,9 @@ class DeviceBindAuthenticationTests {
         whenever(mockBiometricInterface.isSupported()).thenReturn(false)
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertFalse(testObject.isSupported())
+        assertFalse(testObject.isSupported(context))
     }
 
     @Test
@@ -187,9 +199,9 @@ class DeviceBindAuthenticationTests {
             BIOMETRIC_WEAK or DEVICE_CREDENTIAL)).thenReturn(true)
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupported(context))
     }
 
     @Test
@@ -197,15 +209,15 @@ class DeviceBindAuthenticationTests {
         whenever(mockBiometricInterface.isSupported()).thenReturn(true)
         val testObject = BiometricOnly()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupported(context, ))
     }
 
     @Test
     fun testSupportedNone() {
         val testObject = None()
-        assertTrue(testObject.isSupported())
+        assertTrue(testObject.isSupported(context))
     }
 
     @Test
@@ -214,9 +226,9 @@ class DeviceBindAuthenticationTests {
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {}
         val testObject = BiometricOnly()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        testObject.authenticate(60, result)
+        testObject.authenticate(context, 60, result)
         verify(mockBiometricInterface).authenticate(any())
     }
 
@@ -225,10 +237,10 @@ class DeviceBindAuthenticationTests {
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {}
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
-        testObject.setKeyAware(keyAware)
+        testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
 
-        testObject.authenticate(60, result)
+        testObject.authenticate(context, 60, result)
         verify(mockBiometricInterface).authenticate(any())
     }
 
@@ -236,14 +248,14 @@ class DeviceBindAuthenticationTests {
     fun testNoneAuthenticate() {
         val countDownLatch = CountDownLatch(1)
         val privateKey = mock<PrivateKey>()
-        whenever(keyAware.getPrivateKey()).thenReturn(privateKey)
+        whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {
-            assertEquals(it, Success(keyAware.getPrivateKey()))
+            assertEquals(it, Success(cryptoKey.getPrivateKey()))
             countDownLatch.countDown()
         }
         val testObject = None()
-        testObject.setKeyAware(keyAware)
-        testObject.authenticate(60, result)
+        testObject.setKey(cryptoKey)
+        testObject.authenticate(context, 60, result)
         countDownLatch.await()
     }
 

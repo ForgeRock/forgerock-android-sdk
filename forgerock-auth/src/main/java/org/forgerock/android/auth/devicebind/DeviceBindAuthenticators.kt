@@ -38,11 +38,8 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType.APPLICATION_PIN
-import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK
-import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType.BIOMETRIC_ONLY
-import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType.NONE
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -56,14 +53,16 @@ interface DeviceAuthenticator {
     /**
      * generate the public and private [KeyPair]
      */
-    fun generateKeys(callback: (KeyPair) -> Unit)
+    fun generateKeys(context: Context, callback: (KeyPair) -> Unit)
 
     /**
      * Authenticate the user to access the
      * @param timeout Timeout for authentication
      * @param statusResult Listener for receiving authentication status
      */
-    fun authenticate(timeout: Int, statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit)
+    fun authenticate(context: Context,
+                     timeout: Int,
+                     statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit)
 
     /**
      * sign the challenge sent from the server and generate signed JWT
@@ -105,8 +104,27 @@ interface DeviceAuthenticator {
     /**
      * check biometric is supported
      */
-    fun isSupported(): Boolean
+    fun isSupported(context: Context): Boolean
 
+    fun type(): DeviceBindingAuthenticationType
+
+}
+
+fun DeviceAuthenticator.initialize(userId: String,
+                                   title: String,
+                                   subtitle: String,
+                                   description: String) {
+
+    //Inject objects
+    if (this is BiometricAuthenticator) {
+        this.setBiometricHandler(BiometricBindingHandler(title,
+            subtitle,
+            description,
+            deviceBindAuthenticationType = this.type()))
+    }
+    if (this is CryptoAware) {
+        this.setKey(CryptoKey(userId))
+    }
 }
 
 /**
@@ -122,14 +140,14 @@ abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
 
     @VisibleForTesting
     internal var isApi30OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-    internal lateinit var keyAware: KeyAware
+    internal lateinit var cryptoKey: CryptoKey
     internal lateinit var biometricInterface: BiometricHandler
 
-    override fun setKeyAware(keyAware: KeyAware) {
-        this.keyAware = keyAware
+    final override fun setKey(cryptoKey: CryptoKey) {
+        this.cryptoKey = cryptoKey
     }
 
-    override fun setBiometricHandler(biometricHandler: BiometricHandler) {
+    fun setBiometricHandler(biometricHandler: BiometricHandler) {
         this.biometricInterface = biometricHandler
     }
 
@@ -138,7 +156,8 @@ abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
      * @param timeout Timeout for biometric prompt
      * @param statusResult Listener for receiving Biometric changes
      */
-    override fun authenticate(timeout: Int,
+    override fun authenticate(context: Context,
+                              timeout: Int,
                               statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit) {
         val startTime = Date().time
         val listener = object : AuthenticationCallback() {
@@ -166,7 +185,7 @@ abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
                 if (endTime > (timeout.toLong())) {
                     statusResult(Timeout())
                 } else {
-                    statusResult(Success(keyAware.getPrivateKey()))
+                    statusResult(Success(cryptoKey.getPrivateKey()))
                 }
             }
 
@@ -189,24 +208,30 @@ open class BiometricOnly : BiometricAuthenticator() {
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override fun generateKeys(callback: (KeyPair) -> Unit) {
-        val builder = keyAware.keyBuilder()
+    override fun generateKeys(context: Context, callback: (KeyPair) -> Unit) {
+        val builder = cryptoKey.keyBuilder()
         if (isApi30OrAbove) {
-            builder.setUserAuthenticationParameters(keyAware.timeout,
+            builder.setUserAuthenticationParameters(cryptoKey.timeout,
                 KeyProperties.AUTH_BIOMETRIC_STRONG)
         } else {
-            builder.setUserAuthenticationValidityDurationSeconds(keyAware.timeout)
+            builder.setUserAuthenticationValidityDurationSeconds(cryptoKey.timeout)
         }
         builder.setUserAuthenticationRequired(true)
-        callback(keyAware.createKeyPair(builder.build()))
+        val key = cryptoKey.createKeyPair(builder.build())
+        val keyPair = KeyPair(key.public as RSAPublicKey, key.private, cryptoKey.keyAlias)
+        callback(keyPair)
     }
 
     /**
      * check biometric is supported
      */
-    override fun isSupported(): Boolean {
+    override fun isSupported(context: Context): Boolean {
         return biometricInterface.isSupported(BIOMETRIC_STRONG, BIOMETRIC_WEAK)
     }
+
+    final override fun type(): DeviceBindingAuthenticationType =
+        DeviceBindingAuthenticationType.BIOMETRIC_ONLY
+
 
 }
 
@@ -219,81 +244,70 @@ open class BiometricAndDeviceCredential() : BiometricAuthenticator() {
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override fun generateKeys(callback: (KeyPair) -> Unit) {
-        val builder = keyAware.keyBuilder()
+    override fun generateKeys(context: Context, callback: (KeyPair) -> Unit) {
+        val builder = cryptoKey.keyBuilder()
         if (isApi30OrAbove) {
-            builder.setUserAuthenticationParameters(keyAware.timeout,
+            builder.setUserAuthenticationParameters(cryptoKey.timeout,
                 KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         } else {
-            builder.setUserAuthenticationValidityDurationSeconds(keyAware.timeout)
+            builder.setUserAuthenticationValidityDurationSeconds(cryptoKey.timeout)
         }
         builder.setUserAuthenticationRequired(true)
-        callback(keyAware.createKeyPair(builder.build()))
+        val key = cryptoKey.createKeyPair(builder.build())
+        val keyPair = KeyPair(key.public as RSAPublicKey, key.private, cryptoKey.keyAlias)
+        callback(keyPair)
     }
 
     /**
      * check biometric is supported
      */
-    override fun isSupported(): Boolean {
+    override fun isSupported(context: Context): Boolean {
         return biometricInterface.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL,
             BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
     }
+
+    final override fun type(): DeviceBindingAuthenticationType =
+        DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK
+
 
 }
 
 /**
  * Settings for all the none authentication is configured
  */
-class None() : CryptoAware, DeviceAuthenticator {
+open class None() : CryptoAware, DeviceAuthenticator {
 
-    private lateinit var keyAware: KeyAware
+    private lateinit var cryptoKey: CryptoKey
 
     /**
      * generate the public and private keypair
      */
-    override fun generateKeys(callback: (KeyPair) -> Unit) {
-        val builder = keyAware.keyBuilder()
-        callback(keyAware.createKeyPair(builder.build()))
-
+    override fun generateKeys(context: Context, callback: (KeyPair) -> Unit) {
+        val builder = cryptoKey.keyBuilder()
+        val key = cryptoKey.createKeyPair(builder.build())
+        val keyPair = KeyPair(key.public as RSAPublicKey, key.private, cryptoKey.keyAlias)
+        callback(keyPair)
     }
 
     /**
      * Default is true for None type
      */
-    override fun isSupported(): Boolean {
-        return true
-    }
+    override fun isSupported(context: Context): Boolean = true
+
+    final override fun type(): DeviceBindingAuthenticationType =
+        DeviceBindingAuthenticationType.NONE
 
     /**
      * return success block for None type
      */
-    override fun authenticate(timeout: Int,
+    override fun authenticate(context: Context,
+                              timeout: Int,
                               statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit) {
-        statusResult(Success(keyAware.getPrivateKey()))
+        statusResult(Success(cryptoKey.getPrivateKey()))
     }
 
-    override fun setKeyAware(keyAware: KeyAware) {
-        this.keyAware = keyAware
+    final override fun setKey(cryptoKey: CryptoKey) {
+        this.cryptoKey = cryptoKey
     }
 
 }
-
-/**
- * Internal AuthenticatorFactory to create the authentication type.
- */
-class AuthenticatorFactory {
-    companion object {
-        fun getType(context: Context,
-                    authentication: DeviceBindingAuthenticationType): DeviceAuthenticator {
-
-            return when (authentication) {
-                BIOMETRIC_ONLY -> BiometricOnly()
-                BIOMETRIC_ALLOW_FALLBACK -> BiometricAndDeviceCredential()
-                APPLICATION_PIN -> ApplicationPinDeviceAuthenticator(context)
-                NONE -> None()
-            }
-
-        }
-    }
-}
-

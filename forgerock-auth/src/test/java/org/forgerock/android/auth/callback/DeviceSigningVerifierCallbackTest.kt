@@ -11,11 +11,23 @@ import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.forgerock.android.auth.FRListener
-import org.forgerock.android.auth.devicebind.*
+import org.forgerock.android.auth.devicebind.DeviceAuthenticator
+import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.DeviceBindingStatus
+import org.forgerock.android.auth.devicebind.KeyPair
+import org.forgerock.android.auth.devicebind.MultipleKeysFound
+import org.forgerock.android.auth.devicebind.NoKeysFound
+import org.forgerock.android.auth.devicebind.SingleKeyFound
+import org.forgerock.android.auth.devicebind.Success
+import org.forgerock.android.auth.devicebind.UserKey
+import org.forgerock.android.auth.devicebind.UserKeyService
 import org.json.JSONObject
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -70,9 +82,9 @@ class DeviceSigningVerifierCallbackTest {
         val authenticationLatch = CountDownLatch(1)
         val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
-        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
-        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any(),  eq(20), any())).thenAnswer {
+            (it.arguments[2] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
         whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
@@ -107,9 +119,9 @@ class DeviceSigningVerifierCallbackTest {
         val testObject: DeviceSigningVerifierCallbackMock = DeviceSigningVerifierCallbackMock(rawContent)
 
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(MultipleKeysFound(mutableListOf(userKey, userKey1)))
-        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
-        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any(), eq(20), any())).thenAnswer {
+            (it.arguments[2] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
         whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var success = false
@@ -141,9 +153,9 @@ class DeviceSigningVerifierCallbackTest {
         val authenticationLatch = CountDownLatch(1)
         val userKey = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(NoKeysFound)
-        whenever(deviceAuthenticator.isSupported()).thenReturn(true)
-        whenever(deviceAuthenticator.authenticate(eq(20), any())).thenAnswer {
-            (it.arguments[1] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any(), eq(20), any())).thenAnswer {
+            (it.arguments[2] as (DeviceBindingStatus<PrivateKey>) -> Unit).invoke(Success(keyPair.privateKey))
         }
         whenever(deviceAuthenticator.sign(userKey, keyPair.privateKey, "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=", getExpiration())).thenReturn("jws")
         var exception = false
@@ -201,14 +213,6 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
         super.execute(context, userKeyService, listener)
     }
 
-    override fun execute(
-        context: Context,
-        userKeyService: UserKeyService,
-        listener: FRListener<Void>
-    ) {
-        super.execute(context, userKeyService, listener)
-    }
-
     override fun getUserKey(activity: FragmentActivity,
                              userKeyService: UserKeyService,
                              listener: (UserKey) -> (Unit)) {
@@ -218,11 +222,11 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String, jsonObje
     }
 
     override fun authenticate(context: Context,
-        userKey: UserKey,
-        listener: FRListener<Void>,
-        authInterface: DeviceAuthenticator
+                              userKey: UserKey,
+                              listener: FRListener<Void>,
+                              deviceAuthenticator: DeviceAuthenticator
     ) {
-        super.authenticate(context, userKey, listener, authInterface)
+        super.authenticate(context, userKey, listener, deviceAuthenticator)
     }
 
 }

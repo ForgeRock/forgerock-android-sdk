@@ -29,45 +29,53 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * The userId received from server
      */
     lateinit var userId: String
+        private set
 
     /**
      * The userName received from server
      */
     lateinit var userName: String
+        private set
 
     /**
      * The challenge received from server
      */
     lateinit var challenge: String
+        private set
 
     /**
      * The authentication type of the journey
      */
     lateinit var deviceBindingAuthenticationType: DeviceBindingAuthenticationType
+        private set
 
     /**
      * The title to be displayed in biometric prompt
      */
     lateinit var title: String
+        private set
 
     /**
      * The subtitle to be displayed in biometric prompt
      */
     lateinit var subtitle: String
+        private set
 
     /**
      * The description to be displayed in biometric prompt
      */
     lateinit var description: String
+        private set
 
     /**
      * The timeout to be to expire the biometric authentication
      */
     var timeout: Int? = null
+        private set
 
     private val tag = DeviceBindingCallback::class.java.simpleName
 
-    override fun setAttribute(name: String, value: Any) = when (name) {
+    final override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" -> userId = value as String
         "username" -> userName = value as String
         "challenge" -> challenge = value as String
@@ -122,7 +130,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
-    fun bind(context: Context, listener: FRListener<Void>) {
+    open fun bind(context: Context, listener: FRListener<Void>) {
         execute(context, listener)
     }
 
@@ -131,37 +139,36 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      *
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
-     * @param authInterface Interface to find the Authentication Type
+     * @param deviceAuthenticator Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
     @JvmOverloads
-    protected open fun execute(context: Context,
-                               listener: FRListener<Void>,
-                               authInterface: DeviceAuthenticator = getDeviceBindAuthenticator(
-                                   context,
-                                   deviceBindingAuthenticationType),
-                               encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
-                                   context),
-                               deviceId: String = DeviceIdentifier.builder().context(context)
-                                   .build().identifier) {
+    internal fun execute(context: Context,
+                         listener: FRListener<Void>,
+                         deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(context,
+                             deviceBindingAuthenticationType),
+                         encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
+                             context),
+                         deviceId: String = DeviceIdentifier.builder().context(context)
+                             .build().identifier) {
 
 
-        initialize(authInterface)
+        deviceAuthenticator.initialize(userId, title, subtitle, description)
 
-        if (authInterface.isSupported().not()) {
+        if (deviceAuthenticator.isSupported(context).not()) {
             handleException(Unsupported(), e = null, listener = listener)
             return
         }
 
         try {
-            authInterface.generateKeys { keyPair ->
-                authInterface.authenticate(timeout ?: 60) { result ->
+            deviceAuthenticator.generateKeys(context) { keyPair ->
+                deviceAuthenticator.authenticate(context, timeout ?: 60) { result ->
                     if (result is Success) {
                         val kid = encryptedPreference.persist(userId,
                             userName,
                             keyPair.keyAlias,
                             deviceBindingAuthenticationType)
-                        val jws = authInterface.sign(keyPair,
+                        val jws = deviceAuthenticator.sign(keyPair,
                             kid,
                             userId,
                             challenge,
@@ -178,22 +185,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
         } catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.
             handleException(Unsupported(errorMessage = e.message), e, listener = listener)
-        }
-    }
 
-    /**
-     * Inject crypto related objects to [DeviceAuthenticator]
-     */
-    private fun initialize(deviceAuthenticator: DeviceAuthenticator) {
-        //Inject objects
-        if (deviceAuthenticator is CryptoAware) {
-            deviceAuthenticator.setBiometricHandler(BiometricBindingHandler(title,
-                subtitle,
-                description,
-                deviceBindAuthenticationType = deviceBindingAuthenticationType))
-            deviceAuthenticator.setKeyAware(KeyAware(userId))
         }
-
     }
 
     /**
@@ -220,3 +213,13 @@ enum class DeviceBindingAuthenticationType constructor(val serializedValue: Stri
     BIOMETRIC_ONLY("BIOMETRIC_ONLY"), BIOMETRIC_ALLOW_FALLBACK("BIOMETRIC_ALLOW_FALLBACK"), NONE("NONE"), APPLICATION_PIN(
         "APPLICATION_PIN");
 }
+
+fun DeviceBindingAuthenticationType.getAuthType(context: Context): DeviceAuthenticator {
+    return when (this) {
+        DeviceBindingAuthenticationType.BIOMETRIC_ONLY -> BiometricOnly()
+        DeviceBindingAuthenticationType.APPLICATION_PIN -> ApplicationPinDeviceAuthenticator()
+        DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK -> BiometricAndDeviceCredential()
+        else -> None()
+    }
+}
+
