@@ -27,13 +27,13 @@ import org.forgerock.android.auth.callback.PasswordCallback;
 /**
  * Reference implementation of handing Advice with {@link DialogFragment}
  */
-public class NodeDialogFragment extends DialogFragment {
+public class usernamePasswordFragment extends DialogFragment {
 
     private MainActivity listener;
     private Node node;
 
-    public static NodeDialogFragment newInstance(Node node) {
-        NodeDialogFragment fragment = new NodeDialogFragment();
+    public static usernamePasswordFragment newInstance(Node node) {
+        usernamePasswordFragment fragment = new usernamePasswordFragment();
         Bundle args = new Bundle();
         args.putSerializable("NODE", node);
         fragment.setArguments(args);
@@ -53,11 +53,11 @@ public class NodeDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_node, container, false);
+        View view = inflater.inflate(R.layout.fragment_username_password, container, false);
         node = (Node) getArguments().getSerializable("NODE");
-        TextInputEditText username = view.findViewById(R.id.username);
-        TextInputEditText password = view.findViewById(R.id.password);
-        Button next = view.findViewById(R.id.next);
+        TextInputEditText username = view.findViewById(R.id.inputUsername);
+        TextInputEditText password = view.findViewById(R.id.inputPassword);
+        Button next = view.findViewById(R.id.buttonContinue);
         next.setOnClickListener(v -> {
             dismiss();
             node.getCallback(NameCallback.class).setName(username.getText().toString());
@@ -65,7 +65,7 @@ public class NodeDialogFragment extends DialogFragment {
             node.next(getContext(), listener);
 
         });
-        Button cancel = view.findViewById(R.id.cancel);
+        Button cancel = view.findViewById(R.id.buttonCancel);
         cancel.setOnClickListener(v -> {
             dismiss();
         });

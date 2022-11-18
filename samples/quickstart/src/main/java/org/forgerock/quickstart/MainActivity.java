@@ -31,10 +31,11 @@ public class MainActivity extends AppCompatActivity implements NodeListener<FRUs
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Logger.set(Logger.Level.DEBUG);
         FRAuth.start(this);
-        status = findViewById(R.id.status);
-        loginButton = findViewById(R.id.login);
-        logoutButton = findViewById(R.id.logout);
+        status = findViewById(R.id.textViewUserStatus);
+        loginButton = findViewById(R.id.buttonLogin);
+        logoutButton = findViewById(R.id.buttonLogout);
         updateStatus();
 
         loginButton.setOnClickListener(view -> FRUser.login(getApplicationContext(), this));
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NodeListener<FRUs
 
     @Override
     public void onCallbackReceived(Node node) {
-        NodeDialogFragment fragment = NodeDialogFragment.newInstance(node);
-        fragment.show(getSupportFragmentManager(), NodeDialogFragment.class.getName());
+        usernamePasswordFragment fragment = usernamePasswordFragment.newInstance(node);
+        fragment.show(getSupportFragmentManager(), usernamePasswordFragment.class.getName());
     }
 }
