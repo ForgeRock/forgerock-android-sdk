@@ -22,11 +22,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -224,6 +220,8 @@ class DeviceBindAuthenticationTests {
     fun testAuthenticateForBiometric() {
 
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {}
+        val privateKey = mock<PrivateKey>()
+        whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
         val testObject = BiometricOnly()
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
@@ -235,11 +233,12 @@ class DeviceBindAuthenticationTests {
     @Test
     fun testAuthenticateForBiometricAndCredential() {
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {}
+        val privateKey = mock<PrivateKey>()
+        whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
         val testObject = BiometricAndDeviceCredential()
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-
         testObject.authenticate(context, 60, result)
         verify(mockBiometricInterface).authenticate(any())
     }
@@ -250,11 +249,28 @@ class DeviceBindAuthenticationTests {
         val privateKey = mock<PrivateKey>()
         whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
         val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {
-            assertEquals(it, Success(cryptoKey.getPrivateKey()))
+            assertEquals(it, Success(cryptoKey.getPrivateKey()!!))
             countDownLatch.countDown()
         }
         val testObject = None()
         testObject.setKey(cryptoKey)
+        testObject.authenticate(context, 60, result)
+        countDownLatch.await()
+    }
+
+    @Test
+    fun testDoNotInvokeBiometricWhenThePrivateKeyIsNull() {
+        val countDownLatch = CountDownLatch(1)
+        val result: (DeviceBindingStatus<PrivateKey>) -> (Unit) = {
+            assertEquals(it, UnRegister())
+            verify(mockBiometricInterface, never()).authenticate(any())
+            countDownLatch.countDown()
+        }
+        whenever(cryptoKey.getPrivateKey()).thenReturn(null)
+        val testObject = BiometricAndDeviceCredential()
+        testObject.setBiometricHandler(mockBiometricInterface)
+        testObject.setKey(cryptoKey)
+        testObject.isApi30OrAbove = false
         testObject.authenticate(context, 60, result)
         countDownLatch.await()
     }

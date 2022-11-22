@@ -53,14 +53,14 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
      * @return The [PrivateKey]
      */
     @Throws(IOException::class, UnrecoverableKeyException::class)
-    fun authenticate(context: Context, pin: CharArray): PrivateKey {
+    fun getPrivateKey(context: Context, pin: CharArray): PrivateKey? {
         val keystore = KeyStore.getInstance(keyStoreRepository.getKeystoreType())
         keyStoreRepository.getInputStream(context, cryptoKey.keyAlias).use {
-            keystore.load(it, null);
+            keystore.load(it, null)
         }
-        val entry = keystore.getEntry(cryptoKey.keyAlias,
-            KeyStore.PasswordProtection(pin)) as KeyStore.PrivateKeyEntry
-        return entry.privateKey
+        val entry = keystore.takeIf { it.isKeyEntry(cryptoKey.keyAlias) }?.getEntry(cryptoKey.keyAlias,
+            KeyStore.PasswordProtection(pin)) as? KeyStore.PrivateKeyEntry
+        return entry?.privateKey
     }
 
     /**

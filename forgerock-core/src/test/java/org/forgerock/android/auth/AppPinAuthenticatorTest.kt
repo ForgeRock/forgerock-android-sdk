@@ -50,19 +50,19 @@ class AppPinAuthenticatorTest {
     @Test
     fun testSuccessAuthenticate() {
         appPinAuthenticator.generateKeys(context, "1234".toCharArray())
-        val privateKey = appPinAuthenticator.authenticate(context, "1234".toCharArray())
+        val privateKey = appPinAuthenticator.getPrivateKey(context, "1234".toCharArray())
         assertThat(privateKey).isNotNull
     }
 
     @Test(expected = UnrecoverableKeyException::class)
     fun testInvalidPin() {
         appPinAuthenticator.generateKeys(context, "1234".toCharArray())
-        appPinAuthenticator.authenticate(context, "invalid".toCharArray())
+        appPinAuthenticator.getPrivateKey(context, "invalid".toCharArray())
     }
 
     @Test(expected = IOException::class)
     fun testNoKeys() {
-        appPinAuthenticator.authenticate(context, "invalid".toCharArray())
+        appPinAuthenticator.getPrivateKey(context, "invalid".toCharArray())
     }
 
     @Test

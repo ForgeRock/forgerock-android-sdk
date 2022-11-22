@@ -11,12 +11,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.assertj.core.api.Assertions.assertThat
+import org.forgerock.android.auth.AppPinAuthenticator
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.InitProvider
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.io.File
@@ -86,6 +88,20 @@ class ApplicationPinDeviceAuthenticatorTest {
                 assertThat(it).isEqualTo(Success(keyPair.privateKey))
                 assertThat(authenticator.pinRef.get()).isNull()
             }
+        }
+    }
+
+
+    // Its hard to test this scenario without mocking, the keystore has to return null value to test this case
+    @Test
+    fun testUnRegisterWhenPrivateKeyIsNull() {
+        val authenticator: ApplicationPinDeviceAuthenticator = getApplicationPinDeviceAuthenticator()
+        val mockAppPinAuthenticator = mock<AppPinAuthenticator>()
+        whenever(mockAppPinAuthenticator.getPrivateKey(any(), any())).thenReturn(null)
+        authenticator.appPinAuthenticator = mockAppPinAuthenticator
+        authenticator.pinRef.set("1234".toCharArray())
+        authenticator.authenticate(context, 100) {
+            assertThat(it).isEqualTo(UnRegister())
         }
     }
 

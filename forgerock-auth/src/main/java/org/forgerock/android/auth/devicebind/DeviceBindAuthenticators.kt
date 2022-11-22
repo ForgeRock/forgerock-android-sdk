@@ -136,7 +136,7 @@ fun DeviceAuthenticator.initialize(userId: String,
 
 data class KeyPair(val publicKey: RSAPublicKey, val privateKey: PrivateKey, var keyAlias: String)
 
-abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
+abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
 
     @VisibleForTesting
     internal var isApi30OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
@@ -156,9 +156,18 @@ abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
      * @param timeout Timeout for biometric prompt
      * @param statusResult Listener for receiving Biometric changes
      */
+
     override fun authenticate(context: Context,
                               timeout: Int,
                               statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit) {
+
+        val privateKey = cryptoKey.getPrivateKey()
+
+        if(privateKey == null) {
+            statusResult(UnRegister())
+            return
+        }
+
         val startTime = Date().time
         val listener = object : AuthenticationCallback() {
 
@@ -185,7 +194,7 @@ abstract class BiometricAuthenticator() : CryptoAware, DeviceAuthenticator {
                 if (endTime > (timeout.toLong())) {
                     statusResult(Timeout())
                 } else {
-                    statusResult(Success(cryptoKey.getPrivateKey()))
+                    statusResult(Success(privateKey))
                 }
             }
 
@@ -238,7 +247,7 @@ open class BiometricOnly : BiometricAuthenticator() {
 /**
  * Settings for all the biometric authentication and device credential is configured
  */
-open class BiometricAndDeviceCredential() : BiometricAuthenticator() {
+open class BiometricAndDeviceCredential : BiometricAuthenticator() {
 
     /**
      * generate the public and private keypair
@@ -275,7 +284,7 @@ open class BiometricAndDeviceCredential() : BiometricAuthenticator() {
 /**
  * Settings for all the none authentication is configured
  */
-open class None() : CryptoAware, DeviceAuthenticator {
+open class None : CryptoAware, DeviceAuthenticator {
 
     private lateinit var cryptoKey: CryptoKey
 
@@ -303,7 +312,10 @@ open class None() : CryptoAware, DeviceAuthenticator {
     override fun authenticate(context: Context,
                               timeout: Int,
                               statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit) {
-        statusResult(Success(cryptoKey.getPrivateKey()))
+        cryptoKey.getPrivateKey()?.let {
+            statusResult(Success(it))
+        } ?: statusResult(UnRegister())
+
     }
 
     final override fun setKey(cryptoKey: CryptoKey) {

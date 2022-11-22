@@ -34,7 +34,8 @@ open class ApplicationPinDeviceAuthenticator(private val keyStore: KeyStoreRepos
 
     CryptoAware, DeviceAuthenticator, KeyStoreRepository {
 
-    private lateinit var appPinAuthenticator: AppPinAuthenticator
+    @VisibleForTesting
+    internal lateinit var appPinAuthenticator: AppPinAuthenticator
 
     private val pinSuffix = "_PIN"
 
@@ -105,7 +106,10 @@ open class ApplicationPinDeviceAuthenticator(private val keyStore: KeyStoreRepos
                               statusResult: (DeviceBindingStatus<PrivateKey>) -> Unit) {
         if (pin.isNotEmpty()) {
             try {
-                statusResult(Success(appPinAuthenticator.authenticate(context, pin)))
+                appPinAuthenticator.getPrivateKey(context, pin)?.let {
+                    statusResult(Success(it))
+                } ?: UnRegister()
+
             } catch (e: FileNotFoundException) {
                 statusResult(UnRegister())
                 return

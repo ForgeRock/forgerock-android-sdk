@@ -65,9 +65,9 @@ class CryptoKey(private var keyId: String) {
     /**
      * Get the private key from the Keypair for the given builder
      */
-    fun getPrivateKey(): PrivateKey {
+    fun getPrivateKey(): PrivateKey? {
         val keyStore: KeyStore = getKeyStore()
-        return keyStore.getKey(keyAlias, null) as PrivateKey
+        return keyStore.getKey(keyAlias, null) as? PrivateKey
     }
 
     /**

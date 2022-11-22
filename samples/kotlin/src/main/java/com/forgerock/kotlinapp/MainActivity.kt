@@ -247,6 +247,21 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
                         })
                     }
+                    "DeviceProfileCallback" -> {
+                        val deviceProfileCallback = node.getCallback(
+                            DeviceProfileCallback::class.java
+                        )
+
+                        deviceProfileCallback?.execute(activity,  object : FRListener<Void?> {
+                            override fun onException(e: Exception) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    }
                     "SelectIdPCallback" -> {
                         val idp: SelectIdPCallback = node.getCallback(
                             SelectIdPCallback::class.java
