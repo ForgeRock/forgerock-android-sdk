@@ -102,7 +102,7 @@ dependencies {
     compileOnly 'com.facebook.android:facebook-login:12.3.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
@@ -120,10 +120,10 @@ dependencies {
 
 
 
-    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'androidx.test.ext:junit:1.1.4'
     testImplementation 'androidx.test:runner:1.5.1'
-    testImplementation 'androidx.fragment:fragment-testing:1.4.1'
+    testImplementation 'androidx.fragment:fragment-testing:1.5.4'
     testImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
 
     testImplementation 'junit:junit:4.13.2'
@@ -131,7 +131,7 @@ dependencies {
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.18.1'
-    testImplementation "androidx.test.espresso:espresso-intents:3.4.0"
+    testImplementation "androidx.test.espresso:espresso-intents:3.5.0"
     testImplementation 'net.openid:appauth:0.7.1'
     testImplementation 'com.google.android.gms:play-services-fido:18.1.0'
     testImplementation 'com.google.android.gms:play-services-auth:20.3.0'
@@ -148,8 +148,8 @@ dependencies {
 
     testImplementation 'org.mockito:mockito-core:4.0.0'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
