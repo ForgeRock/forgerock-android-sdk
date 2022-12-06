@@ -13,6 +13,7 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.Logger.Companion.debug
@@ -55,7 +56,7 @@ class BiometricAuth @JvmOverloads constructor(
      * Return the Biometric Authentication listener used to return authentication result.
      * @return the Biometric Authentication listener.
      */
-    var biometricAuthListener: BiometricAuthCompletionHandler? = null,
+    var biometricAuthListener: AuthenticationCallback? = null,
 
     /**
      * The description to be displayed on the prompt.
@@ -84,7 +85,7 @@ class BiometricAuth @JvmOverloads constructor(
 
     private fun handleError(logMessage: String, biometricErrorMessage: String, errorType: Int) {
         debug(TAG, logMessage)
-        biometricAuthListener?.onError(
+        biometricAuthListener?.onAuthenticationError(
             errorType, biometricErrorMessage)
     }
 
@@ -94,7 +95,7 @@ class BiometricAuth @JvmOverloads constructor(
         } else {
             handleError("allowDeviceCredentials is set to false, but no biometric " +
                     "hardware found or enrolled." ,"It requires " +
-                    "biometric authentication. No biometric hardware found or enrolled.", ERROR_NO_BIOMETRICS)
+                    "biometric authentication. No biometric hardware found or enrolled.", BiometricPrompt.ERROR_NO_BIOMETRICS)
         }
     }
 
@@ -127,7 +128,7 @@ class BiometricAuth @JvmOverloads constructor(
             handleError("This device does not support required security features." +
                     " No Biometric, device PIN, pattern, or password registered." ,"This device does " +
                     "not support required security features. No Biometric, device PIN, pattern, " +
-                    "or password registered.", ERROR_NO_DEVICE_CREDENTIAL)
+                    "or password registered.", BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL)
         }
     }
 
@@ -161,29 +162,12 @@ class BiometricAuth @JvmOverloads constructor(
 
     private fun initBiometricPrompt(): BiometricPrompt {
         val executor = ContextCompat.getMainExecutor(activity)
-        val biometricPrompt = BiometricPrompt(
-            activity, executor, object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(
-                    errorCode: Int,
-                    errString: CharSequence
-                ) {
-                    debug(TAG, "Authentication failed. errCode is %s", errorCode)
-                    biometricAuthListener?.onError(errorCode, errString.toString())
-                }
+        val biometricPrompt = biometricAuthListener?.let {
+            BiometricPrompt(activity, executor, it)
+        } ?: kotlin.run {
+            throw IllegalStateException("AuthenticationCallback is not set.")
+        }
 
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
-                    debug(TAG, "Authentication was successful")
-                    biometricAuthListener?.onSuccess(result)
-                }
-
-                override fun onAuthenticationFailed() {
-                    // This is usually called when a biometric (e.g. fingerprint, face, etc.) is
-                    // presented but not recognized as belonging to the user.
-                    debug(TAG, "Biometric authentication failed for unknown reason.")
-                }
-            })
         val builder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title ?: "Biometric Authentication for login")
             .setSubtitle(subtitle ?: "Log in using your biometric credential")
@@ -220,7 +204,9 @@ class BiometricAuth @JvmOverloads constructor(
     private fun initBiometricAuthentication() {
         val biometricPrompt = initBiometricPrompt()
         promptInfo?.let {
-            biometricPrompt.authenticate(it)
+            activity.runOnUiThread() {
+                biometricPrompt.authenticate(it)
+            }
         }
     }
 
@@ -229,8 +215,6 @@ class BiometricAuth @JvmOverloads constructor(
     }
 
     companion object {
-        const val ERROR_NO_BIOMETRICS = -1
-        const val ERROR_NO_DEVICE_CREDENTIAL = -2
         private val TAG = BiometricAuth::class.java.simpleName
     }
 

@@ -6,6 +6,9 @@
  */
 package org.forgerock.android.auth.callback;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -40,8 +43,9 @@ public class CustomDeviceSigningVerifierCallback extends DeviceSigningVerifierCa
         this.expSeconds = expSeconds;
     }
 
+    @NonNull
     @Override
-    protected Date getExpiration() {
+    public Date getExpiration(@Nullable Integer timeout) {
         Calendar date = Calendar.getInstance();
         date.add(Calendar.SECOND, this.expSeconds);
         return date.getTime();
@@ -67,7 +71,7 @@ public class CustomDeviceSigningVerifierCallback extends DeviceSigningVerifierCa
         JWTClaimsSet payload = new JWTClaimsSet.Builder()
                 .subject(sub)
                 .claim("challenge", challenge)
-                .expirationTime(getExpiration())
+                .expirationTime(getExpiration(null))
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(header, payload);

@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
@@ -1019,8 +1020,11 @@ public class FRUserMockTest extends BaseTest {
     @Test
     public void testRequestInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
 
+        //Total e request will be intercepted
+        CountDownLatch countDownLatch = new CountDownLatch(8);
         final HashMap<String, Pair<Action, Integer>> result = new HashMap<>();
         RequestInterceptorRegistry.getInstance().register(request -> {
+            countDownLatch.countDown();
             String action = ((Action) request.tag()).getType();
             Pair<Action, Integer> pair = result.get(action);
             if (pair == null) {
@@ -1042,6 +1046,7 @@ public class FRUserMockTest extends BaseTest {
 
 
         FRUser.getCurrentUser().logout();
+        countDownLatch.await();
 
         Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("tree")).isEqualTo("Test");
         Assertions.assertThat(result.get("START_AUTHENTICATE").first.getPayload().getString("type")).isEqualTo("service");

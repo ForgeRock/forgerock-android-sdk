@@ -7,6 +7,10 @@
 package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.AuthenticationCallback
+import androidx.biometric.BiometricPrompt.AuthenticationResult
+import androidx.biometric.BiometricPrompt.ERROR_TIMEOUT
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
@@ -115,22 +119,25 @@ class BiometricBindingHandlerTests {
     @Test
     fun testListener() {
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        val result: (DeviceBindingStatus) -> Unit = {}
-        testObject.authenticate(60, result)
+        val result = object : AuthenticationCallback() {}
+        testObject.authenticate(result)
         verify(biometricAuth).biometricAuthListener = testObject.biometricListener
         verify(biometricAuth).authenticate()
     }
 
     @Test
     fun testBiometricListenerForSuccess() {
+        val authenticationResult = mock<AuthenticationResult>()
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
 
-        testObject.authenticate(timeout = 60) {
-            assertEquals(it, Success)
-            latch.countDown()
+        val result = object : AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: AuthenticationResult) {
+                latch.countDown()
+            }
         }
-        testObject.biometricListener?.onSuccess(null)
+        testObject.authenticate(result)
+        testObject.biometricListener?.onAuthenticationSucceeded(authenticationResult)
         latch.await()
     }
 
@@ -139,12 +146,14 @@ class BiometricBindingHandlerTests {
     fun testBiometricListenerForTimeoutFailure() {
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        testObject.authenticate(timeout = -100) {
-            assertTrue(it is Timeout)
-            assertEquals("Biometric Timeout", it.message)
-            latch.countDown()
+        val result = object : AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                assertEquals(ERROR_TIMEOUT, errorCode)
+                latch.countDown()
+            }
         }
-        testObject.biometricListener?.onSuccess(null)
+        testObject.authenticate(result)
+        testObject.biometricListener?.onAuthenticationError(ERROR_TIMEOUT, "Timeout")
         latch.await()
     }
 
@@ -152,12 +161,15 @@ class BiometricBindingHandlerTests {
     fun testBiometricListenerForWrongFingerPrintFailure() {
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        testObject.authenticate(timeout = 60) {
-            assertTrue(it is Abort)
-            assertEquals("invalid credential", it.message)
-            latch.countDown()
+
+        val result = object : AuthenticationCallback() {
+            override fun onAuthenticationFailed() {
+                latch.countDown()
+            }
         }
-        testObject.biometricListener?.onError(1, "invalid credential")
+        testObject.authenticate(result)
+        testObject.biometricListener?.onAuthenticationFailed()
         latch.await()
+
     }
 }

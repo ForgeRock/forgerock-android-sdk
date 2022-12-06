@@ -18,8 +18,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import net.openid.appauth.AuthorizationRequest
-import org.forgerock.android.auth.*
-import org.forgerock.android.auth.callback.*
+import org.forgerock.android.auth.AccessToken
+import org.forgerock.android.auth.FRListener
+import org.forgerock.android.auth.FRUser
+import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.Node
+import org.forgerock.android.auth.NodeListener
+import org.forgerock.android.auth.callback.DeviceBindingCallback
+import org.forgerock.android.auth.callback.DeviceProfileCallback
+import org.forgerock.android.auth.callback.DeviceSigningVerifierCallback
+import org.forgerock.android.auth.callback.IdPCallback
+import org.forgerock.android.auth.callback.SelectIdPCallback
+import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
+import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
+import org.forgerock.android.auth.devicebind.DeviceBindingException
+import org.forgerock.android.auth.devicebind.UnRegister
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -27,7 +40,7 @@ interface ActivityListener {
     fun logout()
 }
 
-class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener {
+class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener {
 
     private val status: TextView by lazy { findViewById(R.id.status) }
     private val loginButton: Button by lazy { findViewById(R.id.login) }
@@ -41,10 +54,9 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         setContentView(R.layout.activity_main)
         updateStatus()
         loginButton.setOnClickListener {
-            if(BuildConfig.embeddedLogin) {
+            if (BuildConfig.embeddedLogin) {
                 FRUser.login(applicationContext, this)
-            }
-            else {
+            } else {
                 centralizedLogin()
             }
         }
@@ -59,15 +71,14 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
 
-        if(FRUser.getCurrentUser() == null) {
+        if (FRUser.getCurrentUser() == null) {
             updateStatus(true)
         } else {
             try {
                 val currentUser = FRUser.getCurrentUser()
                 updateStatus(false)
                 launchUserInfoFragment(currentUser.accessToken, currentUser)
-            }
-            catch(e: AuthenticationRequiredException) {
+            } catch (e: AuthenticationRequiredException) {
                 updateStatus(true)
             }
 
@@ -81,17 +92,16 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                 r.setLoginHint("demo@example.com")
                 // Request that the user re-authenticates:
                 r.setPrompt("login")
-            }
-            .customTabsIntent { t: CustomTabsIntent.Builder ->
+            }.customTabsIntent { t: CustomTabsIntent.Builder ->
                 // Customize the browser:
                 t.setShowTitle(true)
                 t.setToolbarColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
-            }.done()
-            .login(this, object : FRListener<FRUser?> {
+            }.done().login(this, object : FRListener<FRUser?> {
                 override fun onSuccess(result: FRUser?) {
                     Logger.debug(classNameTag, result?.accessToken?.value)
                     getUserInfo(result)
                 }
+
                 override fun onException(e: java.lang.Exception) {
                     Logger.error(classNameTag, e.message)
                 }
@@ -101,14 +111,14 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
     private fun updateStatus(showLogin: Boolean = false) {
         runOnUiThread {
-            (if(showLogin) View.VISIBLE else View.GONE).also {
+            (if (showLogin) View.VISIBLE else View.GONE).also {
                 loginButton.visibility = it
                 logoutButton.visibility = it
                 status.visibility = it
             }
             loginButton.apply { this.isEnabled = showLogin == true }
             logoutButton.apply { this.isEnabled = showLogin == false }
-            status.text = if(showLogin) "User is not authenticated" else "User is authenticated"
+            status.text = if (showLogin) "User is not authenticated" else "User is authenticated"
         }
     }
 
@@ -123,6 +133,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                     launchUserInfoFragment(token, result)
                 }
             }
+
             override fun onException(e: java.lang.Exception) {
 
             }
@@ -131,15 +142,12 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
 
     private fun launchUserInfoFragment(token: AccessToken, result: FRUser?) {
-        userInfoFragment = UserInfoFragment.newInstance(
-            result?.accessToken?.value,
+        userInfoFragment = UserInfoFragment.newInstance(result?.accessToken?.value,
             token.refreshToken,
             token.idToken,
-            this@MainActivity
-        )
+            this@MainActivity)
         userInfoFragment?.let {
-            supportFragmentManager.beginTransaction()
-                .add(R.id.container, it).commit()
+            supportFragmentManager.beginTransaction().add(R.id.container, it).commit()
         }
     }
 
@@ -172,12 +180,11 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         nodeDialog?.dismiss()
         node?.takeUnless { it.callbacks.isEmpty() }?.let {
             it.callbacks.forEach { typer ->
-                when(typer.type) {
+                when (typer.type) {
                     "DeviceBindingCallback" -> {
                         runOnUiThread {
-                            val deviceBindingCallback = node.getCallback(
-                                DeviceBindingCallback::class.java
-                            )
+                            val deviceBindingCallback =
+                                node.getCallback(DeviceBindingCallback::class.java)
                             deviceBindingCallback.bind(activity, object : FRListener<Void> {
                                 override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
@@ -191,9 +198,8 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                     }
                     "DeviceSigningVerifierCallback" -> {
                         runOnUiThread {
-                            val deviceBindingCallback = node.getCallback(
-                                DeviceSigningVerifierCallback::class.java
-                            )
+                            val deviceBindingCallback =
+                                node.getCallback(DeviceSigningVerifierCallback::class.java)
                             deviceBindingCallback.sign(activity, object : FRListener<Void> {
                                 override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
@@ -206,9 +212,8 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                         }
                     }
                     "WebAuthnAuthenticationCallback" -> {
-                        val webAuthCallback = node.getCallback(
-                            WebAuthnAuthenticationCallback::class.java
-                        )
+                        val webAuthCallback =
+                            node.getCallback(WebAuthnAuthenticationCallback::class.java)
                         webAuthCallback?.authenticate(node, null, object : FRListener<Void?> {
                             override fun onException(e: Exception) {
                                 node.next(activity, activity)
@@ -220,9 +225,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                         })
                     }
                     "WebAuthnRegistrationCallback" -> {
-                        val callback = node.getCallback(
-                            WebAuthnRegistrationCallback::class.java
-                        )
+                        val callback = node.getCallback(WebAuthnRegistrationCallback::class.java)
                         callback?.register(node, object : FRListener<Void?> {
                             override fun onSuccess(result: Void?) {
                                 node.next(activity, activity)
@@ -234,9 +237,7 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
                         })
                     }
                     "IdPCallback" -> {
-                        val idp: IdPCallback = node.getCallback(
-                            IdPCallback::class.java
-                        )
+                        val idp: IdPCallback = node.getCallback(IdPCallback::class.java)
                         idp.signIn(null, object : FRListener<Void?> {
                             override fun onSuccess(result: Void?) {
                                 node.next(activity, activity)
@@ -247,27 +248,42 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
 
                         })
                     }
+                    "DeviceProfileCallback" -> {
+                        val deviceProfileCallback =
+                            node.getCallback(DeviceProfileCallback::class.java)
+
+                        deviceProfileCallback?.execute(activity, object : FRListener<Void?> {
+                            override fun onException(e: Exception) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+                        })
+                    }
                     "SelectIdPCallback" -> {
-                        val idp: SelectIdPCallback = node.getCallback(
-                            SelectIdPCallback::class.java
-                        )
+                        val idp: SelectIdPCallback = node.getCallback(SelectIdPCallback::class.java)
                         idp.setValue("google_andy")
                         node.next(activity, activity)
                     }
                     "NameCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
-                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                        nodeDialog?.show(supportFragmentManager,
+                            NodeDialogFragment::class.java.name)
                     }
                     "PasswordCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
-                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                        nodeDialog?.show(supportFragmentManager,
+                            NodeDialogFragment::class.java.name)
                     }
                     "ChoiceCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
-                        nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
+                        nodeDialog?.show(supportFragmentManager,
+                            NodeDialogFragment::class.java.name)
                     }
                 }
             }
@@ -282,5 +298,4 @@ class MainActivity: AppCompatActivity(), NodeListener<FRUser>, ActivityListener 
         }
         updateStatus(true)
     }
-
 }

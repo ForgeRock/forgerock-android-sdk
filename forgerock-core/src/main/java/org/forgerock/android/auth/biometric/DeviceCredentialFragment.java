@@ -9,18 +9,18 @@ package org.forgerock.android.auth.biometric;
 
 import static android.app.Activity.RESULT_OK;
 
-import static org.forgerock.android.auth.biometric.BiometricAuth.ERROR_NO_DEVICE_CREDENTIAL;
-
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.core.R;
 
 /**
  * Headless Fragment to receive result from KeyguardManager library.
@@ -56,10 +56,10 @@ public class DeviceCredentialFragment extends Fragment {
 
         String title = this.biometricAuth.getTitle() != null
                 ? this.biometricAuth.getTitle()
-                : "Device Credentials for login";
+                : getString(R.string.biometric_title);
         String reason = this.biometricAuth.getSubtitle() != null
                 ? this.biometricAuth.getSubtitle()
-                : "Device credentials required to approve Push authentication request";
+                : getString(R.string.biometric_subtitle);
 
         Intent authIntent = biometricAuth.getKeyguardManager()
                 .createConfirmDeviceCredentialIntent(title, reason);
@@ -74,12 +74,12 @@ public class DeviceCredentialFragment extends Fragment {
         }
         if (requestCode == LOCK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                this.biometricAuth.getBiometricAuthListener().onSuccess(null);
+                this.biometricAuth.getBiometricAuthListener().onAuthenticationSucceeded(null);
             } else {
                 Logger.debug(TAG, "Fail to approve using device Credentials. requestCode " +
                         "is %s", resultCode);
-                this.biometricAuth.getBiometricAuthListener().onError(
-                        ERROR_NO_DEVICE_CREDENTIAL,
+                this.biometricAuth.getBiometricAuthListener().onAuthenticationError(
+                        BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                         "Fail to approve using device Credentials.");
             }
         }

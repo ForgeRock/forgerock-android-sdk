@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import static androidx.annotation.RestrictTo.Scope.LIBRARY;
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 

@@ -1,29 +1,65 @@
+/*
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth.devicebind
 
+import android.content.DialogInterface
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.OperationCanceledException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
 import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
-import org.forgerock.android.auth.R
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.TimeoutCancellationException
+import org.forgerock.android.auth.databinding.FragmentUserDeviceBindBinding
+import org.forgerock.android.auth.exception.IgnorableException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * internal Fragment to display the list of users keys
  */
-class DeviceBindFragment(private val userKeyList: List<UserKey>): DialogFragment() {
 
-    companion object {
-        const val TAG: String = "DeviceBindFragment"
+private const val ARG_USER_LIST = "userKeys"
+
+class DeviceBindFragment : DialogFragment() {
+
+    private var userKeys: UserKeys? = null
+    private var _binding: FragmentUserDeviceBindBinding? = null
+    private val binding get() = _binding!!
+
+    var continuation: CancellableContinuation<UserKey>? = null
+        set(value) {
+            field = value
+            field?.invokeOnCancellation {
+                if (it is TimeoutCancellationException) {
+                    if (this.isVisible) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            userKeys = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                it.getParcelable(ARG_USER_LIST, UserKeys::class.java)
+            } else {
+                it.getParcelable(ARG_USER_LIST)
+            }
+        }
     }
-
-    var getUserKey: ((UserKey) -> (Unit))? = null
 
     override fun onResume() {
         super.onResume()
@@ -33,33 +69,63 @@ class DeviceBindFragment(private val userKeyList: List<UserKey>): DialogFragment
         dialog?.window?.attributes = params as WindowManager.LayoutParams
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_user_device_bind, container, false)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
+        _binding = FragmentUserDeviceBindBinding.inflate(layoutInflater, container, false)
+        val view = binding.root;
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            val arrayAdapter = ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeyList.map { it.userName })
-            val keyListView = view.findViewById<ListView>(R.id.key_list)
-            val submitButton = view.findViewById<Button>(R.id.submit)
-            var selectedView: View? = null
-            keyListView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+        val arrayAdapter = userKeys?.items?.let {
+            ArrayAdapter(view.context, android.R.layout.simple_list_item_1, it.map { it.userName })
+        }
+        var selectedView: View? = null
+        binding.keyList.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
                 selectedView = view
                 selectedView?.tag = position
-                keyListView.children.iterator().forEach { it.setBackgroundColor(Color.WHITE) }
+                binding.keyList.children.iterator().forEach { it.setBackgroundColor(Color.WHITE) }
                 view.setBackgroundColor(Color.LTGRAY)
-                arrayAdapter.notifyDataSetChanged()
+                arrayAdapter?.notifyDataSetChanged()
             }
-            keyListView.adapter = arrayAdapter
-            submitButton.setOnClickListener {
-                selectedView?.let {
-                    getUserKey?.invoke(userKeyList[it.tag as Int])
-                }
+        binding.keyList.adapter = arrayAdapter
+        binding.submit.setOnClickListener {
+            selectedView?.let {
+                continuation?.resume(userKeys!!.items!![it.tag as Int])
                 this@DeviceBindFragment.dismiss()
             }
+        }
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        continuation?.resumeWithException(OperationCanceledException())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //throw exception to end the coroutine scope
+        continuation?.takeUnless { it.isCompleted }?.cancel(IgnorableException())
+    }
+
+    companion object {
+        fun newInstance(userKeyList: UserKeys,
+                        continuation: CancellableContinuation<UserKey>): DeviceBindFragment =
+            DeviceBindFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_USER_LIST, userKeyList)
+                }
+                this.continuation = continuation
+            }
+
+        const val TAG: String = "DeviceBindFragment"
     }
 }

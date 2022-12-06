@@ -59,6 +59,13 @@ apply from: '../config/logger.gradle'
 apply from: '../config/javadoc.gradle'
 apply from: '../config/publish.gradle'
 
+configurations.all {
+    //Due to this https://github.com/powermock/powermock/issues/1125, we have to keep using an
+    //older version of mockito until mockito release a fix
+    resolutionStrategy {
+        force 'org.mockito:mockito-core:3.12.4'
+    }
+}
 /**
  * Dependencies
  */
@@ -73,24 +80,36 @@ dependencies {
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
 
-    testImplementation 'androidx.test:core:1.4.0'
-    testImplementation 'androidx.test:runner:1.4.0'
+    //Application Pin
+    compileOnly 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    testImplementation 'androidx.test:core:1.5.0'
+    testImplementation 'androidx.test:runner:1.5.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    //Do not update to the latest library, Only 2.x compatible with Android M and below.
+    androidTestImplementation 'org.assertj:assertj-core:2.9.1'
 
-    testImplementation 'junit:junit:4.13'
-    testImplementation 'org.robolectric:robolectric:4.7.3'
+    //For Application Pin
+    androidTestImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
+    androidTestImplementation 'androidx.security:security-crypto:1.0.0'
+
+    testImplementation 'androidx.test.ext:junit:1.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
-    testImplementation 'org.assertj:assertj-core:3.16.1'
+    testImplementation 'org.assertj:assertj-core:3.18.1'
 
-    testImplementation 'org.mockito:mockito-core:3.4.6'
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
+    testImplementation 'org.mockito:mockito-core:4.6.1'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"

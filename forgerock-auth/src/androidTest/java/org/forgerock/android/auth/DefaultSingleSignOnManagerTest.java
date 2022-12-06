@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,11 +14,13 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 
 import androidx.test.core.app.ApplicationProvider;
 
 import org.assertj.core.api.Assertions;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -140,8 +142,8 @@ public class DefaultSingleSignOnManagerTest extends AndroidBaseTest {
         Assertions.assertThat(accounts).hasSize(1);
         Assertions.assertThat(accounts[0].name).isEqualTo("Dummy");
         //cleanup
-        AccountManagerFuture<Boolean> future = accountManager.removeAccount(accounts[0], null, null);
-        future.getResult();
+        boolean isAccountRemoved = accountManager.removeAccountExplicitly(accounts[0]);
+        Assert.assertTrue(isAccountRemoved);
 
     }
 

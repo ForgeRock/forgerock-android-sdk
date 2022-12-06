@@ -50,7 +50,17 @@
     <!-- WebAuthn -->
     <string name="select_user">Select User</string>
     <string name="submit">Submit</string>
+
+    <!-- Device Binding -->
+    <string name="binding_title">Enter Application PIN</string>
+    <string name="binding_subtitle">Cryptography device binding</string>
+    <string name="binding_description">Please complete with application pin</string>
+    <string name="binding_pin">Pin</string>
+    <string name="binding_ok">OK</string>
+    <string name="binding_cancel">Cancel</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

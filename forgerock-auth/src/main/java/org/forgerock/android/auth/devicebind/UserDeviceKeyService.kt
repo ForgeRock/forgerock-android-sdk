@@ -91,3 +91,7 @@ data class UserKey(val userId: String,
                    val kid: String,
                    val authType: DeviceBindingAuthenticationType,
                    val keyAlias: String): Parcelable
+@Parcelize
+data class UserKeys(
+    val items: List<UserKey>?
+) : Parcelable
