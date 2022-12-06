@@ -17,6 +17,7 @@ import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.forgerock.android.auth.AndroidBaseTest;
@@ -75,6 +76,7 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testLocation() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
@@ -109,13 +111,11 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
 
         assertTrue(content.contains("identifier"));
 
-        LocationManager lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-
         int backgroundLocationPermissionApproved =
                 ActivityCompat.checkSelfPermission(context,
                         Manifest.permission.ACCESS_BACKGROUND_LOCATION);
 
-        if (!isEmulator() && backgroundLocationPermissionApproved >=0) {
+        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
             assertTrue(content.contains("location"));
         }
     }

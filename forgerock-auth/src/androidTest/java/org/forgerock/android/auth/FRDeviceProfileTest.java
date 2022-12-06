@@ -15,8 +15,10 @@ import android.Manifest;
 import android.content.Context;
 import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.forgerock.android.auth.collector.BluetoothCollector;
@@ -48,6 +50,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
 
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
@@ -100,7 +103,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
                 ActivityCompat.checkSelfPermission(context,
                         Manifest.permission.ACCESS_BACKGROUND_LOCATION);
 
-        if (!isEmulator() && backgroundLocationPermissionApproved >=0) {
+        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
             result.getJSONObject("location").getDouble("latitude");
             result.getJSONObject("location").getDouble("longitude");
         }
