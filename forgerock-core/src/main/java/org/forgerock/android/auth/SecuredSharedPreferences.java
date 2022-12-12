@@ -214,7 +214,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (EncryptionException e) {
             //Failed to decrypt the data, reset the encryptor
-            Logger.warn(TAG, "Failed to decrypt the data." );
+            Logger.warn(TAG, "Failed to decrypt the data.");
             edit().clear().commit();
             return null;
         }
@@ -315,8 +315,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             return this;
         }
 
-        @Override
-        public boolean commit() {
+        private void preClear() {
             if (clearRequest.getAndSet(false)) {
                 for (String key : securedSharedPreferences.keys()) {
                     if (!keysChanged.contains(key)
@@ -325,6 +324,11 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
                     }
                 }
             }
+        }
+
+        @Override
+        public boolean commit() {
+            preClear();
             try {
                 return editor.commit();
             } finally {
@@ -335,8 +339,10 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
 
         @Override
         public void apply() {
+            preClear();
             editor.apply();
             notifyListeners();
+            keysChanged.clear();
         }
 
         private void put(@lombok.NonNull String key, Object value, int type) {
@@ -381,7 +387,6 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             editor.putString(key, v);
         }
 
-
         private void notifyListeners() {
             for (OnSharedPreferenceChangeListener listener :
                     securedSharedPreferences.listeners) {
@@ -390,10 +395,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
                 }
             }
         }
-
     }
-
-
 }
 
 

@@ -1,3 +1,8 @@
+##[4.0.0]
+#### Added
+- Upgrade Google Fido Client to support PassKey [SDKS-2243]
+
+
 ## [3.4.0]
 #### Added
 - Dynamic SDK Configuration [SDKS-1759]
