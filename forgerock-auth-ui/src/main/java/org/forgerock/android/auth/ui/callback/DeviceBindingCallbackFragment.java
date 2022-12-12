@@ -36,8 +36,7 @@ public class DeviceBindingCallbackFragment extends CallbackFragment<DeviceBindin
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_device_binding_callback, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_device_binding_callback, container, false);
     }
 
     @Override
@@ -47,17 +46,17 @@ public class DeviceBindingCallbackFragment extends CallbackFragment<DeviceBindin
     }
 
     private void proceed() {
-        callback.bind(this.getContext(), new FRListener<Void>() {
+        callback.bind(requireContext(), new FRListener<Void>() {
             @Override
             public void onSuccess(Void result) {
                 if (node.getCallbacks().size() == 1) { //auto submit if there is one node
-                    getActivity().runOnUiThread(() -> next());
+                    requireActivity().runOnUiThread(() -> next());
                 }
             }
             @Override
             public void onException(Exception e) {
                 Log.e(TAG, e.getMessage());
-                getActivity().runOnUiThread(() -> next());
+                requireActivity().runOnUiThread(() -> next());
             }
         });
     }

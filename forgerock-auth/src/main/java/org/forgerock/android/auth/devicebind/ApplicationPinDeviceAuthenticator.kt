@@ -19,6 +19,7 @@ import org.forgerock.android.auth.EncryptedFileKeyStore
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.KeyStoreRepository
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
@@ -39,7 +40,7 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
 
     @VisibleForTesting
     internal lateinit var appPinAuthenticator: AppPinAuthenticator
-    internal lateinit var keyStore: KeyStoreRepository
+    private lateinit var keyStore: KeyStoreRepository
 
     private val pinSuffix = "_PIN"
 
@@ -63,7 +64,7 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
         return KeyPair(keyPair.public as RSAPublicKey, keyPair.private, alias)
     }
 
-    override suspend fun authenticate(context: Context): DeviceBindingStatus<PrivateKey> {
+    override suspend fun authenticate(context: Context): DeviceBindingStatus {
 
         if (!appPinAuthenticator.exists(context)) {
             return UnRegister()
@@ -111,7 +112,7 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
     /**
      * Retrieve the Keystore Type, default to [KeyStore.getDefaultType]
      */
-    private fun getPrivateKey(context: Context, pin: CharArray): DeviceBindingStatus<PrivateKey> {
+    private fun getPrivateKey(context: Context, pin: CharArray): DeviceBindingStatus {
         return try {
             appPinAuthenticator.getPrivateKey(context, pin)?.let { Success(it) } ?: UnRegister()
         } catch (e: FileNotFoundException) {
