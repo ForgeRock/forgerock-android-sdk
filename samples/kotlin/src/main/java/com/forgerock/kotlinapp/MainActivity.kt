@@ -31,8 +31,6 @@ import org.forgerock.android.auth.callback.IdPCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
-import org.forgerock.android.auth.devicebind.DeviceBindingException
-import org.forgerock.android.auth.devicebind.UnRegister
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 

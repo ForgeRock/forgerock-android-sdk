@@ -17,11 +17,12 @@ import org.forgerock.android.auth.DeviceIdentifier
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.devicebind.Abort
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.BiometricAndDeviceCredential
 import org.forgerock.android.auth.devicebind.BiometricOnly
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.DeviceBindingStatus
 import org.forgerock.android.auth.devicebind.DeviceRepository
@@ -30,8 +31,6 @@ import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
 import org.forgerock.android.auth.devicebind.Success
-import org.forgerock.android.auth.devicebind.Timeout
-import org.forgerock.android.auth.devicebind.Unsupported
 import org.forgerock.android.auth.devicebind.initialize
 import org.forgerock.android.auth.exception.IgnorableException
 import org.json.JSONObject
@@ -165,7 +164,6 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param deviceAuthenticator Interface to find the Authentication Type
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
-    @OptIn(ExperimentalTime::class)
     @JvmOverloads
     internal fun execute(context: Context,
                          listener: FRListener<Void>,
@@ -188,27 +186,29 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
         scope.launch {
             try {
                 val keyPair: KeyPair
-                val status: DeviceBindingStatus<Any>
+                val status: DeviceBindingStatus
                 withTimeout(getDuration(timeout)) {
                     keyPair = deviceAuthenticator.generateKeys(context);
                     status = deviceAuthenticator.authenticate(context)
                 }
-                if (status is Success) {
-                    val kid = encryptedPreference.persist(userId,
-                        userName,
-                        keyPair.keyAlias,
-                        deviceBindingAuthenticationType)
-                    val jws = deviceAuthenticator.sign(keyPair,
-                        kid,
-                        userId,
-                        challenge,
-                        getExpiration(timeout))
-                    setJws(jws)
-                    setDeviceId(deviceId)
-                    Listener.onSuccess(listener, null)
-                } else {
-                    // All the biometric exception is handled here , it could be Abort or timeout
-                    handleException(status, e = null, listener = listener)
+                when (status) {
+                    is Success -> {
+                        val kid = encryptedPreference.persist(userId,
+                            userName,
+                            keyPair.keyAlias,
+                            deviceBindingAuthenticationType)
+                        val jws = deviceAuthenticator.sign(keyPair,
+                            kid,
+                            userId,
+                            challenge,
+                            getExpiration(timeout))
+                        setJws(jws)
+                        setDeviceId(deviceId)
+                        Listener.onSuccess(listener, null)
+                    }
+                    is DeviceBindingErrorStatus -> {
+                        handleException(status, e = null, listener = listener)
+                    }
                 }
             } catch (e: OperationCanceledException) {
                 handleException(Abort(), e, listener)
@@ -243,7 +243,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
      * @param listener The Listener to listen for the result
      */
-    protected open fun handleException(status: DeviceBindingStatus<Any>,
+    protected open fun handleException(status: DeviceBindingErrorStatus,
                                        e: Throwable?,
                                        listener: FRListener<Void>) {
 

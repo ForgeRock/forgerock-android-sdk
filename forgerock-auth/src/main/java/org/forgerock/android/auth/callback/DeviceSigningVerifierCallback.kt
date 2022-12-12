@@ -20,18 +20,15 @@ import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.devicebind.Abort
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
-import org.forgerock.android.auth.devicebind.DeviceBindingStatus
 import org.forgerock.android.auth.devicebind.NoKeysFound
 import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.devicebind.SingleKeyFound
 import org.forgerock.android.auth.devicebind.Success
-import org.forgerock.android.auth.devicebind.Timeout
-import org.forgerock.android.auth.devicebind.UnRegister
-import org.forgerock.android.auth.devicebind.Unsupported
 import org.forgerock.android.auth.devicebind.UserDeviceKeyService
 import org.forgerock.android.auth.devicebind.UserKey
 import org.forgerock.android.auth.devicebind.UserKeyService
@@ -153,16 +150,19 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
             return
         }
         val status = deviceAuthenticator.authenticate(context)
-        if (status is Success) {
-            val jws = deviceAuthenticator.sign(userKey,
-                status.privateKey,
-                challenge,
-                getExpiration(timeout))
-            setJws(jws)
-            Listener.onSuccess(listener, null)
-        } else {
-            // All the biometric exception is handled here , it could be Abort or timeout
-            handleException(status, e = null, listener = listener)
+        when(status) {
+            is Success -> {
+                val jws = deviceAuthenticator.sign(userKey,
+                    status.privateKey,
+                    challenge,
+                    getExpiration(timeout))
+                setJws(jws)
+                Listener.onSuccess(listener, null)
+            }
+            is DeviceBindingErrorStatus -> {
+                // All the biometric exception is handled here , it could be Abort or timeout
+                handleException(status, e = null, listener = listener)
+            }
         }
 
     }
@@ -243,7 +243,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param listener The Listener to listen for the result
      *
      */
-    protected open fun handleException(status: DeviceBindingStatus<Any>,
+    protected open fun handleException(status: DeviceBindingErrorStatus,
                                        e: Exception?,
                                        listener: FRListener<Void>) {
 

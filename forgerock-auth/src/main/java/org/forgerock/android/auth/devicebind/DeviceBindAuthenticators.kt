@@ -63,7 +63,7 @@ interface DeviceAuthenticator {
     /**
      * Authenticate the user to access the
      */
-    suspend fun authenticate(context: Context): DeviceBindingStatus<PrivateKey>
+    suspend fun authenticate(context: Context): DeviceBindingStatus
 
     /**
      * Set the Authentication Prompt
@@ -166,13 +166,13 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
      * @param timeout Timeout for biometric prompt
      * @param statusResult Listener for receiving Biometric changes
      */
-    override suspend fun authenticate(context: Context): DeviceBindingStatus<PrivateKey> =
+    override suspend fun authenticate(context: Context): DeviceBindingStatus =
         withContext(Dispatchers.Main) {
             suspendCoroutine { continuation ->
                 //The keys may be removed due to pin change
                 val privateKey = cryptoKey.getPrivateKey()
                 if (privateKey == null) {
-                    continuation.resume(UnRegister())
+                    continuation.resume(DeviceBindingErrorStatus.UnRegister())
                 } else {
                     val listener = object : AuthenticationCallback() {
 
@@ -180,26 +180,33 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                                                            errString: CharSequence) {
                             when (errorCode) {
                                 ERROR_CANCELED, ERROR_USER_CANCELED, ERROR_NEGATIVE_BUTTON -> continuation.resume(
-                                    Abort(errString.toString(), code = errorCode))
-                                ERROR_TIMEOUT -> continuation.resume(Timeout(errString.toString(),
+                                    DeviceBindingErrorStatus.Abort(errString.toString(),
+                                        code = errorCode))
+                                ERROR_TIMEOUT -> continuation.resume(DeviceBindingErrorStatus.Timeout(
+                                    errString.toString(),
                                     code = errorCode))
                                 ERROR_NO_BIOMETRICS, ERROR_NO_DEVICE_CREDENTIAL, ERROR_HW_NOT_PRESENT -> continuation.resume(
-                                    Unsupported(errString.toString(), code = errorCode))
-                                ERROR_VENDOR -> continuation.resume(Unsupported(errString.toString(),
+                                    DeviceBindingErrorStatus.Unsupported(errString.toString(),
+                                        code = errorCode))
+                                ERROR_VENDOR -> continuation.resume(DeviceBindingErrorStatus.Unsupported(
+                                    errString.toString(),
                                     code = errorCode))
                                 ERROR_LOCKOUT_PERMANENT, ERROR_LOCKOUT, ERROR_NO_SPACE, ERROR_HW_UNAVAILABLE, ERROR_UNABLE_TO_PROCESS -> continuation.resume(
-                                    UnAuthorize(errString.toString(), code = errorCode))
+                                    DeviceBindingErrorStatus.UnAuthorize(errString.toString(),
+                                        code = errorCode))
                                 else -> {
-                                    continuation.resume(Unknown(errString.toString(),
+                                    continuation.resume(DeviceBindingErrorStatus.Unknown(errString.toString(),
                                         code = errorCode))
                                 }
                             }
                         }
+
                         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                             continuation.resume(Success(privateKey))
                         }
+
                         override fun onAuthenticationFailed() {
-                            continuation.resume(UnAuthorize())
+                            continuation.resume(DeviceBindingErrorStatus.UnAuthorize())
                         }
                     }
                     biometricInterface.authenticate(listener)
@@ -307,10 +314,10 @@ open class None : CryptoAware, DeviceAuthenticator {
     /**
      * return success block for None type
      */
-    override suspend fun authenticate(context: Context): DeviceBindingStatus<PrivateKey> {
+    override suspend fun authenticate(context: Context): DeviceBindingStatus {
         cryptoKey.getPrivateKey()?.let {
             return Success(it)
-        } ?: return UnRegister()
+        } ?: return DeviceBindingErrorStatus.UnRegister()
     }
 
     final override fun setKey(cryptoKey: CryptoKey) {

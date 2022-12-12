@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.AppPinAuthenticator
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.InitProvider
-import org.forgerock.android.auth.KeyStoreRepository
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,9 +25,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
