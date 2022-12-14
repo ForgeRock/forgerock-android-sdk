@@ -68,6 +68,7 @@ class UserInfoFragment : Fragment() {
         val logout: Button = view.findViewById(R.id.logout)
         logout.setOnClickListener {
             listener?.logout()
+
         }
     }
 
@@ -91,5 +92,6 @@ class UserInfoFragment : Fragment() {
                     putString(ARG_PARAM3, param3)
                 }
             }
+        const val TAG: String = "UserInfoFragment"
     }
 }

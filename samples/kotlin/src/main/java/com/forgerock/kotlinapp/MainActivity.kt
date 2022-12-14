@@ -31,6 +31,7 @@ import org.forgerock.android.auth.callback.IdPCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
+import org.forgerock.android.auth.devicebind.DeviceBindFragment
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -44,8 +45,6 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
     private val loginButton: Button by lazy { findViewById(R.id.login) }
     private val logoutButton: Button by lazy { findViewById(R.id.logout) }
     private val classNameTag = MainActivity::class.java.name
-    private var userInfoFragment: UserInfoFragment? = null
-    private var nodeDialog: NodeDialogFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +64,9 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
 
     override fun onStart() {
         super.onStart()
-        userInfoFragment?.let {
+
+        val existing = supportFragmentManager.findFragmentByTag(UserInfoFragment.TAG) as? UserInfoFragment
+        existing?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
 
@@ -140,12 +141,12 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
 
 
     private fun launchUserInfoFragment(token: AccessToken, result: FRUser?) {
-        userInfoFragment = UserInfoFragment.newInstance(result?.accessToken?.value,
+        val userInfoFragment = UserInfoFragment.newInstance(result?.accessToken?.value,
             token.refreshToken,
             token.idToken,
             this@MainActivity)
-        userInfoFragment?.let {
-            supportFragmentManager.beginTransaction().add(R.id.container, it).commit()
+        userInfoFragment.let {
+            supportFragmentManager.beginTransaction().add(R.id.container, it, UserInfoFragment.TAG).commit()
         }
     }
 
@@ -175,7 +176,10 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCallbackReceived(node: Node?) {
         val activity = this
+
+        var nodeDialog = supportFragmentManager.findFragmentByTag(NodeDialogFragment.TAG) as? NodeDialogFragment
         nodeDialog?.dismiss()
+
         node?.takeUnless { it.callbacks.isEmpty() }?.let {
             it.callbacks.forEach { typer ->
                 when (typer.type) {
@@ -269,19 +273,19 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
                         nodeDialog?.show(supportFragmentManager,
-                            NodeDialogFragment::class.java.name)
+                            NodeDialogFragment.TAG)
                     }
                     "PasswordCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
                         nodeDialog?.show(supportFragmentManager,
-                            NodeDialogFragment::class.java.name)
+                            NodeDialogFragment.TAG)
                     }
                     "ChoiceCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
                         nodeDialog?.show(supportFragmentManager,
-                            NodeDialogFragment::class.java.name)
+                            NodeDialogFragment.TAG)
                     }
                 }
             }
@@ -291,9 +295,12 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
 
     override fun logout() {
         FRUser.getCurrentUser().logout()
-        userInfoFragment?.let {
+
+        val existing = supportFragmentManager.findFragmentByTag(UserInfoFragment.TAG) as? UserInfoFragment
+        existing?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
         }
+
         updateStatus(true)
     }
 }
