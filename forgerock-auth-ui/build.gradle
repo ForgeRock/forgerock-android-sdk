@@ -8,6 +8,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 33
@@ -29,6 +30,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 apply from: '../config/javadoc.gradle'
@@ -48,6 +53,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.5.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+
+    compileOnly 'com.google.android.gms:play-services-fido:19.0.0'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"
