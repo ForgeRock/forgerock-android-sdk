@@ -18,7 +18,6 @@ import androidx.fragment.app.DialogFragment
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.TimeoutCancellationException
 import org.forgerock.android.auth.databinding.FragmentApplicationPinBinding
-import org.forgerock.android.auth.exception.IgnorableException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -94,7 +93,7 @@ class ApplicationPinFragment : DialogFragment() {
     override fun onDestroy() {
         super.onDestroy()
         //throw exception to end the coroutine scope
-        continuation?.takeUnless { it.isCompleted }?.cancel(IgnorableException())
+        continuation?.takeUnless { it.isCompleted }?.cancel()
     }
 
     companion object {

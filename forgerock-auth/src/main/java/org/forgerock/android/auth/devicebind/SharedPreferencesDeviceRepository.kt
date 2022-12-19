@@ -15,6 +15,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
+const val ORG_FORGEROCK_V_1_DEVICE_REPO = "org.forgerock.v1.DEVICE_REPO"
+
 interface DeviceRepository {
     /**
      * Persist the data in encrypted shared preference
@@ -38,7 +40,7 @@ const val userNameKey = "username"
 internal class SharedPreferencesDeviceRepository(context: Context,
                                         private val uuid: String = UUID.randomUUID().toString(),
                                         private val sharedPreferences: SharedPreferences =
-                         EncryptedPreferences.getInstance(context)): DeviceRepository {
+                         EncryptedPreferences.getInstance(context, ORG_FORGEROCK_V_1_DEVICE_REPO)): DeviceRepository {
 
     /**
      * Persist the data in encrypted shared preference

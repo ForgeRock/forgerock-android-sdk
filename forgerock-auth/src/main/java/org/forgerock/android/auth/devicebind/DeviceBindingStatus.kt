@@ -17,38 +17,38 @@ private const val UNSUPPORTED = "Unsupported"
 
 sealed interface DeviceBindingStatus
 
-abstract class DeviceBindingErrorStatus(var message: String?,
-                                               val clientError: String,
-                                               val errorCode: Int? = null) :
+abstract class DeviceBindingErrorStatus(var message: String,
+                                        val clientError: String,
+                                        val errorCode: Int? = null) :
     DeviceBindingStatus {
 
-    data class Timeout(private val errorMessage: String? = "Authentication Timeout",
+    data class Timeout(private val errorMessage: String = "Authentication Timeout",
                        private val errorType: String = TIMEOUT,
                        private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
 
-    data class Abort(private val errorMessage: String? = "User Terminates the Authentication",
+    data class Abort(private val errorMessage: String = "User Terminates the Authentication",
                      private val errorType: String = ABORT,
                      private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
-    data class Unsupported(private var errorMessage: String? = "Device not supported. Please verify the biometric or Pin settings",
+    data class Unsupported(private var errorMessage: String = "Device not supported. Please verify the biometric or Pin settings",
                            private val errorType: String = UNSUPPORTED,
                            private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
-    data class UnRegister(private val errorMessage: String? = "PublicKey or PrivateKey Not found in Device",
+    data class UnRegister(private val errorMessage: String = "PublicKey or PrivateKey Not found in Device",
                           private val errorType: String = UNSUPPORTED,
                           private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
-    data class UnAuthorize(private val errorMessage: String? = "Invalid Credentials",
+    data class UnAuthorize(private val errorMessage: String = "Invalid Credentials",
                            private val errorType: String = UNSUPPORTED,
                            private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
-    data class Unknown(private val errorMessage: String? = "Unknown",
+    data class Unknown(private val errorMessage: String = "Unknown",
                        private val errorType: String = ABORT,
                        private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
@@ -59,6 +59,14 @@ data class Success(val privateKey: PrivateKey) : DeviceBindingStatus
 /**
  * Exceptions for device binding
  */
-class DeviceBindingException @JvmOverloads constructor(val status: DeviceBindingErrorStatus,
-                                                       e: Throwable?) :
-    Exception(status.message ?: "", e)
+class DeviceBindingException : Exception {
+    internal val status: DeviceBindingErrorStatus
+
+    constructor(status: DeviceBindingErrorStatus) : super(status.message) {
+        this.status = status
+    }
+    constructor(status: DeviceBindingErrorStatus, cause: Throwable?) : super(status.message,
+        cause) {
+        this.status = status
+    }
+}

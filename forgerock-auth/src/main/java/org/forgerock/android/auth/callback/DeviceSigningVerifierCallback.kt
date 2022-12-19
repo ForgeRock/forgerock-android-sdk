@@ -19,7 +19,6 @@ import kotlinx.coroutines.withTimeout
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.Listener
-import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
@@ -34,9 +33,7 @@ import org.forgerock.android.auth.devicebind.UserKey
 import org.forgerock.android.auth.devicebind.UserKeyService
 import org.forgerock.android.auth.devicebind.UserKeys
 import org.forgerock.android.auth.devicebind.initialize
-import org.forgerock.android.auth.exception.IgnorableException
 import org.json.JSONObject
-import kotlin.time.ExperimentalTime
 
 
 /**
@@ -86,8 +83,6 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     var timeout: Int? = null
         private set
 
-    private val tag = DeviceSigningVerifierCallback::class.java.simpleName
-
     override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" -> userId = value as? String
         "challenge" -> challenge = value as String
@@ -115,7 +110,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * Input the Client Error to the server
      * @param value DeviceSign ErrorType .
      */
-    fun setClientError(value: String?) {
+    override fun setClientError(value: String?) {
         super.setValue(value, 1)
     }
 
@@ -125,8 +120,27 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      */
+    open suspend fun sign(context: Context) {
+        execute(context)
+    }
+
+
+    /**
+     * Bind the device.
+     *
+     * @param context  The Application Context
+     * @param listener The Listener to listen for the result
+     */
     open fun sign(context: Context, listener: FRListener<Void>) {
-        execute(context, listener = listener)
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
+            try {
+                sign(context)
+                Listener.onSuccess(listener, null)
+            } catch (e: Exception) {
+                Listener.onException(listener, e)
+            }
+        }
     }
 
     /**
@@ -139,29 +153,25 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     @JvmOverloads
     protected open suspend fun authenticate(context: Context,
                                             userKey: UserKey,
-                                            listener: FRListener<Void>,
                                             deviceAuthenticator: DeviceAuthenticator = getDeviceBindAuthenticator(
                                                 userKey)) {
 
         deviceAuthenticator.initialize(userKey.userId, Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
-            handleException(Unsupported(), e = null, listener = listener)
-            return
+            handleException(DeviceBindingException(Unsupported()))
         }
-        val status = deviceAuthenticator.authenticate(context)
-        when(status) {
+        when (val status = deviceAuthenticator.authenticate(context)) {
             is Success -> {
                 val jws = deviceAuthenticator.sign(userKey,
                     status.privateKey,
                     challenge,
                     getExpiration(timeout))
                 setJws(jws)
-                Listener.onSuccess(listener, null)
             }
             is DeviceBindingErrorStatus -> {
                 // All the biometric exception is handled here , it could be Abort or timeout
-                handleException(status, e = null, listener = listener)
+                handleException(DeviceBindingException(status))
             }
         }
 
@@ -173,35 +183,28 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param userKeyService service to sort and fetch the keys stored in the device
      * @param listener The Listener to listen for the result
      */
-    @OptIn(ExperimentalTime::class)
     @JvmOverloads
-    internal fun execute(context: Context,
-                         userKeyService: UserKeyService = UserDeviceKeyService(context),
-                         listener: FRListener<Void>) {
+    internal suspend fun execute(context: Context,
+                                 userKeyService: UserKeyService = UserDeviceKeyService(context)) {
 
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            try {
-                withTimeout(getDuration(timeout)) {
-                    when (val status = userKeyService.getKeyStatus(userId)) {
-                        is NoKeysFound -> handleException(UnRegister(), null, listener)
-                        is SingleKeyFound -> authenticate(context, status.key, listener = listener)
-                        else -> {
-                            val userKey = getUserKey(userKeyService = userKeyService)
-                            authenticate(context, userKey, listener)
-                        }
+        try {
+            withTimeout(getDuration(timeout)) {
+                when (val status = userKeyService.getKeyStatus(userId)) {
+                    is NoKeysFound -> handleException(DeviceBindingException(UnRegister()))
+                    is SingleKeyFound -> authenticate(context, status.key)
+                    else -> {
+                        val userKey = getUserKey(userKeyService = userKeyService)
+                        authenticate(context, userKey)
                     }
                 }
-            } catch (e: TimeoutCancellationException) {
-                handleException(Timeout(), e, listener)
-            } catch (e: OperationCanceledException) {
-                handleException(Abort(), e, listener)
-            } catch (e: IgnorableException) {
-                //ignore
-            } catch (e: Exception) {
-                // This Exception happens only when there is Signing or keypair failed.
-                handleException(Unsupported(errorMessage = e.message), e, listener = listener)
             }
+        } catch (e: TimeoutCancellationException) {
+            handleException(Timeout(), e)
+        } catch (e: OperationCanceledException) {
+            handleException(Abort(), e)
+        } catch (e: Exception) {
+            // This Exception happens only when there is Signing or keypair failed.
+            handleException(e)
         }
     }
 
@@ -236,20 +239,6 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
         return getDeviceAuthenticator(userKey.authType)
     }
 
-    /**
-     * Handle all the errors for the device Signing.
-     *
-     * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
-     * @param listener The Listener to listen for the result
-     *
-     */
-    protected open fun handleException(status: DeviceBindingErrorStatus,
-                                       e: Exception?,
-                                       listener: FRListener<Void>) {
 
-        setClientError(status.clientError)
-        Logger.error(tag, e, status.message)
-        Listener.onException(listener, DeviceBindingException(status, e))
-    }
 
 }
