@@ -107,6 +107,14 @@ public class DeviceSigningVerifierCallbackTest {
                         @Override
                         public void onSuccess(Void result) {
                             bindSuccess[0]++;
+                            try {
+                                // Get the kid
+                                KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
+                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, KID);
+                            } catch (ParseException e) {
+                                Assertions.fail(e.getMessage());
+                            }
+                            node.next(context, nodeListener);
                         }
 
                         @Override
@@ -114,15 +122,6 @@ public class DeviceSigningVerifierCallbackTest {
                             Assertions.fail(e.getMessage());
                         }
                     });
-                    node.next(context, nodeListener);
-
-                    // Get the kid
-                    try {
-                        KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, KID);
-                    } catch (ParseException e) {
-                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
-                    }
                     return;
                 }
                 super.onCallbackReceived(node);
@@ -288,6 +287,8 @@ public class DeviceSigningVerifierCallbackTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
+
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -319,6 +320,7 @@ public class DeviceSigningVerifierCallbackTest {
                                 assertThat(jwtSub).isEqualTo(callback.getUserId());
 
                                 signSuccess[0]++;
+                                node.next(context, nodeListener);
                             } catch (ParseException e) {
                                 Assertions.fail("Invalid JWT: " + e.getMessage());
                             }
@@ -331,8 +333,6 @@ public class DeviceSigningVerifierCallbackTest {
                         }
                     });
 
-                    NodeListener<FRSession> nodeListener = this;
-                    node.next(context, nodeListener);
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
@@ -366,6 +366,7 @@ public class DeviceSigningVerifierCallbackTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -398,6 +399,7 @@ public class DeviceSigningVerifierCallbackTest {
                                 assertThat(jwtSub).isEqualTo(USER_ID);
 
                                 signSuccess[0]++;
+                                node.next(context, nodeListener);
                             } catch (ParseException e) {
                                 Assertions.fail("Invalid JWT: " + e.getMessage());
                             }
@@ -410,8 +412,6 @@ public class DeviceSigningVerifierCallbackTest {
                         }
                     });
 
-                    NodeListener<FRSession> nodeListener = this;
-                    node.next(context, nodeListener);
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
@@ -447,6 +447,7 @@ public class DeviceSigningVerifierCallbackTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -454,7 +455,6 @@ public class DeviceSigningVerifierCallbackTest {
                     CustomDeviceSigningVerifierCallback callback = node.getCallback(CustomDeviceSigningVerifierCallback.class);
                     callback.setExpSeconds(90);
 
-                    NodeListener<FRSession> nodeListener = this;
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
@@ -480,6 +480,7 @@ public class DeviceSigningVerifierCallbackTest {
                                 assertThat(jwtSub).isEqualTo(callback.getUserId());
 
                                 signSuccess[0]++;
+                                node.next(context, nodeListener);
                             } catch (ParseException e) {
                                 Assertions.fail("Invalid JWT: " + e.getMessage());
                             }
@@ -490,15 +491,12 @@ public class DeviceSigningVerifierCallbackTest {
                             Assertions.fail(e.getMessage());
                         }
                     });
-                    node.next(context, nodeListener);
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
                     authSuccess[0]++;
-
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -526,6 +524,7 @@ public class DeviceSigningVerifierCallbackTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -538,6 +537,7 @@ public class DeviceSigningVerifierCallbackTest {
                         @Override
                         public void onSuccess(Void result) {
                             signSuccess[0]++;
+                            node.next(context, nodeListener);
                         }
 
                         @Override
@@ -545,9 +545,6 @@ public class DeviceSigningVerifierCallbackTest {
                             Assertions.fail(e.getMessage());
                         }
                     });
-
-                    NodeListener<FRSession> nodeListener = this;
-                    node.next(context, nodeListener);
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
@@ -555,7 +552,6 @@ public class DeviceSigningVerifierCallbackTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
                     failureOutcome[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -581,6 +577,7 @@ public class DeviceSigningVerifierCallbackTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -592,7 +589,6 @@ public class DeviceSigningVerifierCallbackTest {
                             "invalid-challenge");
 
                     callback.setJws(customJwt);
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -627,6 +623,7 @@ public class DeviceSigningVerifierCallbackTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -640,8 +637,6 @@ public class DeviceSigningVerifierCallbackTest {
                                                     callback.getChallenge());
 
                     callback.setJws(customJwt);
-
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -649,8 +644,6 @@ public class DeviceSigningVerifierCallbackTest {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Key Not Found");
                     keyNotFoundOutcome[0]++;
-
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -675,6 +668,7 @@ public class DeviceSigningVerifierCallbackTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -687,8 +681,6 @@ public class DeviceSigningVerifierCallbackTest {
                             callback.getChallenge());
 
                     callback.setJws(customJwt);
-
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -697,7 +689,6 @@ public class DeviceSigningVerifierCallbackTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
                     authSuccess[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -722,6 +713,7 @@ public class DeviceSigningVerifierCallbackTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -735,43 +727,40 @@ public class DeviceSigningVerifierCallbackTest {
                         @Override
                         public void onSuccess(Void result) {
                             signSuccess[0]++;
+                            // Prepare prepare exp value for 10 days ahead of now...
+                            Calendar expTempered = Calendar.getInstance();
+                            expTempered.add(Calendar.SECOND, 864000);
+
+                            try {
+                                String jwtHeader = JWTParser.parse((String) callback.getInputValue(0)).getParsedParts()[0].toString();
+                                String jwtPayload = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().toPayload().toString();
+                                String jwtSignature = JWTParser.parse((String) callback.getInputValue(0)).getParsedParts()[2].toString();
+
+                                // Temper the exp value in the original JWT...
+                                // The Device Signing Verifier node should detect that the payload has been tempered and therefore should fail!
+                                JSONObject temperedPayloadJson = new JSONObject(jwtPayload);
+                                temperedPayloadJson.put("exp", expTempered.getTime().getTime());
+                                String temperedPayload = Base64.encodeToString(temperedPayloadJson.toString().getBytes(), Base64.DEFAULT);
+                                String temperedJwt = new StringBuilder().
+                                        append(jwtHeader).append(".").
+                                        append(temperedPayload).append(".").
+                                        append(jwtSignature).toString();
+
+                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Original JWT: " + callback.getInputValue(0));
+                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Tempered JWT: " + temperedJwt);
+
+                                // Overwrite the JWT input value in the callback to AM...
+                                callback.setJws(temperedJwt);
+                            } catch (ParseException | JSONException e) {
+                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
+                            }
+                            node.next(context, nodeListener);
                         }
                         @Override
                         public void onException(Exception e) {
                             Assertions.fail(e.getMessage());
                         }
                     });
-
-                    // Prepare prepare exp value for 10 days ahead of now...
-                    Calendar expTempered = Calendar.getInstance();
-                    expTempered.add(Calendar.SECOND, 864000);
-
-                    try {
-                        String jwtHeader = JWTParser.parse((String) callback.getInputValue(0)).getParsedParts()[0].toString();
-                        String jwtPayload = JWTParser.parse((String) callback.getInputValue(0)).getJWTClaimsSet().toPayload().toString();
-                        String jwtSignature = JWTParser.parse((String) callback.getInputValue(0)).getParsedParts()[2].toString();
-
-                        // Temper the exp value in the original JWT...
-                        // The Device Signing Verifier node should detect that the payload has been tempered and therefore should fail!
-                        JSONObject temperedPayloadJson = new JSONObject(jwtPayload);
-                        temperedPayloadJson.put("exp", expTempered.getTime().getTime());
-                        String temperedPayload = Base64.encodeToString(temperedPayloadJson.toString().getBytes(), Base64.DEFAULT);
-                        String temperedJwt = new StringBuilder().
-                                append(jwtHeader).append(".").
-                                append(temperedPayload).append(".").
-                                append(jwtSignature).toString();
-
-                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Original JWT: " + callback.getInputValue(0));
-                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Tempered JWT: " + temperedJwt);
-
-                        // Overwrite the JWT input value in the callback to AM...
-                        callback.setJws(temperedJwt);
-                    } catch (ParseException | JSONException e) {
-                        Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
-                    }
-
-                    NodeListener<FRSession> nodeListener = this;
-                    node.next(context, nodeListener);
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
@@ -779,7 +768,6 @@ public class DeviceSigningVerifierCallbackTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
                     failureOutcome[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }

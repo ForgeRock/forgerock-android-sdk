@@ -7,6 +7,13 @@
 
 package org.forgerock.android.auth.callback;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import android.content.Context;
+
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.DeviceBindingNodeListener;
 import org.forgerock.android.auth.FRAuth;
@@ -18,42 +25,35 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.rules.Timeout;
+import org.junit.runner.RunWith;
 
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import static org.assertj.core.api.Assertions.assertThat;
-import android.content.Context;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class DeviceBindingCallbackTest {
-    protected Context context = ApplicationProvider.getApplicationContext();
+    protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final String AM_URL = "https://openam-dbind.forgeblocks.com/am";
-    protected final String REALM = "alpha";
-    protected final String OAUTH_CLIENT = "AndroidTest";
-    protected final String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
-    protected final String SCOPE = "openid profile email address phone";
-    protected final String TREE = "device-bind";
-
-    protected static String USERNAME = "sdkuser";
-    protected static String PASSWORD = "password";
-    protected static String USER_EMAIL = "sdkuser@example.com";
+    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
+    protected final static String REALM = "alpha";
+    protected final static String OAUTH_CLIENT = "AndroidTest";
+    protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
+    protected final static String SCOPE = "openid profile email address phone";
+    protected final static String TREE = "device-bind";
+    protected final static String USERNAME = "sdkuser";
 
     @Rule
     public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
 
-    @Before
-    public void setUpSDK() {
+    @BeforeClass
+    public static void setUpSDK() {
         Logger.set(Logger.Level.DEBUG);
 
         FROptions options = FROptionsBuilder.build(builder -> {
@@ -97,7 +97,7 @@ public class DeviceBindingCallbackTest {
 
                     NodeListener<FRSession> nodeListener = this;
                     Assert.assertNotNull(callback.getUserId());
-                    // assertThat(callback.getUserName()).isEqualTo(USERNAME);
+                    assertThat(callback.getUserName()).isEqualTo(USERNAME);
                     assertThat(callback.getDeviceBindingAuthenticationType()).isEqualTo(DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK);
                     Assert.assertNotNull(callback.getChallenge());
                     assertThat(callback.getTitle()).isEqualTo("Authentication required");
@@ -134,7 +134,7 @@ public class DeviceBindingCallbackTest {
 
                     NodeListener<FRSession> nodeListener = this;
                     Assert.assertNotNull(callback.getUserId());
-                    // assertThat(callback.getUserName()).isEqualTo(USERNAME);
+                    assertThat(callback.getUserName()).isEqualTo(USERNAME);
                     assertThat(callback.getDeviceBindingAuthenticationType()).isEqualTo(DeviceBindingAuthenticationType.NONE);
                     Assert.assertNotNull(callback.getChallenge());
                     assertThat(callback.getTitle()).isEqualTo("Custom title");
