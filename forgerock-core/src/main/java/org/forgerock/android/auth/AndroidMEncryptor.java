@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,17 +23,14 @@ import java.security.KeyStore;
 /**
  * Provide data encryption and decryption for Android M device.
  */
-@RequiresApi(api = Build.VERSION_CODES.M)
 class AndroidMEncryptor extends AbstractSymmetricEncryptor {
 
     final KeyGenParameterSpec.Builder specBuilder;
-    final KeyUpdatedListener listener;
 
     /**
      * @param keyAlias The key alias to store the key
-     * @param listener The listener to listen event for key changes.
      */
-    AndroidMEncryptor(@NonNull String keyAlias, KeyUpdatedListener listener) {
+    AndroidMEncryptor(@NonNull String keyAlias) {
         super(keyAlias);
         specBuilder = new KeyGenParameterSpec.Builder(
                 keyAlias,
@@ -43,7 +40,6 @@ class AndroidMEncryptor extends AbstractSymmetricEncryptor {
                 .setRandomizedEncryptionRequired(true)
                 .setUserAuthenticationRequired(false)
                 .setKeySize(KEY_SIZE);
-        this.listener = listener;
     }
 
     @Override
@@ -55,15 +51,6 @@ class AndroidMEncryptor extends AbstractSymmetricEncryptor {
             keyGenerator.init(specBuilder.build());
             return keyGenerator.generateKey();
         } else {
-            if (keyStore.getEntry(keyAlias, null) instanceof KeyStore.PrivateKeyEntry) {
-                //This is an upgrade from Android Pre-M to Android M
-                keyStore.deleteEntry(keyAlias);
-                //Notify listener to delete the data which encrypted with this key
-                if (listener != null) {
-                    listener.onKeyUpdated();
-                }
-                return getSecretKey();
-            }
             return ((KeyStore.SecretKeyEntry) keyStore.getEntry(keyAlias, null)).getSecretKey();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,7 +34,7 @@ import static org.forgerock.android.auth.Encryptor.getEncryptor;
 /**
  * An implementation of {@link SharedPreferences} that encrypts values.
  */
-public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedListener {
+public class SecuredSharedPreferences implements SharedPreferences {
     public static final String TAG = SecuredSharedPreferences.class.getName();
 
     private static final int STRING_TYPE = 0;
@@ -63,9 +63,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
         this.keyAlias = keyAlias;
         if (encryptor == null) {
             this.encryptor = getEncryptor(context,
-                    keyAlias,
-                    new SharedPreferencesSecretKeyStore(keyAlias, sharedPreferences),
-                    this);
+                    keyAlias);
         } else {
             this.encryptor = encryptor;
         }
@@ -237,11 +235,6 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
         }
     }
 
-
-    @Override
-    public void onKeyUpdated() {
-        edit().clear().commit();
-    }
 
     private static final class Editor implements SharedPreferences.Editor {
         private final SecuredSharedPreferences securedSharedPreferences;

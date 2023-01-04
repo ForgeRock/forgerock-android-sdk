@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -53,20 +53,24 @@ public class Config {
     private CookieJar cookieJar;
     private String cookieName;
 
+    @Getter(value = AccessLevel.NONE)
     private String authenticateEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String authorizeEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String tokenEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String revokeEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String userinfoEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String sessionEndpoint;
+    @Getter(value = AccessLevel.NONE)
     private String endSessionEndpoint;
 
     //service
     private String authServiceName;
     private String registrationServiceName;
-
-    //SSO Token Manager
-    private Encryptor encryptor;
 
     private SharedPreferences ssoSharedPreferences;
 
@@ -89,11 +93,6 @@ public class Config {
     }
 
      Config() {}
-
-    @VisibleForTesting
-    public void setEncryptor(Encryptor encryptor) {
-        this.encryptor = encryptor;
-    }
 
     //For testing to avoid using Android KeyStore Encryption
     @VisibleForTesting
@@ -212,7 +211,6 @@ public class Config {
                 .sharedPreferences(ssoSharedPreferences)
                 .serverConfig(getServerConfig())
                 .context(context)
-                .encryptor(encryptor)
                 .ssoBroadcastModel(getSSOBroadcastModel())
                 .build();
     }

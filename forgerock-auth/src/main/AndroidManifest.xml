@@ -1,33 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2023 ForgeRock. All rights reserved.
+  ~
+  ~  This software may be modified and distributed under the terms
+  ~  of the MIT license. See the LICENSE file for details.
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.forgerock.android.auth">
 
-    <uses-permission
-        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
-        android:maxSdkVersion="22" />
-    <uses-permission
-        android:name="android.permission.GET_ACCOUNTS"
-        android:maxSdkVersion="22" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.MANAGE_ACCOUNTS"
-        android:maxSdkVersion="22" />
-    <uses-permission
-        android:name="android.permission.USE_CREDENTIALS"
-        android:maxSdkVersion="22" />
 
     <application>
-        <!--
-        <service
-                android:name=".authenticator.AuthenticatorService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data
-                    android:name="android.accounts.AccountAuthenticator"
-                    android:resource="@xml/forgerock_authenticator" />
-        </service>
-        -->
         <provider
             android:name=".InitProvider"
             android:authorities="${applicationId}.initprovider"

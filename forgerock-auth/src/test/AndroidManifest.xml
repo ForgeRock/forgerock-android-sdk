@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -9,17 +9,6 @@
     package="org.forgerock.android.auth">
 
     <application>
-
-        <service
-            android:name=".authenticator.AuthenticatorService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/forgerock_authenticator" />
-        </service>
 
         <activity
             android:name="org.forgerock.android.auth.DummyActivity"
