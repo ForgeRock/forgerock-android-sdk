@@ -4,24 +4,20 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
+
 package org.forgerock.android.auth.callback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import android.content.Context;
 import android.util.Base64;
 
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.android.auth.FRAuth;
 import org.forgerock.android.auth.FRListener;
-import org.forgerock.android.auth.FROptions;
-import org.forgerock.android.auth.FROptionsBuilder;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
@@ -29,71 +25,22 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public class DeviceSigningVerifierCallbackTest {
-    private static final String TAG = DeviceSigningVerifierCallbackTest.class.getSimpleName();
-    protected static Context context = ApplicationProvider.getApplicationContext();
-
-    // This test uses dynamic configuration with the following settings:
-    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
-    protected final static String REALM = "alpha";
-    protected final static String OAUTH_CLIENT = "AndroidTest";
-    protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
-    protected final static String SCOPE = "openid profile email address phone";
+public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
 
-    protected final static String USERNAME = "sdkuser";
-    protected static String KID = null; // Used to store the kid of the key generated during binding
-    protected static String USER_ID = null; // Used to store the userId of the user who binds the device
-
-    @Rule
-    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @BeforeClass
-    public static void setUpSDK() throws ExecutionException, InterruptedException {
-        Logger.set(Logger.Level.DEBUG);
-
-        // Prepare dynamic configuration object
-        FROptions options = FROptionsBuilder.build(builder -> {
-            builder.server(serverBuilder -> {
-                serverBuilder.setUrl(AM_URL);
-                serverBuilder.setRealm(REALM);
-                return null;
-            });
-            builder.service(service-> {
-                service.setAuthServiceName(TREE);
-                return null;
-            });
-            builder.oauth(oauth -> {
-                oauth.setOauthClientId(OAUTH_CLIENT);
-                oauth.setOauthRedirectUri(OAUTH_REDIRECT_URI);
-                oauth.setOauthScope(SCOPE);
-                return null;
-            });
-            return null;
-        });
-
-        FRAuth.start(context, options);
-
+    public static void bindDevice() throws ExecutionException, InterruptedException {
         final int[] bindSuccess = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind") {
             @Override
@@ -110,7 +57,7 @@ public class DeviceSigningVerifierCallbackTest {
                             try {
                                 // Get the kid
                                 KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, KID);
+                                Logger.debug(TAG, KID);
                             } catch (ParseException e) {
                                 Assertions.fail(e.getMessage());
                             }
@@ -138,14 +85,6 @@ public class DeviceSigningVerifierCallbackTest {
         if (FRSession.getCurrentSession() != null) {
             FRSession.getCurrentSession().logout();
         }
-    }
-
-    @After
-    public void logoutSession() {
-        if (FRSession.getCurrentSession() != null) {
-            FRSession.getCurrentSession().logout();
-        }
-        CallbackFactory.getInstance().register(DeviceSigningVerifierCallback.class);
     }
 
     @Test
@@ -530,8 +469,8 @@ public class DeviceSigningVerifierCallbackTest {
             {
                 if (node.getCallback(CustomDeviceSigningVerifierCallback.class) != null) {
                     CustomDeviceSigningVerifierCallback callback = node.getCallback(CustomDeviceSigningVerifierCallback.class);
-                    // Make the exp value to "now"
-                    callback.setExpSeconds(0);
+                    // Make the exp value to 2 minute in the past
+                    callback.setExpSeconds(-120);
 
                     callback.sign(context, new FRListener<Void>() {
                         @Override
@@ -746,13 +685,13 @@ public class DeviceSigningVerifierCallbackTest {
                                         append(temperedPayload).append(".").
                                         append(jwtSignature).toString();
 
-                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Original JWT: " + callback.getInputValue(0));
-                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, "Tempered JWT: " + temperedJwt);
+                                Logger.debug(TAG, "Original JWT: " + callback.getInputValue(0));
+                                Logger.debug(TAG, "Tempered JWT: " + temperedJwt);
 
                                 // Overwrite the JWT input value in the callback to AM...
                                 callback.setJws(temperedJwt);
                             } catch (ParseException | JSONException e) {
-                                Logger.debug(DeviceSigningVerifierCallbackTest.TAG, e.getMessage());
+                                Logger.debug(TAG, e.getMessage());
                             }
                             node.next(context, nodeListener);
                         }
@@ -784,39 +723,5 @@ public class DeviceSigningVerifierCallbackTest {
         // Ensure that the journey finishes with success
         Assert.assertNotNull(FRSession.getCurrentSession());
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
-    }
-
-}
-
-class DeviceSigningVerifierNodeListener extends NodeListenerFuture<FRSession> {
-
-    private Context context;
-    private String nodeConfiguration;
-
-    public DeviceSigningVerifierNodeListener(Context context, String nodeConfiguration) {
-        this.context = context;
-        this.nodeConfiguration = nodeConfiguration;
-    }
-
-    @Override
-    public void onCallbackReceived(Node node) {
-        if (node.getCallback(ChoiceCallback.class) != null) {
-            ChoiceCallback choiceCallback = node.getCallback(ChoiceCallback.class);
-            List<String> choices = choiceCallback.getChoices();
-            // Explicitly set the first choice collector to "collectusername" for non "usernameless" flows
-            if (choices.contains("usernameless") && !nodeConfiguration.equals("usernameless")) {
-                int choiceIndex = choices.indexOf("collectusername");
-                choiceCallback.setSelectedIndex(choiceIndex);
-                node.next(context, this);
-                return;
-            }
-            int choiceIndex = choices.indexOf(nodeConfiguration);
-            choiceCallback.setSelectedIndex(choiceIndex);
-            node.next(context, this);
-        }
-        if (node.getCallback(NameCallback.class) != null) {
-            node.getCallback(NameCallback.class).setName(DeviceSigningVerifierCallbackTest.USERNAME);
-            node.next(context, this);
-        }
     }
 }

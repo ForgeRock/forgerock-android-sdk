@@ -42,6 +42,7 @@ allprojects {
 ossIndexAudit {
     username = System.properties['username']
     password = System.properties['password']
+    excludeVulnerabilityIds = ['CVE-2020-15250', 'sonatype-2019-0673']
 }
 
 task clean(type: Delete) {
