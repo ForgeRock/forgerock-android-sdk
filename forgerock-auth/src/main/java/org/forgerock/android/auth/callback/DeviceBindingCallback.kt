@@ -16,7 +16,6 @@ import kotlinx.coroutines.withTimeout
 import org.forgerock.android.auth.DeviceIdentifier
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Listener
-import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.BiometricAndDeviceCredential
 import org.forgerock.android.auth.devicebind.BiometricOnly
@@ -32,9 +31,7 @@ import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
 import org.forgerock.android.auth.devicebind.Success
 import org.forgerock.android.auth.devicebind.initialize
-import org.forgerock.android.auth.exception.IgnorableException
 import org.json.JSONObject
-import kotlin.time.ExperimentalTime
 
 /**
  * Callback to collect the device binding information
@@ -95,8 +92,6 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     var timeout: Int? = null
         private set
 
-    private val tag = DeviceBindingCallback::class.java.simpleName
-
     final override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" -> userId = value as String
         "username" -> userName = value as String
@@ -142,7 +137,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * Input the Client Error to the server
      * @param value DeviceBind ErrorType .
      */
-    fun setClientError(value: String?) {
+    override fun setClientError(value: String?) {
         super.setValue(value, 3)
     }
 
@@ -153,8 +148,26 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param listener The Listener to listen for the result
      */
     open fun bind(context: Context, listener: FRListener<Void>) {
-        execute(context, listener)
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
+            try {
+                bind(context)
+                Listener.onSuccess(listener, null)
+            } catch (e: Exception) {
+                Listener.onException(listener, e)
+            }
+        }
     }
+
+    /**
+     * Bind the device.
+     *
+     * @param context  The Application Context
+     */
+    open suspend fun bind(context: Context) {
+        execute(context)
+    }
+
 
     /**
      * Helper method to execute binding , signing, show biometric prompt.
@@ -165,92 +178,57 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param encryptedPreference Persist the values in encrypted shared preference
      */
     @JvmOverloads
-    internal fun execute(context: Context,
-                         listener: FRListener<Void>,
-                         deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
-                             deviceBindingAuthenticationType),
-                         encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
-                             context),
-                         deviceId: String = DeviceIdentifier.builder().context(context)
-                             .build().identifier) {
+    internal suspend fun execute(context: Context,
+                                 deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
+                                     deviceBindingAuthenticationType),
+                                 encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
+                                     context),
+                                 deviceId: String = DeviceIdentifier.builder().context(context)
+                                     .build().identifier) {
 
 
         deviceAuthenticator.initialize(userId, Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
-            handleException(Unsupported(), e = null, listener = listener)
+            handleException(DeviceBindingException(Unsupported()))
             return
         }
 
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            try {
-                val keyPair: KeyPair
-                val status: DeviceBindingStatus
-                withTimeout(getDuration(timeout)) {
-                    keyPair = deviceAuthenticator.generateKeys(context);
-                    status = deviceAuthenticator.authenticate(context)
-                }
-                when (status) {
-                    is Success -> {
-                        val kid = encryptedPreference.persist(userId,
-                            userName,
-                            keyPair.keyAlias,
-                            deviceBindingAuthenticationType)
-                        val jws = deviceAuthenticator.sign(keyPair,
-                            kid,
-                            userId,
-                            challenge,
-                            getExpiration(timeout))
-                        setJws(jws)
-                        setDeviceId(deviceId)
-                        Listener.onSuccess(listener, null)
-                    }
-                    is DeviceBindingErrorStatus -> {
-                        handleException(status, e = null, listener = listener)
-                    }
-                }
-            } catch (e: OperationCanceledException) {
-                handleException(Abort(), e, listener)
-            } catch (e: TimeoutCancellationException) {
-                handleException(Timeout(), e, listener)
-            } catch (e: IgnorableException) {
-                // Ignore
-            } catch (e: Exception) {
-                // This Exception happens only when there is Signing or keypair failed.
-                handleException(e, listener)
+        try {
+            val keyPair: KeyPair
+            val status: DeviceBindingStatus
+            withTimeout(getDuration(timeout)) {
+                keyPair = deviceAuthenticator.generateKeys(context);
+                status = deviceAuthenticator.authenticate(context)
             }
+            when (status) {
+                is Success -> {
+                    val kid = encryptedPreference.persist(userId,
+                        userName,
+                        keyPair.keyAlias,
+                        deviceBindingAuthenticationType)
+                    val jws = deviceAuthenticator.sign(keyPair,
+                        kid,
+                        userId,
+                        challenge,
+                        getExpiration(timeout))
+                    setJws(jws)
+                    setDeviceId(deviceId)
+                }
+                is DeviceBindingErrorStatus -> {
+                    handleException(DeviceBindingException(status))
+                }
+            }
+        } catch (e: OperationCanceledException) {
+            handleException(Abort(), e)
+        } catch (e: TimeoutCancellationException) {
+            handleException(Timeout(), e)
+        } catch (e: Exception) {
+            // This Exception happens only when there is Signing or keypair failed.
+            handleException(e)
         }
     }
 
-    /**
-     * Handle all the errors for the device binding.
-     *
-     * @param listener The Listener to listen for the result
-     */
-    protected open fun handleException(e: Throwable, listener: FRListener<Void>) {
-        if (e is DeviceBindingException) {
-            handleException(e.status, e, listener)
-            return
-        } else {
-            handleException(Unsupported(errorMessage = e.message), e, listener)
-        }
-    }
-
-    /**
-     * Handle all the errors for the device binding.
-     *
-     * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
-     * @param listener The Listener to listen for the result
-     */
-    protected open fun handleException(status: DeviceBindingErrorStatus,
-                                       e: Throwable?,
-                                       listener: FRListener<Void>) {
-
-        setClientError(status.clientError)
-        Logger.error(tag, e, status.message)
-        Listener.onException(listener, DeviceBindingException(status, e))
-    }
 }
 
 

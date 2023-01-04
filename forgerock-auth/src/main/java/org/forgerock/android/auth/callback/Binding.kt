@@ -6,7 +6,11 @@
  */
 package org.forgerock.android.auth.callback
 
+import kotlinx.coroutines.CancellationException
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
+import org.forgerock.android.auth.devicebind.DeviceBindingException
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -15,6 +19,8 @@ import kotlin.time.toDuration
 /**
  * Device Binding interface to provide utility method for [DeviceBindingCallback] and [DeviceSigningVerifierCallback]
  */
+private val tag = Binding::class.java.simpleName
+
 interface Binding {
 
     /**
@@ -43,5 +49,38 @@ interface Binding {
     fun getDuration(timeout: Int?): Duration {
         return (timeout?.toLong() ?: 60L).toDuration(DurationUnit.SECONDS)
     }
+
+    /**
+     * Handle all the errors for the device binding.
+     */
+    fun handleException(e: Throwable) {
+        when (e) {
+            is DeviceBindingException -> {
+                handleException(e.status, e)
+            }
+            is CancellationException -> {
+                throw e
+            }
+            else -> {
+                handleException(DeviceBindingErrorStatus.Unsupported(errorMessage = e.message
+                    ?: ""), e)
+            }
+        }
+    }
+
+    /**
+     * Handle all the errors for the device binding.
+     *
+     * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
+     */
+    fun handleException(status: DeviceBindingErrorStatus,
+                        e: Throwable) {
+
+        setClientError(status.clientError)
+        Logger.error(tag, e, status.message)
+        throw e
+    }
+
+    fun setClientError(clientError: String?)
 
 }
