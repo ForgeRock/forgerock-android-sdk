@@ -206,7 +206,7 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                         }
 
                         override fun onAuthenticationFailed() {
-                            continuation.resume(DeviceBindingErrorStatus.UnAuthorize())
+                            //Ignore with wrong fingerprint
                         }
                     }
                     biometricInterface.authenticate(listener)
