@@ -373,8 +373,7 @@ public class PushNotification extends ModelObject<PushNotification> {
 
                 @Override
                 public void onAuthenticationFailed() {
-                    listener.onException(new PushMechanismException("Error processing the Push " +
-                            "Authentication request. Biometric Authentication failed"));
+                    //Ignore to allow fingerprint retry
                 }
             });
             biometricAuth.authenticate();
