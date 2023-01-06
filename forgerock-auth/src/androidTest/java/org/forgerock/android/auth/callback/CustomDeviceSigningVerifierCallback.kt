@@ -7,58 +7,43 @@
 
 package org.forgerock.android.auth.callback
 
-import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import org.forgerock.android.auth.Logger.Companion.debug
 import org.json.JSONObject
 import java.security.KeyPairGenerator
-import java.security.NoSuchAlgorithmException
 import java.security.interfaces.RSAPrivateKey
 import java.util.*
 
 class CustomDeviceSigningVerifierCallback : DeviceSigningVerifierCallback {
-  constructor() : super() {}
-  constructor(json: JSONObject?, index: Int) : super(json!!, index) {}
+    constructor() : super()
+    constructor(json: JSONObject, index: Int) : super(json, index)
 
-  private var expSeconds = 0
-  fun setExpSeconds(expSeconds: Int) {
-    this.expSeconds = expSeconds
-  }
-
-  override fun getExpiration(timeout: Int?): Date {
-    val date = Calendar.getInstance()
-    date.add(Calendar.SECOND, expSeconds)
-    return date.time
-  }
-
-  fun getSignedJwt(kid: String?, sub: String?, challenge: String?): String {
-    //Generate RSA key
-    var kpg: KeyPairGenerator? = null
-    try {
-      kpg = KeyPairGenerator.getInstance("RSA")
-    } catch (e: NoSuchAlgorithmException) {
-      debug(TAG, e.message)
+    private var expSeconds = 0
+    fun setExpSeconds(expSeconds: Int) {
+        this.expSeconds = expSeconds
     }
-    kpg!!.initialize(2048)
-    val rsaKey = kpg.generateKeyPair()
-    val header = JWSHeader.Builder(JWSAlgorithm.RS512).type(JOSEObjectType.JWT).keyID(kid).build()
-    val payload = JWTClaimsSet.Builder().subject(sub).claim("challenge", challenge)
-      .expirationTime(getExpiration(null)).build()
-    val signedJWT = SignedJWT(header, payload)
-    try {
-      signedJWT.sign(RSASSASigner(rsaKey.private as RSAPrivateKey))
-    } catch (e: JOSEException) {
-      debug(TAG, e.message)
-    }
-    return signedJWT.serialize()
-  }
 
-  companion object {
-    private val TAG = CustomDeviceSigningVerifierCallback::class.java.simpleName
-  }
+    override fun getExpiration(timeout: Int?): Date {
+        val date = Calendar.getInstance()
+        date.add(Calendar.SECOND, expSeconds)
+        return date.time
+    }
+
+    fun getSignedJwt(kid: String?, sub: String?, challenge: String?): String {
+        //Generate RSA key
+        val kpg = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(2048)
+        val rsaKey = kpg.generateKeyPair()
+        val header =
+            JWSHeader.Builder(JWSAlgorithm.RS512).type(JOSEObjectType.JWT).keyID(kid).build()
+        val payload = JWTClaimsSet.Builder().subject(sub).claim("challenge", challenge)
+            .expirationTime(getExpiration(null)).build()
+        val signedJWT = SignedJWT(header, payload)
+        signedJWT.sign(RSASSASigner(rsaKey.private as RSAPrivateKey))
+        return signedJWT.serialize()
+    }
 }

@@ -9,16 +9,14 @@ package org.forgerock.android.auth.callback
 
 import org.json.JSONObject
 
-class CustomApplicationPinDeviceBindingCallback: DeviceBindingCallback {
-  val deviceAuthenticator: CustomApplicationPinDeviceAuthenticator = CustomApplicationPinDeviceAuthenticator()
+class CustomApplicationPinDeviceBindingCallback : DeviceBindingCallback {
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
+    constructor() : super()
 
-  @JvmOverloads
-  constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
+    val deviceAuthenticator: CustomApplicationPinDeviceAuthenticator =
+        CustomApplicationPinDeviceAuthenticator()
 
-  @JvmOverloads
-  constructor() : super()
-
-  override fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): CustomApplicationPinDeviceAuthenticator {
-    return deviceAuthenticator;
-  }
+    override fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): CustomApplicationPinDeviceAuthenticator {
+        return deviceAuthenticator
+    }
 }

@@ -10,10 +10,10 @@ package org.forgerock.android.auth.callback
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 
-class CustomApplicationPinDeviceAuthenticator: ApplicationPinDeviceAuthenticator() {
-  lateinit var pin: String
+class CustomApplicationPinDeviceAuthenticator : ApplicationPinDeviceAuthenticator() {
+    lateinit var pin: String
 
-  override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
-    return pin.toCharArray()
-  }
+    override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
+        return pin.toCharArray()
+    }
 }

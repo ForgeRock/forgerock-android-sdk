@@ -41,12 +41,12 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         final int[] bindSuccess = {0};
         CallbackFactory.getInstance().register(CustomApplicationPinDeviceBindingCallback.class);
 
-        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind-pin")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -98,12 +98,12 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         final int[] signSuccess = {0};
         final int[] authSuccess = {0};
         CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
-        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
 
             @Override
             public void onCallbackReceived(Node node)
@@ -157,7 +157,6 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
                     authSuccess[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -181,12 +180,12 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         final int[] signFailure = {0};
 
         CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
-        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
 
             @Override
             public void onCallbackReceived(Node node)
@@ -243,12 +242,12 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
 
         CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
 
-        ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
+        ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -302,7 +301,6 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
                     authSuccess[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }

@@ -42,12 +42,14 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     @BeforeClass
     public static void bindDevice() throws ExecutionException, InterruptedException {
         final int[] bindSuccess = {0};
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind") {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind")
+        {
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
-                    NodeListener<FRSession> nodeListener = this;
+
                     USER_ID = callback.getUserId();
                     // Bind the device...
                     callback.bind(context, new FRListener<Void>() {
@@ -130,13 +132,12 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
                 if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
                     DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
-
-                    NodeListener<FRSession> nodeListener = this;
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
                     assertThat(callback.getTitle()).isEqualTo("Authentication required");
@@ -154,7 +155,6 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(callback.getMessage()).isEqualTo("Abort");
                     hit[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -176,13 +176,13 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "custom")
         {
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
                 if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
                     DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
 
-                    NodeListener<FRSession> nodeListener = this;
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
@@ -202,7 +202,6 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(callback.getMessage()).isEqualTo("Custom");
                     hit[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -226,7 +225,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
 
             @Override
             public void onCallbackReceived(Node node)
@@ -279,7 +278,6 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
                     authSuccess[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -305,7 +303,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -358,7 +356,6 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Success");
                     authSuccess[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -386,7 +383,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -463,7 +460,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -516,7 +513,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -536,7 +533,6 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
                     failureOutcome[0]++;
 
-                    NodeListener<FRSession> nodeListener = this;
                     node.next(context, nodeListener);
                     return;
                 }
@@ -562,7 +558,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -607,7 +603,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
@@ -652,7 +648,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
-            NodeListener<FRSession> nodeListener = this;
+            final NodeListener<FRSession> nodeListener = this;
             @Override
             public void onCallbackReceived(Node node)
             {
