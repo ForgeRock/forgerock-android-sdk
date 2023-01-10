@@ -23,6 +23,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.R
+import org.forgerock.android.auth.convertToTime
 import org.forgerock.android.auth.databinding.FragmentUserSelectBinding
 import org.forgerock.android.auth.databinding.FragmentUserSelectBinding.inflate
 import kotlin.coroutines.resume
@@ -84,7 +85,9 @@ class WebAuthKeySelectionFragment : DialogFragment() {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.spinner_item, parent, false)
                     val names = view?.findViewById<TextView>(R.id.textView)
-                    names?.text = sources[position].otherUI
+                    val publicKeyCredentialSource = this@WebAuthKeySelectionFragment.sources[position]
+                    val displayKey = "${publicKeyCredentialSource.otherUI} (${publicKeyCredentialSource.created.convertToTime()})"
+                    names?.text = displayKey
                     return view
                 }
 

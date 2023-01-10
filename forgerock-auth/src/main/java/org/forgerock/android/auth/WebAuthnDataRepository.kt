@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -110,13 +110,10 @@ open class WebAuthnDataRepository internal constructor(val context: Context,
             warn(TAG, "UsernameLess cannot be supported. No credential will be stored")
             return emptyList()
         }
+
         return dataRepository.getStringSet(rpId, null)?.mapNotNull {
-            JSONObject(it)
-        }?.sortedWith(compareByDescending {
-            it.optLong("created", 0)
-        })?.map {
-            fromJson(it)
-        } ?: emptyList()
+            fromJson(JSONObject(it))
+        }?.sortedWith(compareBy<PublicKeyCredentialSource> { it.otherUI }.thenBy { it.created } )  ?: emptyList()
     }
 
     fun deleteByUserIdAndRpId(userId: ByteArray, rpId: String) {

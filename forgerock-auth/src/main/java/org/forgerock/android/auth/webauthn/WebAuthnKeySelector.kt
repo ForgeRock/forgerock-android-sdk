@@ -6,8 +6,6 @@
  */
 package org.forgerock.android.auth.webauthn
 
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
-
 /**
  * A Selector for credential key selection.
  */

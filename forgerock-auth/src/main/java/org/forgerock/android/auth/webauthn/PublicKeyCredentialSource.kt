@@ -35,7 +35,7 @@ class PublicKeyCredentialSource(val id: ByteArray,
                                 val rpid: String,
                                 val userHandle: ByteArray,
                                 val otherUI: String,
-                                val created: Long = System.currentTimeMillis()) : Parcelable {
+                                val created: Long) : Parcelable {
 
     /**
      * Convert [PublicKeyCredentialSource] to [JSONObject]
@@ -66,7 +66,7 @@ class PublicKeyCredentialSource(val id: ByteArray,
         private lateinit var rpid: String
         private lateinit var userHandle: ByteArray
         private lateinit var otherUI: String
-        private var created: Long = System.currentTimeMillis()
+        private var created: Long? = null
 
         fun id(id: ByteArray): PublicKeyCredentialSourceBuilder {
             this.id = id
@@ -98,9 +98,8 @@ class PublicKeyCredentialSource(val id: ByteArray,
             return this
         }
 
-
         fun build(): PublicKeyCredentialSource {
-            return PublicKeyCredentialSource(id, type, rpid, userHandle, otherUI)
+            return PublicKeyCredentialSource(id, type, rpid, userHandle, otherUI, created = created ?: System.currentTimeMillis())
         }
     }
 
