@@ -27,6 +27,9 @@ interface DeviceRepository {
                 authenticationType: DeviceBindingAuthenticationType): String
 
     fun getAllKeys(): MutableMap<String, *>?
+
+    fun delete(key: String)
+
 }
 
 const val userIdKey = "userId"
@@ -64,6 +67,10 @@ internal class SharedPreferencesDeviceRepository(context: Context,
 
     override fun getAllKeys(): MutableMap<String, *>? {
         return sharedPreferences.all
+    }
+
+    override fun delete(key: String) {
+        sharedPreferences.edit().remove(key).apply()
     }
 }
 

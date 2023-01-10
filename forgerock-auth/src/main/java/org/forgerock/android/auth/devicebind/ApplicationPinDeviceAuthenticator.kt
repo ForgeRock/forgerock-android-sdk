@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,13 +18,13 @@ import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.EncryptedFileKeyStore
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.KeyStoreRepository
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.KeyStore
-import java.security.PrivateKey
 import java.security.UnrecoverableKeyException
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -32,6 +32,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
+private val TAG = ApplicationPinDeviceAuthenticator::class.java.simpleName
 /**
  * Device Authenticator which use Application PIN to secure device cryptography keys
  */
@@ -129,6 +130,14 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
 
     final override fun type(): DeviceBindingAuthenticationType =
         DeviceBindingAuthenticationType.APPLICATION_PIN
+
+    override fun deleteKeys(context: Context) {
+        try {
+            keyStore.delete(context)
+        } catch (e: Exception) {
+            Logger.warn(TAG, e, e.message)
+        }
+    }
 
     override fun getInputStream(context: Context): InputStream {
         return keyStore.getInputStream(context)
