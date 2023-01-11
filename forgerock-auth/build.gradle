@@ -11,6 +11,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.dokka'
 
 android {
     compileSdkVersion 33

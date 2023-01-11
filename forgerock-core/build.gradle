@@ -10,6 +10,7 @@ apply plugin: "com.adarshr.test-logger"
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
 
 android {
     compileSdkVersion 33

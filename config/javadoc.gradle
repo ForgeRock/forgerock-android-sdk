@@ -5,6 +5,9 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
+apply plugin: 'org.jetbrains.dokka'
+
+
 /**
  * Generate Javadoc, delombok then generate Javadoc
  */
@@ -23,33 +26,53 @@ task delombok {
     }
 }
 
-task javadoc(type: Javadoc, dependsOn: delombok) {
-    source = "$buildDir/src-delomboked"
-    destinationDir = new File("$buildDir/generated-javadoc")
-    failOnError = false
-    exclude '**/*.kt'
-    ext.androidDoc = "${android.sdkDirectory}/docs/reference"
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    options.linksOffline("http://d.android.com/reference", ext.androidDoc)
-    options.links("http://docs.oracle.com/javase/7/docs/api/")
-    options.links("http://d.android.com/reference/")
+dokkaJavadoc.dependsOn delombok
+dokkaHtml.dependsOn delombok
+
+dokkaJavadoc {
+    dokkaSourceSets {
+        named("main") {
+            // Main source set conf
+            outputDirectory = file("build/javadoc/$project.name-dokka")
+            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+        }
+        configureEach {
+            // Shared conf for all source sets
+            noAndroidSdkLink.set(false)
+            includeNonPublic.set(false)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(true)
+            skipDeprecated.set(false)
+        }
+    }
 }
 
-afterEvaluate {
-    javadoc.classpath += files(android.libraryVariants.collect { variant ->
-        variant.getJavaCompileProvider().get().classpath.files
-    })}
-
+dokkaHtml {
+    dokkaSourceSets {
+        named("main") {
+            // Main source set conf
+            outputDirectory = file("build/html/$project.name-dokka")
+            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+        }
+        configureEach {
+            // Shared conf for all source sets
+            noAndroidSdkLink.set(false)
+            includeNonPublic.set(false)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(true)
+            skipDeprecated.set(false)
+        }
+    }
+}
 
 task sourcesJar(type: Jar) {
     archiveClassifier.set("sources")
     from android.sourceSets.main.java.srcDirs
 }
 
-javadoc.failOnError = false
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     archiveClassifier.set("javadoc")
-    from javadoc.destinationDir
+    from new File("build/dokkadoc/$rootProject.name-$project.name-dokka")
 }
 
 artifacts {
