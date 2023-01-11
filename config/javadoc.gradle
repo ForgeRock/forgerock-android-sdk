@@ -36,14 +36,6 @@ dokkaJavadoc {
             outputDirectory = file("build/javadoc/$project.name-dokka")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
         }
-        configureEach {
-            // Shared conf for all source sets
-            noAndroidSdkLink.set(false)
-            includeNonPublic.set(false)
-            skipEmptyPackages.set(true)
-            reportUndocumented.set(true)
-            skipDeprecated.set(false)
-        }
     }
 }
 
@@ -53,14 +45,6 @@ dokkaHtml {
             // Main source set conf
             outputDirectory = file("build/html/$project.name-dokka")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
-        }
-        configureEach {
-            // Shared conf for all source sets
-            noAndroidSdkLink.set(false)
-            includeNonPublic.set(false)
-            skipEmptyPackages.set(true)
-            reportUndocumented.set(true)
-            skipDeprecated.set(false)
         }
     }
 }
@@ -72,7 +56,7 @@ task sourcesJar(type: Jar) {
 
 task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     archiveClassifier.set("javadoc")
-    from new File("build/dokkadoc/$rootProject.name-$project.name-dokka")
+    from new File("build/javadoc/$project.name-dokka")
 }
 
 artifacts {
