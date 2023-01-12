@@ -1,26 +1,31 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.callback
 
+import android.os.OperationCanceledException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Timeout
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Unsupported
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
+private val TAG = Binding::class.java.simpleName
+
 /**
  * Device Binding interface to provide utility method for [DeviceBindingCallback] and [DeviceSigningVerifierCallback]
  */
-private val tag = Binding::class.java.simpleName
-
 interface Binding {
 
     /**
@@ -56,29 +61,25 @@ interface Binding {
     fun handleException(e: Throwable) {
         when (e) {
             is DeviceBindingException -> {
-                handleException(e.status, e)
+                Logger.error(TAG, e, e.message)
+                setClientError(e.status.clientError)
+                throw e
+            }
+            is OperationCanceledException -> {
+                handleException(DeviceBindingException(Abort(), e))
+            }
+            is TimeoutCancellationException -> {
+                //For Timeout, it is consider subclass of CancellationException, we want developer to ignore
+                //CancellationException in case of configuration change but not TimeoutCancellationException
+                handleException(DeviceBindingException(Timeout(), e))
             }
             is CancellationException -> {
                 throw e
             }
             else -> {
-                handleException(DeviceBindingErrorStatus.Unsupported(errorMessage = e.message
-                    ?: ""), e)
+                handleException(DeviceBindingException(Unsupported(), e))
             }
         }
-    }
-
-    /**
-     * Handle all the errors for the device binding.
-     *
-     * @param status  DeviceBindingStatus(timeout,Abort, unsupported)
-     */
-    fun handleException(status: DeviceBindingErrorStatus,
-                        e: Throwable) {
-
-        setClientError(status.clientError)
-        Logger.error(tag, e, status.message)
-        throw e
     }
 
     fun setClientError(clientError: String?)

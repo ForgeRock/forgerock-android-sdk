@@ -27,6 +27,7 @@ import java.security.KeyStore
 import java.security.UnrecoverableKeyException
 import java.security.spec.RSAKeyGenParameterSpec
 
+private val TAG = AppPinAuthenticator::class.java.simpleName
 /**
  * An authenticator to authenticate the user with Application Pin
  */
@@ -72,6 +73,7 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
         try {
             keyStore = getKeyStore(context)
         } catch (e: Exception) {
+            Logger.warn(TAG, e, "Failed to load Keystore.")
             return false
         }
         return keyStore.containsAlias(getKeyAlias())

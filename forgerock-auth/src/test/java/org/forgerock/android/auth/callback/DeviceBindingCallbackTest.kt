@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 -2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -12,10 +12,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.DummyActivity
-import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.BiometricOnly
@@ -29,7 +27,6 @@ import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
 import org.forgerock.android.auth.devicebind.Success
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -168,8 +165,6 @@ class DeviceBindingCallbackTest {
             "keyAlias",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
-        val authenticationLatch = CountDownLatch(1)
-
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
             authInterface = deviceAuthenticator,
@@ -201,6 +196,8 @@ class DeviceBindingCallbackTest {
             assertTrue(deviceBindException.message == abort.message)
         }
 
+        verify(encryptedPref).delete(any())
+        verify(deviceAuthenticator).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid,
             "jey",
@@ -229,6 +226,8 @@ class DeviceBindingCallbackTest {
             assertTrue(e is DeviceBindingException)
         }
 
+        verify(encryptedPref).delete(any())
+        verify(deviceAuthenticator).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid,
             "jey",
@@ -241,7 +240,7 @@ class DeviceBindingCallbackTest {
         val rawContent =
             "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(false)
-        val testObject =  DeviceBindingCallbackMockTest(rawContent)
+        val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
                 authInterface = deviceAuthenticator,
@@ -259,6 +258,8 @@ class DeviceBindingCallbackTest {
             "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"Unsupported\"}]}"
         assertEquals(expectedOut, actualOutput)
 
+        verify(encryptedPref, times(0)).delete(any())
+        verify(deviceAuthenticator, times(0)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid,
@@ -283,10 +284,13 @@ class DeviceBindingCallbackTest {
                 "device_id")
             fail()
         } catch (e: Exception) {
-            assertTrue(e is java.lang.NullPointerException)
+            assertTrue(e is DeviceBindingException)
+            assertTrue(e.cause is java.lang.NullPointerException)
         }
 
-       verify(deviceAuthenticator, times(0)).authenticate(any())
+        verify(encryptedPref, times(0)).delete(any())
+        verify(deviceAuthenticator).deleteKeys(any())
+        verify(deviceAuthenticator, times(0)).authenticate(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(userid,
             "jey",

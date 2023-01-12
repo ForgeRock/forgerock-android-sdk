@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,6 +11,7 @@ import android.os.OperationCanceledException
 import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.AppPinAuthenticator
@@ -62,7 +63,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         //Test pin is cached for 1 sec
         assertThat(authenticator.size()).isGreaterThan(1000)
         assertThat(authenticator.pinRef.get()).isNotNull()
-        authenticator.worker.awaitTermination(3, TimeUnit.SECONDS)
+        delay(3000)
         assertThat(authenticator.pinRef.get()).isNull()
     }
 
@@ -176,6 +177,10 @@ class ApplicationPinDeviceAuthenticatorTest {
         }
 
         override fun delete(context: Context) {
+            byteArrayOutputStream = ByteArrayOutputStream(1024)
+        }
+
+        override fun deleteKeys(context: Context) {
             byteArrayOutputStream = ByteArrayOutputStream(1024)
         }
 

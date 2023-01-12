@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -198,10 +198,6 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                     }
                 }
             }
-        } catch (e: TimeoutCancellationException) {
-            handleException(Timeout(), e)
-        } catch (e: OperationCanceledException) {
-            handleException(Abort(), e)
         } catch (e: Exception) {
             // This Exception happens only when there is Signing or keypair failed.
             handleException(e)

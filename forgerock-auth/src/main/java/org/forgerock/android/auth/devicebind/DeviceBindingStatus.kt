@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -60,7 +60,7 @@ data class Success(val privateKey: PrivateKey) : DeviceBindingStatus
  * Exceptions for device binding
  */
 class DeviceBindingException : Exception {
-    internal val status: DeviceBindingErrorStatus
+    val status: DeviceBindingErrorStatus
 
     constructor(status: DeviceBindingErrorStatus) : super(status.message) {
         this.status = status

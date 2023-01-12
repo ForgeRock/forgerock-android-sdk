@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -194,41 +194,41 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
             return
         }
 
+        //TODO We may need to delete other keys if we only want to maintain one keys on the device
+        //TODO However, we may want to have Application Pin as fallback, so for now, keep multiple keys.
+        var keyPair: KeyPair? = null
         try {
-            val keyPair: KeyPair
             val status: DeviceBindingStatus
             withTimeout(getDuration(timeout)) {
-                keyPair = deviceAuthenticator.generateKeys(context);
+                keyPair = deviceAuthenticator.generateKeys(context)
                 status = deviceAuthenticator.authenticate(context)
             }
             when (status) {
                 is Success -> {
-                    val kid = encryptedPreference.persist(userId,
-                        userName,
-                        keyPair.keyAlias,
-                        deviceBindingAuthenticationType)
-                    val jws = deviceAuthenticator.sign(keyPair,
-                        kid,
-                        userId,
-                        challenge,
-                        getExpiration(timeout))
-                    setJws(jws)
-                    setDeviceId(deviceId)
+                    keyPair?.let {
+                        val kid = encryptedPreference.persist(userId,
+                            userName,
+                            it.keyAlias,
+                            deviceBindingAuthenticationType)
+                        val jws = deviceAuthenticator.sign(it,
+                            kid,
+                            userId,
+                            challenge,
+                            getExpiration(timeout))
+                        setJws(jws)
+                        setDeviceId(deviceId)
+                    }
                 }
                 is DeviceBindingErrorStatus -> {
                     handleException(DeviceBindingException(status))
                 }
             }
-        } catch (e: OperationCanceledException) {
-            handleException(Abort(), e)
-        } catch (e: TimeoutCancellationException) {
-            handleException(Timeout(), e)
         } catch (e: Exception) {
-            // This Exception happens only when there is Signing or keypair failed.
+            keyPair?.let { encryptedPreference.delete(it.keyAlias) }
+            deviceAuthenticator.deleteKeys(context)
             handleException(e)
         }
     }
-
 }
 
 

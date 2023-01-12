@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.CryptoKey
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -50,6 +51,7 @@ import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+private val TAG = DeviceAuthenticator::class.java.simpleName
 /**
  * Device Authenticator Interface
  */
@@ -116,6 +118,8 @@ interface DeviceAuthenticator {
 
     fun type(): DeviceBindingAuthenticationType
 
+    fun deleteKeys(context: Context)
+
 }
 
 fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) {
@@ -159,6 +163,14 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
 
     fun setBiometricHandler(biometricHandler: BiometricHandler) {
         this.biometricInterface = biometricHandler
+    }
+
+    override fun deleteKeys(context: Context) {
+        try {
+            cryptoKey.deleteKeys()
+        } catch (e: Exception) {
+            Logger.warn(TAG, e, e.message)
+        }
     }
 
     /**
@@ -307,6 +319,14 @@ open class None : CryptoAware, DeviceAuthenticator {
      * Default is true for None type
      */
     override fun isSupported(context: Context): Boolean = true
+
+    override fun deleteKeys(context: Context) {
+        try {
+            cryptoKey.deleteKeys()
+        } catch (e: Exception) {
+            Logger.warn(TAG, e, e.message)
+        }
+    }
 
     final override fun type(): DeviceBindingAuthenticationType =
         DeviceBindingAuthenticationType.NONE
