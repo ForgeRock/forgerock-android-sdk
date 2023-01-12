@@ -116,20 +116,36 @@ open class WebAuthnDataRepository internal constructor(val context: Context,
         }?.sortedWith(compareBy<PublicKeyCredentialSource> { it.otherUI }.thenBy { it.created } )  ?: emptyList()
     }
 
-    fun deleteByUserIdAndRpId(userId: ByteArray, rpId: String) {
+    /**
+     * Delete the provided [PublicKeyCredentialSource]
+     * @param publicKeyCredentialSource The [PublicKeyCredentialSource] to be deleted
+     */
+    fun delete(publicKeyCredentialSource: PublicKeyCredentialSource) {
         if (!this::dataRepository.isInitialized) {
             warn(TAG, "UsernameLess cannot be supported. No credential will be stored")
             return
         }
 
-        val storedCredentials = dataRepository.getStringSet(rpId, null)?.filter {
-            fromJson(JSONObject(it)).userHandle.contentEquals(userId).not()
-        }?.toSet()
+        val storedCredentials =
+            getPublicKeyCredentialSource(publicKeyCredentialSource.rpid).filter {
+                it.id.contentEquals(publicKeyCredentialSource.id).not()
+            }.map { it.toJson().toString() }.toSet()
 
-        storedCredentials?.let {
-            dataRepository.edit().putStringSet(rpId, it).apply()
+        dataRepository.edit()
+            .putStringSet(publicKeyCredentialSource.rpid, storedCredentials)
+            .apply()
+    }
+
+    /**
+     * Delete all the [PublicKeyCredentialSource] with provided rpId
+     * @param rpId The rpId to be deleted
+     */
+    fun delete(rpId: String) {
+        if (!this::dataRepository.isInitialized) {
+            warn(TAG, "UsernameLess cannot be supported. No credential will be stored")
+            return
         }
-
+        dataRepository.edit().remove(rpId).apply()
     }
 
     class WebAuthnDataRepositoryBuilder internal constructor() {

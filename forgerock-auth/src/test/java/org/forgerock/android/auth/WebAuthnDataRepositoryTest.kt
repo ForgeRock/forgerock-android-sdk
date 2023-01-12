@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -99,22 +99,33 @@ class WebAuthnDataRepositoryTest {
         assertThat(sources[0].otherUI).isEqualTo(source3.otherUI)
         assertThat(sources[0].userHandle).isEqualTo(source3.userHandle)
         assertThat(sources[0].type).isEqualTo(source3.type)
-
     }
 
     @Test
     fun testDelete() {
         repository.persist(source1)
         repository.persist(source2)
-        repository.deleteByUserIdAndRpId(source1.userHandle, source1.rpid)
+        repository.delete(source1)
         val sources = repository.getPublicKeyCredentialSource(source2.rpid)
         assertThat(sources).hasSize(1)
         assertThat(sources[0].id).isEqualTo(source2.id)
     }
 
     @Test
+    fun testDeleteByRpId() {
+        repository.persist(source1)
+        repository.persist(source2)
+        var sources = repository.getPublicKeyCredentialSource(source1.rpid)
+        assertThat(sources).hasSize(2)
+        repository.delete(source1.rpid)
+        sources = repository.getPublicKeyCredentialSource(source1.rpid)
+        assertThat(sources).isEmpty()
+
+    }
+
+    @Test
     fun testDeleteEmpty() {
-        repository.deleteByUserIdAndRpId(source1.userHandle, source1.rpid)
+        repository.delete(source1)
         val sources = repository.getPublicKeyCredentialSource(source2.rpid)
         assertThat(sources).hasSize(0)
     }
@@ -122,7 +133,7 @@ class WebAuthnDataRepositoryTest {
     @Test
     fun testDeleteEmptyAfter() {
         repository.persist(source1)
-        repository.deleteByUserIdAndRpId(source1.userHandle, source1.rpid)
+        repository.delete(source1)
         val sources = repository.getPublicKeyCredentialSource(source2.rpid)
         assertThat(sources).hasSize(0)
     }

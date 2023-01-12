@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,12 +14,16 @@ import static android.view.View.VISIBLE;
 import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 import static org.forgerock.android.auth.ui.SimpleLoginActivity.ERROR_EXTRA;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -325,6 +329,12 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> content.setText(e.getMessage()));
                 }
 
+            case R.id.webAuthn:
+                success.setVisibility(INVISIBLE);
+                content.setText("");
+                listWebAuthnCredentials();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -390,6 +400,55 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(INVISIBLE);
             content.setText("No User Session");
         }
+    }
+
+    private void listWebAuthnCredentials() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("List WebAuthn Credentials");
+        builder.setMessage("List all credentials by RpId");
+        final EditText rpIdInput = new EditText(this);
+        rpIdInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(rpIdInput);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String rpId = rpIdInput.getText().toString();
+                dialog.dismiss();
+
+                progressBar.setVisibility(INVISIBLE);
+                content.setText("");
+
+                if (rpId != null) {
+
+                    Intent webAuthnList = new Intent(MainActivity.this, WebAuthnKeysListActivity.class);
+                    webAuthnList.putExtra("RPID", rpId);
+                    MainActivity.this.startActivity(webAuthnList);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                progressBar.setVisibility(INVISIBLE);
+                content.setText("");
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener( new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.GRAY);
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.WHITE);
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setBackgroundColor(Color.DKGRAY);
+            }
+        });
+
+        dialog.show();
     }
 
     private void checkPermission() {
