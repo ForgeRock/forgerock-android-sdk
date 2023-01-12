@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,7 +9,7 @@ apply plugin: 'org.jetbrains.dokka'
 
 
 /**
- * Generate Javadoc, delombok then generate Javadoc
+ * Generate Kdoc, delombok then generate Javadoc
  */
 configurations {
     delombok
@@ -34,7 +34,14 @@ dokkaJavadoc {
         named("main") {
             // Main source set conf
             outputDirectory = file("build/javadoc/$project.name-dokka")
+            sourceDirs = files("$buildDir/src-delomboked")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+            noAndroidSdkLink.set(false)
+            includeNonPublic.set(true)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(true)
+            skipDeprecated.set(false)
+
         }
     }
 }
@@ -44,7 +51,14 @@ dokkaHtml {
         named("main") {
             // Main source set conf
             outputDirectory = file("build/html/$project.name-dokka")
+            sourceDirs = files("$buildDir/src-delomboked")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+            noAndroidSdkLink.set(false)
+            includeNonPublic.set(true)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(true)
+            skipDeprecated.set(false)
+
         }
     }
 }
