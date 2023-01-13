@@ -23,3 +23,6 @@ project(':quickstart').projectDir = new File('samples/quickstart')
 
 include ':kotlin'
 project(':kotlin').projectDir = new File('samples/kotlin')
+
+include ':app'
+project(':app').projectDir = new File('samples/app')
