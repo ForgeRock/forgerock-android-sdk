@@ -9,35 +9,32 @@ package org.forgerock.android.auth.devicebind
 import android.content.Context
 import android.os.OperationCanceledException
 import androidx.annotation.VisibleForTesting
-import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import org.forgerock.android.auth.AppPinAuthenticator
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.EncryptedFileKeyStore
-import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.KeyStoreRepository
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnAuthorize
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnRegister
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.KeyStore
 import java.security.UnrecoverableKeyException
 import java.security.interfaces.RSAPublicKey
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 private val TAG = ApplicationPinDeviceAuthenticator::class.java.simpleName
+
 /**
  * Device Authenticator which use Application PIN to secure device cryptography keys
  */
-open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
-    KeyStoreRepository {
+open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollector = DefaultPinCollector()) :
+    CryptoAware, DeviceAuthenticator, KeyStoreRepository {
 
     @VisibleForTesting
     internal lateinit var appPinAuthenticator: AppPinAuthenticator
@@ -53,7 +50,7 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
     internal val worker = Executors.newSingleThreadScheduledExecutor()
 
     override suspend fun generateKeys(context: Context): KeyPair {
-        val pin = requestForCredentials()
+        val pin = pinCollector.collectPin(prompt)
         pinRef.set(pin)
         //This allow a user to have an biometric key + application pin
         val alias = appPinAuthenticator.getKeyAlias() + pinSuffix
@@ -76,7 +73,7 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
             return getPrivateKey(context, it)
         }
         return try {
-            pin = requestForCredentials()
+            pin = pinCollector.collectPin(prompt)
             getPrivateKey(context, pin)
         } catch (e: OperationCanceledException) {
             Abort()
@@ -90,25 +87,6 @@ open class ApplicationPinDeviceAuthenticator : CryptoAware, DeviceAuthenticator,
     override fun isSupported(context: Context): Boolean {
         return true
     }
-
-    /**
-     * Request for user credential
-     * @param fragmentActivity The current [FragmentActivity]
-     * @throws throw [OperationCanceledException] will return [Abort] status
-     */
-    open suspend fun requestForCredentials(fragmentActivity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity()): CharArray =
-        withContext(Dispatchers.Main) {
-            suspendCancellableCoroutine { continuation ->
-                val existing =
-                    fragmentActivity.supportFragmentManager.findFragmentByTag(ApplicationPinFragment.TAG) as? ApplicationPinFragment
-                existing?.let {
-                    existing.continuation = continuation
-                } ?: run {
-                    ApplicationPinFragment.newInstance(prompt, continuation)
-                        .show(fragmentActivity.supportFragmentManager, ApplicationPinFragment.TAG)
-                }
-            }
-        }
 
     /**
      * Retrieve the Keystore Type, default to [KeyStore.getDefaultType]

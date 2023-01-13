@@ -23,6 +23,8 @@ import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.DeviceRepository
 import org.forgerock.android.auth.devicebind.KeyPair
 import org.forgerock.android.auth.devicebind.None
+import org.forgerock.android.auth.devicebind.PinCollector
+import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
 import org.forgerock.android.auth.devicebind.Success
 import org.json.JSONObject
@@ -342,15 +344,16 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
     }
 
 
-    override fun getDeviceAuthenticator(deviceBindingAuthenticationType: DeviceBindingAuthenticationType): DeviceAuthenticator {
+    override fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): DeviceAuthenticator {
 
-        if (deviceBindingAuthenticationType == DeviceBindingAuthenticationType.APPLICATION_PIN) {
-            val deviceAuthenticator = object : ApplicationPinDeviceAuthenticator() {
-                var byteArrayOutputStream = ByteArrayOutputStream(1024)
-
-                override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
+        if (type == DeviceBindingAuthenticationType.APPLICATION_PIN) {
+            val deviceAuthenticator = object : ApplicationPinDeviceAuthenticator(object : PinCollector {
+                override suspend fun collectPin(prompt: Prompt,
+                                                fragmentActivity: FragmentActivity): CharArray {
                     return "1234".toCharArray()
                 }
+            }) {
+                var byteArrayOutputStream = ByteArrayOutputStream(1024)
 
                 override fun getInputStream(context: Context): InputStream {
                     return byteArrayOutputStream.toByteArray().inputStream();
@@ -373,6 +376,6 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
             deviceAuthenticator.setKey(CryptoKey(userId))
             return deviceAuthenticator
         }
-        return super.getDeviceAuthenticator(deviceBindingAuthenticationType)
+        return super.getDeviceAuthenticator(type)
     }
 }

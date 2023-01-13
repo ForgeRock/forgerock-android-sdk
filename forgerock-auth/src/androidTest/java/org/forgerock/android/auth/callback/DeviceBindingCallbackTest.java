@@ -20,6 +20,7 @@ import org.forgerock.android.auth.InitProvider;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
+import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,12 +33,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
 
     @Test
     public void testDeviceBindingDefaults() throws ExecutionException, InterruptedException {
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "default")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "default") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
+            public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
                     Assert.assertNotNull(callback.getUserId());
@@ -68,12 +68,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
 
     @Test
     public void testDeviceBindingCustom() throws ExecutionException, InterruptedException {
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
+            public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
                     Assert.assertNotNull(callback.getUserId());
@@ -105,12 +104,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceBindingBind() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
+            public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
@@ -144,12 +142,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceBindingExceed() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "exceed-limit")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "exceed-limit") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
+            public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     Assertions.fail("Device bind node did NOT trigger the expected 'Exceeded Device Limit' outcome");
                     node.next(context, nodeListener);
@@ -178,12 +175,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceBindingCustomOutcome() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
+            public void onCallbackReceived(Node node) {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
@@ -215,33 +211,32 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceBindingApplicationPin() throws ExecutionException, InterruptedException {
         final int[] bindSuccess = {0};
-        CallbackFactory.getInstance().register(CustomApplicationPinDeviceBindingCallback.class);
 
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "pin")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "pin") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
-                if (node.getCallback(CustomApplicationPinDeviceBindingCallback.class) != null) {
-                    CustomApplicationPinDeviceBindingCallback callback = node.getCallback(CustomApplicationPinDeviceBindingCallback.class);
-                    callback.getDeviceAuthenticator().pin = "1234";
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceBindingCallback.class) != null) {
+                    DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
-                    callback.bind(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            bindSuccess[0]++;
-                            node.next(context, nodeListener);
-                        }
+                    callback.bind(context, deviceBindingAuthenticationType ->
+                                    new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "1234".toCharArray()),
+                            new FRListener<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    bindSuccess[0]++;
+                                    node.next(context, nodeListener);
+                                }
 
-                        @Override
-                        public void onException(Exception e) {
-                            Assertions.fail(e.getMessage());
-                        }
-                    });
+                                @Override
+                                public void onException(Exception e) {
+                                    Assertions.fail(e.getMessage());
+                                }
+                            });
                     return;
                 }
                 super.onCallbackReceived(node);

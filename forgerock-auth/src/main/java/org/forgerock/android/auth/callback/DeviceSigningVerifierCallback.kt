@@ -7,20 +7,14 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import android.os.OperationCanceledException
-import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.forgerock.android.auth.FRListener
-import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.Listener
+import org.forgerock.android.auth.devicebind.DefaultUserKeySelector
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
-import org.forgerock.android.auth.devicebind.DeviceBindFragment
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
@@ -30,6 +24,7 @@ import org.forgerock.android.auth.devicebind.SingleKeyFound
 import org.forgerock.android.auth.devicebind.Success
 import org.forgerock.android.auth.devicebind.UserDeviceKeyService
 import org.forgerock.android.auth.devicebind.UserKey
+import org.forgerock.android.auth.devicebind.UserKeySelector
 import org.forgerock.android.auth.devicebind.UserKeyService
 import org.forgerock.android.auth.devicebind.UserKeys
 import org.forgerock.android.auth.devicebind.initialize
@@ -115,27 +110,38 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     }
 
     /**
-     * Sign the device.
+     * Sign the challenge with bounded device keys.
      *
      * @param context  The Application Context
-     * @param listener The Listener to listen for the result
+     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
+     * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
-    open suspend fun sign(context: Context) {
-        execute(context)
+    open suspend fun sign(context: Context,
+                          userKeySelector: UserKeySelector = DefaultUserKeySelector(),
+                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
+        execute(context,
+            userKeySelector = userKeySelector,
+            deviceAuthenticator = deviceAuthenticator)
     }
 
 
     /**
-     * Bind the device.
+     * Sign the challenge with bounded device keys.
      *
      * @param context  The Application Context
+     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
+     * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
      */
-    open fun sign(context: Context, listener: FRListener<Void>) {
+    @JvmOverloads
+    open fun sign(context: Context,
+                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),
+                  deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
+                  listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                sign(context)
+                sign(context, userKeySelector, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -146,15 +152,13 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     /**
      * Helper method to execute signing, show biometric prompt.
      *
+     * @param context Application Context
      * @param userKey User Information
-     * @param listener The Listener to listen for the result
-     * @param deviceAuthenticator Interface to find the Authentication Type
+     * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [getDeviceAuthenticator] will be used if not provided
      */
-    @JvmOverloads
     protected open suspend fun authenticate(context: Context,
                                             userKey: UserKey,
-                                            deviceAuthenticator: DeviceAuthenticator = getDeviceBindAuthenticator(
-                                                userKey)) {
+                                            deviceAuthenticator: DeviceAuthenticator) {
 
         deviceAuthenticator.initialize(userKey.userId, Prompt(title, subtitle, description))
 
@@ -177,24 +181,23 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
 
     }
 
-    /**
-     * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
-     * @param context application or activity context
-     * @param userKeyService service to sort and fetch the keys stored in the device
-     * @param listener The Listener to listen for the result
-     */
     @JvmOverloads
     internal suspend fun execute(context: Context,
-                                 userKeyService: UserKeyService = UserDeviceKeyService(context)) {
+                                 userKeyService: UserKeyService = UserDeviceKeyService(context),
+                                 userKeySelector: UserKeySelector = DefaultUserKeySelector(),
+                                 deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator) {
 
         try {
             withTimeout(getDuration(timeout)) {
                 when (val status = userKeyService.getKeyStatus(userId)) {
                     is NoKeysFound -> handleException(DeviceBindingException(UnRegister()))
-                    is SingleKeyFound -> authenticate(context, status.key)
+                    is SingleKeyFound -> authenticate(context,
+                        status.key,
+                        deviceAuthenticator(status.key.authType))
                     else -> {
-                        val userKey = getUserKey(userKeyService = userKeyService)
-                        authenticate(context, userKey)
+                        val userKey =
+                            userKeySelector.selectUserKey(UserKeys(userKeyService.userKeys))
+                        authenticate(context, userKey, deviceAuthenticator(userKey.authType))
                     }
                 }
             }
@@ -203,38 +206,5 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
             handleException(e)
         }
     }
-
-    /**
-     * Display fragment to select a user key from the list
-     * @param activity activity to be used to display the Fragment
-     * @param userKeyService service to sort and fetch the keys stored in the device
-     * @param listener The Listener to listen for the result
-     */
-    protected open suspend fun getUserKey(activity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity(),
-                                          userKeyService: UserKeyService): UserKey =
-        withContext(Dispatchers.Main) {
-            suspendCancellableCoroutine { continuation ->
-                val existing =
-                    activity.supportFragmentManager.findFragmentByTag(DeviceBindFragment.TAG) as? DeviceBindFragment
-                if (existing != null) {
-                    existing.continuation = continuation
-                } else {
-                    DeviceBindFragment.newInstance(UserKeys(userKeyService.userKeys), continuation)
-                        .apply {
-                            this.show(activity.supportFragmentManager, DeviceBindFragment.TAG)
-                        }
-                }
-            }
-        }
-
-    /**
-     * Create the interface for the Authentication type(Biometric, Biometric_Fallback, none)
-     * @param userKey selected UserKey from the device
-     */
-    protected open fun getDeviceBindAuthenticator(userKey: UserKey): DeviceAuthenticator {
-        return getDeviceAuthenticator(userKey.authType)
-    }
-
-
 
 }

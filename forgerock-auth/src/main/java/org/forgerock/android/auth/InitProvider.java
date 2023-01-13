@@ -83,10 +83,12 @@ public class InitProvider extends ContentProvider {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
+                currentActivity = new WeakReference<>(activity);
             }
 
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
+                currentActivity = new WeakReference<>(activity);
             }
 
             @Override

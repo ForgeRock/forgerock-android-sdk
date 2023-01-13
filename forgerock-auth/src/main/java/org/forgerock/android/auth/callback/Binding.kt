@@ -10,7 +10,6 @@ import android.os.OperationCanceledException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Timeout
@@ -83,5 +82,13 @@ interface Binding {
     }
 
     fun setClientError(clientError: String?)
+
+    /**
+     * Default function to identify [DeviceAuthenticator]
+     */
+    val deviceAuthenticatorIdentifier: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator
+        get() = {
+            getDeviceAuthenticator(it)
+        }
 
 }

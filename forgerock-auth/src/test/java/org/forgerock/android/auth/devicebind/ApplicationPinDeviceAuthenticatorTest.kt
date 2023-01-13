@@ -35,6 +35,7 @@ class ApplicationPinDeviceAuthenticatorTest {
 
     private val activity = mock<FragmentActivity>()
     private val cryptoKey = CryptoKey("bob")
+    private val prompt = Prompt("","", "")
     var context = ApplicationProvider.getApplicationContext<Context>()
 
     @Before
@@ -78,8 +79,9 @@ class ApplicationPinDeviceAuthenticatorTest {
 
     // Its hard to test this scenario without mocking, the keystore has to return null value to test this case
     @Test
-    fun testUnRegisterWhenPrivateKeyIsNull(): Unit = runBlocking{
-        val authenticator: ApplicationPinDeviceAuthenticator = getApplicationPinDeviceAuthenticator()
+    fun testUnRegisterWhenPrivateKeyIsNull(): Unit = runBlocking {
+        val authenticator: ApplicationPinDeviceAuthenticator =
+            getApplicationPinDeviceAuthenticator()
         val mockAppPinAuthenticator = mock<AppPinAuthenticator>()
         whenever(mockAppPinAuthenticator.getPrivateKey(any(), any())).thenReturn(null)
         authenticator.appPinAuthenticator = mockAppPinAuthenticator
@@ -100,23 +102,26 @@ class ApplicationPinDeviceAuthenticatorTest {
         val authenticator = getApplicationPinDeviceAuthenticator()
         authenticator.generateKeys(context)
         //Using the same byte array buffer
-        val authenticator2 = object : NoEncryptionApplicationPinDeviceAuthenticator() {
-            override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
-                return ("invalidPin".toCharArray())
-            }
+        val authenticator2 =
+            object : NoEncryptionApplicationPinDeviceAuthenticator(object : PinCollector {
+                override suspend fun collectPin(prompt: Prompt,
+                                                fragmentActivity: FragmentActivity): CharArray {
+                    return ("invalidPin".toCharArray())
+                }
+            }) {
+                override fun getInputStream(context: Context): InputStream {
+                    return authenticator.getInputStream(context)
+                }
 
-            override fun getInputStream(context: Context): InputStream {
-                return authenticator.getInputStream(context)
-            }
+                override fun getOutputStream(context: Context): OutputStream {
+                    return authenticator.getOutputStream(context)
+                }
 
-            override fun getOutputStream(context: Context): OutputStream {
-                return authenticator.getOutputStream(context)
+                override fun delete(context: Context) {
+                    authenticator.delete(context)
+                }
             }
-
-            override fun delete(context: Context) {
-                authenticator.delete(context)
-            }
-        }
+        authenticator2.prompt(prompt)
         authenticator2.setKey(cryptoKey)
         val status = authenticator2.authenticate(context)
         assertThat(status).isEqualTo(UnAuthorize())
@@ -127,24 +132,29 @@ class ApplicationPinDeviceAuthenticatorTest {
         val authenticator = getApplicationPinDeviceAuthenticator()
         authenticator.generateKeys(context)
         //Using the same byte array buffer
-        val authenticator2 = object : NoEncryptionApplicationPinDeviceAuthenticator() {
-            override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
-                throw OperationCanceledException()
-            }
+        val authenticator2 =
+            object : NoEncryptionApplicationPinDeviceAuthenticator(object : PinCollector {
+                override suspend fun collectPin(prompt: Prompt,
+                                                fragmentActivity: FragmentActivity): CharArray {
+                    throw OperationCanceledException()
+                }
 
-            override fun getInputStream(context: Context): InputStream {
-                return authenticator.getInputStream(context)
-            }
+            }) {
 
-            override fun getOutputStream(context: Context): OutputStream {
-                return authenticator.getOutputStream(context)
-            }
+                override fun getInputStream(context: Context): InputStream {
+                    return authenticator.getInputStream(context)
+                }
 
-            override fun delete(context: Context) {
-                authenticator.delete(context)
+                override fun getOutputStream(context: Context): OutputStream {
+                    return authenticator.getOutputStream(context)
+                }
+
+                override fun delete(context: Context) {
+                    authenticator.delete(context)
+                }
             }
-        }
         authenticator2.setKey(cryptoKey)
+        authenticator2.prompt(prompt)
         val status = authenticator2.authenticate(context)
         assertThat(status).isEqualTo(Abort())
 
@@ -152,17 +162,20 @@ class ApplicationPinDeviceAuthenticatorTest {
 
     private fun getApplicationPinDeviceAuthenticator(): NoEncryptionApplicationPinDeviceAuthenticator {
         val authenticator = NoEncryptionApplicationPinDeviceAuthenticator()
+        authenticator.prompt(prompt)
         authenticator.setKey(cryptoKey)
         return authenticator
     }
 
-    open class NoEncryptionApplicationPinDeviceAuthenticator : ApplicationPinDeviceAuthenticator() {
-
-        var byteArrayOutputStream = ByteArrayOutputStream(1024)
-
-        override suspend fun requestForCredentials(fragmentActivity: FragmentActivity): CharArray {
+    open class NoEncryptionApplicationPinDeviceAuthenticator(pinCollector: PinCollector = object :
+        PinCollector {
+        override suspend fun collectPin(prompt: Prompt,
+                                        fragmentActivity: FragmentActivity): CharArray {
             return "1234".toCharArray()
         }
+    }) : ApplicationPinDeviceAuthenticator(pinCollector) {
+
+        var byteArrayOutputStream = ByteArrayOutputStream(1024)
 
         override fun getInputStream(context: Context): InputStream {
             return byteArrayOutputStream.toByteArray().inputStream();

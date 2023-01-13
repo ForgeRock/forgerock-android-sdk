@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,7 +20,9 @@ import org.forgerock.android.auth.devicebind.NoKeysFound
 import org.forgerock.android.auth.devicebind.SingleKeyFound
 import org.forgerock.android.auth.devicebind.Success
 import org.forgerock.android.auth.devicebind.UserKey
+import org.forgerock.android.auth.devicebind.UserKeySelector
 import org.forgerock.android.auth.devicebind.UserKeyService
+import org.forgerock.android.auth.devicebind.UserKeys
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -119,7 +121,7 @@ class DeviceSigningVerifierCallbackTest {
             keyPair.privateKey,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
-        val key = testObject.executeGetUserKey(mockFragmentActivity, userKeyService)
+        val key = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
         testObject.executeAuthenticate(context, key, deviceAuthenticator)
 
     }
@@ -141,7 +143,7 @@ class DeviceSigningVerifierCallbackTest {
 
         val testObject =
             DeviceSigningVerifierCallbackMock(rawContent)
-        testObject.executeAllKey(context, userKeyService)
+        testObject.executeAllKey(context, userKeyService) { deviceAuthenticator }
     }
 
     fun getExpiration(): Date {
@@ -163,20 +165,13 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String,
         authenticate(context, userKey, authInterface)
     }
 
-    suspend fun executeGetUserKey(activity: FragmentActivity,
-                                  viewModel: UserKeyService) : UserKey {
-        return getUserKey(activity, viewModel)
-    }
-
     suspend fun executeAllKey(context: Context,
-                              userKeyService: UserKeyService) {
-        super.execute(context, userKeyService)
+                              userKeyService: UserKeyService, authenticator: (DeviceBindingAuthenticationType) -> DeviceAuthenticator) {
+        super.execute(context, userKeyService, userKeySelector = object : UserKeySelector {
+            override suspend fun selectUserKey(userKeys: UserKeys,
+                                               fragmentActivity: FragmentActivity): UserKey {
+                return UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+            }
+        }, deviceAuthenticator = authenticator)
     }
-
-    override suspend fun getUserKey(activity: FragmentActivity,
-                                    userKeyService: UserKeyService): UserKey {
-        return UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
-
-    }
-
 }
