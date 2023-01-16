@@ -50,7 +50,7 @@ class WebAuthnRegistrationCallbackTest {
         val spCallback = spy(callback)
         doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
         whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
-        spCallback.register(context, node)
+        spCallback.register(context, node = node)
         val hiddenValueCallback = node.getCallback(HiddenValueCallback::class.java)
         assertThat(hiddenValueCallback.contentAsJson.getJSONArray("input").getJSONObject(0)
             .getString("value")).isEqualTo("SuccessResult")
@@ -67,7 +67,7 @@ class WebAuthnRegistrationCallbackTest {
         doThrow(Attachment.UnsupportedAttachmentException::class.java).`when`(spCallback)
             .getWebAuthnRegistration()
         try {
-            spCallback.register(context, node)
+            spCallback.register(context, node = node)
             failBecauseExceptionWasNotThrown(Attachment.UnsupportedAttachmentException::class.java)
         } catch (e: Attachment.UnsupportedAttachmentException) {
             assertThat(e).isInstanceOf(Attachment.UnsupportedAttachmentException::class.java)
@@ -91,11 +91,26 @@ class WebAuthnRegistrationCallbackTest {
         doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
         whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
         val future = FRListenerFuture<Void>()
-        spCallback.register(context, node, listener = future)
+        spCallback.register(context, node = node, listener = future)
         future.get()
         val hiddenValueCallback = node.getCallback(HiddenValueCallback::class.java)
         assertThat(hiddenValueCallback.contentAsJson.getJSONArray("input").getJSONObject(0)
             .getString("value")).isEqualTo("SuccessResult")
+    }
+
+    @Test
+    fun `Test device name append to the hidden value result`()  = runTest {
+        val nodeListener = DummyNodeListener()
+        val node = nodeListener.onCallbackReceived("",
+            JSONObject(getJson("/webAuthn_registration_71.json")))
+        val callback = node.getCallback(WebAuthnRegistrationCallback::class.java)
+        val spCallback = spy(callback)
+        doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
+        whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
+        spCallback.register(context, "MyDeviceName", node)
+        val hiddenValueCallback = node.getCallback(HiddenValueCallback::class.java)
+        assertThat(hiddenValueCallback.contentAsJson.getJSONArray("input").getJSONObject(0)
+            .getString("value")).isEqualTo("SuccessResult::MyDeviceName")
     }
 
 }

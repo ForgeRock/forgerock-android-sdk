@@ -9,8 +9,11 @@ package org.forgerock.android.auth.callback
 import com.google.android.gms.fido.fido2.api.common.Attachment
 import com.google.android.gms.fido.fido2.api.common.AttestationConveyancePreference
 import com.google.android.gms.fido.fido2.api.common.ErrorCode
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.exception.WebAuthnResponseException
+
+private val TAG = WebAuthnCallback::class.java.simpleName
 
 /**
  * Interface for WebAuthn Related callback
@@ -40,6 +43,7 @@ interface WebAuthnCallback {
      * @param e: The Exception
      */
     fun setErrorRethrow(node: Node, e: Exception) {
+        Logger.warn(TAG, e, e.message)
         when (e) {
             is WebAuthnResponseException -> {
                 if (e.errorCode == ErrorCode.NOT_SUPPORTED_ERR)

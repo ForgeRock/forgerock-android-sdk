@@ -43,13 +43,14 @@ open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
         residentKeyRequirement = requirement.name
     }
 
+
     /**
      * Perform WebAuthn Registration
      *
      * @param context The application context
      * @param node The current Node
      */
-    suspend fun register(context: Context, node: Node) {
+    suspend fun register(context: Context, deviceName: String? = null, node: Node) {
         try {
             val webAuthnRegistration = getWebAuthnRegistration()
             //Override the ResidentKeyRequirement
@@ -57,7 +58,8 @@ open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
                 webAuthnRegistration.options = webAuthnRegistration.options.cloneWith(
                     ResidentKeyRequirement.valueOf(it))
             }
-            val result = webAuthnRegistration.register(context)
+            var result = webAuthnRegistration.register(context)
+            deviceName?.apply { result += "::$deviceName" }
             setHiddenCallbackValue(node, result);
         } catch (e: Exception) {
             setErrorRethrow(node, e)
@@ -70,12 +72,13 @@ open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
      * @param node     The current Node
      * @param listener Listener to listen for WebAuthn Registration Event
      */
-    fun register(context: Context, node: Node,
+    @JvmOverloads
+    fun register(context: Context, deviceName: String? = null, node: Node,
                  listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                register(context, node)
+                register(context, deviceName, node)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)

@@ -2,6 +2,7 @@
 #### Added
 - Upgrade Google Fido Client to support PassKey [SDKS-2243]
 - Introduce FRWebAuthn interface to remove WebAuthn Reference Keys [SDKS-2272]
+- Interface to set Device Name during WebAuthn Registration [SDKS-2296]
 
 
 ## [3.4.0]
