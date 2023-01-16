@@ -7,10 +7,8 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
-import android.os.OperationCanceledException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.forgerock.android.auth.DeviceIdentifier
@@ -145,13 +143,17 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * Bind the device.
      *
      * @param context  The Application Context
+     * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
      */
-    open fun bind(context: Context, listener: FRListener<Void>) {
+    @JvmOverloads
+    open fun bind(context: Context,
+                  deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
+                  listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                bind(context)
+                bind(context, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -163,9 +165,11 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * Bind the device.
      *
      * @param context  The Application Context
+     * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
-    open suspend fun bind(context: Context) {
-        execute(context)
+    open suspend fun bind(context: Context,
+                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
+        execute(context, deviceAuthenticator(deviceBindingAuthenticationType))
     }
 
 

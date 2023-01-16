@@ -9,6 +9,9 @@ package org.forgerock.android.auth.callback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 
 import com.nimbusds.jwt.JWT;
@@ -23,6 +26,11 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
+import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
+import org.forgerock.android.auth.devicebind.DefaultUserKeySelector;
+import org.forgerock.android.auth.devicebind.DeviceAuthenticator;
+import org.forgerock.android.auth.devicebind.PinCollector;
+import org.forgerock.android.auth.devicebind.Prompt;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,6 +40,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import kotlin.coroutines.Continuation;
+import kotlin.jvm.functions.Function1;
+
 public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
     protected final static String APPLICATION_PIN = "1234";
@@ -39,42 +50,42 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
     @BeforeClass
     public static void bindDevice() throws ExecutionException, InterruptedException {
         final int[] bindSuccess = {0};
-        CallbackFactory.getInstance().register(CustomApplicationPinDeviceBindingCallback.class);
 
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind-pin")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "bind-pin") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
-                if (node.getCallback(CustomApplicationPinDeviceBindingCallback.class) != null) {
-                    CustomApplicationPinDeviceBindingCallback callback = node.getCallback(CustomApplicationPinDeviceBindingCallback.class);
-                    callback.getDeviceAuthenticator().pin = APPLICATION_PIN;
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceBindingCallback.class) != null) {
+                    DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
                     USER_ID = callback.getUserId();
-                    // Bind the device...
-                    callback.bind(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            bindSuccess[0]++;
-                            try {
-                                // Get the kid
-                                KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
-                                Logger.debug(TAG, KID);
-                            } catch (ParseException e) {
-                                Assertions.fail(e.getMessage());
-                            }
-                            node.next(context, nodeListener);
-                        }
 
-                        @Override
-                        public void onException(Exception e) {
-                            Assertions.fail(e.getMessage());
-                        }
-                    });
+                    // Bind the device...
+                    callback.bind(context, deviceBindingAuthenticationType ->
+                                    new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
+                            new FRListener<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    bindSuccess[0]++;
+                                    try {
+                                        // Get the kid
+                                        KID = JWTParser.parse((String) callback.getInputValue(0)).getHeader().toJSONObject().get("kid").toString();
+                                        Logger.debug(TAG, KID);
+                                    } catch (ParseException e) {
+                                        Assertions.fail(e.getMessage());
+                                    }
+                                    node.next(context, nodeListener);
+                                }
+
+                                @Override
+                                public void onException(Exception e) {
+                                    Assertions.fail(e.getMessage());
+                                }
+                            });
                     return;
                 }
                 super.onCallbackReceived(node);
@@ -97,58 +108,56 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
     public void testDeviceVerificationWithCorrectApplicationPin() throws ExecutionException, InterruptedException {
         final int[] signSuccess = {0};
         final int[] authSuccess = {0};
-        CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default") {
             final NodeListener<FRSession> nodeListener = this;
 
             @Override
-            public void onCallbackReceived(Node node)
-            {
-                if (node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class) != null) {
-                    CustomApplicationPinDeviceSigningVerifierCallback callback = node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class);
-                    callback.getDeviceAuthenticator().pin = APPLICATION_PIN;
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
 
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            // Verify the JWT attributes
-                            try {
-                                Calendar expMin = Calendar.getInstance();
-                                Calendar expMax = Calendar.getInstance();
-                                expMin.add(Calendar.SECOND, 55);
-                                expMax.add(Calendar.SECOND, 60);
+                    callback.sign(context, new DefaultUserKeySelector(),
+                            deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
+                            new FRListener<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    // Verify the JWT attributes
+                                    try {
+                                        Calendar expMin = Calendar.getInstance();
+                                        Calendar expMax = Calendar.getInstance();
+                                        expMin.add(Calendar.SECOND, 55);
+                                        expMax.add(Calendar.SECOND, 60);
 
-                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
-                                String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
-                                Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
-                                String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
-                                String jwtSub = jwt.getJWTClaimsSet().getSubject();
+                                        JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                        String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
+                                        Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                        String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
+                                        String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
-                                assertThat(jwtKid).isEqualTo(KID);
-                                assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
-                                assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
-                                assertThat(jwtSub).isEqualTo(callback.getUserId());
+                                        assertThat(jwtKid).isEqualTo(KID);
+                                        assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
+                                        assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
+                                        assertThat(jwtSub).isEqualTo(callback.getUserId());
 
-                                signSuccess[0]++;
-                                node.next(context, nodeListener);
-                            } catch (ParseException e) {
-                                Assertions.fail("Invalid JWT: " + e.getMessage());
-                            }
-                        }
+                                        signSuccess[0]++;
+                                        node.next(context, nodeListener);
+                                    } catch (ParseException e) {
+                                        Assertions.fail("Invalid JWT: " + e.getMessage());
+                                    }
+                                }
 
-                        @Override
-                        public void onException(Exception e) {
-                            // Signing of the challenge has failed unexpectedly...
-                            Assertions.fail(e.getMessage());
-                        }
-                    });
+                                @Override
+                                public void onException(Exception e) {
+                                    // Signing of the challenge has failed unexpectedly...
+                                    Assertions.fail(e.getMessage());
+                                }
+                            });
 
                     return;
                 }
@@ -179,37 +188,35 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
     public void testDeviceVerificationWithWrongApplicationPin() throws ExecutionException, InterruptedException {
         final int[] signFailure = {0};
 
-        CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default") {
             final NodeListener<FRSession> nodeListener = this;
 
             @Override
-            public void onCallbackReceived(Node node)
-            {
-                if (node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class) != null) {
-                    CustomApplicationPinDeviceSigningVerifierCallback callback = node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class);
-                    callback.getDeviceAuthenticator().pin = "WRONG";
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
 
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            node.next(context, nodeListener);
-                        }
+                    callback.sign(context, new DefaultUserKeySelector(),
+                            deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "WRONG".toCharArray()),
+                            new FRListener<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    node.next(context, nodeListener);
+                                }
 
-                        @Override
-                        public void onException(Exception e) {
-                            assertThat(e.getMessage()).isEqualTo("Invalid Credentials");
-                            signFailure[0]++;
-                            node.next(context, nodeListener);
-                        }
-                    });
+                                @Override
+                                public void onException(Exception e) {
+                                    assertThat(e.getMessage()).isEqualTo("Invalid Credentials");
+                                    signFailure[0]++;
+                                    node.next(context, nodeListener);
+                                }
+                            });
                     return;
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
@@ -240,59 +247,57 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         final int[] signSuccess = {0};
         final int[] authSuccess = {0};
 
-        CallbackFactory.getInstance().register(CustomApplicationPinDeviceSigningVerifierCallback.class);
-
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
 
-        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless")
-        {
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "usernameless") {
             final NodeListener<FRSession> nodeListener = this;
+
             @Override
-            public void onCallbackReceived(Node node)
-            {
-                if (node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class) != null) {
-                    CustomApplicationPinDeviceSigningVerifierCallback callback = node.getCallback(CustomApplicationPinDeviceSigningVerifierCallback.class);
-                    callback.getDeviceAuthenticator().pin = APPLICATION_PIN;
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
 
                     // In usernameless userId in the callback is empty...
                     assertThat(callback.getUserId()).isEmpty();
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new FRListener<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            // Verify the JWT attributes
-                            try {
-                                Calendar expMin = Calendar.getInstance();
-                                Calendar expMax = Calendar.getInstance();
-                                expMin.add(Calendar.SECOND, 55);
-                                expMax.add(Calendar.SECOND, 60);
+                    callback.sign(context, new DefaultUserKeySelector(),
+                            deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
+                            new FRListener<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    // Verify the JWT attributes
+                                    try {
+                                        Calendar expMin = Calendar.getInstance();
+                                        Calendar expMax = Calendar.getInstance();
+                                        expMin.add(Calendar.SECOND, 55);
+                                        expMax.add(Calendar.SECOND, 60);
 
-                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
-                                String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
-                                Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
-                                String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
-                                String jwtSub = jwt.getJWTClaimsSet().getSubject();
+                                        JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                        String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
+                                        Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                        String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
+                                        String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
-                                assertThat(jwtKid).isEqualTo(KID);
-                                assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
-                                assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
-                                assertThat(jwtSub).isEqualTo(USER_ID);
+                                        assertThat(jwtKid).isEqualTo(KID);
+                                        assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
+                                        assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
+                                        assertThat(jwtSub).isEqualTo(USER_ID);
 
-                                signSuccess[0]++;
-                                node.next(context, nodeListener);
-                            } catch (ParseException e) {
-                                Assertions.fail("Invalid JWT: " + e.getMessage());
-                            }
-                        }
+                                        signSuccess[0]++;
+                                        node.next(context, nodeListener);
+                                    } catch (ParseException e) {
+                                        Assertions.fail("Invalid JWT: " + e.getMessage());
+                                    }
+                                }
 
-                        @Override
-                        public void onException(Exception e) {
-                            // Signing of the challenge has failed unexpectedly...
-                            Assertions.fail(e.getMessage());
-                        }
-                    });
+                                @Override
+                                public void onException(Exception e) {
+                                    // Signing of the challenge has failed unexpectedly...
+                                    Assertions.fail(e.getMessage());
+                                }
+                            });
 
                     return;
                 }
