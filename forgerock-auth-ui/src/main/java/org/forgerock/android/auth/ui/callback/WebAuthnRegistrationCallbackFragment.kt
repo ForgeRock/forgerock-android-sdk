@@ -40,7 +40,7 @@ open class WebAuthnRegistrationCallbackFragment : CallbackFragment<WebAuthnRegis
         scope.launch {
             try {
                 callback.setResidentKeyRequirement(ResidentKeyRequirement.RESIDENT_KEY_DISCOURAGED)
-                callback.register(requireContext(), node)
+                callback.register(requireContext(), node = node)
                 next()
             } catch (e: CancellationException) {
                 //ignore
