@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -84,7 +84,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -180,7 +179,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -279,7 +277,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -336,7 +333,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -400,7 +396,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -534,7 +529,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -604,7 +598,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(ssoManagerSharedPreferences);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
@@ -687,7 +680,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -935,7 +927,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1070,7 +1061,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1145,7 +1135,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1215,7 +1204,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1282,7 +1270,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1343,7 +1330,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 
@@ -1410,7 +1396,6 @@ public class FRUserMockTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRUser> nodeListenerFuture = new NodeListenerFuture<FRUser>() {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -60,7 +60,6 @@ class BrowserLoginTest : BaseTest() {
             DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE
         )
         Config.getInstance().url = url
-        Config.getInstance().encryptor = MockEncryptor()
 
         val scenario: ActivityScenario<DummyActivity> = ActivityScenario.launch(DummyActivity::class.java)
         scenario.onActivity {

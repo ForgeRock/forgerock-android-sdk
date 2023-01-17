@@ -25,10 +25,6 @@
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
 
-    <!-- Single Sign-On Details -->
-    <string name="forgerock">ForgeRock SDK Tutorial</string>
-    <string name="forgerock_account_name" translatable="false">Demo User</string>
-
     <string name="asset_statements" translatable="false">
 [{
   \"include\": \"https://example.com/.well-known/assetlinks.json\"

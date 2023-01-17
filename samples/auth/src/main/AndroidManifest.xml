@@ -7,8 +7,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.forgerock.auth"
-    android:sharedUserId="org.forgerock.singleSignOn">
+    package="org.forgerock.auth">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -46,18 +45,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
-
-        <service
-            android:name="org.forgerock.android.auth.authenticator.AuthenticatorService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/forgerock_authenticator" />
-        </service>
 
         <activity android:name="org.forgerock.auth.MainActivity"
             android:exported="true">

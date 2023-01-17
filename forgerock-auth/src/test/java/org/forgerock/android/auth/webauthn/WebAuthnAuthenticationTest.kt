@@ -1,15 +1,13 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
-import android.accounts.AccountManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.fido.fido2.api.common.AuthenticatorAssertionResponse
@@ -20,7 +18,6 @@ import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.json.JSONObject
-import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock

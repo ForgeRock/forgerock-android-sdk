@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.core.app.ActivityScenario;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.common.api.ApiException;
@@ -46,7 +47,7 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class SocialLoginTest extends BaseTest {
 
     private static final String DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest";
@@ -83,7 +84,6 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
 
@@ -125,7 +125,6 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
@@ -230,7 +229,6 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         //Create a dummy Fragment
         ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
@@ -295,7 +293,6 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         ActivityScenario scenario = ActivityScenario.launch(DummyActivity.class);
         scenario.onActivity(InitProvider::setCurrentActivity);
@@ -390,7 +387,6 @@ public class SocialLoginTest extends BaseTest {
         Config.getInstance().setSharedPreferences(context.getSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         FragmentActivity fragmentActivity = Robolectric.buildActivity(FragmentActivity.class).setup().get();
         InitProvider.setCurrentActivity(fragmentActivity);

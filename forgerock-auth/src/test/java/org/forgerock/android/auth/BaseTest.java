@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -49,7 +49,6 @@ public class BaseTest {
 
         Config.getInstance().init(context, null);
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         serverConfig = Config.getInstance().getServerConfig();
         oAuth2Client = getOAuth2Client();

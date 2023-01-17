@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -16,23 +16,38 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class FRAuthMockTest extends BaseTest {
+
+    private SharedPreferences sharedPreferences;
+
+    @Before
+    public void setUp() throws Exception {
+        sharedPreferences = context.getSharedPreferences("Dummy", MODE_PRIVATE);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        sharedPreferences.edit().clear().commit();
+    }
 
     @Test
     public void frAuthHappyPath() throws InterruptedException, ExecutionException {
@@ -42,9 +57,9 @@ public class FRAuthMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
         final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
+                .sharedPreferences(sharedPreferences)
                 .serverConfig(serverConfig)
                 .context(context)
-                .encryptor(new MockEncryptor())
                 .build();
 
         final FRAuth frAuth = FRAuth.builder()
@@ -104,8 +119,8 @@ public class FRAuthMockTest extends BaseTest {
         Config.getInstance().init(context, null);
 
         final SingleSignOnManager singleSignOnManager = DefaultSingleSignOnManager.builder()
+                .sharedPreferences(sharedPreferences)
                 .context(context)
-                .encryptor(new MockEncryptor())
                 .build();
 
         final FRAuth frAuth = FRAuth.builder()
@@ -211,8 +226,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getRealm(), sharedPreferences.getString("realm", null));
         assertEquals(Config.getInstance().getCookieName(), sharedPreferences.getString("cookieName", null));
         assertEquals(Config.getInstance().getClientId(), sharedPreferences.getString("client_id", null));
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), sharedPreferences.getString("end_session_endpoint", null));
-        assertEquals(Config.getInstance().getRevokeEndpoint(), sharedPreferences.getString("revoke_endpoint", null));
         assertEquals(Config.getInstance().getScope(), sharedPreferences.getString("scope", null));
         assertEquals(Config.getInstance().getRedirectUri(), sharedPreferences.getString("redirect_uri", null));
 
@@ -223,8 +236,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getRealm(), sharedPreferences.getString("realm", null));
         assertEquals(Config.getInstance().getCookieName(), sharedPreferences.getString("cookieName", null));
         assertEquals(Config.getInstance().getClientId(), sharedPreferences.getString("client_id", null));
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), sharedPreferences.getString("end_session_endpoint", null));
-        assertEquals(Config.getInstance().getRevokeEndpoint(), sharedPreferences.getString("revoke_endpoint", null));
         assertEquals(Config.getInstance().getScope(), sharedPreferences.getString("scope", null));
         assertEquals(Config.getInstance().getRedirectUri(), sharedPreferences.getString("redirect_uri", null));
 
@@ -248,7 +259,7 @@ public class FRAuthMockTest extends BaseTest {
             frOptionsBuilder.oauth(oAuthBuilder -> {
                 oAuthBuilder.setOauthClientId("client_id");
                 oAuthBuilder.setOauthRedirectUri("https://redirecturi");
-               oAuthBuilder.setOauthScope("scope");
+                oAuthBuilder.setOauthScope("scope");
                 oAuthBuilder.setOauthThresholdSeconds(5000);
                 return null;
             });
@@ -270,7 +281,7 @@ public class FRAuthMockTest extends BaseTest {
                 serviceBuilder.setAuthServiceName("auth_service");
                 serviceBuilder.setRegistrationServiceName("reg_service");
                 return null;
-            } );
+            });
             return null;
         });
 
@@ -280,8 +291,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getRealm(), sharedPreferences.getString("realm", null));
         assertEquals(Config.getInstance().getCookieName(), sharedPreferences.getString("cookieName", null));
         assertEquals(Config.getInstance().getClientId(), sharedPreferences.getString("client_id", null));
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), sharedPreferences.getString("end_session_endpoint", null));
-        assertEquals(Config.getInstance().getRevokeEndpoint(), sharedPreferences.getString("revoke_endpoint", null));
         assertEquals(Config.getInstance().getScope(), sharedPreferences.getString("scope", null));
         assertEquals(Config.getInstance().getRedirectUri(), sharedPreferences.getString("redirect_uri", null));
 
@@ -298,14 +307,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getTimeout(), frOptions.getServer().getTimeout());
         assertEquals(Config.getInstance().getUrl(), frOptions.getServer().getUrl());
 
-        assertEquals(Config.getInstance().getAuthorizeEndpoint(), frOptions.getUrlPath().getAuthorizeEndpoint());
-        assertEquals(Config.getInstance().getRevokeEndpoint(), frOptions.getUrlPath().getRevokeEndpoint());
-        assertEquals(Config.getInstance().getAuthenticateEndpoint(), frOptions.getUrlPath().getAuthenticateEndpoint());
-        assertEquals(Config.getInstance().getSessionEndpoint(), frOptions.getUrlPath().getSessionEndpoint());
-        assertEquals(Config.getInstance().getUserinfoEndpoint(), frOptions.getUrlPath().getUserinfoEndpoint());
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), frOptions.getUrlPath().getEndSessionEndpoint());
-        assertEquals(Config.getInstance().getTokenEndpoint(), frOptions.getUrlPath().getTokenEndpoint());
-
         assertEquals(Config.getInstance().getRedirectUri(), frOptions.getOauth().getOauthRedirectUri());
         assertEquals(Config.getInstance().getScope(), frOptions.getOauth().getOauthScope());
         assertEquals(Config.getInstance().getClientId(), frOptions.getOauth().getOauthClientId());
@@ -321,8 +322,6 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getRealm(), sharedPreferences1.getString("realm", null));
         assertEquals(Config.getInstance().getCookieName(), sharedPreferences1.getString("cookieName", null));
         assertEquals(Config.getInstance().getClientId(), sharedPreferences1.getString("client_id", null));
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), sharedPreferences1.getString("end_session_endpoint", null));
-        assertEquals(Config.getInstance().getRevokeEndpoint(), sharedPreferences1.getString("revoke_endpoint", null));
         assertEquals(Config.getInstance().getScope(), sharedPreferences1.getString("scope", null));
         assertEquals(Config.getInstance().getRedirectUri(), sharedPreferences1.getString("redirect_uri", null));
 
@@ -337,20 +336,12 @@ public class FRAuthMockTest extends BaseTest {
         assertEquals(Config.getInstance().getTimeout(), 30);
         assertEquals(Config.getInstance().getUrl(), "https://openam.example.com:8081/openam");
 
-        assertEquals(Config.getInstance().getAuthorizeEndpoint(), "");
-        assertEquals(Config.getInstance().getRevokeEndpoint(), "");
-        assertEquals(Config.getInstance().getAuthenticateEndpoint(),"");
-        assertEquals(Config.getInstance().getSessionEndpoint(), "");
-        assertEquals(Config.getInstance().getUserinfoEndpoint(), "");
-        assertEquals(Config.getInstance().getEndSessionEndpoint(), "");
-        assertEquals(Config.getInstance().getTokenEndpoint(), "");
-
         assertEquals(Config.getInstance().getRedirectUri(), "https://www.example.com:8080/callback");
         assertEquals(Config.getInstance().getScope(), "openid email address");
         assertEquals(Config.getInstance().getClientId(), "andy_app");
         assertEquals(Config.getInstance().getOauthCacheMillis(), Long.valueOf(0));
-        assertEquals(Config.getInstance().getOauthThreshold(),  Long.valueOf(30));
-        assertEquals(Config.getInstance().getCookieCacheMillis(),  Long.valueOf(0));
+        assertEquals(Config.getInstance().getOauthThreshold(), Long.valueOf(30));
+        assertEquals(Config.getInstance().getCookieCacheMillis(), Long.valueOf(0));
 
     }
 }

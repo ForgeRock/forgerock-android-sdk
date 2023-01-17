@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.OperationCanceledException;
 import android.util.Pair;
@@ -31,8 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.android.auth.Action.AUTHENTICATE;
 
-@RunWith(RobolectricTestRunner.class)
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+@RunWith(AndroidJUnit4.class)
 public class FRSessionMockTest extends BaseTest {
+
+    private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
+
 
     @After
     public void closeSession() throws Exception {
@@ -49,7 +55,7 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -88,7 +94,7 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -150,7 +156,7 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -189,7 +195,7 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success_withNoSession.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -238,7 +244,6 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_success_withNoSession.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 
@@ -297,7 +302,6 @@ public class FRSessionMockTest extends BaseTest {
         enqueue("/authTreeMockTest_Authenticate_EmailSuspended.json", HttpURLConnection.HTTP_OK);
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
 
         final boolean[] suspended = {false};
 
@@ -355,7 +359,7 @@ public class FRSessionMockTest extends BaseTest {
         });
 
         Config.getInstance().setUrl(getUrl());
-        Config.getInstance().setEncryptor(new MockEncryptor());
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
 
         NodeListenerFuture nodeListenerFuture = new NodeListenerFuture() {
 

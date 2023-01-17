@@ -24,11 +24,6 @@
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
 
-
-    <!-- SSO -->
-    <string name="forgerock">ForgeRock</string> <!-- Account Label -->
-    <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
-
     <!-- Service -->
     <string name="forgerock_auth_service" translatable="false">NamePasswordCallbackTest</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>

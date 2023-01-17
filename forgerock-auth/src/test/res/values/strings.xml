@@ -25,12 +25,6 @@
         <item>9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=</item>
     </string-array>
 
-
-    <!-- SSO -->
-    <string name="forgerock">ForgeRock</string> <!-- Account Label -->
-    <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
-    <bool name="forgerock_enable_sso" traslatable="false">false</bool>
-
     <!-- Service -->
     <string name="forgerock_auth_service" translatable="false">Test</string>
     <string name="forgerock_registration_service" translatable="false">Registration</string>

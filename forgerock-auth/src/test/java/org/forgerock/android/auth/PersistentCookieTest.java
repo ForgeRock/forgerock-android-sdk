@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,13 +23,20 @@ import java.util.concurrent.ExecutionException;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(RobolectricTestRunner.class)
+import android.content.Context;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+@RunWith(AndroidJUnit4.class)
 public class PersistentCookieTest extends BaseTest {
+
+    private static final String DEFAULT_SSO_TOKEN_MANAGER_TEST = "DefaultSSOManagerTest";
 
     @Before
     public void setupConfig() throws Exception {
         //Since the application context changed for each test, we cannot cache the storage in SecureCookieJar.
         OkHttpClientProvider.getInstance().clear();
+        Config.getInstance().setSsoSharedPreferences(context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE));
     }
 
     @Test
@@ -44,7 +51,6 @@ public class PersistentCookieTest extends BaseTest {
                 .setBody(getJson("/authTreeMockTest_Authenticate_success.json")));
 
         enqueue("/authTreeMockTest_Authenticate_success.json", HTTP_OK);
-
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new NodeListenerFuture<FRSession>() {
 
