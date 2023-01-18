@@ -97,7 +97,8 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
 
     //Make it optional for developer
-    compileOnly 'com.google.android.gms:play-services-location:21.0.1'
+    //There is an issue for later version of location services https://github.com/mapbox/mapbox-maps-android/issues/1752
+    compileOnly 'com.google.android.gms:play-services-location:20.0.0'
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
     compileOnly 'net.openid:appauth:0.7.1'
     compileOnly 'com.google.android.gms:play-services-fido:19.0.0'
@@ -118,7 +119,7 @@ dependencies {
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    androidTestImplementation 'com.google.android.gms:play-services-location:21.0.1'
+    androidTestImplementation 'com.google.android.gms:play-services-location:20.0.0'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
     androidTestImplementation 'com.google.android.gms:play-services-fido:19.0.0'
