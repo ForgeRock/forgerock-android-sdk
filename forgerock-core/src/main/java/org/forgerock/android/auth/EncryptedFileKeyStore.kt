@@ -15,7 +15,8 @@ import java.io.OutputStream
 /**
  * An implementation of [KeyStoreRepository] which use [EncryptedFile] to store the KeyStore
  */
-class EncryptedFileKeyStore(val identifier: String) : KeyStoreRepository {
+class EncryptedFileKeyStore(val identifier: String,
+                            private val aliasName: String = "org.forgerock.v1.DEVICE_REPO_BKS") : KeyStoreRepository {
 
     override fun getInputStream(context: Context): InputStream {
         return getEncryptedFile(context).openFileInput();
@@ -35,7 +36,7 @@ class EncryptedFileKeyStore(val identifier: String) : KeyStoreRepository {
         if (createNew and file.exists()) {
             file.delete();
         }
-        return org.forgerock.android.auth.EncryptedFile.getInstance(context, file)
+        return org.forgerock.android.auth.EncryptedFile.getInstance(context, file, aliasName)
     }
 
 
