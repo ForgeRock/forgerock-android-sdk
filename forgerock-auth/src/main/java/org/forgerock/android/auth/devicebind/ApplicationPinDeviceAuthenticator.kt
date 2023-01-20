@@ -117,12 +117,12 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
         }
     }
 
-    override fun getInputStream(context: Context): InputStream {
-        return keyStore.getInputStream(context)
+    override fun getInputStream(context: Context,  keyAlias: String): InputStream {
+        return keyStore.getInputStream(context, keyAlias)
     }
 
-    override fun getOutputStream(context: Context): OutputStream {
-        return keyStore.getOutputStream(context)
+    override fun getOutputStream(context: Context,  keyAlias: String): OutputStream {
+        return keyStore.getOutputStream(context, keyAlias)
     }
 
     override fun getKeystoreType(): String {

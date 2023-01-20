@@ -7,11 +7,6 @@
 package org.forgerock.android.auth
 
 import android.content.Context
-import java.math.BigInteger
-import java.security.KeyPair
-import java.security.PrivateKey
-import java.security.cert.X509Certificate
-import java.util.*
 import org.spongycastle.asn1.x500.X500Name
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
@@ -22,10 +17,19 @@ import org.spongycastle.crypto.util.PrivateKeyFactory
 import org.spongycastle.operator.DefaultDigestAlgorithmIdentifierFinder
 import org.spongycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
 import org.spongycastle.operator.bc.BcRSAContentSignerBuilder
+import java.io.ByteArrayInputStream
+import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.math.BigInteger
+import java.security.KeyPair
 import java.security.KeyStore
+import java.security.PrivateKey
 import java.security.UnrecoverableKeyException
+import java.security.cert.X509Certificate
 import java.security.spec.RSAKeyGenParameterSpec
+import java.util.*
+
 
 private val TAG = AppPinAuthenticator::class.java.simpleName
 /**
@@ -81,8 +85,9 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
 
     private fun getKeyStore(context: Context): KeyStore {
         val keystore = KeyStore.getInstance(keyStoreRepository.getKeystoreType())
-        keyStoreRepository.getInputStream(context).use {
-            keystore.load(it, null);
+        val inuputStreem = keyStoreRepository.getInputStream(context, cryptoKey.keyAlias)
+        inuputStreem.use {
+            keystore.load(it, null)
         }
         return keystore
     }
@@ -100,10 +105,9 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
         val privateKeyEntry = KeyStore.PrivateKeyEntry(keyPair.private,
             arrayOf(generateCertificate(keyPair, cryptoKey.keyAlias)))
         keyStore.setEntry(getKeyAlias(), privateKeyEntry, KeyStore.PasswordProtection(pin))
-        keyStoreRepository.getOutputStream(context).use {
-            it.flush()
-            keyStore.store(it, null)
-        }
+
+        val outPutStream =  keyStoreRepository.getOutputStream(context, cryptoKey.keyAlias)
+        keyStore.store(outPutStream, null)
     }
 
     private fun generateCertificate(keyPair: KeyPair, subject: String): X509Certificate {

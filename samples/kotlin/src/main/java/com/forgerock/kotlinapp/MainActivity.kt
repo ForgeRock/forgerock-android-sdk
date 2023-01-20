@@ -33,6 +33,8 @@ import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
+import org.forgerock.android.auth.webauthn.PublicKeyCredentialSource
+import org.forgerock.android.auth.webauthn.WebAuthnKeySelector
 
 
 interface ActivityListener {
@@ -216,6 +218,7 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                     "WebAuthnAuthenticationCallback" -> {
                         val webAuthCallback =
                             node.getCallback(WebAuthnAuthenticationCallback::class.java)
+
                         webAuthCallback?.authenticate(this, node, listener = object : FRListener<Void> {
                             override fun onException(e: Exception) {
                                 node.next(activity, activity)

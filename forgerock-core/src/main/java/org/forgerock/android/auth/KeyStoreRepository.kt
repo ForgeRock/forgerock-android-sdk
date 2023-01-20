@@ -20,13 +20,13 @@ interface KeyStoreRepository {
      * Retrieve the [InputStream] of the KeyStore
      * @param context Application Context
      */
-    fun getInputStream(context: Context): InputStream
+    fun getInputStream(context: Context,  keyAlias: String): InputStream
 
     /**
      * Retrieve the [OutputStream] of the KeyStore
      * @param context Application Context
      */
-    fun getOutputStream(context: Context): OutputStream
+    fun getOutputStream(context: Context,  keyAlias: String): OutputStream
 
     /**
      * Retrieve the Keystore Type, default to [KeyStore.getDefaultType]
@@ -36,6 +36,5 @@ interface KeyStoreRepository {
     }
 
     fun delete(context: Context)
-
 
 }

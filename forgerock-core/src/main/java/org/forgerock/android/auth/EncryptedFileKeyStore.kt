@@ -8,7 +8,10 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import androidx.security.crypto.EncryptedFile
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -18,12 +21,18 @@ import java.io.OutputStream
 class EncryptedFileKeyStore(val identifier: String,
                             private val aliasName: String = "org.forgerock.v1.DEVICE_REPO_BKS") : KeyStoreRepository {
 
-    override fun getInputStream(context: Context): InputStream {
-        return getEncryptedFile(context).openFileInput();
+    override fun getInputStream(context: Context, keyAlias: String): InputStream {
+        val file = getFile(context)
+        val byteArray = Encryptor.getEncryptor(context, keyAlias).decrypt(file.readBytes())
+        return ByteArrayInputStream(byteArray)
     }
 
-    override fun getOutputStream(context: Context): OutputStream {
-        return getEncryptedFile(context, true).openFileOutput();
+    override fun getOutputStream(context: Context, keyAlias: String): OutputStream {
+        return CustomByteArrayOutputStream {
+            val file = getFile(context, true)
+            val byteArray = Encryptor.getEncryptor(context, keyAlias).encrypt(it)
+            file.writeBytes(byteArray)
+        }
     }
 
     override fun delete(context: Context) {
@@ -31,13 +40,19 @@ class EncryptedFileKeyStore(val identifier: String,
         file.delete()
     }
 
-    private fun getEncryptedFile(context: Context, createNew: Boolean = false): EncryptedFile {
+    private fun getFile(context: Context, createNew: Boolean = false): File {
         val file = File(context.filesDir, identifier)
         if (createNew and file.exists()) {
             file.delete();
         }
-        return org.forgerock.android.auth.EncryptedFile.getInstance(context, file, aliasName)
+        return file
     }
+}
 
 
+open class CustomByteArrayOutputStream(val onClose:(ByteArray) -> Unit) : ByteArrayOutputStream() {
+    override fun close() {
+        onClose(buf)
+        super.close()
+    }
 }
