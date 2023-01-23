@@ -52,7 +52,7 @@ class ApplicationPinDeviceAuthenticatorTest {
     @Test
     fun testIsSupported() {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        assertThat(authenticator.isSupported(context)).isTrue()
+        assertThat(authenticator.isSupported(context)).isTrue
     }
 
     @Test
@@ -63,7 +63,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         assertThat(keyPair.keyAlias).isEqualTo(cryptoKey.keyAlias + "_PIN")
         //Test pin is cached for 1 sec
         assertThat(authenticator.size()).isGreaterThan(1000)
-        assertThat(authenticator.pinRef.get()).isNotNull()
+        assertThat(authenticator.pinRef.get()).isNotNull
         delay(3000)
         assertThat(authenticator.pinRef.get()).isNull()
     }
@@ -103,7 +103,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         authenticator.generateKeys(context)
         //Using the same byte array buffer
         val authenticator2 =
-            object : NoEncryptionApplicationPinDeviceAuthenticator(object : PinCollector {
+            object : NoEncryptionApplicationPinDeviceAuthenticator(pinCollector = object : PinCollector {
                 override suspend fun collectPin(prompt: Prompt,
                                                 fragmentActivity: FragmentActivity): CharArray {
                     return ("invalidPin".toCharArray())
@@ -120,6 +120,10 @@ class ApplicationPinDeviceAuthenticatorTest {
                 override fun delete(context: Context) {
                     authenticator.delete(context)
                 }
+
+                override fun exist(context: Context): Boolean {
+                    return authenticator.exist(context)
+                }
             }
         authenticator2.prompt(prompt)
         authenticator2.setKey(cryptoKey)
@@ -133,7 +137,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         authenticator.generateKeys(context)
         //Using the same byte array buffer
         val authenticator2 =
-            object : NoEncryptionApplicationPinDeviceAuthenticator(object : PinCollector {
+            object : NoEncryptionApplicationPinDeviceAuthenticator(pinCollector = object : PinCollector {
                 override suspend fun collectPin(prompt: Prompt,
                                                 fragmentActivity: FragmentActivity): CharArray {
                     throw OperationCanceledException()
@@ -152,6 +156,11 @@ class ApplicationPinDeviceAuthenticatorTest {
                 override fun delete(context: Context) {
                     authenticator.delete(context)
                 }
+
+                override fun exist(context: Context): Boolean {
+                    return authenticator.exist(context)
+                }
+
             }
         authenticator2.setKey(cryptoKey)
         authenticator2.prompt(prompt)
@@ -167,7 +176,8 @@ class ApplicationPinDeviceAuthenticatorTest {
         return authenticator
     }
 
-    open class NoEncryptionApplicationPinDeviceAuthenticator(pinCollector: PinCollector = object :
+    open class NoEncryptionApplicationPinDeviceAuthenticator(
+        pinCollector: PinCollector = object :
         PinCollector {
         override suspend fun collectPin(prompt: Prompt,
                                         fragmentActivity: FragmentActivity): CharArray {
@@ -186,7 +196,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         }
 
         override fun getKeystoreType(): String {
-            return "BKS"
+            return "PKCS12"
         }
 
         override fun delete(context: Context) {
@@ -195,6 +205,10 @@ class ApplicationPinDeviceAuthenticatorTest {
 
         override fun deleteKeys(context: Context) {
             byteArrayOutputStream = ByteArrayOutputStream(1024)
+        }
+
+        override fun exist(context: Context): Boolean {
+            return byteArrayOutputStream.toByteArray().isNotEmpty()
         }
 
         fun size(): Int {

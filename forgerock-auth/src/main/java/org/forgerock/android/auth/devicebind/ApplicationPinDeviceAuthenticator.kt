@@ -19,6 +19,7 @@ import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnAuthorize
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnRegister
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.KeyStore
@@ -63,11 +64,9 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
     }
 
     override suspend fun authenticate(context: Context): DeviceBindingStatus {
-
         if (!appPinAuthenticator.exists(context)) {
             return UnRegister()
         }
-
         var pin = pinRef.getAndSet(null)
         pin?.let {
             return getPrivateKey(context, it)
@@ -97,6 +96,10 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
         } catch (e: FileNotFoundException) {
             UnRegister()
         } catch (e: UnrecoverableKeyException) {
+            // When user provides wrong pin for BKS type, it will throw UnrecoverableKeyException.
+            UnAuthorize()
+        } catch (e: IOException) {
+            // When the user provides wrong pin for the PCKS12 type , it will throw IOException.
             UnAuthorize()
         }
     }
@@ -127,6 +130,10 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
 
     override fun getKeystoreType(): String {
         return keyStore.getKeystoreType()
+    }
+
+    override fun exist(context: Context): Boolean {
+        return keyStore.exist(context)
     }
 
     override fun delete(context: Context) {

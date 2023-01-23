@@ -39,6 +39,12 @@ class AppPinAuthenticatorTest {
         override fun delete(context: Context) {
             byteArrayOutputStream = ByteArrayOutputStream(1024)
         }
+
+        override fun exist(context: Context): Boolean {
+           return byteArrayOutputStream.toByteArray().isNotEmpty()
+        }
+
+
     }
 
     @Before
@@ -58,7 +64,7 @@ class AppPinAuthenticatorTest {
         assertThat(privateKey).isNotNull
     }
 
-    @Test(expected = UnrecoverableKeyException::class)
+    @Test(expected = IOException::class)
     fun testInvalidPin() {
         appPinAuthenticator.generateKeys(context, "1234".toCharArray())
         appPinAuthenticator.getPrivateKey(context, "invalid".toCharArray())
@@ -84,12 +90,10 @@ class AppPinAuthenticatorTest {
     }
 
     @Test
-    fun testExists() {
-        assertThat(appPinAuthenticator.exists(context)).isFalse()
+    fun testKeyExist() {
+        assertThat(appPinAuthenticator.exists(context)).isFalse
         appPinAuthenticator.generateKeys(context, "1234".toCharArray())
-        assertThat(appPinAuthenticator.exists(context)).isTrue()
+        assertThat(appPinAuthenticator.exists(context)).isTrue
     }
-
-
 
 }

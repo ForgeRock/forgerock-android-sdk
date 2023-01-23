@@ -37,5 +37,6 @@ interface KeyStoreRepository {
 
     fun delete(context: Context)
 
+    fun exist(context: Context): Boolean
 
 }
