@@ -364,11 +364,15 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
                 }
 
                 override fun getKeystoreType(): String {
-                    return "BKS"
+                    return "PKCS12"
                 }
 
                 override fun delete(context: Context) {
                     byteArrayOutputStream = ByteArrayOutputStream(1024)
+                }
+
+                override fun exist(context: Context): Boolean {
+                    return byteArrayOutputStream.toByteArray().isNotEmpty()
                 }
 
             }
