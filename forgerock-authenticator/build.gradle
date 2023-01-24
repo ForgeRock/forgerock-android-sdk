@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,9 @@ apply plugin: 'com.android.library'
 apply plugin: "com.adarshr.test-logger"
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
+
 
 android {
     compileSdkVersion 33
@@ -49,38 +52,25 @@ android {
 
 }
 
-/**
- * Generate Javadoc
- */
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    destinationDir = new File("$buildDir/generated-javadoc")
-    failOnError = false
-    ext.androidDoc = "${android.sdkDirectory}/docs/reference"
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    options.linksOffline("http://d.android.com/reference", ext.androidDoc)
-    options.links("http://docs.oracle.com/javase/7/docs/api/")
-    options.links("http://d.android.com/reference/")
+tasks.named("dokkaHtml") {
+    outputDirectory.set(file("$buildDir/html"))
 }
 
-
-afterEvaluate {
-    javadoc.classpath += files(android.libraryVariants.collect { variant ->
-        variant.getJavaCompileProvider().get().classpath.files
-    })}
+tasks.named("dokkaJavadoc") {
+    outputDirectory.set(file("$buildDir/javadoc"))
+}
 
 /**
  * JCenter Dependency Manager
  */
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
 }
 
-javadoc.failOnError = false
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+task javadocJar(type: Jar, dependsOn: dokkaHtml) {
+    archiveClassifier.set('javadoc')
+    from new File("$buildDir/generated-javadoc")
 }
 
 artifacts {
@@ -90,7 +80,7 @@ artifacts {
 
 apply from: '../config/logger.gradle'
 apply from: '../config/publish.gradle'
-apply plugin: 'org.jetbrains.kotlin.android'
+
 
 /**
  * Dependencies
@@ -116,6 +106,7 @@ dependencies {
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
 
+
     // Testing
     testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'androidx.test.ext:junit:1.1.4'
@@ -127,5 +118,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:4.6.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    
 }
 
