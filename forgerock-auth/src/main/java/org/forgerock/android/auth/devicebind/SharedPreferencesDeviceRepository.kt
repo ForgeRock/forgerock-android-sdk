@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -24,7 +24,8 @@ interface DeviceRepository {
     fun persist(userId: String,
                 userName: String,
                 key: String,
-                authenticationType: DeviceBindingAuthenticationType): String
+                authenticationType: DeviceBindingAuthenticationType,
+                createdAt: Long = System.currentTimeMillis()): String
 
     fun getAllKeys(): MutableMap<String, *>?
 
@@ -36,6 +37,7 @@ const val userIdKey = "userId"
 const val kidKey = "kid"
 const val authTypeKey = "authType"
 const val userNameKey = "username"
+const val createdAtKey = "createdAt"
 
 /**
  * Helper class to save and retrieve EncryptedMessage
@@ -51,13 +53,15 @@ internal class SharedPreferencesDeviceRepository(context: Context,
     override fun persist(userId: String,
                          userName: String,
                          key: String,
-                         authenticationType: DeviceBindingAuthenticationType): String {
+                         authenticationType: DeviceBindingAuthenticationType,
+                         createdAt: Long): String {
             val jsonObject = JSONObject()
             try {
                 jsonObject.put(userIdKey, userId)
                 jsonObject.put(userNameKey, userName)
                 jsonObject.put(kidKey, uuid)
                 jsonObject.put(authTypeKey, authenticationType.serializedValue)
+                jsonObject.put(createdAtKey, createdAt)
             } catch (e: JSONException) {
                 throw RuntimeException(e)
             }

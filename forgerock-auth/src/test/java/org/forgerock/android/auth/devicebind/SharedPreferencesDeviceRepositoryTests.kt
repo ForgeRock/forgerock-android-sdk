@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -24,7 +24,7 @@ class SharedPreferencesDeviceRepositoryTests {
     private val sharedPreferences = mock<SharedPreferences>()
     private val editor = mock<SharedPreferences.Editor>()
     val context: Context = ApplicationProvider.getApplicationContext()
-    val result = "{\"userId\":\"userid\",\"username\":\"stoyan\",\"kid\":\"bfe1fe2a-66be-49a3-9550-8eb042773d17\",\"authType\":\"BIOMETRIC_ONLY\"}"
+    val result = "{\"userId\":\"userid\",\"username\":\"stoyan\",\"kid\":\"bfe1fe2a-66be-49a3-9550-8eb042773d17\",\"authType\":\"BIOMETRIC_ONLY\",\"createdAt\":13123213213}"
 
     @Before
     fun setUp() {
@@ -37,7 +37,7 @@ class SharedPreferencesDeviceRepositoryTests {
     @Test
     fun persistData() {
         val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
-        testObject.persist( "userid", "stoyan","key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        testObject.persist( "userid", "stoyan","key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY, 13123213213)
         verify(editor).putString("key", result)
     }
 
