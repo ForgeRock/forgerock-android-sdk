@@ -48,6 +48,11 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.android.gms:play-services-basement:18.1.0'
+    }
+}
 dependencies {
 
     def composeBom = platform('androidx.compose:compose-bom:2022.10.00')
@@ -63,7 +68,7 @@ dependencies {
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
     //WebAuthn
-    implementation 'com.google.android.gms:play-services-fido:19.0.0'
+    implementation 'com.google.android.gms:play-services-fido:19.0.1'
 
     //Centralize Login
     implementation 'net.openid:appauth:0.7.1'
