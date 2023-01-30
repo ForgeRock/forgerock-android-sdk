@@ -10,10 +10,15 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
+import org.json.JSONObject
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -21,31 +26,32 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class SharedPreferencesDeviceRepositoryTests {
 
-    private val sharedPreferences = mock<SharedPreferences>()
-    private val editor = mock<SharedPreferences.Editor>()
     val context: Context = ApplicationProvider.getApplicationContext()
-    val result = "{\"userId\":\"userid\",\"username\":\"stoyan\",\"kid\":\"bfe1fe2a-66be-49a3-9550-8eb042773d17\",\"authType\":\"BIOMETRIC_ONLY\"}"
+    private val sharedPreferences = context.getSharedPreferences("TestSharedPreferences", Context.MODE_PRIVATE)
 
-    @Before
-    fun setUp() {
-        whenever(sharedPreferences.getString("key", null)).thenReturn(null)
-        whenever(sharedPreferences.edit()).thenReturn(editor)
-        whenever(editor.putString("key", result)).thenReturn(editor)
-        whenever(editor.apply()).thenAnswer { Unit }
+    @After
+    fun tearDown() {
+        sharedPreferences.edit().clear().apply();
     }
 
     @Test
     fun persistData() {
-        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
+        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences)
         testObject.persist( "userid", "stoyan","key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
-        verify(editor).putString("key", result)
+        val result = JSONObject(sharedPreferences.getString("key", null))
+        assertThat(result.getString("userId")).isEqualTo("userid")
+        assertThat(result.getString("username")).isEqualTo("stoyan")
+        assertThat(result.getString("kid")).isNotNull
+        assertThat(result.getString("authType")).isEqualTo(DeviceBindingAuthenticationType.BIOMETRIC_ONLY.serializedValue)
     }
 
     @Test
     fun getAllTheData() {
-        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences, uuid = "bfe1fe2a-66be-49a3-9550-8eb042773d17")
-        testObject.getAllKeys()
-        verify(sharedPreferences).all
+        val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences)
+        testObject.persist( "userid", "test1","key1", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        testObject.persist( "userid", "test2","key2", DeviceBindingAuthenticationType.APPLICATION_PIN)
+
+        assertThat(testObject.getAllKeys()).hasSize(2)
     }
 
 }
