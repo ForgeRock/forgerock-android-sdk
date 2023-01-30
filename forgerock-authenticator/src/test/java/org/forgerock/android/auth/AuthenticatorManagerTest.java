@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,7 +34,6 @@ import okhttp3.mockwebserver.MockWebServer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -160,6 +159,56 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
+    }
+
+    @Test
+    public void testCreateCombinedMechanismsFailure() throws Exception {
+        try {
+            authenticatorManager.setPushFactory(pushFactory);
+
+            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
+                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
+                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
+
+            authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
+            pushListenerFuture.get();
+            fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("Failed to register with server"));
+        }
+    }
+
+    @Test
+    public void testShouldCreateCombinedMechanismsSuccessfully() throws Exception {
+        authenticatorManager.setPushFactory(pushFactory);
+
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String oathUri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
+        String pushUri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server,"authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server,"register") + "&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr&";
+        String combinedUri = "mfauth://mfa/ForgeRock:demo/" +
+                "?oath=" + Base64.encodeToString(oathUri.getBytes(), Base64.NO_WRAP) + "&" +
+                "&push=" + Base64.encodeToString(pushUri.getBytes(), Base64.NO_WRAP) + "&" +
+                "ba=true&dt=true&dts=0.5";
+
+        authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
+        assertEquals(push.getType(), Mechanism.PUSH);
+        assertEquals(push.getAccountName(), "demo");
+        assertEquals(push.getIssuer(), "Forgerock");
+        assertTrue(push.getAccount().isBiometricAuthentication());
+        assertTrue(push.getAccount().isDeviceTamperingDetection());
+        assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0.5, 0);
     }
 
     @Test

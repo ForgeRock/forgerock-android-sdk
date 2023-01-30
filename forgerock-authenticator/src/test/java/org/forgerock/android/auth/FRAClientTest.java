@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,7 +15,6 @@ import androidx.test.core.app.ApplicationProvider;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AuthenticatorException;
-import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.junit.After;
@@ -33,6 +32,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -256,6 +256,48 @@ public class FRAClientTest extends FRABaseTest {
             assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("FCM token not provided during SDK initialization"));
         }
+    }
+
+    @Test
+    public void testShouldCreateCombinedMechanismsSuccessfully() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        AuthenticatorManager managerInstance = fraClient.getAuthenticatorManagerInstance();
+        managerInstance.setPushFactory(pushFactory);
+
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String oathUri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
+        String pushUri = "pushauth://push/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server,"authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server,"register") + "&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "issuer=Rm9yZ2Vyb2Nr";
+        String combinedUri = "mfauth://mfa/ForgeRock:demo/" +
+                "?oath=" + Base64.encodeToString(oathUri.getBytes(), Base64.NO_WRAP) + "&" +
+                "&push=" + Base64.encodeToString(pushUri.getBytes(), Base64.NO_WRAP);
+
+        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Mechanism>();
+        fraClient.createMechanismFromUri(combinedUri, pushListenerFuture);
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
+        assertEquals(push.getType(), Mechanism.PUSH);
+        assertEquals(push.getAccountName(), "demo");
+        assertEquals(push.getIssuer(), "Forgerock");
+        assertFalse(push.getAccount().isBiometricAuthentication());
+        assertFalse(push.getAccount().isDeviceTamperingDetection());
+        assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0, 0);
     }
 
     @Test

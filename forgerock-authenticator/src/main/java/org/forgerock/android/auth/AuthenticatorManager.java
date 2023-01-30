@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,6 +20,7 @@ import org.forgerock.android.auth.exception.MechanismCreationException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 class AuthenticatorManager {
 
@@ -64,6 +65,9 @@ class AuthenticatorManager {
         }
         else if(uri.startsWith(Mechanism.OATH)) {
             oathFactory.createFromUri(uri, listener);
+        }
+        else if(uri.startsWith(Mechanism.MFAUTH)) {
+            createCombinedMechanismsFromUri(uri, listener);
         }
         else {
             Logger.warn(TAG, "Invalid QR Code given for Mechanism initialization.");
@@ -110,7 +114,7 @@ class AuthenticatorManager {
         if(mechanism.getAccount() != null) {
             account = mechanism.getAccount();
         } else {
-            account = storageClient.getAccount(mechanism.getIssuer() + "-" + mechanism.getAccountName());
+            account = storageClient.getAccount(mechanism.getAccountId());
         }
 
         return account;
@@ -157,6 +161,7 @@ class AuthenticatorManager {
 
     boolean removeMechanism(Mechanism mechanism) {
         String mechanismUID = mechanism.getMechanismUID();
+        Account account = this.getAccount(mechanism);
         Logger.debug(TAG, "Removing Mechanism with ID '%s' from the StorageClient.", mechanismUID);
 
         // If PushMechanism mechanism, remove any notifications associated with it
@@ -171,7 +176,14 @@ class AuthenticatorManager {
         }
 
         // Remove the mechanism itself
-        return storageClient.removeMechanism(mechanism);
+        boolean result = storageClient.removeMechanism(mechanism);
+
+        // Remove account if no other mechanism exist
+        if (storageClient.getMechanismsForAccount(account).isEmpty()) {
+            storageClient.removeAccount(account);
+        }
+
+        return result;
     }
 
     boolean removeNotification(PushNotification notification) {
@@ -260,6 +272,49 @@ class AuthenticatorManager {
     @VisibleForTesting
     void setNotificationFactory(NotificationFactory notificationFactory) {
         this.notificationFactory = notificationFactory;
+    }
+
+    @VisibleForTesting
+    void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
+        final Mechanism[] oathMechanism = new Mechanism[1];
+        Map<String, String> combinedParameters = MechanismParser.getUriParameters(uri);
+
+        // Retrieves OATH and PUSH registration URIs from parameters
+        String oathUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.OATH_URI));
+        combinedParameters.remove(MechanismParser.OATH_URI);
+        String pushUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.PUSH_URI));
+        combinedParameters.remove(MechanismParser.PUSH_URI);
+
+        // Register OATH mechanism passing combined parameters
+        oathFactory.createFromUri(oathUri, combinedParameters, new FRAListener<Mechanism>() {
+            @Override
+            public void onSuccess(Mechanism result) {
+                oathMechanism[0] = result;
+                Logger.debug(TAG, "OATH mechanism in Combined MFA successfully created.");
+            }
+
+            @Override
+            public void onException(Exception e) {
+                Logger.error(TAG, "Error creating OATH mechanism in Combined MFA.");
+            }
+        });
+
+        // Register PUSH mechanism passing combined parameters
+        pushFactory.createFromUri(pushUri, combinedParameters, new FRAListener<Mechanism>() {
+            @Override
+            public void onSuccess(Mechanism result) {
+                listener.onSuccess(result);
+                Logger.debug(TAG, "PUSH mechanism in Combined MFA successfully created.");
+            }
+
+            @Override
+            public void onException(Exception e) {
+                // if PUSH mechanisms fails to register, removes temporally created OATH mechanism
+                removeMechanism(oathMechanism[0]);
+                listener.onException(e);
+                Logger.error(TAG, "Error creating PUSH mechanism in Combined MFA.");
+            }
+        });
     }
 
 }

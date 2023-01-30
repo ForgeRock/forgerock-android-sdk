@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -38,21 +38,36 @@ public class Account extends ModelObject<Account> {
     private final String backgroundColor;
     /** Date this object was stored */
     private final Calendar timeAdded;
+    /** Enforce Device Tampering detection flag */
+    private final boolean enforceDeviceTamperingDetection;
+    /** Device Tampering score (0 - 1) */
+    private final double deviceTamperingScoreThreshold;
+    /** Enforce Biometric Authentication flag */
+    private final boolean enforceBiometricAuthentication;
+    /** Account locked flag */
+    private final boolean lock;
     /** List of Mechanism objects associated with this account **/
     private List<Mechanism> mechanismList;
 
     /**
      * Creates Account object with given information.
-     * @param issuer String value of issuer
-     * @param displayIssuer String alternative value of the issuer
-     * @param accountName String value of accountName or username
-     * @param displayAccountName String alternative value of the accountName
-     * @param imageURL URL of account's logo image (optional)
-     * @param backgroundColor String HEX code of account's background color (optional)
-     * @param timeAdded Date and Time this Account was stored
+     *
+     * @param issuer                          String value of issuer
+     * @param displayIssuer                   String alternative value of the issuer
+     * @param accountName                     String value of accountName or username
+     * @param displayAccountName              String alternative value of the accountName
+     * @param imageURL                        URL of account's logo image (optional)
+     * @param backgroundColor                 String HEX code of account's background color (optional)
+     * @param timeAdded                       Date and Time this Account was stored
+     * @param enforceDeviceTamperingDetection Enforce Device Tampering detection (optional)
+     * @param deviceTamperingScoreThreshold   Device Tampering score (optional)
+     * @param enforceBiometricAuthentication  Enforce Biometric Authentication (optional)
+     * @param lock                            Indicates if the account is locked (optional)
      */
     public Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
-                   String imageURL, String backgroundColor, Calendar timeAdded) {
+                   String imageURL, String backgroundColor, Calendar timeAdded,
+                   boolean enforceDeviceTamperingDetection, double deviceTamperingScoreThreshold,
+                   boolean enforceBiometricAuthentication, boolean lock) {
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
         this.displayIssuer = displayIssuer;
@@ -61,6 +76,10 @@ public class Account extends ModelObject<Account> {
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
         this.timeAdded = timeAdded;
+        this.enforceDeviceTamperingDetection = enforceDeviceTamperingDetection;
+        this.deviceTamperingScoreThreshold = deviceTamperingScoreThreshold;
+        this.enforceBiometricAuthentication = enforceBiometricAuthentication;
+        this.lock = lock;
     }
 
     /**
@@ -154,6 +173,38 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
+     * Determine whether the Device Tampering Detection should be applied to the account.
+     * @return True if the should use Device Tampering Detection, false otherwise.
+     */
+    public boolean isDeviceTamperingDetection() {
+        return enforceDeviceTamperingDetection;
+    }
+
+    /**
+     * Returns the Device Tampering score.
+     * @return The score to be used on Device Tampering Detection.
+     */
+    public double getDeviceTamperingScoreThreshold() {
+        return deviceTamperingScoreThreshold;
+    }
+
+    /**
+     * Determine whether the Biometric Authentication should be applied to the account.
+     * @return True if the should use Biometric Authentication, false otherwise.
+     */
+    public boolean isBiometricAuthentication() {
+        return enforceBiometricAuthentication;
+    }
+
+    /**
+     * Determine whether the this Account should be locked by the app.
+     * @return True if the Account should be locked, false otherwise.
+     */
+    public boolean isLocked() {
+        return lock;
+    }
+
+    /**
      * Get the list of mechanisms associates with this account.
      * @return List<Mechanism> list of mechanisms
      */
@@ -182,6 +233,10 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("imageURL", imageURL);
             jsonObject.put("backgroundColor", backgroundColor);
             jsonObject.put("timeAdded", timeAdded != null ? timeAdded.getTimeInMillis() : null);
+            jsonObject.put("enforceDeviceTamperingDetection", isDeviceTamperingDetection());
+            jsonObject.put("deviceTamperingScoreThreshold", getDeviceTamperingScoreThreshold());
+            jsonObject.put("enforceBiometricAuthentication", isBiometricAuthentication());
+            jsonObject.put("lock", isLocked());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }
@@ -208,6 +263,10 @@ public class Account extends ModelObject<Account> {
                     .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL") : null)
                     .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
                     .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
+                    .setEnforceDeviceTamperingDetection(jsonObject.getBoolean("enforceDeviceTamperingDetection"))
+                    .setDeviceTamperingScoreThreshold(jsonObject.getDouble("deviceTamperingScoreThreshold"))
+                    .setEnforceBiometricAuthentication(jsonObject.getBoolean("enforceBiometricAuthentication"))
+                    .setLock(jsonObject.getBoolean("lock"))
                     .build();
         } catch (JSONException e) {
             return null;
@@ -268,6 +327,10 @@ public class Account extends ModelObject<Account> {
         private String imageURL;
         private String backgroundColor;
         private Calendar timeCreated;
+        private boolean enforceDeviceTamperingDetection = false;
+        private double deviceTamperingScoreThreshold = 0;
+        private boolean enforceBiometricAuthentication = false;
+        private boolean lock = false;
 
         /**
          * Sets the name of the IDP that issued this account.
@@ -333,12 +396,51 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
+         * Sets to enforce Device Tampering Detection.
+         * @param enforceDeviceTamperingDetection True if the Device Tampering Detection should be used, false otherwise.
+         */
+        public AccountBuilder setEnforceDeviceTamperingDetection(boolean enforceDeviceTamperingDetection) {
+            this.enforceDeviceTamperingDetection = enforceDeviceTamperingDetection;
+            return this;
+        }
+
+        /**
+         * Sets the Device Tampering score (0 - 1).
+         * @param deviceTamperingScoreThreshold Device tampering score limit.
+         */
+        public AccountBuilder setDeviceTamperingScoreThreshold(double deviceTamperingScoreThreshold) {
+            this.deviceTamperingScoreThreshold = (deviceTamperingScoreThreshold >= 0 && deviceTamperingScoreThreshold <= 1)
+                    ? deviceTamperingScoreThreshold
+                    : 0;
+            return this;
+        }
+
+        /**
+         * Sets to enforce Biometric Authentication.
+         * @param enforceBiometricAuthentication True if the Biometric should be used to unlock the account, false otherwise.
+         */
+        public AccountBuilder setEnforceBiometricAuthentication(boolean enforceBiometricAuthentication) {
+            this.enforceBiometricAuthentication = enforceBiometricAuthentication;
+            return this;
+        }
+
+        /**
+         * Sets to lock the Account.
+         * @param lock True if the Account should be locked, false otherwise.
+         */
+        public AccountBuilder setLock(boolean lock) {
+            this.lock = lock;
+            return this;
+        }
+
+        /**
          * Produces the Account object that was being constructed.
          * @return The account.
          */
         protected Account build() {
             return new Account(issuer, displayIssuer, accountName, displayAccountName,
-                    imageURL, backgroundColor, timeCreated);
+                    imageURL, backgroundColor, timeCreated, enforceDeviceTamperingDetection,
+                    deviceTamperingScoreThreshold, enforceBiometricAuthentication, lock);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -62,6 +62,17 @@ abstract class MechanismFactory {
      * @param listener Listener for receiving the mechanism registration result
      */
     final void createFromUri(String uri, FRAListener<Mechanism> listener) {
+        createFromUri(uri, null, listener);
+    }
+
+    /**
+     * Convert a URL to the Mechanism it represents, including extracting the account.
+     * Also adds it to the model.
+     * @param uri The URI to process.
+     * @param extraParameters The extra map of values to be added to the Account.
+     * @param listener Listener for receiving the mechanism registration result
+     */
+    final void createFromUri(String uri, Map<String, String> extraParameters, FRAListener<Mechanism> listener) {
         // Parse uri
         MechanismParser parser = getParser();
         Map<String, String> values = null;
@@ -72,12 +83,20 @@ abstract class MechanismFactory {
             return;
         }
 
+        // Add any extra parameters
+        if (extraParameters != null && !extraParameters.isEmpty()) {
+            values.putAll(extraParameters);
+        }
+
         // Extract data and set default values accordingly
         String mechanismType = getFromMap(values, MechanismParser.SCHEME, "");
         String issuer = getFromMap(values, MechanismParser.ISSUER, "");
         String accountName = getFromMap(values, MechanismParser.ACCOUNT_NAME, "");
         String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
         String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
+        String deviceTampering = getFromMap(values, MechanismParser.DEVICE_TAMPERING, "false");
+        String deviceTamperingScore = getFromMap(values, MechanismParser.DEVICE_TAMPERING_SCORE, "0");
+        String biometricAuthentication = getFromMap(values, MechanismParser.BIOMETRIC_AUTHENTICATION, "false");
 
         // Check version
         int version = 0;
@@ -96,6 +115,9 @@ abstract class MechanismFactory {
                 .setAccountName(accountName)
                 .setImageURL(imageURL)
                 .setBackgroundColor(bgColor)
+                .setEnforceDeviceTamperingDetection(Boolean.parseBoolean(deviceTampering))
+                .setDeviceTamperingScoreThreshold(Double.parseDouble(deviceTamperingScore))
+                .setEnforceBiometricAuthentication(Boolean.parseBoolean(biometricAuthentication))
                 .build();
 
         // Constructs Mechanism object, and tries to store it
