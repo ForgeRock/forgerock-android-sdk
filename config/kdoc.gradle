@@ -32,16 +32,18 @@ dokkaHtml.dependsOn delombok
 dokkaJavadoc {
     dokkaSourceSets {
         named("main") {
-            // Main source set conf
+            displayName.set(name)
             outputDirectory = file("build/javadoc/$project.name-dokka")
             sourceDirs = files("$buildDir/src-delomboked")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
-            noAndroidSdkLink.set(false)
-            includeNonPublic.set(true)
+            reportUndocumented.set(false)
             skipEmptyPackages.set(true)
-            reportUndocumented.set(true)
             skipDeprecated.set(false)
-
+            suppressGeneratedFiles.set(true)
+            noStdlibLink.set(false)
+            noJdkLink.set(false)
+            noAndroidSdkLink.set(false)
+            suppress.set(false)
         }
     }
 }
@@ -49,7 +51,6 @@ dokkaJavadoc {
 dokkaHtml {
     dokkaSourceSets {
         named("main") {
-            // Main source set conf
             outputDirectory = file("build/html/$project.name-dokka")
             sourceDirs = files("$buildDir/src-delomboked")
             sourceRoots.setFrom(file("$buildDir/src-delomboked"))
