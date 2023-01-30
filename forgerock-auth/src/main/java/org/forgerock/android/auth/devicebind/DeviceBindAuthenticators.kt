@@ -122,7 +122,7 @@ interface DeviceAuthenticator {
 
 }
 
-fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) : DeviceAuthenticator {
+fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) {
 
     //Inject objects
     if (this is BiometricAuthenticator) {
@@ -131,17 +131,11 @@ fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) : DeviceAuthe
             prompt.description,
             deviceBindAuthenticationType = this.type()))
     }
-    initialize(userId)
-    this.prompt(prompt)
-    return this
-}
-
-fun DeviceAuthenticator.initialize(userId: String) : DeviceAuthenticator {
-    //Inject objects
     if (this is CryptoAware) {
         this.setKey(CryptoKey(userId))
     }
-    return this
+
+    this.prompt(prompt)
 }
 
 @Parcelize
