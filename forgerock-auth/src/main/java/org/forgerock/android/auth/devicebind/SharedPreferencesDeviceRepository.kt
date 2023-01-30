@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -41,9 +41,10 @@ const val userNameKey = "username"
  * Helper class to save and retrieve EncryptedMessage
  */
 internal class SharedPreferencesDeviceRepository(context: Context,
-                                        private val uuid: String = UUID.randomUUID().toString(),
-                                        private val sharedPreferences: SharedPreferences =
-                         EncryptedPreferences.getInstance(context, ORG_FORGEROCK_V_1_DEVICE_REPO)): DeviceRepository {
+                                                 private val sharedPreferences: SharedPreferences =
+                                                     EncryptedPreferences.getInstance(context,
+                                                         ORG_FORGEROCK_V_1_DEVICE_REPO)) :
+    DeviceRepository {
 
     /**
      * Persist the data in encrypted shared preference
@@ -52,17 +53,19 @@ internal class SharedPreferencesDeviceRepository(context: Context,
                          userName: String,
                          key: String,
                          authenticationType: DeviceBindingAuthenticationType): String {
-            val jsonObject = JSONObject()
-            try {
-                jsonObject.put(userIdKey, userId)
-                jsonObject.put(userNameKey, userName)
-                jsonObject.put(kidKey, uuid)
-                jsonObject.put(authTypeKey, authenticationType.serializedValue)
-            } catch (e: JSONException) {
-                throw RuntimeException(e)
-            }
-            sharedPreferences.edit().putString(key, jsonObject.toString())?.apply()
-        return this.uuid
+        val jsonObject = JSONObject()
+        val uuid = UUID.randomUUID().toString()
+
+        try {
+            jsonObject.put(userIdKey, userId)
+            jsonObject.put(userNameKey, userName)
+            jsonObject.put(kidKey, uuid)
+            jsonObject.put(authTypeKey, authenticationType.serializedValue)
+        } catch (e: JSONException) {
+            throw RuntimeException(e)
+        }
+        sharedPreferences.edit().putString(key, jsonObject.toString())?.apply()
+        return uuid
     }
 
     override fun getAllKeys(): MutableMap<String, *>? {
@@ -73,4 +76,3 @@ internal class SharedPreferencesDeviceRepository(context: Context,
         sharedPreferences.edit().remove(key).apply()
     }
 }
-
