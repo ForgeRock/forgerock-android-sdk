@@ -36,43 +36,48 @@ class EnvViewModel : ViewModel() {
         }
     }
 
-    var current by mutableStateOf(localhost)
+    val dbind = FROptionsBuilder.build {
+        server {
+            url = "https://openam-dbind.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "afef1acb448a873"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "sign-verifier-stoyan"
+        }
+    }
+
+    val sdk = FROptionsBuilder.build {
+        server {
+            url = "https://openam-forgerrock-sdksteanant.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "43d72fc37bdde8c"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "WebAuthn"
+        }
+    }
+
+    var current by mutableStateOf(dbind)
         private set
 
     init {
-        val dbind = FROptionsBuilder.build {
-            server {
-                url = "https://openam-dbind.forgeblocks.com/am"
-                realm = "alpha"
-                cookieName = "iPlanetDirectoryPro"
-                timeout = 50
-            }
-            oauth {
-                oauthClientId = "AndroidTest"
-                oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-                oauthCacheSeconds = 0
-                oauthScope = "openid profile email address phone"
-                oauthThresholdSeconds = 0
-            }
-        }
-
-        val sdk = FROptionsBuilder.build {
-            server {
-                url = "https://openam-forgerrock-sdksteanant.forgeblocks.com/am"
-                realm = "alpha"
-                cookieName = "43d72fc37bdde8c"
-                timeout = 50
-            }
-            oauth {
-                oauthClientId = "AndroidTest"
-                oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-                oauthCacheSeconds = 0
-                oauthScope = "openid profile email address phone"
-                oauthThresholdSeconds = 0
-            }
-        }
-
-
         servers.add(localhost)
         servers.add(dbind)
         servers.add(sdk)
@@ -89,7 +94,7 @@ class EnvViewModel : ViewModel() {
         }?.let {
             select(context, it)
        } ?: run {
-           select(context, localhost)
+           select(context, dbind)
        }
     }
 

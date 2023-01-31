@@ -17,8 +17,8 @@ import org.forgerock.android.auth.devicebind.UserKeyService
  * Manage [UserKey] that created by the SDK
  * The [UserKey] are created with [DeviceBindingCallback]
  */
-class FRUserKeys(private val context: Context,
-                 private val userKeyService: UserKeyService = UserDeviceKeyService(context)) {
+class FRUserKeys @JvmOverloads constructor(private val context: Context,
+                                           private val userKeyService: UserKeyService = UserDeviceKeyService(context)) {
 
     /**
      * Load all the [UserKey] which created with [DeviceBindingCallback]
