@@ -160,7 +160,7 @@ fun CollectPin(onSubmit: (String) -> Unit, onCancel: () -> Unit) {
                         }
                     },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password
+                        keyboardType = KeyboardType.NumberPassword
                     ),
                     visualTransformation = if (pinVisibility) VisualTransformation.None
                     else PasswordVisualTransformation()
