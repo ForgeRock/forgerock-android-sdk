@@ -10,6 +10,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.Assert.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -88,5 +89,22 @@ class UserDeviceKeyServiceTest {
         val userKeyService = UserDeviceKeyService(context, encryptedPreference)
         val keyStatus = userKeyService.getKeyStatus(null)
         assertTrue(keyStatus is NoKeysFound)
+    }
+
+    @Test
+    fun testDelete() {
+        val userList = mutableMapOf<String, Any>()
+        userList["ZJgBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\",\"username\":\"jey\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\", \"createdAt\":12345}"
+        userList["J0gBS+bL9Di2Qh2In/zkHW1STMZ61m48mAAk4eSZM5w="] = "{\"userId\":\"id=stoyan,ou=user,dc=openam,dc=forgerock,dc=org\", \"username\":\"stoyan\",\"kid\":\"ba48e524-62ae-40df-a437-274f91b0df87\",\"authType\":\"BIOMETRIC_ALLOW_FALLBACK\", \"createdAt\":12345}"
+        whenever(encryptedPreference.getAllKeys()).thenReturn(userList)
+        val userKeyService = UserDeviceKeyService(context, encryptedPreference)
+        assertThat(userKeyService.userKeys).hasSize(2)
+        val userkey = userKeyService.userKeys[0]
+        userKeyService.delete(userkey)
+        assertThat(userKeyService.userKeys).hasSize(1)
+
+        //Delete a key which already deleted
+        userKeyService.delete(userkey)
+        assertThat(userKeyService.userKeys).hasSize(1)
     }
 }

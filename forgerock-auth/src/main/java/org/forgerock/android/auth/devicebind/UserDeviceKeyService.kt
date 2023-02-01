@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,10 +11,12 @@ import android.content.Context
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
+import org.forgerock.android.auth.callback.getAuthType
 import org.json.JSONObject
 
 
 interface UserKeyService {
+
     /**
      * Fetch the key existence status in device.
      * @param  userId id optional and received from server
@@ -25,10 +27,16 @@ interface UserKeyService {
      * Get all the user keys in device.
      */
     val userKeys: MutableList<UserKey>
+
+    /**
+     * Delete user key
+     */
+    fun delete(userKey: UserKey)
 }
 
-internal class UserDeviceKeyService(context: Context,
-                          private val encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(context)): UserKeyService {
+internal class UserDeviceKeyService(val context: Context,
+                                    private val deviceRepository: DeviceRepository = SharedPreferencesDeviceRepository(
+                                        context)) : UserKeyService {
 
     /**
      * Get all the user keys in device.
@@ -36,11 +44,11 @@ internal class UserDeviceKeyService(context: Context,
     override var userKeys: MutableList<UserKey> = mutableListOf()
 
     init {
-          getAllUsers()
+        getAllUsers()
     }
 
     private fun getAllUsers() {
-        encryptedPreference.getAllKeys()?.mapNotNull {
+        deviceRepository.getAllKeys()?.mapNotNull {
             val json = JSONObject(it.value as String)
             UserKey(
                 json.getString(userIdKey),
@@ -55,6 +63,13 @@ internal class UserDeviceKeyService(context: Context,
         }
     }
 
+    override fun delete(userKey: UserKey) {
+        deviceRepository.delete(userKey.keyAlias)
+        userKeys.remove(userKey)
+        userKey.authType.getAuthType().initialize(userKey.userId).deleteKeys(context)
+    }
+
+
     /**
      * Fetch the key existence status in device.
      * @param  userId id optional and received from server
@@ -68,10 +83,10 @@ internal class UserDeviceKeyService(context: Context,
         }
 
         return when (userKeys.size) {
-                0 -> NoKeysFound
-                1 -> SingleKeyFound(userKeys.first())
-                else -> MultipleKeysFound(userKeys)
-            }
+            0 -> NoKeysFound
+            1 -> SingleKeyFound(userKeys.first())
+            else -> MultipleKeysFound(userKeys)
+        }
     }
 }
 
@@ -79,20 +94,22 @@ internal class UserDeviceKeyService(context: Context,
  * Key existence status in device.
  */
 sealed class KeyFoundStatus
-data class SingleKeyFound(val key: UserKey): KeyFoundStatus()
-data class MultipleKeysFound(val keys: MutableList<UserKey>): KeyFoundStatus()
-object NoKeysFound: KeyFoundStatus()
+data class SingleKeyFound(val key: UserKey) : KeyFoundStatus()
+data class MultipleKeysFound(val keys: MutableList<UserKey>) : KeyFoundStatus()
+object NoKeysFound : KeyFoundStatus()
 
 /**
  * UserKey DTO
  */
 @Parcelize
-data class UserKey(val userId: String,
-                   val userName: String,
-                   val kid: String,
-                   val authType: DeviceBindingAuthenticationType,
-                   val keyAlias: String,
-                   val createdAt: Long): Parcelable
+
+data class UserKey internal constructor(val userId: String,
+                                        val userName: String,
+                                        val kid: String,
+                                        val authType: DeviceBindingAuthenticationType,
+                                        val keyAlias: String,
+                                        val createdAt: Long) : Parcelable
+
 @Parcelize
 data class UserKeys(
     val items: List<UserKey>?
