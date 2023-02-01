@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -29,6 +29,8 @@ class SharedPreferencesDeviceRepositoryTests {
     val context: Context = ApplicationProvider.getApplicationContext()
     private val sharedPreferences = context.getSharedPreferences("TestSharedPreferences", Context.MODE_PRIVATE)
 
+    val result = "{\"userId\":\"userid\",\"username\":\"stoyan\",\"kid\":\"bfe1fe2a-66be-49a3-9550-8eb042773d17\",\"authType\":\"BIOMETRIC_ONLY\",\"createdAt\":13123213213}"
+
     @After
     fun tearDown() {
         sharedPreferences.edit().clear().apply();
@@ -37,12 +39,14 @@ class SharedPreferencesDeviceRepositoryTests {
     @Test
     fun persistData() {
         val testObject = SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences)
-        testObject.persist( "userid", "stoyan","key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        testObject.persist( "userid", "stoyan","key", DeviceBindingAuthenticationType.BIOMETRIC_ONLY, 123444)
         val result = JSONObject(sharedPreferences.getString("key", null))
         assertThat(result.getString("userId")).isEqualTo("userid")
         assertThat(result.getString("username")).isEqualTo("stoyan")
         assertThat(result.getString("kid")).isNotNull
+        assertThat(result.getLong("createdAt")).isEqualTo(123444)
         assertThat(result.getString("authType")).isEqualTo(DeviceBindingAuthenticationType.BIOMETRIC_ONLY.serializedValue)
+
     }
 
     @Test

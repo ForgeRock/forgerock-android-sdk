@@ -82,7 +82,7 @@ class DeviceSigningVerifierCallbackTest {
         val rawContent =
             "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val userKey =
-            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
@@ -100,13 +100,11 @@ class DeviceSigningVerifierCallbackTest {
     fun testSuccessPathForMultipleKeyFound() = runBlocking {
         val rawContent =
             "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val mockFragmentActivity = mock<FragmentActivity>()
-        val fragment = mock<DeviceBindFragment>()
         val userKeyService = mock<UserKeyService>()
         val userKey =
-            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
         val userKey1 =
-            UserKey("andy", "andy", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+            UserKey("andy", "andy", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
 
         val testObject =
             DeviceSigningVerifierCallbackMock(rawContent)
@@ -121,7 +119,7 @@ class DeviceSigningVerifierCallbackTest {
             keyPair.privateKey,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
-        val key = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+        val key = UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
         testObject.executeAuthenticate(context, key, deviceAuthenticator)
 
     }
@@ -131,7 +129,7 @@ class DeviceSigningVerifierCallbackTest {
         val rawContent =
             "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val userKey =
-            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+            UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(NoKeysFound)
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
@@ -170,7 +168,7 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String,
         super.execute(context, userKeyService, userKeySelector = object : UserKeySelector {
             override suspend fun selectUserKey(userKeys: UserKeys,
                                                fragmentActivity: FragmentActivity): UserKey {
-                return UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias")
+                return UserKey("jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, "jeyKeyAlias", System.currentTimeMillis())
             }
         }, deviceAuthenticator = authenticator)
     }

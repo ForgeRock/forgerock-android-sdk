@@ -55,7 +55,8 @@ internal class UserDeviceKeyService(val context: Context,
                 json.getString(userNameKey),
                 json.getString(kidKey),
                 DeviceBindingAuthenticationType.valueOf(json.getString(authTypeKey)),
-                it.key
+                it.key,
+                json.getLong(createdAtKey)
             )
         }?.toMutableList()?.also {
             userKeys = it
@@ -101,11 +102,13 @@ object NoKeysFound : KeyFoundStatus()
  * UserKey DTO
  */
 @Parcelize
+
 data class UserKey internal constructor(val userId: String,
                                         val userName: String,
                                         val kid: String,
                                         val authType: DeviceBindingAuthenticationType,
-                                        val keyAlias: String) : Parcelable
+                                        val keyAlias: String,
+                                        val createdAt: Long) : Parcelable
 
 @Parcelize
 data class UserKeys(

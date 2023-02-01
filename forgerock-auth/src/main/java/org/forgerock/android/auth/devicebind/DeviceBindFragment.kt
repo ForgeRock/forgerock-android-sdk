@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,6 +21,7 @@ import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.TimeoutCancellationException
+import org.forgerock.android.auth.convertToTime
 import org.forgerock.android.auth.databinding.FragmentUserDeviceBindBinding
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -33,7 +34,7 @@ private const val ARG_USER_LIST = "userKeys"
 
 class DeviceBindFragment : DialogFragment() {
 
-    private var userKeys: UserKeys? = null
+    private var userKeyItems: List<UserKey>? = null
     private var _binding: FragmentUserDeviceBindBinding? = null
     private val binding get() = _binding!!
 
@@ -51,12 +52,13 @@ class DeviceBindFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            userKeys = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                it.getParcelable(ARG_USER_LIST, UserKeys::class.java)
+        arguments?.let { bundle ->
+            userKeyItems = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                bundle.getParcelable(ARG_USER_LIST, UserKeys::class.java)
             } else {
-                it.getParcelable(ARG_USER_LIST)
-            }
+                bundle.getParcelable(ARG_USER_LIST)
+            }?.items?.sortedWith(compareBy<UserKey> { userKey -> userKey.userName }
+                .thenBy { it.createdAt } )
         }
     }
 
@@ -83,12 +85,12 @@ class DeviceBindFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val arrayAdapter = userKeys?.items?.let {
-            ArrayAdapter(view.context, android.R.layout.simple_list_item_1, it.map { it.userName })
+        val arrayAdapter = userKeyItems?.let { userKeys ->
+            ArrayAdapter(view.context, android.R.layout.simple_list_item_1, userKeys.map { "${it.userName}-(${it.authType})-(${it.createdAt.convertToTime()})" })
         }
         var selectedView: View? = null
         binding.keyList.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, view, position, id ->
+            AdapterView.OnItemClickListener { _, view, position, _ ->
                 selectedView = view
                 selectedView?.tag = position
                 binding.keyList.children.iterator().forEach { it.setBackgroundColor(Color.WHITE) }
@@ -98,7 +100,7 @@ class DeviceBindFragment : DialogFragment() {
         binding.keyList.adapter = arrayAdapter
         binding.submit.setOnClickListener {
             selectedView?.let {
-                continuation?.resume(userKeys!!.items!![it.tag as Int])
+                continuation?.resume(userKeyItems!![it.tag as Int])
                 this@DeviceBindFragment.dismiss()
             }
         }
