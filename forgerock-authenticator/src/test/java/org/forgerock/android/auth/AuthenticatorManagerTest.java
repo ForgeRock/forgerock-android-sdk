@@ -37,6 +37,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
@@ -68,7 +70,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n");
+        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
 
         oathListenerFuture = new FRAListenerFuture<Mechanism>();
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
@@ -98,7 +100,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     @Test
     public void testFailToCreateMechanismInvalidQRCode() {
         try {
-            authenticatorManager = new AuthenticatorManager(context, storageClient, null);
+            authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
 
             String uri = "http://unkown/Forgerock:user1?secret=ONSWG4TFOQ=====";
 
@@ -114,7 +116,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     @Test
     public void testCreatePushMechanismFailureNoFcmTokenProvided() {
         try {
-            authenticatorManager = new AuthenticatorManager(context, storageClient, null);
+            authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
             server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
             String uri = "pushauth://push/forgerock:demo?" +
@@ -162,7 +164,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateCombinedMechanismsFailure() throws Exception {
+    public void testCreateCombinedMechanismsNetworkFailure() throws Exception {
         try {
             authenticatorManager.setPushFactory(pushFactory);
 
@@ -176,6 +178,64 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("Failed to register with server"));
+        }
+    }
+
+    @Test
+    public void testCreateCombinedMechanismsDeviceTamperingFailure() throws Exception {
+        try {
+            SecurityPolicy securityPolicy = spy(new SecurityPolicy());
+
+            authenticatorManager = spy(new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", true));
+            authenticatorManager.setPushFactory(pushFactory);
+            authenticatorManager.setSecurityPolicy(securityPolicy);
+
+            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
+                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
+                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
+
+            doReturn(true).when(securityPolicy).isBiometricCapable(any());
+            doReturn(true).when(securityPolicy).isDeviceRooted(any(), anyDouble());
+
+            given(securityPolicy.violatePolicies(any(), anyBoolean(), anyBoolean(), anyDouble())).willReturn(true);
+            given(securityPolicy.violateDeviceTamperingPolicy(any(), anyBoolean(), anyDouble())).willReturn(true);
+            given(securityPolicy.violateBiometricAuthenticationPolicy(any(), anyBoolean())).willReturn(false);
+
+            authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
+            pushListenerFuture.get();
+            fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device because it either Rooted or has no Biometric authentication enabled"));
+        }
+    }
+
+    @Test
+    public void testCreateCombinedMechanismsBiometricCapableFailure() throws Exception {
+        try {
+            SecurityPolicy securityPolicy = spy(new SecurityPolicy());
+
+            authenticatorManager = spy(new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", true));
+            authenticatorManager.setPushFactory(pushFactory);
+            authenticatorManager.setSecurityPolicy(securityPolicy);
+
+            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
+                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
+                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
+
+            doReturn(false).when(securityPolicy).isBiometricCapable(any());
+            doReturn(false).when(securityPolicy).isDeviceRooted(any(), anyDouble());
+
+            given(securityPolicy.violatePolicies(any(), anyBoolean(), anyBoolean(), anyDouble())).willReturn(true);
+            given(securityPolicy.violateDeviceTamperingPolicy(any(), anyBoolean(), anyDouble())).willReturn(false);
+            given(securityPolicy.violateBiometricAuthenticationPolicy(any(), anyBoolean())).willReturn(true);
+
+            authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
+            pushListenerFuture.get();
+            fail("Should throw MechanismCreationException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device because it either Rooted or has no Biometric authentication enabled"));
         }
     }
 
@@ -206,8 +266,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
-        assertTrue(push.getAccount().isBiometricAuthentication());
-        assertTrue(push.getAccount().isDeviceTamperingDetection());
+        assertTrue(push.getAccount().isBiometricAuthenticationEnforced());
+        assertTrue(push.getAccount().isDeviceTamperingDetectionEnforced());
         assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0.5, 0);
     }
 
@@ -245,7 +305,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
         PushNotification pushNotification = null;
 
-        authenticatorManager = new AuthenticatorManager(context, storageClient, null);
+        authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
         try {
             pushNotification = authenticatorManager.handleMessage(remoteMessage);
         } catch (Exception e) {
@@ -264,7 +324,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredSameToken() {
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n");
+        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
         try {
             authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
             fail("Should throw AuthenticatorException");
@@ -276,7 +336,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredDifferentToken() {
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n");
+        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
         try {
             authenticatorManager.registerForRemoteNotifications("a-n-o-t-h-e-r-t-o-k-e-n");
             fail("Should throw AuthenticatorException");

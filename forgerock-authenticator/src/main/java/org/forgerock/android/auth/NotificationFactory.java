@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -146,6 +146,8 @@ class NotificationFactory {
         if (push == null) {
             Logger.warn(TAG, "Could not retrieve the PUSH mechanism associated with the notification.");
             throw new InvalidNotificationException("Could not retrieve the PUSH mechanism associated with this remote message.");
+        } else {
+            push.setAccount(storageClient.getAccount(push.getAccountId()));
         }
 
         // Verify the JWT signature

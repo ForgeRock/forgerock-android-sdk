@@ -36,16 +36,22 @@ class AuthenticatorManager {
     private MechanismFactory pushFactory;
     /** The Notification Factory responsible to handle remote messages. */
     private NotificationFactory notificationFactory;
+    /** The Helper responsible to check Security Policy enforcement. */
+    private SecurityPolicy securityPolicy;
+    /** The Security Policies enforcement */
+    private boolean enforceSecurityPolicies;
 
     private static final String TAG = AuthenticatorManager.class.getSimpleName();
 
-    AuthenticatorManager(Context context, StorageClient storageClient, String deviceToken) {
+    AuthenticatorManager(Context context, StorageClient storageClient, String deviceToken, boolean enforceSecurityPolicies) {
         this.context = context;
         this.storageClient = storageClient;
         this.deviceToken = deviceToken;
         this.oathFactory = new OathFactory(context, storageClient);
         this.pushFactory = new PushFactory(context, storageClient, deviceToken);
         this.notificationFactory = new NotificationFactory(storageClient);
+        this.securityPolicy = new SecurityPolicy();
+        this.enforceSecurityPolicies = enforceSecurityPolicies;
 
         OathCodeGenerator.getInstance(storageClient);
         PushResponder.getInstance(storageClient);
@@ -142,6 +148,10 @@ class AuthenticatorManager {
             mechanism = notification.getPushMechanism();
         } else {
             mechanism = storageClient.getMechanismByUUID(mechanismUID);
+        }
+
+        if(mechanism.getAccount() == null) {
+            mechanism.setAccount(storageClient.getAccount(mechanism.getAccountId()));
         }
 
         return mechanism;
@@ -252,38 +262,25 @@ class AuthenticatorManager {
         }
     }
 
-    private void initializeAccount(Account account) {
-        if(account != null) {
-            Logger.debug(TAG, "Loading associated data for the Account with ID: %s", account.getId());
-            List<Mechanism> mechanismList = storageClient.getMechanismsForAccount(account);
-            Collections.sort(mechanismList);
-            account.setMechanismList(mechanismList);
-            for (Mechanism mechanism : mechanismList) {
-                mechanism.setAccount(account);
-            }
-        }
-    }
-
-    @VisibleForTesting
-    void setPushFactory(MechanismFactory pushFactory) {
-        this.pushFactory = pushFactory;
-    }
-
-    @VisibleForTesting
-    void setNotificationFactory(NotificationFactory notificationFactory) {
-        this.notificationFactory = notificationFactory;
-    }
-
-    @VisibleForTesting
-    void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
+    private void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
         final Mechanism[] oathMechanism = new Mechanism[1];
         Map<String, String> combinedParameters = MechanismParser.getUriParameters(uri);
 
+        // Apply security policies before proceed with registration
+        if(enforceSecurityPolicies) {
+            boolean enforceBiometricAuthentication = Boolean.parseBoolean(combinedParameters.get(MechanismParser.BIOMETRIC_AUTHENTICATION));
+            boolean enforceTamperingDetection = Boolean.parseBoolean(combinedParameters.get(MechanismParser.DEVICE_TAMPERING));
+            double deviceTamperingScore = Double.parseDouble(combinedParameters.get(MechanismParser.DEVICE_TAMPERING_SCORE));
+            if(securityPolicy.violatePolicies(context, enforceBiometricAuthentication,
+                    enforceTamperingDetection, deviceTamperingScore)) {
+                listener.onException(new MechanismCreationException("This account cannot be registered on this device " +
+                        "because it is either Rooted or has no Biometric authentication enabled."));
+            }
+        }
+        
         // Retrieves OATH and PUSH registration URIs from parameters
         String oathUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.OATH_URI));
-        combinedParameters.remove(MechanismParser.OATH_URI);
         String pushUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.PUSH_URI));
-        combinedParameters.remove(MechanismParser.PUSH_URI);
 
         // Register OATH mechanism passing combined parameters
         oathFactory.createFromUri(oathUri, combinedParameters, new FRAListener<Mechanism>() {
@@ -309,13 +306,50 @@ class AuthenticatorManager {
 
             @Override
             public void onException(Exception e) {
-                // if PUSH mechanisms fails to register, removes temporally created OATH mechanism
-                removeMechanism(oathMechanism[0]);
+                listener.onSuccess(oathMechanism[0]);
                 listener.onException(e);
                 Logger.error(TAG, "Error creating PUSH mechanism in Combined MFA.");
             }
         });
     }
+    
+    private void initializeAccount(Account account) {
+        if(account != null) {
+            if(enforceSecurityPolicies) {
+                Logger.debug(TAG, "Checking Security Policies enforcement for Account with ID: %s", account.getId());
+                boolean violate = securityPolicy.violatePolicies(context, account);
+                if(account.isLocked() & !violate) {
+                    account.setLock(false);
+                    updateAccount(account); 
+                } else if(!account.isLocked() & violate) {
+                    account.setLock(true);
+                    updateAccount(account);
+                }
+            }
 
+            Logger.debug(TAG, "Loading associated mechanisms for the Account with ID: %s", account.getId());
+            List<Mechanism> mechanismList = storageClient.getMechanismsForAccount(account);
+            Collections.sort(mechanismList);
+            account.setMechanismList(mechanismList);
+            for (Mechanism mechanism : mechanismList) {
+                mechanism.setAccount(account);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void setPushFactory(MechanismFactory pushFactory) {
+        this.pushFactory = pushFactory;
+    }
+
+    @VisibleForTesting
+    void setNotificationFactory(NotificationFactory notificationFactory) {
+        this.notificationFactory = notificationFactory;
+    }
+
+    @VisibleForTesting
+    void setSecurityPolicy(SecurityPolicy securityPolicy) {
+        this.securityPolicy = securityPolicy;
+    }
 }
 

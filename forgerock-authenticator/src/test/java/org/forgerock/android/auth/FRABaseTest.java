@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -107,6 +107,7 @@ public abstract class FRABaseTest {
     public static PushMechanism mockPushMechanism(String mechanismUid) {
         final PushMechanism push = mock(PushMechanism.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
+        given(push.getAccountId()).willReturn(ISSUER + "-" + ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);
         given(push.getMechanismUID()).willReturn(mechanismUid);
@@ -117,7 +118,13 @@ public abstract class FRABaseTest {
     }
 
     public static PushMechanism mockPushMechanism(String mechanismUid, String serverUrl) {
+        return mockPushMechanism(mechanismUid, serverUrl, createAccount(ACCOUNT_NAME, ISSUER));
+    }
+
+    public static PushMechanism mockPushMechanism(String mechanismUid, String serverUrl, Account account) {
         final PushMechanism push = mock(PushMechanism.class);
+        given((push.getAccount())).willReturn(account);
+        given(push.getAccountId()).willReturn(ISSUER + "-" + ACCOUNT_NAME);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);

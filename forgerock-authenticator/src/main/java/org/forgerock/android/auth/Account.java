@@ -45,7 +45,7 @@ public class Account extends ModelObject<Account> {
     /** Enforce Biometric Authentication flag */
     private final boolean enforceBiometricAuthentication;
     /** Account locked flag */
-    private final boolean lock;
+    private boolean lock;
     /** List of Mechanism objects associated with this account **/
     private List<Mechanism> mechanismList;
 
@@ -173,26 +173,26 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
-     * Determine whether the Device Tampering Detection should be applied to the account.
+     * Determine whether the Device Tampering Detection policy should be applied to the account.
      * @return True if the should use Device Tampering Detection, false otherwise.
      */
-    public boolean isDeviceTamperingDetection() {
+    public boolean isDeviceTamperingDetectionEnforced() {
         return enforceDeviceTamperingDetection;
     }
 
     /**
      * Returns the Device Tampering score.
-     * @return The score to be used on Device Tampering Detection.
+     * @return The score to be used on Device Tampering Detection policy.
      */
     public double getDeviceTamperingScoreThreshold() {
         return deviceTamperingScoreThreshold;
     }
 
     /**
-     * Determine whether the Biometric Authentication should be applied to the account.
+     * Determine whether the Biometric Authentication policy should be applied to the account.
      * @return True if the should use Biometric Authentication, false otherwise.
      */
-    public boolean isBiometricAuthentication() {
+    public boolean isBiometricAuthenticationEnforced() {
         return enforceBiometricAuthentication;
     }
 
@@ -202,6 +202,14 @@ public class Account extends ModelObject<Account> {
      */
     public boolean isLocked() {
         return lock;
+    }
+
+    /**
+     * Sets whether the this Account should be locked by the app.
+     * @param lock Indicates if the Account should be locked.
+     */
+    public void setLock(boolean lock) {
+        this.lock = lock;
     }
 
     /**
@@ -233,9 +241,9 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("imageURL", imageURL);
             jsonObject.put("backgroundColor", backgroundColor);
             jsonObject.put("timeAdded", timeAdded != null ? timeAdded.getTimeInMillis() : null);
-            jsonObject.put("enforceDeviceTamperingDetection", isDeviceTamperingDetection());
+            jsonObject.put("enforceDeviceTamperingDetection", isDeviceTamperingDetectionEnforced());
             jsonObject.put("deviceTamperingScoreThreshold", getDeviceTamperingScoreThreshold());
-            jsonObject.put("enforceBiometricAuthentication", isBiometricAuthentication());
+            jsonObject.put("enforceBiometricAuthentication", isBiometricAuthenticationEnforced());
             jsonObject.put("lock", isLocked());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
@@ -263,10 +271,10 @@ public class Account extends ModelObject<Account> {
                     .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL") : null)
                     .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
                     .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
-                    .setEnforceDeviceTamperingDetection(jsonObject.getBoolean("enforceDeviceTamperingDetection"))
-                    .setDeviceTamperingScoreThreshold(jsonObject.getDouble("deviceTamperingScoreThreshold"))
-                    .setEnforceBiometricAuthentication(jsonObject.getBoolean("enforceBiometricAuthentication"))
-                    .setLock(jsonObject.getBoolean("lock"))
+                    .setEnforceDeviceTamperingDetection(jsonObject.has("enforceDeviceTamperingDetection") && jsonObject.getBoolean("enforceDeviceTamperingDetection"))
+                    .setDeviceTamperingScoreThreshold(jsonObject.has("deviceTamperingScoreThreshold") ? jsonObject.getDouble("deviceTamperingScoreThreshold") : 0.0)
+                    .setEnforceBiometricAuthentication(jsonObject.has("enforceBiometricAuthentication") && jsonObject.getBoolean("enforceBiometricAuthentication"))
+                    .setLock(jsonObject.has("lock") && jsonObject.getBoolean("lock"))
                     .build();
         } catch (JSONException e) {
             return null;
@@ -396,7 +404,7 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
-         * Sets to enforce Device Tampering Detection.
+         * Sets to enforce Device Tampering Detection policy.
          * @param enforceDeviceTamperingDetection True if the Device Tampering Detection should be used, false otherwise.
          */
         public AccountBuilder setEnforceDeviceTamperingDetection(boolean enforceDeviceTamperingDetection) {
@@ -405,7 +413,7 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
-         * Sets the Device Tampering score (0 - 1).
+         * Sets the score (0 - 1) used by the Device Tampering Detection policy.
          * @param deviceTamperingScoreThreshold Device tampering score limit.
          */
         public AccountBuilder setDeviceTamperingScoreThreshold(double deviceTamperingScoreThreshold) {
@@ -416,7 +424,7 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
-         * Sets to enforce Biometric Authentication.
+         * Sets to enforce Biometric Authentication policy.
          * @param enforceBiometricAuthentication True if the Biometric should be used to unlock the account, false otherwise.
          */
         public AccountBuilder setEnforceBiometricAuthentication(boolean enforceBiometricAuthentication) {

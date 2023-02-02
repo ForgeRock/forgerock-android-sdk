@@ -7,7 +7,6 @@
 package org.forgerock.android.auth
 
 import android.content.Context
-import org.robolectric.RobolectricTestRunner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.forgerock.android.auth.detector.RootDetector

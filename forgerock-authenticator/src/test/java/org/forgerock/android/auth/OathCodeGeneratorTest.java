@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AccountLockedException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
@@ -56,7 +57,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpSHA1Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpSHA1Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -75,7 +77,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpSHA1Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpSHA1Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -105,7 +108,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpSHA224Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpSHA224Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -124,7 +128,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpSHA224Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpSHA224Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -154,7 +159,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpSHA256Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpSHA256Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -173,7 +179,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpSHA256Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpSHA256Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -203,7 +210,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpSHA384Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpSHA384Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -222,7 +230,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpSHA384Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpSHA384Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -252,7 +261,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpSHA512Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpSHA512Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -271,7 +281,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpSHA512Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpSHA512Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -301,7 +312,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeHotpMD5Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeHotpMD5Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -320,7 +332,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGenerateCodeTotpMD5Algorithm() throws OathMechanismException, MechanismCreationException {
+    public void testShouldGenerateCodeTotpMD5Algorithm()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override
@@ -350,7 +363,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testHandleHOTPCorrectlyWith6Digits() throws OathMechanismException, MechanismCreationException {
+    public void testHandleHOTPCorrectlyWith6Digits()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -372,7 +386,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testHandleHOTPCorrectlyWith8Digits() throws OathMechanismException, MechanismCreationException {
+    public void testHandleHOTPCorrectlyWith8Digits()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
         HOTPMechanism oath = (HOTPMechanism) HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -394,7 +409,8 @@ public class OathCodeGeneratorTest extends FRABaseTest {
     }
 
     @Test
-    public void testHandleTOTPCorrectly() throws OathMechanismException, MechanismCreationException {
+    public void testHandleTOTPCorrectly()
+            throws OathMechanismException, MechanismCreationException, AccountLockedException {
 
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;

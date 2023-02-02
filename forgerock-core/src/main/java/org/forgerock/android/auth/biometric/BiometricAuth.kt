@@ -8,6 +8,8 @@ package org.forgerock.android.auth.biometric
 
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Context.KEYGUARD_SERVICE
+import android.content.pm.PackageManager
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import androidx.annotation.RestrictTo
@@ -216,6 +218,30 @@ class BiometricAuth @JvmOverloads constructor(
 
     companion object {
         private val TAG = BiometricAuth::class.java.simpleName
+
+        @JvmStatic
+        fun isBiometricAvailable(applicationContext: Context) : Boolean{
+            var canAuthenticate = true
+            if (Build.VERSION.SDK_INT < 29) {
+                val keyguardManager : KeyguardManager = applicationContext.getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+                val packageManager : PackageManager = applicationContext.packageManager
+                // Check if Fingerprint Sensor is supported
+                if(!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                    canAuthenticate = false
+                }
+                // Check if lock screen security is enabled in Settings
+                if (!keyguardManager.isKeyguardSecure) {
+                    canAuthenticate = false
+                }
+            } else {
+                // Check if biometric is supported
+                val biometricManager : BiometricManager = applicationContext.getSystemService(BiometricManager::class.java)
+                if(biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) != BiometricManager.BIOMETRIC_SUCCESS){
+                    canAuthenticate = false
+                }
+            }
+            return canAuthenticate
+        }
     }
 
     init {

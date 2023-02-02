@@ -95,7 +95,7 @@ abstract class MechanismFactory {
         String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
         String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
         String deviceTampering = getFromMap(values, MechanismParser.DEVICE_TAMPERING, "false");
-        String deviceTamperingScore = getFromMap(values, MechanismParser.DEVICE_TAMPERING_SCORE, "0");
+        String deviceTamperingScore = getFromMap(values, MechanismParser.DEVICE_TAMPERING_SCORE, "0.0");
         String biometricAuthentication = getFromMap(values, MechanismParser.BIOMETRIC_AUTHENTICATION, "false");
 
         // Check version

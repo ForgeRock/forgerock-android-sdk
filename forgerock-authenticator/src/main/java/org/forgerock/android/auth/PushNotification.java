@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -16,6 +16,7 @@ import androidx.biometric.BiometricPrompt.AuthenticationCallback;
 import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.biometric.BiometricAuth;
+import org.forgerock.android.auth.exception.AccountLockedException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.json.JSONException;
@@ -312,7 +313,10 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @param listener Listener for receiving the authentication result.
      */
     public final void accept(@NonNull FRAListener<Void> listener) {
-        if (this.pushType == PushType.DEFAULT) {
+        if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
+            listener.onException(new AccountLockedException("Unable to process the Push " +
+                    "Authentication request: Account is locked."));
+        } else if (this.pushType == PushType.DEFAULT) {
             Logger.debug(TAG, "Accept Push Authentication request for message: %s", getMessageId());
             performAcceptDenyAsync(true, listener);
         } else {
@@ -329,7 +333,10 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @param listener Listener for receiving the authentication result.
      */
     public final void accept(@NonNull String challengeResponse, @NonNull FRAListener<Void> listener) {
-        if (this.pushType == PushType.CHALLENGE) {
+        if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
+            listener.onException(new AccountLockedException("Unable to process the Push " +
+                    "Authentication request: Account is locked."));
+        } else if (this.pushType == PushType.CHALLENGE) {
             Logger.debug(TAG, "Respond the challenge for message: %s", getMessageId());
             PushResponder.getInstance().authenticationWithChallenge(this, challengeResponse, listener);
         } else {
@@ -354,7 +361,10 @@ public class PushNotification extends ModelObject<PushNotification> {
                              boolean allowDeviceCredentials,
                              @NonNull FragmentActivity activity,
                              @NonNull FRAListener<Void> listener) {
-        if (this.pushType == PushType.BIOMETRIC) {
+        if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
+            listener.onException(new AccountLockedException("Unable to process the Push " +
+                    "Authentication request: Account is locked."));
+        } else if (this.pushType == PushType.BIOMETRIC) {
             final PushNotification pushNotification = this;
             BiometricAuth biometricAuth = new BiometricAuth(title,
                     subtitle, allowDeviceCredentials, activity, new AuthenticationCallback() {
@@ -389,8 +399,13 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @param listener Listener for receiving the HTTP call response code.
      */
     public final void deny(@NonNull FRAListener<Void> listener) {
-        Logger.debug(TAG, "Deny Push Authentication request for message: %s", getMessageId());
-        performAcceptDenyAsync(false, listener);
+        if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
+            listener.onException(new AccountLockedException("Unable to process the Push " +
+                    "Authentication request: Account is locked."));
+        } else {
+            Logger.debug(TAG, "Deny Push Authentication request for message: %s", getMessageId());
+            performAcceptDenyAsync(false, listener);
+        }
     }
 
     void performAcceptDenyAsync(boolean approved, FRAListener<Void> listener) {

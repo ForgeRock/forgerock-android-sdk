@@ -92,6 +92,17 @@ public class FRAClientTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldStartSDKWithEnforceAccountLock() throws AuthenticatorException {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withEnforceSecurityPolicies(false)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+    }
+
+    @Test
     public void testShouldStartSDKWithFcmToken() throws AuthenticatorException {
         FRAClient fraClient = FRAClient.builder()
                 .withContext(context)
@@ -264,6 +275,7 @@ public class FRAClientTest extends FRABaseTest {
                 .withContext(context)
                 .withDeviceToken("s-o-m-e-t-o-k-e-n")
                 .withStorage(storageClient)
+                .withEnforceSecurityPolicies(false)
                 .start();
 
         assertNotNull(fraClient);
@@ -295,8 +307,8 @@ public class FRAClientTest extends FRABaseTest {
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
         assertEquals(push.getIssuer(), "Forgerock");
-        assertFalse(push.getAccount().isBiometricAuthentication());
-        assertFalse(push.getAccount().isDeviceTamperingDetection());
+        assertFalse(push.getAccount().isBiometricAuthenticationEnforced());
+        assertFalse(push.getAccount().isDeviceTamperingDetectionEnforced());
         assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0, 0);
     }
 

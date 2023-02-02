@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,6 +15,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.TimeZone;
 
 @RunWith(RobolectricTestRunner.class)
 public class AccountTest extends FRABaseTest {
@@ -140,14 +143,27 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"enforceDeviceTamperingDetection\":true," +
+                "\"deviceTamperingScoreThreshold\":0.8," +
+                "\"enforceBiometricAuthentication\":false," +
+                "\"lock\":false" +
                 "}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
+                .setTimeAdded(timeAdded)
+                .setEnforceDeviceTamperingDetection(true)
+                .setDeviceTamperingScoreThreshold(0.8)
+                .setEnforceBiometricAuthentication(false)
+                .setLock(false)
                 .build();
 
         String accountAsJson = account.toJson();
@@ -163,14 +179,27 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"enforceDeviceTamperingDetection\":true," +
+                "\"deviceTamperingScoreThreshold\":0.8," +
+                "\"enforceBiometricAuthentication\":false," +
+                "\"lock\":false" +
                 "}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
+                .setTimeAdded(timeAdded)
+                .setEnforceDeviceTamperingDetection(true)
+                .setDeviceTamperingScoreThreshold(0.8)
+                .setEnforceBiometricAuthentication(false)
+                .setLock(false)
                 .build();
 
         String accountAsJson = account.serialize();
@@ -186,7 +215,8 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660" +
                 "}";
 
         Account account = Account.deserialize(json);

@@ -54,6 +54,7 @@ public class FRAClient {
         private StorageClient storageClient;
         private String fcmToken;
         private Context context;
+        private boolean enforceSecurityPolicies = true;
 
         /**
          * Initialize the FRAClient instance with an Android Context.
@@ -89,6 +90,19 @@ public class FRAClient {
         }
 
         /**
+         * Initialize the FRAClient instance with the enforce Security Policies. If set to {@code true},
+         * the {@link Account} registered with {@code enforceDeviceTamperingDetection} and/or
+         * {@code enforceBiometricAuthentication} will be automatically locked by the SDK.
+         * @param enforceSecurityPolicies {@code true} if the Accounts should be automatically locked,
+         * {@code false} otherwise
+         * @return this builder
+         */
+        public FRAClientBuilder withEnforceSecurityPolicies(boolean enforceSecurityPolicies) {
+            this.enforceSecurityPolicies = enforceSecurityPolicies;
+            return this;
+        }
+
+        /**
          * Initialize the authenticator client {@link FRAClient}.
          * @throws AuthenticatorException If {@link Context} was not provided
          */
@@ -108,7 +122,7 @@ public class FRAClient {
                         " FRAClient#registerForRemoteNotifications can also be used to register the device token.");
             }
 
-            return new FRAClient(new AuthenticatorManager(context, storageClient, fcmToken));
+            return new FRAClient(new AuthenticatorManager(context, storageClient, fcmToken, enforceSecurityPolicies));
         }
 
     }
