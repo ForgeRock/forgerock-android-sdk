@@ -27,13 +27,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.app.Alert
 import com.example.app.Topbar
 import org.forgerock.android.auth.devicebind.UserKey
 
 @Composable
 fun UserKeysRoute(viewModel: UserKeysViewModel, openDrawer: () -> Unit) {
 
-    val userKeys by viewModel.userKeys.collectAsState()
+    val userKeysState by viewModel.userKeys.collectAsState()
 
     var showConfirmation by remember {
         mutableStateOf(false)
@@ -51,7 +52,6 @@ fun UserKeysRoute(viewModel: UserKeysViewModel, openDrawer: () -> Unit) {
                     state.userKey?.let {
                         viewModel.delete(it)
                     }
-                    viewModel.fetch()
                     showConfirmation = false
                 })
                 { Text(text = "Delete") }
@@ -66,9 +66,14 @@ fun UserKeysRoute(viewModel: UserKeysViewModel, openDrawer: () -> Unit) {
         )
     }
 
+    userKeysState.throwable?.apply {
+        Alert(throwable = this)
+        userKeysState.throwable = null
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
-        Topbar(heading = "User Keys", openDrawer)
-        UserKeys(userKeys,
+        Topbar(heading = "User Keys - Device Binding", openDrawer)
+        UserKeys(userKeysState.userKeys,
             onSelected = {
                 showConfirmation = true
                 state = UserKeyState(it)

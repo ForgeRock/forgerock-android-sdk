@@ -196,7 +196,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                         deviceAuthenticator(status.key.authType))
                     else -> {
                         val userKey =
-                            userKeySelector.selectUserKey(UserKeys(userKeyService.userKeys))
+                            userKeySelector.selectUserKey(UserKeys(userKeyService.getAll()))
                         authenticate(context, userKey, deviceAuthenticator(userKey.authType))
                     }
                 }

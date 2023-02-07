@@ -25,6 +25,7 @@ import com.example.app.Topbar
 import com.example.app.callback.ChoiceCallback
 import com.example.app.callback.ConfirmationCallback
 import com.example.app.callback.DeviceBindingCallback
+import com.example.app.callback.DeviceProfileCallback
 import com.example.app.callback.DeviceSigningVerifierCallback
 import com.example.app.callback.NameCallback
 import com.example.app.callback.PasswordCallback
@@ -38,6 +39,7 @@ import com.example.app.userprofile.UserProfileViewModel
 import org.forgerock.android.auth.callback.ChoiceCallback
 import org.forgerock.android.auth.callback.ConfirmationCallback
 import org.forgerock.android.auth.callback.DeviceBindingCallback
+import org.forgerock.android.auth.callback.DeviceProfileCallback
 import org.forgerock.android.auth.callback.DeviceSigningVerifierCallback
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
@@ -74,7 +76,7 @@ fun Journey(journeyName: String,
             UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
         }
         state.exception?.apply {
-            Error(exception = this)
+            Error(exception = this, openDrawer)
         }
         state.node?.apply {
             var showNext = true
@@ -112,6 +114,16 @@ fun Journey(journeyName: String,
                     }
                     is SelectIdPCallback -> {
                         SelectIdPCallback(callback = it, onSelected = onNext)
+                    }
+                    /*
+                    is AppIntegrityCallback -> {
+                        AppIntegrityCallback(callback = it, onCompleted = onNext)
+                        showNext = false
+                    }
+                     */
+                    is DeviceProfileCallback -> {
+                        DeviceProfileCallback(callback = it, onCompleted = onNext)
+                        showNext = false
                     }
 
                     else -> {

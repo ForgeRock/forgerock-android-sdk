@@ -14,6 +14,7 @@ import androidx.test.core.app.ActivityScenario;
 import org.assertj.core.api.Assertions;
 import org.forgerock.android.auth.DummyActivity;
 import org.forgerock.android.auth.FRListener;
+import org.forgerock.android.auth.FRListenerFuture;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.FRUserKeys;
 import org.forgerock.android.auth.InitProvider;
@@ -21,10 +22,12 @@ import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
+import org.forgerock.android.auth.exception.ApiException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
@@ -107,7 +110,7 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testListAndDeleteKeys() throws ExecutionException, InterruptedException {
+    public void testListAndDeleteKeys() throws ExecutionException, InterruptedException, IOException, ApiException {
         FRUserKeys userKeys = new FRUserKeys(context);
         assertThat(userKeys.loadAll().size()).isEqualTo(2);
 
@@ -116,11 +119,17 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
         assertThat(userKeys.loadAll().get(1).getUserName()).isEqualTo(USERNAME);
 
         // Delete one of the keys and confirm it was deleted
-        userKeys.delete(userKeys.loadAll().get(0));
+        FRListenerFuture<Void> future = new FRListenerFuture<>();
+        userKeys.delete(userKeys.loadAll().get(0), false, future);
+        future.get();
+
         assertThat(1).isEqualTo(userKeys.loadAll().size());
 
         // Delete the second key and confirm it was deleted
-        userKeys.delete(userKeys.loadAll().get(0));
+        FRListenerFuture<Void> future2 = new FRListenerFuture<>();
+        userKeys.delete(userKeys.loadAll().get(0), false, future2);
+        future2.get();
+
         assertThat(0).isEqualTo(userKeys.loadAll().size());
     }
 }

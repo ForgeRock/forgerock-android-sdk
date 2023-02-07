@@ -7,7 +7,7 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepositoryKt.ORG_FORGEROCK_V_1_DEVICE_REPO;
+import static org.forgerock.android.auth.devicebind.LocalDeviceBindingRepositoryKt.ORG_FORGEROCK_V_1_DEVICE_REPO;
 
 import android.content.Context;
 

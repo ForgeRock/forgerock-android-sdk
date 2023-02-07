@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -122,7 +123,7 @@ fun AppDrawer(
 private fun Logo(modifier: Modifier = Modifier) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Color.LightGray)
+        .background(MaterialTheme.colorScheme.primary)
         .then(modifier)) {
         Icon(
             painterResource(R.drawable.forgerock),

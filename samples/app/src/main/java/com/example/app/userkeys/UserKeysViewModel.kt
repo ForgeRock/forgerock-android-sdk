@@ -10,29 +10,36 @@ package com.example.app.userkeys
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRUserKeys
 import org.forgerock.android.auth.devicebind.UserKey
 
 class UserKeysViewModel(context: Context) : ViewModel() {
 
     private val frUserKeys = FRUserKeys(context)
-
-    val userKeys = MutableStateFlow(emptyList<UserKey>())
+    val userKeys = MutableStateFlow(UserKeysState())
 
     init {
-        fetch()
+        fetch(null)
     }
 
     fun delete(userKey: UserKey) {
-        frUserKeys.delete(userKey)
-        fetch()
+        val handler = CoroutineExceptionHandler { _, t ->
+            fetch(t)
+        }
+        viewModelScope.launch(handler) {
+            frUserKeys.delete(userKey)
+            fetch(null)
+        }
     }
 
-    fun fetch() {
+    private fun fetch(t: Throwable?) {
         userKeys.update {
-            frUserKeys.loadAll()
+            it.copy(userKeys = frUserKeys.loadAll(), throwable = t)
         }
     }
 

@@ -20,12 +20,12 @@ import org.forgerock.android.auth.devicebind.BiometricOnly
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
-import org.forgerock.android.auth.devicebind.DeviceRepository
+import org.forgerock.android.auth.devicebind.DeviceBindingRepository
 import org.forgerock.android.auth.devicebind.KeyPair
 import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.PinCollector
 import org.forgerock.android.auth.devicebind.Prompt
-import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
+import org.forgerock.android.auth.devicebind.LocalDeviceBindingRepository
 import org.forgerock.android.auth.devicebind.Success
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -44,14 +44,13 @@ import java.io.OutputStream
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
-import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
 class DeviceBindingCallbackTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
 
-    private val encryptedPref = mock<DeviceRepository>()
+    private val encryptedPref = mock<DeviceBindingRepository>()
     private val deviceAuthenticator = mock<DeviceAuthenticator>()
     private val publicKey = mock<RSAPublicKey>()
     private val privateKey = mock<PrivateKey>()
@@ -90,8 +89,7 @@ class DeviceBindingCallbackTest {
     fun testSuccessPathForNoneType() = runBlocking {
         val rawContent =
             "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw=\"},{\"name\":\"title\",\"value\":\"jey\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
-        val encryptedPref = mock<DeviceRepository>()
-        val authenticationLatch = CountDownLatch(1)
+        val encryptedPref = mock<DeviceBindingRepository>()
         val deviceAuthenticator = mock<None>()
         whenever(deviceAuthenticator.isSupported(any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any())).thenReturn(keyPair)
@@ -101,11 +99,6 @@ class DeviceBindingCallbackTest {
             userid,
             challenge,
             getExpiration())).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid,
-            "keyAlias",
-            "",
-            DeviceBindingAuthenticationType.NONE)).thenReturn(kid)
-
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
             authInterface = deviceAuthenticator,
@@ -114,7 +107,6 @@ class DeviceBindingCallbackTest {
         verify(deviceAuthenticator).setKey(any())
 
     }
-
 
     @Test
     fun testSuccessPathForBiometricType() = runBlocking {
@@ -130,10 +122,6 @@ class DeviceBindingCallbackTest {
             userid,
             challenge,
             getExpiration())).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ONLY)).thenReturn(kid)
 
         val scenario: ActivityScenario<DummyActivity> =
             ActivityScenario.launch(DummyActivity::class.java)
@@ -162,10 +150,6 @@ class DeviceBindingCallbackTest {
             userid,
             challenge,
             getExpiration())).thenReturn("signedJWT")
-        whenever(encryptedPref.persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)).thenReturn(kid)
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
@@ -198,13 +182,10 @@ class DeviceBindingCallbackTest {
             assertTrue(deviceBindException.message == abort.message)
         }
 
-        verify(encryptedPref).delete(any())
+        verify(encryptedPref, times(0)).delete(any()) //The key reference has not been created
         verify(deviceAuthenticator).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
-        verify(encryptedPref, times(0)).persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        verify(encryptedPref, times(0)).persist(any())
     }
 
 
@@ -228,13 +209,10 @@ class DeviceBindingCallbackTest {
             assertTrue(e is DeviceBindingException)
         }
 
-        verify(encryptedPref).delete(any())
+        verify(encryptedPref, times(0)).delete(any())
         verify(deviceAuthenticator).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
-        verify(encryptedPref, times(0)).persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        verify(encryptedPref, times(0)).persist(any())
     }
 
     @Test
@@ -264,10 +242,7 @@ class DeviceBindingCallbackTest {
         verify(deviceAuthenticator, times(0)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
-        verify(encryptedPref, times(0)).persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        verify(encryptedPref, times(0)).persist(any())
 
     }
 
@@ -294,10 +269,7 @@ class DeviceBindingCallbackTest {
         verify(deviceAuthenticator).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
-        verify(encryptedPref, times(0)).persist(userid,
-            "jey",
-            "keyAlias",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        verify(encryptedPref, times(0)).persist(any())
     }
 
     @Test
@@ -312,7 +284,7 @@ class DeviceBindingCallbackTest {
         }
         val sharedPreferences = context.getSharedPreferences("TEST", Context.MODE_PRIVATE)
         val repository =
-            SharedPreferencesDeviceRepository(context, sharedPreferences = sharedPreferences)
+            LocalDeviceBindingRepository(context, sharedPreferences = sharedPreferences)
 
         testObject.testExecute(context, encryptedPreference = repository, deviceId = "deviceId")
     }
@@ -325,6 +297,7 @@ class DeviceBindingCallbackTest {
 }
 
 
+
 class DeviceBindingCallbackMockTest constructor(rawContent: String,
                                                 jsonObject: JSONObject = JSONObject(rawContent),
                                                 value: Int = 0) :
@@ -332,15 +305,15 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
 
     suspend fun testExecute(context: Context,
                             authInterface: DeviceAuthenticator,
-                            encryptedPreference: DeviceRepository,
+                            encryptedPreference: DeviceBindingRepository,
                             deviceId: String) {
         execute(context, authInterface, encryptedPreference, deviceId)
     }
 
     suspend fun testExecute(context: Context,
-                            encryptedPreference: DeviceRepository,
+                            encryptedPreference: DeviceBindingRepository,
                             deviceId: String) {
-        execute(context, encryptedPreference = encryptedPreference, deviceId = deviceId)
+        execute(context, deviceBindingRepository = encryptedPreference, deviceId = deviceId)
     }
 
 
@@ -382,4 +355,5 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
         }
         return super.getDeviceAuthenticator(type)
     }
+
 }

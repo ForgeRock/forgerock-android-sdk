@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import com.example.app.callback.binding.CustomAppPinDeviceAuthenticator
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType.APPLICATION_PIN
 import org.forgerock.android.auth.callback.DeviceBindingCallback
 
@@ -45,7 +44,10 @@ import org.forgerock.android.auth.callback.DeviceBindingCallback
 fun DeviceBindingCallback(callback: DeviceBindingCallback,
                           onCompleted: () -> Unit) {
 
+    //Using coroutineScope instead of LaunchedEffect because we need to run coroutine in callback
     val coroutineScope = rememberCoroutineScope()
+    //We should not put input callback function (onCompleted) to coroutineScope or LaunchEffect
+    //onCompleted may call after LaunchEffect finished
     val currentOnCompleted by rememberUpdatedState(onCompleted)
     val context = LocalContext.current
     var deviceName by remember {
@@ -82,7 +84,7 @@ fun DeviceBindingCallback(callback: DeviceBindingCallback,
                 modifier = Modifier.align(Alignment.End),
                 onClick = {
                     showProgress = true
-                    coroutineScope.launch {
+                   coroutineScope.launch {
                         try {
                             callback.setDeviceName(deviceName)
                             callback.bind(context) {
