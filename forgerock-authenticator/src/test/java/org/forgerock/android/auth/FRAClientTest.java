@@ -7,6 +7,19 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
 import android.content.Context;
 import android.util.Base64;
 
@@ -14,9 +27,12 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
+import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,19 +47,6 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-
 @RunWith(RobolectricTestRunner.class)
 public class FRAClientTest extends FRABaseTest {
 
@@ -51,6 +54,7 @@ public class FRAClientTest extends FRABaseTest {
     private DefaultStorageClient storageClient;
     private PushFactory pushFactory;
     private NotificationFactory notificationFactory;
+    private FRAPolicyEvaluator policyEvaluator;
     private PushMechanism push;
     private MockWebServer server;
 
@@ -69,6 +73,10 @@ public class FRAClientTest extends FRABaseTest {
 
         pushFactory = spy(new PushFactory(context, storageClient, "s-o-m-e-t-o-k-e-n"));
         doReturn(true).when(pushFactory).checkGooglePlayServices();
+
+        policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        doReturn(true).when(policyEvaluator).evaluate(any(), anyString());
+        doReturn(true).when(policyEvaluator).evaluate(any(), any(Account.class));
 
         notificationFactory = new NotificationFactory(storageClient);
 
@@ -95,7 +103,7 @@ public class FRAClientTest extends FRABaseTest {
     public void testShouldStartSDKWithEnforceAccountLock() throws AuthenticatorException {
         FRAClient fraClient = FRAClient.builder()
                 .withContext(context)
-                .withEnforceSecurityPolicies(false)
+                .withPolicyEvaluator(policyEvaluator)
                 .start();
 
         assertNotNull(fraClient);
@@ -275,7 +283,7 @@ public class FRAClientTest extends FRABaseTest {
                 .withContext(context)
                 .withDeviceToken("s-o-m-e-t-o-k-e-n")
                 .withStorage(storageClient)
-                .withEnforceSecurityPolicies(false)
+                .withPolicyEvaluator(policyEvaluator)
                 .start();
 
         assertNotNull(fraClient);
@@ -286,30 +294,27 @@ public class FRAClientTest extends FRABaseTest {
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String oathUri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
-        String pushUri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl(server,"authenticate") + "&" +
+        String combinedUri = "mfauth://mfa/ForgeRock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl(server,"register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
                 "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
                 "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
-                "issuer=Rm9yZ2Vyb2Nr";
-        String combinedUri = "mfauth://mfa/ForgeRock:demo/" +
-                "?oath=" + Base64.encodeToString(oathUri.getBytes(), Base64.NO_WRAP) + "&" +
-                "&push=" + Base64.encodeToString(pushUri.getBytes(), Base64.NO_WRAP);
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&" +
+                "type=totp";
 
         FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Mechanism>();
         fraClient.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
-        assertEquals(push.getIssuer(), "Forgerock");
-        assertFalse(push.getAccount().isBiometricAuthenticationEnforced());
-        assertFalse(push.getAccount().isDeviceTamperingDetectionEnforced());
-        assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0, 0);
+        assertEquals(push.getIssuer(), "ForgeRock");
     }
 
     @Test
@@ -822,4 +827,71 @@ public class FRAClientTest extends FRABaseTest {
         assertTrue(result);
     }
 
+    @Test
+    public void testShouldLockAccount() throws AccountLockException, AuthenticatorException {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        FRAPolicy policy = new DeviceTamperingPolicy();
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        boolean result = fraClient.lockAccount(account, policy);
+
+        assertTrue(result);
+        assertTrue(account.isLocked());
+        assertEquals(account.getLockingPolicy(), policy.getName());
+    }
+
+    @Test
+    public void testShouldUnlockAccount() throws AccountLockException, AuthenticatorException {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLock(true)
+                .setLockingPolicy("deviceTampering")
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        boolean result = fraClient.unlockAccount(account);
+
+        assertTrue(result);
+        assertFalse(account.isLocked());
+        assertNull(account.getLockingPolicy());
+    }
 }

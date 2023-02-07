@@ -14,13 +14,14 @@ import androidx.annotation.VisibleForTesting;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 class AuthenticatorManager {
 
@@ -36,22 +37,20 @@ class AuthenticatorManager {
     private MechanismFactory pushFactory;
     /** The Notification Factory responsible to handle remote messages. */
     private NotificationFactory notificationFactory;
-    /** The Helper responsible to check Security Policy enforcement. */
-    private SecurityPolicy securityPolicy;
-    /** The Security Policies enforcement */
-    private boolean enforceSecurityPolicies;
+    /** The Policy Evaluator is used to enforce policy compliance. */
+    private FRAPolicyEvaluator policyEvaluator;
 
     private static final String TAG = AuthenticatorManager.class.getSimpleName();
 
-    AuthenticatorManager(Context context, StorageClient storageClient, String deviceToken, boolean enforceSecurityPolicies) {
+    AuthenticatorManager(Context context, StorageClient storageClient, FRAPolicyEvaluator policyEvaluator,
+                         String deviceToken) {
         this.context = context;
         this.storageClient = storageClient;
         this.deviceToken = deviceToken;
+        this.policyEvaluator = policyEvaluator;
         this.oathFactory = new OathFactory(context, storageClient);
         this.pushFactory = new PushFactory(context, storageClient, deviceToken);
         this.notificationFactory = new NotificationFactory(storageClient);
-        this.securityPolicy = new SecurityPolicy();
-        this.enforceSecurityPolicies = enforceSecurityPolicies;
 
         OathCodeGenerator.getInstance(storageClient);
         PushResponder.getInstance(storageClient);
@@ -126,8 +125,13 @@ class AuthenticatorManager {
         return account;
     }
 
-    boolean updateAccount(Account account) {
+    boolean updateAccount(Account account) throws AccountLockException {
         Logger.debug(TAG, "Updating Account with ID '%s'", account.getId());
+
+        // Check if Account is locked
+        if (account.isLocked()) {
+            throw new AccountLockException("Error updating the Account: Account is locked.");
+        }
 
         // Update the account object if it already exist, otherwise return false
         Account oldAccount = storageClient.getAccount(account.getId());
@@ -135,6 +139,29 @@ class AuthenticatorManager {
             return storageClient.setAccount(account);
         } else {
             return false;
+        }
+    }
+
+    boolean lockAccount(Account account, FRAPolicy policy) throws AccountLockException {
+        if (account.isLocked()) {
+            throw new AccountLockException("Error locking the Account: Account is already locked.");
+        } else if (policy.getName() == null || policy.getName().isEmpty()) {
+            throw new AccountLockException("Error locking the Account: The policy name is required.");
+        } else if (!account.getPolicies().contains(policy.getName())) {
+            throw new AccountLockException("Error locking the Account: The policy provided was not " +
+                    "included during Account registration.");
+        } else {
+            account.lock(policy);
+            return storageClient.setAccount(account);
+        }
+    }
+
+    boolean unlockAccount(Account account) throws AccountLockException {
+        if (!account.isLocked()) {
+            throw new AccountLockException("Error unlocking the Account: Account is not locked.");
+        } else {
+            account.unlock();
+            return storageClient.setAccount(account);
         }
     }
 
@@ -264,26 +291,21 @@ class AuthenticatorManager {
 
     private void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
         final Mechanism[] oathMechanism = new Mechanism[1];
-        Map<String, String> combinedParameters = MechanismParser.getUriParameters(uri);
 
-        // Apply security policies before proceed with registration
-        if(enforceSecurityPolicies) {
-            boolean enforceBiometricAuthentication = Boolean.parseBoolean(combinedParameters.get(MechanismParser.BIOMETRIC_AUTHENTICATION));
-            boolean enforceTamperingDetection = Boolean.parseBoolean(combinedParameters.get(MechanismParser.DEVICE_TAMPERING));
-            double deviceTamperingScore = Double.parseDouble(combinedParameters.get(MechanismParser.DEVICE_TAMPERING_SCORE));
-            if(securityPolicy.violatePolicies(context, enforceBiometricAuthentication,
-                    enforceTamperingDetection, deviceTamperingScore)) {
-                listener.onException(new MechanismCreationException("This account cannot be registered on this device " +
-                        "because it is either Rooted or has no Biometric authentication enabled."));
-            }
+        // Check if security policies are available in the URI before proceed with registration
+        Logger.debug(TAG, "Evaluating policies for the new Account");
+        boolean policiesCompliance = policyEvaluator.evaluate(context, uri);
+        if (!policiesCompliance) {
+            listener.onException(new MechanismCreationException("This account cannot be " +
+                    "registered on this device. It violates the following policy: " +
+                    policyEvaluator.getNonCompliancePolicy().getName()));
+            return;
+        } else {
+            Logger.debug(TAG, "All policies passed for the new Account");
         }
-        
-        // Retrieves OATH and PUSH registration URIs from parameters
-        String oathUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.OATH_URI));
-        String pushUri = MechanismParser.getBase64DecodedString(combinedParameters.get(MechanismParser.PUSH_URI));
 
         // Register OATH mechanism passing combined parameters
-        oathFactory.createFromUri(oathUri, combinedParameters, new FRAListener<Mechanism>() {
+        oathFactory.createFromUri(uri, new FRAListener<Mechanism>() {
             @Override
             public void onSuccess(Mechanism result) {
                 oathMechanism[0] = result;
@@ -297,7 +319,7 @@ class AuthenticatorManager {
         });
 
         // Register PUSH mechanism passing combined parameters
-        pushFactory.createFromUri(pushUri, combinedParameters, new FRAListener<Mechanism>() {
+        pushFactory.createFromUri(uri, new FRAListener<Mechanism>() {
             @Override
             public void onSuccess(Mechanism result) {
                 listener.onSuccess(result);
@@ -315,16 +337,18 @@ class AuthenticatorManager {
     
     private void initializeAccount(Account account) {
         if(account != null) {
-            if(enforceSecurityPolicies) {
-                Logger.debug(TAG, "Checking Security Policies enforcement for Account with ID: %s", account.getId());
-                boolean violate = securityPolicy.violatePolicies(context, account);
-                if(account.isLocked() & !violate) {
-                    account.setLock(false);
-                    updateAccount(account); 
-                } else if(!account.isLocked() & violate) {
-                    account.setLock(true);
-                    updateAccount(account);
-                }
+            Logger.debug(TAG, "Evaluating policies for the new Account with ID: %s",
+                    account.getId());
+            boolean policiesCompliance = policyEvaluator.evaluate(context, account);
+            if(!account.isLocked() & !policiesCompliance) {
+                Logger.debug(TAG, "Lock Account due non-compliance policy with name: %s",
+                        policyEvaluator.getNonCompliancePolicy().getName());
+                account.lock(policyEvaluator.getNonCompliancePolicy());
+                storageClient.setAccount(account);
+            } else if(account.isLocked() & policiesCompliance) {
+                Logger.debug(TAG, "Unlock previously locked Account: All policies are compliance.");
+                account.unlock();
+                storageClient.setAccount(account);
             }
 
             Logger.debug(TAG, "Loading associated mechanisms for the Account with ID: %s", account.getId());
@@ -347,9 +371,5 @@ class AuthenticatorManager {
         this.notificationFactory = notificationFactory;
     }
 
-    @VisibleForTesting
-    void setSecurityPolicy(SecurityPolicy securityPolicy) {
-        this.securityPolicy = securityPolicy;
-    }
 }
 

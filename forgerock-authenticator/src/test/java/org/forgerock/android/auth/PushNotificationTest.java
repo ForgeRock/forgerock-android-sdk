@@ -9,9 +9,8 @@ package org.forgerock.android.auth;
 
 import com.google.firebase.messaging.RemoteMessage;
 
-import org.forgerock.android.auth.exception.AccountLockedException;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
-import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.junit.After;
 import org.junit.Assert;
@@ -339,8 +338,11 @@ public class PushNotificationTest extends FRABaseTest {
         PushResponder.getInstance(storageClient);
 
         HttpUrl baseUrl = server.url("/");
-        Account account = createAccount(ACCOUNT_NAME, ISSUER);
-        account.setLock(true);
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setLock(true)
+                .build();
         PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString(), account);
 
         NotificationFactory notificationFactory = new NotificationFactory(storageClient);
@@ -357,7 +359,7 @@ public class PushNotificationTest extends FRABaseTest {
             pushListenerFuture.get();
             Assert.fail("Should throw PushMechanismException");
         } catch (Exception e) {
-            assertTrue(e.getCause() instanceof AccountLockedException);
+            assertTrue(e.getCause() instanceof AccountLockException);
             assertTrue(e.getLocalizedMessage().contains("Account is locked"));
         }
     }

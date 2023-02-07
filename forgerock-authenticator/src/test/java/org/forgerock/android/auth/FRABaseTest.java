@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Base64;
 
@@ -25,6 +26,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
@@ -75,6 +77,7 @@ public abstract class FRABaseTest {
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
+    public static final String POLICIES = "{\"biometricAvailable\": { },\"deviceTampering\": {\"score\": 0.8}}";
 
     @BeforeClass
     public static void setup() {
@@ -353,4 +356,27 @@ public abstract class FRABaseTest {
         return base64Url;
     }
 
+    static class UnregisteredPolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "unregistered";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            return true;
+        }
+    }
+
+    static class InvalidFakePolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            return true;
+        }
+    }
 }

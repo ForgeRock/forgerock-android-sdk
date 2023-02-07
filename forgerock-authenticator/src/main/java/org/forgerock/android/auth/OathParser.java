@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -32,21 +32,32 @@ class OathParser extends MechanismParser {
     /** The frequency with which the OTP updates */
     public static final String PERIOD = "period";
 
+    /** The type of OATH algorithm */
+    public static final String OATH_TYPE = "type";
+
     private static final String[] ALLOWED_TYPES = new String[]{"hotp", "totp"};
 
     @Override
     protected Map<String, String> postProcess(Map<String, String> values) throws MechanismParsingException {
         // Validate Type
         String type = values.get(TYPE);
-        boolean validType = false;
-        for (String allowedType : ALLOWED_TYPES) {
-            if (allowedType.equalsIgnoreCase(type)) {
-                validType = true;
-                break;
+        if (type != null && type.equals(MFA)) {
+            if (containsNonEmpty(values, OATH_TYPE)) {
+                values.put(TYPE, values.get(OATH_TYPE));
+            } else {
+                throw new MechanismParsingException("OATH Type is required");
             }
-        }
-        if (!validType) {
-            throw new MechanismParsingException(MessageFormat.format("Type {0} was not valid", type));
+        } else {
+            boolean validType = false;
+            for (String allowedType : ALLOWED_TYPES) {
+                if (allowedType.equalsIgnoreCase(type)) {
+                    validType = true;
+                    break;
+                }
+            }
+            if (!validType) {
+                throw new MechanismParsingException(MessageFormat.format("Type {0} was not valid", type));
+            }
         }
 
         // Secret is REQUIRED

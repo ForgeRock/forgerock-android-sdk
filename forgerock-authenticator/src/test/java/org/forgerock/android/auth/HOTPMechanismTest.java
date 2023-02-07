@@ -7,7 +7,7 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.exception.AccountLockedException;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.junit.Assert;
@@ -161,9 +161,7 @@ public class HOTPMechanismTest extends FRABaseTest {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
-                .setEnforceBiometricAuthentication(true)
-                .setEnforceDeviceTamperingDetection(true)
-                .setDeviceTamperingScoreThreshold(0.8)
+                .setPolicies(POLICIES)
                 .setLock(true)
                 .build();
         OathMechanism oath = HOTPMechanism.builder()
@@ -181,14 +179,14 @@ public class HOTPMechanismTest extends FRABaseTest {
             oath.getOathTokenCode();
             Assert.fail("Should throw OathMechanismException");
         } catch (Exception e) {
-            assertTrue(e instanceof OathMechanismException);
+            assertTrue(e instanceof AccountLockException);
             assertTrue(e.getLocalizedMessage().contains("Account is locked"));
         }
     }
 
     @Test
     public void testShouldHandleHOTPCorrectlyWith6Digits()
-            throws OathMechanismException, MechanismCreationException, AccountLockedException {
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -208,7 +206,7 @@ public class HOTPMechanismTest extends FRABaseTest {
 
     @Test
     public void testShouldHandleHOTPCorrectlyWith8Digits()
-            throws OathMechanismException, MechanismCreationException, AccountLockedException {
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)

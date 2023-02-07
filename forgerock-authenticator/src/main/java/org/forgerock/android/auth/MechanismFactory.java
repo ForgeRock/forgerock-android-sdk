@@ -62,30 +62,14 @@ abstract class MechanismFactory {
      * @param listener Listener for receiving the mechanism registration result
      */
     final void createFromUri(String uri, FRAListener<Mechanism> listener) {
-        createFromUri(uri, null, listener);
-    }
-
-    /**
-     * Convert a URL to the Mechanism it represents, including extracting the account.
-     * Also adds it to the model.
-     * @param uri The URI to process.
-     * @param extraParameters The extra map of values to be added to the Account.
-     * @param listener Listener for receiving the mechanism registration result
-     */
-    final void createFromUri(String uri, Map<String, String> extraParameters, FRAListener<Mechanism> listener) {
         // Parse uri
         MechanismParser parser = getParser();
-        Map<String, String> values = null;
+        Map<String, String> values;
         try {
             values = parser.map(uri);
         } catch (MechanismParsingException e) {
             listener.onException(e);
             return;
-        }
-
-        // Add any extra parameters
-        if (extraParameters != null && !extraParameters.isEmpty()) {
-            values.putAll(extraParameters);
         }
 
         // Extract data and set default values accordingly
@@ -94,9 +78,7 @@ abstract class MechanismFactory {
         String accountName = getFromMap(values, MechanismParser.ACCOUNT_NAME, "");
         String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
         String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
-        String deviceTampering = getFromMap(values, MechanismParser.DEVICE_TAMPERING, "false");
-        String deviceTamperingScore = getFromMap(values, MechanismParser.DEVICE_TAMPERING_SCORE, "0.0");
-        String biometricAuthentication = getFromMap(values, MechanismParser.BIOMETRIC_AUTHENTICATION, "false");
+        String policies = getFromMap(values, MechanismParser.POLICIES, null);
 
         // Check version
         int version = 0;
@@ -115,9 +97,7 @@ abstract class MechanismFactory {
                 .setAccountName(accountName)
                 .setImageURL(imageURL)
                 .setBackgroundColor(bgColor)
-                .setEnforceDeviceTamperingDetection(Boolean.parseBoolean(deviceTampering))
-                .setDeviceTamperingScoreThreshold(Double.parseDouble(deviceTamperingScore))
-                .setEnforceBiometricAuthentication(Boolean.parseBoolean(biometricAuthentication))
+                .setPolicies(policies)
                 .build();
 
         // Constructs Mechanism object, and tries to store it

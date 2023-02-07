@@ -7,6 +7,19 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
 import android.content.Context;
 import android.util.Base64;
 
@@ -14,9 +27,12 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
@@ -32,19 +48,6 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-
 @RunWith(RobolectricTestRunner.class)
 public class AuthenticatorManagerTest extends FRABaseTest {
 
@@ -56,6 +59,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     private AuthenticatorManager authenticatorManager;
     private PushMechanism push;
     private MockWebServer server;
+    private FRAPolicyEvaluator policyEvaluator;
 
     @Before
     public void setUp() throws IOException {
@@ -70,7 +74,12 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
+        policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        doReturn(true).when(policyEvaluator).evaluate(any(), anyString());
+        doReturn(true).when(policyEvaluator).evaluate(any(), any(Account.class));
+
+        authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator,
+                "s-o-m-e-t-o-k-e-n");
 
         oathListenerFuture = new FRAListenerFuture<Mechanism>();
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
@@ -89,7 +98,6 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
     @Test
     public void testShouldCreateOathMechanismSuccessfully() throws Exception {
-
         String uri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
         authenticatorManager.createMechanismFromUri(uri, oathListenerFuture);
         OathMechanism oath = (OathMechanism) oathListenerFuture.get();
@@ -100,8 +108,6 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     @Test
     public void testFailToCreateMechanismInvalidQRCode() {
         try {
-            authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
-
             String uri = "http://unkown/Forgerock:user1?secret=ONSWG4TFOQ=====";
 
             authenticatorManager.createMechanismFromUri(uri, oathListenerFuture);
@@ -116,7 +122,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     @Test
     public void testCreatePushMechanismFailureNoFcmTokenProvided() {
         try {
-            authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
+            authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator, null);
             server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
             String uri = "pushauth://push/forgerock:demo?" +
@@ -164,13 +170,24 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateCombinedMechanismsNetworkFailure() throws Exception {
+    public void testCreateCombinedMechanismsNetworkFailure() {
         try {
             authenticatorManager.setPushFactory(pushFactory);
 
-            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
-                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
-                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
+            String combinedUri = "mfauth://mfa/Forgerock:demo?" +
+                    "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
+                    "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                    "b=ff00ff&" +
+                    "r=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&" +
+                    "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                    "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                    "l=YW1sYmNvb2tpZT0wMQ==&" +
+                    "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                    "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                    "digits=6&" +
+                    "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                    "period=30&" +
+                    "type=totp";
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
             pushListenerFuture.get();
@@ -182,60 +199,38 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testCreateCombinedMechanismsDeviceTamperingFailure() throws Exception {
+    public void testCreateCombinedMechanismsPolicyComplaintFailure() {
         try {
-            SecurityPolicy securityPolicy = spy(new SecurityPolicy());
+            FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
 
-            authenticatorManager = spy(new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", true));
+            authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
+                    policyEvaluator, "s-o-m-e-t-o-k-e-n"));
             authenticatorManager.setPushFactory(pushFactory);
-            authenticatorManager.setSecurityPolicy(securityPolicy);
 
-            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
-                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
-                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
+            String combinedUri = "mfauth://mfa/Forgerock:demo?" +
+                    "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
+                    "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                    "b=ff00ff&" +
+                    "r=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&" +
+                    "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                    "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                    "l=YW1sYmNvb2tpZT0wMQ==&" +
+                    "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                    "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                    "digits=6&" +
+                    "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                    "period=30&" +
+                    "type=totp";
 
-            doReturn(true).when(securityPolicy).isBiometricCapable(any());
-            doReturn(true).when(securityPolicy).isDeviceRooted(any(), anyDouble());
-
-            given(securityPolicy.violatePolicies(any(), anyBoolean(), anyBoolean(), anyDouble())).willReturn(true);
-            given(securityPolicy.violateDeviceTamperingPolicy(any(), anyBoolean(), anyDouble())).willReturn(true);
-            given(securityPolicy.violateBiometricAuthenticationPolicy(any(), anyBoolean())).willReturn(false);
+            doReturn(false).when(policyEvaluator).evaluate(any(), anyString());
+            doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
             pushListenerFuture.get();
             fail("Should throw MechanismCreationException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismCreationException);
-            assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device because it either Rooted or has no Biometric authentication enabled"));
-        }
-    }
-
-    @Test
-    public void testCreateCombinedMechanismsBiometricCapableFailure() throws Exception {
-        try {
-            SecurityPolicy securityPolicy = spy(new SecurityPolicy());
-
-            authenticatorManager = spy(new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", true));
-            authenticatorManager.setPushFactory(pushFactory);
-            authenticatorManager.setSecurityPolicy(securityPolicy);
-
-            String combinedUri = "mfauth://mfa/ForgeRock:user1?dt=true&dts=1.0&ba=true" +
-                    "&oath=b3RwYXV0aDovL3RvdHAvRm9yZ2VSb2NrOnVzZXIxP3NlY3JldD1aRVlGR1hJMldST0pZQlFVS1RGWUFaRDJaVT09PT09PSZpc3N1ZXI9Rm9yZ2VSb2NrJnBlcmlvZD0zMCZkaWdpdHM9NiZiPTAzMmI3NQ" +
-                    "&push=cHVzaGF1dGg6Ly9wdXNoL0ZvcmdlUm9jazp1c2VyMT9sPVlXMXNZbU52YjJ0cFpUMHdNUSZpc3N1ZXI9Um05eVoyVlNiMk5yJm09UkVHSVNURVI6ZDhhMjg4YjctYzYwMS00Y2Y5LTlmZGYtM2UyMDkzOGUxYzBmMTY3NTExMTQ3Mjk5NSZzPXhoM0VQY3ZmQjhVNDk1MTFXdnZHWmRQclFVVjRfMHlJTW5UTXlDV0l4aFEmYz1MWmpBU01qTWowZGJJRFM4Z1lKTTQ1NFBxQUtaOV84WU15T0dSVk1ZR0pRJnI9YUhSMGNITTZMeTltYjNKblpYSnZZMnN1WlhoaGJYQnNaUzVqYjIwdmIzQmxibUZ0TDJwemIyNHZjSFZ6YUM5emJuTXZiV1Z6YzJGblpUOWZZV04wYVc5dVBYSmxaMmx6ZEdWeSZhPWFIUjBjSE02THk5bWIzSm5aWEp2WTJzdVpYaGhiWEJzWlM1amIyMHZiM0JsYm1GdEwycHpiMjR2Y0hWemFDOXpibk12YldWemMyRm5aVDlmWVdOMGFXOXVQV0YxZEdobGJuUnBZMkYwWlEmYj0wMzJiNzU";
-
-            doReturn(false).when(securityPolicy).isBiometricCapable(any());
-            doReturn(false).when(securityPolicy).isDeviceRooted(any(), anyDouble());
-
-            given(securityPolicy.violatePolicies(any(), anyBoolean(), anyBoolean(), anyDouble())).willReturn(true);
-            given(securityPolicy.violateDeviceTamperingPolicy(any(), anyBoolean(), anyDouble())).willReturn(false);
-            given(securityPolicy.violateBiometricAuthenticationPolicy(any(), anyBoolean())).willReturn(true);
-
-            authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
-            pushListenerFuture.get();
-            fail("Should throw MechanismCreationException");
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof MechanismCreationException);
-            assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device because it either Rooted or has no Biometric authentication enabled"));
+            assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device"));
         }
     }
 
@@ -245,30 +240,153 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String oathUri = "otpauth://totp/Forgerock:user1?secret=ONSWG4TFOQ=====";
-        String pushUri = "pushauth://push/forgerock:demo?" +
-                "a=" + getBase64PushActionUrl(server,"authenticate") + "&" +
+        String combinedUri = "mfauth://mfa/ForgeRock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
-                "r=" + getBase64PushActionUrl(server,"register") + "&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
                 "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
                 "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
                 "l=YW1sYmNvb2tpZT0wMQ==&" +
                 "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
-                "issuer=Rm9yZ2Vyb2Nr&";
-        String combinedUri = "mfauth://mfa/ForgeRock:demo/" +
-                "?oath=" + Base64.encodeToString(oathUri.getBytes(), Base64.NO_WRAP) + "&" +
-                "&push=" + Base64.encodeToString(pushUri.getBytes(), Base64.NO_WRAP) + "&" +
-                "ba=true&dt=true&dts=0.5";
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&" +
+                "type=totp";
 
         authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
         assertEquals(push.getType(), Mechanism.PUSH);
         assertEquals(push.getAccountName(), "demo");
-        assertEquals(push.getIssuer(), "Forgerock");
-        assertTrue(push.getAccount().isBiometricAuthenticationEnforced());
-        assertTrue(push.getAccount().isDeviceTamperingDetectionEnforced());
-        assertEquals(push.getAccount().getDeviceTamperingScoreThreshold(), 0.5, 0);
+        assertEquals(push.getIssuer(), "ForgeRock");
+    }
+
+    @Test
+    public void testShouldLockAccountWhenPolicyComplaintFail() {
+        FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
+                policyEvaluator, "s-o-m-e-t-o-k-e-n"));
+
+        Account account1 = createAccount(OTHER_ACCOUNT_NAME, OTHER_ISSUER);
+        Mechanism oath = createOathMechanism(OTHER_ACCOUNT_NAME, OTHER_ISSUER, OTHER_MECHANISM_UID);
+
+        Account account2 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account1);
+        accountList.add(account2);
+
+        List<Mechanism> mechanismList1 = new ArrayList<>();
+        mechanismList1.add(oath);
+
+        List<Mechanism> mechanismList2 = new ArrayList<>();
+        mechanismList2.add(push);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
+        given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
+        given(storageClient.setAccount(account2)).willReturn(true);
+        doReturn(false).when(policyEvaluator).evaluate(context, account2);
+        doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
+
+        List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
+
+        assertNotNull(accountsFromStorageList);
+        assertEquals(2, accountsFromStorageList.size());
+        assertFalse(accountsFromStorageList.get(0).isLocked());
+        assertTrue(accountsFromStorageList.get(1).isLocked());
+    }
+
+    @Test
+    public void testShouldKeepAccountLockedWhenPolicyComplaintFail() {
+        FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
+                policyEvaluator, "s-o-m-e-t-o-k-e-n"));
+
+        Account account1 = createAccount(OTHER_ACCOUNT_NAME, OTHER_ISSUER);
+        Mechanism oath = createOathMechanism(OTHER_ACCOUNT_NAME, OTHER_ISSUER, OTHER_MECHANISM_UID);
+
+        Account account2 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLockingPolicy("deviceTampering")
+                .setLock(true)
+                .build();
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account1);
+        accountList.add(account2);
+
+        List<Mechanism> mechanismList1 = new ArrayList<>();
+        mechanismList1.add(oath);
+
+        List<Mechanism> mechanismList2 = new ArrayList<>();
+        mechanismList2.add(push);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
+        given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
+        given(storageClient.setAccount(account2)).willReturn(true);
+        doReturn(false).when(policyEvaluator).evaluate(context, account2);
+        doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
+
+        List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
+
+        assertNotNull(accountsFromStorageList);
+        assertEquals(2, accountsFromStorageList.size());
+        assertFalse(accountsFromStorageList.get(0).isLocked());
+        assertTrue(accountsFromStorageList.get(1).isLocked());
+    }
+
+    @Test
+    public void testShouldUnlockAccountWhenPolicyComplaintPass() {
+        FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
+                policyEvaluator, "s-o-m-e-t-o-k-e-n"));
+
+        Account account1 = createAccount(OTHER_ACCOUNT_NAME, OTHER_ISSUER);
+        Mechanism oath = createOathMechanism(OTHER_ACCOUNT_NAME, OTHER_ISSUER, OTHER_MECHANISM_UID);
+
+        Account account2 = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLockingPolicy("deviceTampering")
+                .setLock(true)
+                .build();
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account1);
+        accountList.add(account2);
+
+        List<Mechanism> mechanismList1 = new ArrayList<>();
+        mechanismList1.add(oath);
+
+        List<Mechanism> mechanismList2 = new ArrayList<>();
+        mechanismList2.add(push);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
+        given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
+        given(storageClient.setAccount(account2)).willReturn(true);
+        doReturn(true).when(policyEvaluator).evaluate(context, account2);
+        doReturn(null).when(policyEvaluator).getNonCompliancePolicy();
+
+        List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
+
+        assertNotNull(accountsFromStorageList);
+        assertEquals(2, accountsFromStorageList.size());
+        assertFalse(accountsFromStorageList.get(0).isLocked());
+        assertFalse(accountsFromStorageList.get(1).isLocked());
     }
 
     @Test
@@ -305,7 +423,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
         PushNotification pushNotification = null;
 
-        authenticatorManager = new AuthenticatorManager(context, storageClient, null, false);
+        authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator, null);
         try {
             pushNotification = authenticatorManager.handleMessage(remoteMessage);
         } catch (Exception e) {
@@ -324,7 +442,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredSameToken() {
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
+        authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator,
+                "s-o-m-e-t-o-k-e-n");
         try {
             authenticatorManager.registerForRemoteNotifications("s-o-m-e-t-o-k-e-n");
             fail("Should throw AuthenticatorException");
@@ -336,7 +455,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
     @Test
     public void testShouldFailToRegisterDeviceTokenForRemoteNotificationsAlreadyRegisteredDifferentToken() {
-        authenticatorManager = new AuthenticatorManager(context, storageClient, "s-o-m-e-t-o-k-e-n", false);
+        authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator,
+                "s-o-m-e-t-o-k-e-n");
         try {
             authenticatorManager.registerForRemoteNotifications("a-n-o-t-h-e-r-t-o-k-e-n");
             fail("Should throw AuthenticatorException");
@@ -407,7 +527,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGetStoredAccountByMechanism() throws Exception {
+    public void testShouldGetStoredAccountByMechanism() {
         Account account = createAccount(ACCOUNT_NAME, ISSUER);
         Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
 
@@ -425,7 +545,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldUpdateStoredAccount() throws Exception {
+    public void testShouldUpdateStoredAccount() throws AccountLockException {
         Account account = createAccount(ACCOUNT_NAME, ISSUER);
         Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
 
@@ -448,7 +568,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGetStoredMechanismByPushNotification() throws Exception {
+    public void testShouldGetStoredMechanismByPushNotification() {
         Account account = createAccount(ACCOUNT_NAME, ISSUER);
         Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
 
@@ -472,7 +592,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldGetAllNotificationsByMechanism() throws Exception {
+    public void testShouldGetAllNotificationsByMechanism() {
         Account account = createAccount(ACCOUNT_NAME, ISSUER);
         Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
 
@@ -608,6 +728,121 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         boolean result = authenticatorManager.removeNotification(notificationList.get(0));
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testShouldLockAccountWhenPolicyIsValid() throws AccountLockException {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        FRAPolicy policy = new DeviceTamperingPolicy();
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        boolean result = authenticatorManager.lockAccount(account, policy);
+
+        assertTrue(result);
+        assertTrue(account.isLocked());
+        assertEquals(account.getLockingPolicy(), policy.getName());
+    }
+
+    @Test
+    public void testShouldNotLockAccountWhenPolicyIsNotRegistered() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        FRAPolicy policy = new UnregisteredPolicy();
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        try {
+            authenticatorManager.lockAccount(account, policy);
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage()
+                    .contains("The policy provided was not included during Account registration"));
+            assertFalse(account.isLocked());
+            assertNull(account.getLockingPolicy());
+        }
+    }
+
+    @Test
+    public void testShouldNotLockAccountWhenPolicyIsInvalid() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        FRAPolicy policy = new InvalidFakePolicy();
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        try {
+            authenticatorManager.lockAccount(account, policy);
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage().contains("The policy name is required"));
+            assertFalse(account.isLocked());
+            assertNull(account.getLockingPolicy());
+        }
+    }
+
+    @Test
+    public void testShouldUnlockAccount() throws AccountLockException {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLock(true)
+                .setLockingPolicy("deviceTampering")
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        boolean result = authenticatorManager.unlockAccount(account);
+
+        assertTrue(result);
+        assertFalse(account.isLocked());
+        assertNull(account.getLockingPolicy());
     }
 
 }

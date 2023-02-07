@@ -9,7 +9,7 @@ package org.forgerock.android.auth;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.forgerock.android.auth.exception.AccountLockedException;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.Base32String;
 import org.forgerock.android.auth.util.TimeKeeper;
@@ -76,11 +76,11 @@ class OathCodeGenerator {
      * @throws OathMechanismException If an error occur on generating OTP codes
      */
     OathTokenCode generateNextCode(OathMechanism oath, TimeKeeper timeKeeper)
-            throws OathMechanismException, AccountLockedException {
+            throws OathMechanismException, AccountLockException {
         Logger.debug(TAG, "Generating next OTP code.");
 
         if(oath.getAccount() != null && oath.getAccount().isLocked()) {
-            throw new AccountLockedException("Error generating next OTP code: Account is locked.");
+            throw new AccountLockException("Error generating next OTP code: Account is locked.");
         }
 
         long currentTime = timeKeeper.getCurrentTimeMillis();

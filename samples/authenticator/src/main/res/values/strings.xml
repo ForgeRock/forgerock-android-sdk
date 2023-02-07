@@ -1,6 +1,6 @@
 <resources>
 <!--
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -12,6 +12,7 @@
     <string name="no_accounts">No accounts registered</string>
     <string name="account_title">My Accounts</string>
     <string name="title_menu_item_scan_qr_code">Scan QR code</string>
+    <string name="account_locked">This account is locked by the following Policy: "%1$s"</string>
 
     <!-- Delete Account activity -->
     <string name="title_menu_item_delete">Delete</string>

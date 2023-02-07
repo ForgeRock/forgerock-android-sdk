@@ -7,7 +7,7 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.exception.AccountLockedException;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
@@ -179,14 +179,14 @@ public class TOTPMechanismTest extends FRABaseTest {
             oath.getOathTokenCode();
             Assert.fail("Should throw OathMechanismException");
         } catch (Exception e) {
-            assertTrue(e instanceof OathMechanismException);
+            assertTrue(e instanceof AccountLockException);
             assertTrue(e.getLocalizedMessage().contains("Account is locked"));
         }
     }
 
     @Test
     public void testShouldHandleTOTPCorrectly()
-            throws OathMechanismException, MechanismCreationException, AccountLockedException {
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override

@@ -8,16 +8,16 @@
 package org.forgerock.android.auth.exception;
 
 /**
- * Represents an error when trying to access some functions from an Account locked.
+ * Represents an error with Account Lock.
  */
-public class AccountLockedException extends Exception {
+public class AccountLockException extends Exception {
 
     /**
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      * @param throwable The throwable cause of the exception.
      */
-    public AccountLockedException(String detailMessage, Throwable throwable) {
+    public AccountLockException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
 
@@ -25,7 +25,7 @@ public class AccountLockedException extends Exception {
      * Create a new exception containing a message.
      * @param detailMessage The message cause of the exception.
      */
-    public AccountLockedException(String detailMessage) {
+    public AccountLockException(String detailMessage) {
         super(detailMessage);
     }
 

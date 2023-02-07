@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AccountLockException;
+import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -14,6 +17,7 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
@@ -35,7 +39,6 @@ public class AccountTest extends FRABaseTest {
 
     @Test
     public void testCreateAccountWithOptionalParameters() {
-
         String imageUrl = IMAGE_URL;
         String backgroundColor = BACKGROUND_COLOR;
 
@@ -145,9 +148,7 @@ public class AccountTest extends FRABaseTest {
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
                 "\"backgroundColor\":\"032b75\"," +
                 "\"timeAdded\":1629261902660," +
-                "\"enforceDeviceTamperingDetection\":true," +
-                "\"deviceTamperingScoreThreshold\":0.8," +
-                "\"enforceBiometricAuthentication\":false," +
+                "\"policies\":\"{\\\"biometricAvailable\\\": { },\\\"deviceTampering\\\": {\\\"score\\\": 0.8}}\"," +
                 "\"lock\":false" +
                 "}";
 
@@ -160,9 +161,7 @@ public class AccountTest extends FRABaseTest {
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
                 .setTimeAdded(timeAdded)
-                .setEnforceDeviceTamperingDetection(true)
-                .setDeviceTamperingScoreThreshold(0.8)
-                .setEnforceBiometricAuthentication(false)
+                .setPolicies(POLICIES)
                 .setLock(false)
                 .build();
 
@@ -181,9 +180,7 @@ public class AccountTest extends FRABaseTest {
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
                 "\"backgroundColor\":\"032b75\"," +
                 "\"timeAdded\":1629261902660," +
-                "\"enforceDeviceTamperingDetection\":true," +
-                "\"deviceTamperingScoreThreshold\":0.8," +
-                "\"enforceBiometricAuthentication\":false," +
+                "\"policies\":\"{\\\"biometricAvailable\\\": { },\\\"deviceTampering\\\": {\\\"score\\\": 0.8}}\"," +
                 "\"lock\":false" +
                 "}";
 
@@ -196,9 +193,7 @@ public class AccountTest extends FRABaseTest {
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
                 .setTimeAdded(timeAdded)
-                .setEnforceDeviceTamperingDetection(true)
-                .setDeviceTamperingScoreThreshold(0.8)
-                .setEnforceBiometricAuthentication(false)
+                .setPolicies(POLICIES)
                 .setLock(false)
                 .build();
 
@@ -226,6 +221,37 @@ public class AccountTest extends FRABaseTest {
         assertEquals(account.getAccountName(), ACCOUNT_NAME);
         assertEquals(account.getImageURL(), IMAGE_URL);
         assertEquals(account.getBackgroundColor(), BACKGROUND_COLOR);
+    }
+
+    @Test
+    public void testShouldUnlockAccount() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLockingPolicy("deviceTampering")
+                .setLock(true)
+                .build();
+
+        account.unlock();
+
+        assertFalse(account.isLocked());
+        assertNull(account.getLockingPolicy());
+    }
+
+    @Test
+    public void testShouldLockAccount() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        FRAPolicy policy = new DeviceTamperingPolicy();
+        account.lock(policy);
+
+        assertTrue(account.isLocked());
+        assertEquals(account.getLockingPolicy(), policy.getName());
     }
 
 }

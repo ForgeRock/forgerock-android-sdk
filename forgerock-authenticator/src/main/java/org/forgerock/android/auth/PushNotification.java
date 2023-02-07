@@ -7,16 +7,13 @@
 
 package org.forgerock.android.auth;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricPrompt;
 import androidx.biometric.BiometricPrompt.AuthenticationCallback;
 import androidx.fragment.app.FragmentActivity;
 
 import org.forgerock.android.auth.biometric.BiometricAuth;
-import org.forgerock.android.auth.exception.AccountLockedException;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.json.JSONException;
@@ -314,7 +311,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      */
     public final void accept(@NonNull FRAListener<Void> listener) {
         if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
-            listener.onException(new AccountLockedException("Unable to process the Push " +
+            listener.onException(new AccountLockException("Unable to process the Push " +
                     "Authentication request: Account is locked."));
         } else if (this.pushType == PushType.DEFAULT) {
             Logger.debug(TAG, "Accept Push Authentication request for message: %s", getMessageId());
@@ -334,7 +331,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      */
     public final void accept(@NonNull String challengeResponse, @NonNull FRAListener<Void> listener) {
         if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
-            listener.onException(new AccountLockedException("Unable to process the Push " +
+            listener.onException(new AccountLockException("Unable to process the Push " +
                     "Authentication request: Account is locked."));
         } else if (this.pushType == PushType.CHALLENGE) {
             Logger.debug(TAG, "Respond the challenge for message: %s", getMessageId());
@@ -355,14 +352,13 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @param activity the activity of the client application that will host the prompt.
      * @param listener listener for receiving the push authentication result.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     public final void accept(String title,
                              String subtitle,
                              boolean allowDeviceCredentials,
                              @NonNull FragmentActivity activity,
                              @NonNull FRAListener<Void> listener) {
         if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
-            listener.onException(new AccountLockedException("Unable to process the Push " +
+            listener.onException(new AccountLockException("Unable to process the Push " +
                     "Authentication request: Account is locked."));
         } else if (this.pushType == PushType.BIOMETRIC) {
             final PushNotification pushNotification = this;
@@ -400,7 +396,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      */
     public final void deny(@NonNull FRAListener<Void> listener) {
         if(this.pushMechanism.getAccount() != null && this.pushMechanism.getAccount().isLocked()) {
-            listener.onException(new AccountLockedException("Unable to process the Push " +
+            listener.onException(new AccountLockException("Unable to process the Push " +
                     "Authentication request: Account is locked."));
         } else {
             Logger.debug(TAG, "Deny Push Authentication request for message: %s", getMessageId());

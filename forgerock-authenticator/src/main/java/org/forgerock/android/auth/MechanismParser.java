@@ -44,16 +44,10 @@ abstract class MechanismParser {
     public static final String BG_COLOR = "b";
     /** Unknown identity **/
     public static final String UNTITLED = "Untitled";
-    /** The OATH URI. */
-    public static final String OATH_URI = "oath";
-    /** The PUSH URI. */
-    public static final String PUSH_URI = "push";
-    /** Enforce biometric authentication. */
-    public static final String BIOMETRIC_AUTHENTICATION = "ba";
-    /** Enforce jailbreak/root detection. */
-    public static final String DEVICE_TAMPERING = "dt";
-    /** The Score threshold of jailbreak/root detection. */
-    public static final String DEVICE_TAMPERING_SCORE = "dts";
+    /** The MFA type which combines PUSH and OATH. */
+    public static final String MFA = "mfa";
+    /** The Authenticator Policies. */
+    public static final String POLICIES = "policies";
 
     private static final String SLASH = "/";
 
@@ -100,6 +94,7 @@ abstract class MechanismParser {
             r.put(ACCOUNT_NAME, pathParts[1]);
         }
 
+        // Extract query parameters
         Collection<String> queryParts = Collections.emptySet();
         if (uri.getQuery() != null) {
             queryParts = Arrays.asList(uri.getQuery().split("&"));
@@ -114,6 +109,7 @@ abstract class MechanismParser {
             }
         }
 
+        // Parse color
         if (r.containsKey(BG_COLOR) && !r.get(BG_COLOR).startsWith("#")) {
             r.put(BG_COLOR, "#" + r.get(BG_COLOR));
         }
@@ -123,6 +119,11 @@ abstract class MechanismParser {
             throw new MechanismParsingException("No identity is associated with this MFA account. Missing account name and issuer.");
         } else if (r.get(ACCOUNT_NAME).isEmpty()) {
             r.put(ACCOUNT_NAME, UNTITLED);
+        }
+
+        // Check policy
+        if (containsNonEmpty(r, POLICIES) && isBase64Encoded(r.get(POLICIES))) {
+            r.put(POLICIES, getBase64DecodedString(r.get(POLICIES)));
         }
 
         return r;
@@ -175,6 +176,15 @@ abstract class MechanismParser {
     protected static String getBase64DecodedString(String value) {
         byte[] bytes = Base64.decode(value, Base64.NO_WRAP + Base64.URL_SAFE);
         return new String(bytes);
+    }
+
+    protected boolean isBase64Encoded(String value) {
+        try {
+            Base64.decode(value, Base64.DEFAULT);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
