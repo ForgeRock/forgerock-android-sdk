@@ -14,6 +14,9 @@ import org.forgerock.android.auth.biometric.BiometricAuth;
 /**
  * The Biometric Available policy checks if the device has enabled Biometric capabilities and
  * lock screen security is enabled.
+ *
+ *  JSON Policy format:
+ *  {"biometricAvailable": { }}
  */
 public class BiometricAvailablePolicy extends FRAPolicy {
 

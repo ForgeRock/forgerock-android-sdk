@@ -18,18 +18,30 @@ import org.json.JSONObject;
  * A policy must contain an unique name and instructions to determinate whether a condition is
  * valid at a particular time. The policy may optionally contain some data to be used in the
  * validation procedure.
+ *
+ * JSON representation of a policy:
+ * {"policyName" : { policyData }}
  */
 public abstract class FRAPolicy {
 
     JSONObject data;
 
     /**
-     * Set the attributes used for policy validation.
+     * Set the data used for policy validation.
      *
-     * @param data The attributes
+     * @param data The policy data
      */
     public void setData(JSONObject data) {
         this.data = data;
+    }
+
+    /**
+     * Get the data used for policy validation.
+     *
+     * @return The policy data
+     */
+    public JSONObject getData() {
+        return this.data;
     }
 
     /**

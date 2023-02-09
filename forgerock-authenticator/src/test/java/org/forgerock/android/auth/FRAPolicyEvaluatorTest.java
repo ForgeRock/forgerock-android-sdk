@@ -18,6 +18,7 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.policy.BiometricAvailablePolicy;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
@@ -40,33 +41,86 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
     }
 
     @Test
-    public void testSingleCustomPolicySuccessAgainstMultiplePoliciesFromAccount() {
+    public void testRegisterSinglePolicy() throws InvalidPolicyException {
+        FRAPolicyEvaluator policyEvaluator = new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder()
+                .withPolicy(new DummyPolicy())
+                .build();
+
+        assertEquals(policyEvaluator.getPolicies().size(), 1);
+    }
+
+    @Test
+    public void testRegisterMultiplePolicies() throws InvalidPolicyException {
+        FRAPolicyEvaluator policyEvaluator = new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder()
+                .withPolicy(new BiometricAvailablePolicy())
+                .withPolicy(new DeviceTamperingPolicy())
+                .withPolicy(new DummyWithDataPolicy())
+                .withPolicy(new DummyPolicy())
+                .build();
+
+        assertEquals(policyEvaluator.getPolicies().size(), 4);
+    }
+
+    @Test
+    public void testRegisterMultiplePoliciesBuilderOrderDoesNotMatter() throws InvalidPolicyException {
+        FRAPolicyEvaluator policyEvaluator = new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder()
+                .withPolicy(new DummyPolicy())
+                .withPolicies(FRAPolicyEvaluator.DEFAULT_POLICIES)
+                .build();
+
+        assertEquals(policyEvaluator.getPolicies().size(), 3);
+    }
+
+    @Test
+    public void testRegisterMultiplePoliciesWhenSamePolicyIsRegisteredTwice() throws InvalidPolicyException {
+        FRAPolicyEvaluator policyEvaluator = FRAPolicyEvaluator.builder()
+                .withPolicy(new DeviceTamperingPolicy())
+                .withPolicy(new DummyWithDataPolicy())
+                .withPolicy(new DummyWithDataPolicy())
+                .build();
+
+        assertEquals(policyEvaluator.getPolicies().size(), 3);
+    }
+
+    @Test
+    public void testRegisterMultiplePoliciesWhenInvalidPolicyIsRegistered() {
+        try {
+            FRAPolicyEvaluator.builder()
+                    .withPolicy(new DummyWithDataPolicy())
+                    .withPolicy(new InvalidFakePolicy())
+                    .build();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidPolicyException);
+            assertTrue(e.getLocalizedMessage().contains(InvalidFakePolicy.class.getSimpleName()));
+        }
+    }
+
+    @Test
+    public void testSingleCustomPolicySuccessAgainstMultiplePoliciesFromAccount() throws InvalidPolicyException {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
-                .setPolicies(POLICIES)
+                .setPolicies("{\"dummy\": { },\"dummyWithData\": { }}")
                 .build();
 
-        BiometricAvailablePolicy policy = spy(new BiometricAvailablePolicy());
+        DummyPolicy policy = new DummyPolicy();
 
         List<FRAPolicy> policyList = new ArrayList<>();
         policyList.add(policy);
 
-        FRAPolicyEvaluator customPolicyEvaluator = spy(FRAPolicyEvaluator.builder()
+        FRAPolicyEvaluator customPolicyEvaluator = FRAPolicyEvaluator.builder()
                 .withPolicies(policyList)
-                .build());
+                .build();
 
-        doReturn(true).when(policy).evaluate(context);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, account);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, account);
-
-        assertTrue(complaint);
-        assertNull(customPolicyEvaluator.getNonCompliancePolicy());
-        assertEquals(customPolicyEvaluator.getTargetedPolicies().size(), 1);
+        assertTrue(result.isComply());
+        assertNull(result.getNonCompliancePolicy());
+        assertEquals(customPolicyEvaluator.getPolicies().size(), 1);
     }
 
     @Test
-    public void testSingleCustomPolicyFailureAgainstMultiplePoliciesFromAccount() {
+    public void testSingleCustomPolicyFailureAgainstMultiplePoliciesFromAccount() throws InvalidPolicyException {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
@@ -85,15 +139,15 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
 
         doReturn(false).when(policy).evaluate(context);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, account);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, account);
 
-        assertFalse(complaint);
-        assertEquals(customPolicyEvaluator.getNonCompliancePolicy().getName(), policy.getName());
-        assertEquals(customPolicyEvaluator.getTargetedPolicies().size(), 1);
+        assertFalse(result.isComply());
+        assertEquals(result.getNonCompliancePolicy().getName(), policy.getName());
+        assertEquals(customPolicyEvaluator.getPolicies().size(), 1);
     }
 
     @Test
-    public void testSingleCustomPolicySuccessAgainstZeroPoliciesFromAccount() {
+    public void testSingleCustomPolicySuccessAgainstZeroPoliciesFromAccount() throws InvalidPolicyException {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
@@ -111,14 +165,13 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
 
         doReturn(true).when(policy).evaluate(context);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, account);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, account);
 
-        assertTrue(complaint);
-        assertTrue(customPolicyEvaluator.getTargetedPolicies().isEmpty());
+        assertTrue(result.isComply());
     }
 
     @Test
-    public void testSingleCustomPolicySuccessAgainstNoMatchingPolicyFromAccount() {
+    public void testSingleCustomPolicySuccessAgainstNoMatchingPolicyFromAccount() throws InvalidPolicyException {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
@@ -137,15 +190,14 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
 
         doReturn(true).when(policy).evaluate(context);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, account);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, account);
 
-        assertTrue(complaint);
-        assertTrue(customPolicyEvaluator.getTargetedPolicies().isEmpty());
+        assertTrue(result.isComply());
     }
 
 
     @Test
-    public void testMultipleCustomPolicySuccessAgainstMultiplePoliciesFromAccount() {
+    public void testMultipleCustomPolicySuccessAgainstMultiplePoliciesFromAccount() throws InvalidPolicyException {
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
@@ -167,16 +219,16 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
         doReturn(true).when(biometricAvailablePolicy).evaluate(context);
         doReturn(true).when(deviceTamperingPolicy).evaluate(context);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, account);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, account);
 
-        assertTrue(complaint);
-        assertNull(customPolicyEvaluator.getNonCompliancePolicy());
-        assertEquals(customPolicyEvaluator.getTargetedPolicies().size(), 2);
+        assertTrue(result.isComply());
+        assertNull(result.getNonCompliancePolicy());
+        assertEquals(customPolicyEvaluator.getPolicies().size(), 2);
     }
 
     @Test
-    public void testMultipleCustomPolicySuccessAgainstMultiplePoliciesFromURI() {
-        String combinedUri = "mfauth://mfa/Forgerock:demo?" +
+    public void testMultipleCustomPolicySuccessAgainstMultiplePoliciesFromURI() throws InvalidPolicyException {
+        String combinedUri = "mfauth://totp/Forgerock:demo?" +
                 "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
@@ -188,8 +240,7 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&" +
-                "type=totp";
+                "period=30&";
 
         BiometricAvailablePolicy biometricAvailablePolicy = spy(new BiometricAvailablePolicy());
         DeviceTamperingPolicy deviceTamperingPolicy = spy(new DeviceTamperingPolicy());
@@ -206,11 +257,11 @@ public class FRAPolicyEvaluatorTest extends FRABaseTest {
         doReturn(true).when(biometricAvailablePolicy).evaluate(context);
         doReturn(true).when(deviceTamperingPolicy).evaluate(context);
 
-        boolean complaint = customPolicyEvaluator.evaluate(context, combinedUri);
+        FRAPolicyEvaluator.Result result = customPolicyEvaluator.evaluate(context, combinedUri);
 
-        assertTrue(complaint);
-        assertNull(customPolicyEvaluator.getNonCompliancePolicy());
-        assertEquals(customPolicyEvaluator.getTargetedPolicies().size(), 2);
+        assertTrue(result.isComply());
+        assertNull(result.getNonCompliancePolicy());
+        assertEquals(customPolicyEvaluator.getPolicies().size(), 2);
     }
 
 }

@@ -356,15 +356,35 @@ public abstract class FRABaseTest {
         return base64Url;
     }
 
-    static class UnregisteredPolicy extends FRAPolicy {
+    static class DummyPolicy extends FRAPolicy {
         @Override
         public String getName() {
-            return "unregistered";
+            return "dummy";
         }
 
         @Override
         public boolean evaluate(Context context) {
             return true;
+        }
+    }
+
+    static class DummyWithDataPolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "dummyWithData";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            if(getData() != null && getData().has("result")) {
+                try {
+                    return getData().getBoolean("result");
+                } catch (JSONException e) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
         }
     }
 

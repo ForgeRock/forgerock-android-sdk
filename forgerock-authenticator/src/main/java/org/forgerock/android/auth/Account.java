@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -62,7 +63,7 @@ public class Account extends ModelObject<Account> {
      * @param lockingPolicy      Indicates the policy locking the account (optional)
      * @param lock               Indicates if the account is locked (optional)
      */
-    public Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
+    protected Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
                    String imageURL, String backgroundColor, Calendar timeAdded,
                    String policies, String lockingPolicy, boolean lock) {
         this.lockingPolicy = lockingPolicy;
@@ -172,6 +173,7 @@ public class Account extends ModelObject<Account> {
      * Return the Policies used to enforce App security.
      * @return Policies in a JSON String format.
      */
+    @Nullable
     public String getPolicies() {
         return policies;
     }
@@ -180,6 +182,7 @@ public class Account extends ModelObject<Account> {
      * Return the name of the policy locking the Account.
      * @return Policy name as String.
      */
+    @Nullable
     public String getLockingPolicy() {
         return lockingPolicy;
     }

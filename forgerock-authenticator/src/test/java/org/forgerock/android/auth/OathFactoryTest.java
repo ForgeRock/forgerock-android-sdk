@@ -512,7 +512,7 @@ public class OathFactoryTest extends FRABaseTest {
 
     @Test
     public void testShouldHandleCombinedURIAndRegisterOathMechanism() throws Exception {
-        String uri = "mfauth://mfa/Forgerock:demo?" +
+        String uri = "mfauth://totp/Forgerock:demo?" +
                 "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
@@ -524,8 +524,7 @@ public class OathFactoryTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&" +
-                "type=totp";
+                "period=30&";
 
         factory.createFromUri(uri, oathListenerFuture);
         TOTPMechanism oath = (TOTPMechanism) oathListenerFuture.get();

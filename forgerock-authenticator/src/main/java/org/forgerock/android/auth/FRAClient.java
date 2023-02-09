@@ -18,6 +18,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.List;
@@ -120,7 +121,11 @@ public class FRAClient {
 
             if(policyEvaluator == null) {
                 Logger.warn(TAG, "No custom FRAPolicyEvaluator provided, using default policies.");
-                policyEvaluator = FRAPolicyEvaluator.builder().build();
+                try {
+                    policyEvaluator = FRAPolicyEvaluator.builder().build();
+                } catch (InvalidPolicyException e) {
+                    Logger.warn(TAG, "Error on building FRAPolicyEvaluator using default policies.");
+                }
             }
 
             if (fcmToken == null) {
@@ -183,9 +188,8 @@ public class FRAClient {
      * not be found or updated.
      * @param account The Account to update.
      * @return boolean as result of the operation
-     * @throws AccountLockException if account is locked
      */
-    public boolean updateAccount(@NonNull Account account) throws AccountLockException {
+    public boolean updateAccount(@NonNull Account account) {
         return this.authenticatorManager.updateAccount(account);
     }
 

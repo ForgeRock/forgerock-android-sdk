@@ -44,8 +44,6 @@ abstract class MechanismParser {
     public static final String BG_COLOR = "b";
     /** Unknown identity **/
     public static final String UNTITLED = "Untitled";
-    /** The MFA type which combines PUSH and OATH. */
-    public static final String MFA = "mfa";
     /** The Authenticator Policies. */
     public static final String POLICIES = "policies";
 
@@ -183,6 +181,7 @@ abstract class MechanismParser {
             Base64.decode(value, Base64.DEFAULT);
             return true;
         } catch (Exception e) {
+            Logger.warn(TAG, e,"Failed to decode the value: %s", value);
             return false;
         }
     }

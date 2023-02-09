@@ -227,11 +227,11 @@ class BiometricAuth @JvmOverloads constructor(
                 val keyguardManager : KeyguardManager = applicationContext.getSystemService(KEYGUARD_SERVICE) as KeyguardManager
                 val packageManager : PackageManager = applicationContext.packageManager
                 // Check if Fingerprint Sensor is supported
-                if(!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                if(packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT).not()) {
                     canAuthenticate = false
                 }
                 // Check if lock screen security is enabled in Settings
-                if (!keyguardManager.isKeyguardSecure) {
+                if (keyguardManager.isKeyguardSecure.not()) {
                     canAuthenticate = false
                 }
                 // Check if Fingerprint Authentication Permission was granted

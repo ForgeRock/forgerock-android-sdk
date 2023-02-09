@@ -30,6 +30,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
@@ -62,7 +63,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     private FRAPolicyEvaluator policyEvaluator;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, InvalidPolicyException {
         context = ApplicationProvider.getApplicationContext();
 
         push = mockPushMechanism(MECHANISM_UID);
@@ -74,9 +75,10 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
+        FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(true, null);
         policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
-        doReturn(true).when(policyEvaluator).evaluate(any(), anyString());
-        doReturn(true).when(policyEvaluator).evaluate(any(), any(Account.class));
+        doReturn(result).when(policyEvaluator).evaluate(any(), anyString());
+        doReturn(result).when(policyEvaluator).evaluate(any(), any(Account.class));
 
         authenticatorManager = new AuthenticatorManager(context, storageClient, policyEvaluator,
                 "s-o-m-e-t-o-k-e-n");
@@ -174,7 +176,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         try {
             authenticatorManager.setPushFactory(pushFactory);
 
-            String combinedUri = "mfauth://mfa/Forgerock:demo?" +
+            String combinedUri = "mfauth://totp/Forgerock:demo?" +
                     "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
                     "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                     "b=ff00ff&" +
@@ -186,8 +188,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                     "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                     "digits=6&" +
                     "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                    "period=30&" +
-                    "type=totp";
+                    "period=30&";
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
             pushListenerFuture.get();
@@ -201,13 +202,14 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     @Test
     public void testCreateCombinedMechanismsPolicyComplaintFailure() {
         try {
-            FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
-
+            FRAPolicyEvaluator policyEvaluator = spy(FRAPolicyEvaluator.builder().build());
+            FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(false,
+                    new DeviceTamperingPolicy());
             authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
                     policyEvaluator, "s-o-m-e-t-o-k-e-n"));
             authenticatorManager.setPushFactory(pushFactory);
 
-            String combinedUri = "mfauth://mfa/Forgerock:demo?" +
+            String combinedUri = "mfauth://totp/Forgerock:demo?" +
                     "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
                     "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                     "b=ff00ff&" +
@@ -219,11 +221,9 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                     "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                     "digits=6&" +
                     "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                    "period=30&" +
-                    "type=totp";
+                    "period=30&";
 
-            doReturn(false).when(policyEvaluator).evaluate(any(), anyString());
-            doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
+            doReturn(result).when(policyEvaluator).evaluate(any(), anyString());
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
             pushListenerFuture.get();
@@ -240,7 +240,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String combinedUri = "mfauth://mfa/ForgeRock:demo?" +
+        String combinedUri = "mfauth://totp/ForgeRock:demo?" +
                 "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
@@ -252,8 +252,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&" +
-                "type=totp";
+                "period=30&";
 
         authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
@@ -263,8 +262,11 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldLockAccountWhenPolicyComplaintFail() {
+    public void testShouldLockAccountWhenPolicyComplaintFail() throws InvalidPolicyException {
         FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(false,
+                new DeviceTamperingPolicy());
+
         authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
                 policyEvaluator, "s-o-m-e-t-o-k-e-n"));
 
@@ -292,8 +294,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
         given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
         given(storageClient.setAccount(account2)).willReturn(true);
-        doReturn(false).when(policyEvaluator).evaluate(context, account2);
-        doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
+        doReturn(result).when(policyEvaluator).evaluate(context, account2);
 
         List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
 
@@ -304,8 +305,10 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldKeepAccountLockedWhenPolicyComplaintFail() {
+    public void testShouldKeepAccountLockedWhenPolicyComplaintFail() throws InvalidPolicyException {
         FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(false,
+                new DeviceTamperingPolicy());
         authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
                 policyEvaluator, "s-o-m-e-t-o-k-e-n"));
 
@@ -335,8 +338,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
         given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
         given(storageClient.setAccount(account2)).willReturn(true);
-        doReturn(false).when(policyEvaluator).evaluate(context, account2);
-        doReturn(new DeviceTamperingPolicy()).when(policyEvaluator).getNonCompliancePolicy();
+        doReturn(result).when(policyEvaluator).evaluate(context, account2);
 
         List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
 
@@ -347,8 +349,9 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void testShouldUnlockAccountWhenPolicyComplaintPass() {
+    public void testShouldUnlockAccountWhenPolicyComplaintPass() throws InvalidPolicyException {
         FRAPolicyEvaluator policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
+        FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(true, null);
         authenticatorManager = spy(new AuthenticatorManager(context, storageClient,
                 policyEvaluator, "s-o-m-e-t-o-k-e-n"));
 
@@ -378,8 +381,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         given(storageClient.getMechanismsForAccount(account1)).willReturn(mechanismList1);
         given(storageClient.getMechanismsForAccount(account2)).willReturn(mechanismList2);
         given(storageClient.setAccount(account2)).willReturn(true);
-        doReturn(true).when(policyEvaluator).evaluate(context, account2);
-        doReturn(null).when(policyEvaluator).getNonCompliancePolicy();
+        doReturn(result).when(policyEvaluator).evaluate(context, account2);
 
         List<Account> accountsFromStorageList = authenticatorManager.getAllAccounts();
 
@@ -771,7 +773,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         mechanismList.add(push);
         mechanismList.add(oath);
 
-        FRAPolicy policy = new UnregisteredPolicy();
+        FRAPolicy policy = new DummyPolicy();
 
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
         given(storageClient.getAccount(any(String.class))).willReturn(account);

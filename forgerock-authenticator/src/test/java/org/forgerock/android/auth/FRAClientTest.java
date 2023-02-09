@@ -29,6 +29,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
+import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
@@ -59,7 +60,7 @@ public class FRAClientTest extends FRABaseTest {
     private MockWebServer server;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, InvalidPolicyException {
         context = ApplicationProvider.getApplicationContext();
 
         push = mockPushMechanism(MECHANISM_UID);
@@ -74,9 +75,10 @@ public class FRAClientTest extends FRABaseTest {
         pushFactory = spy(new PushFactory(context, storageClient, "s-o-m-e-t-o-k-e-n"));
         doReturn(true).when(pushFactory).checkGooglePlayServices();
 
+        FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(true, null);
         policyEvaluator = spy(new FRAPolicyEvaluator.FRAPolicyEvaluatorBuilder().build());
-        doReturn(true).when(policyEvaluator).evaluate(any(), anyString());
-        doReturn(true).when(policyEvaluator).evaluate(any(), any(Account.class));
+        doReturn(result).when(policyEvaluator).evaluate(any(), anyString());
+        doReturn(result).when(policyEvaluator).evaluate(any(), any(Account.class));
 
         notificationFactory = new NotificationFactory(storageClient);
 
@@ -294,7 +296,7 @@ public class FRAClientTest extends FRABaseTest {
 
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String combinedUri = "mfauth://mfa/ForgeRock:demo?" +
+        String combinedUri = "mfauth://totp/ForgeRock:demo?" +
                 "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
@@ -306,8 +308,7 @@ public class FRAClientTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&" +
-                "type=totp";
+                "period=30&";
 
         FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Mechanism>();
         fraClient.createMechanismFromUri(combinedUri, pushListenerFuture);

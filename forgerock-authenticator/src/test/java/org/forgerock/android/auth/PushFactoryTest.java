@@ -422,7 +422,7 @@ public class PushFactoryTest extends FRABaseTest {
     public void testShouldHandleCombinedURIAndRegisterPushMechanism() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
 
-        String uri = "mfauth://mfa/forgerock:demo?" +
+        String uri = "mfauth://totp/forgerock:demo?" +
                 "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
                 "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
                 "b=ff00ff&" +
@@ -434,8 +434,7 @@ public class PushFactoryTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&" +
-                "type=totp";
+                "period=30&";
 
         factory.createFromUri(uri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
