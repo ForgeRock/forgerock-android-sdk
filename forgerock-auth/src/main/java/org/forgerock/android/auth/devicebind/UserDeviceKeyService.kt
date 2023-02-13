@@ -9,7 +9,9 @@ package org.forgerock.android.auth.devicebind
 
 import android.content.Context
 import android.os.Parcelable
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
+import org.forgerock.android.auth.RemoteDeviceBindingRepository
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.callback.getAuthType
 import org.json.JSONObject
@@ -26,46 +28,46 @@ interface UserKeyService {
     /**
      * Get all the user keys in device.
      */
-    val userKeys: MutableList<UserKey>
+    fun getAll(): List<UserKey>
 
     /**
-     * Delete user key
+     * Delete user key from local storage and also remotely from Server.
+     * By default, if failed to delete from server, local storage will not be deleted,
+     * by providing [forceDelete] to true, it will also delete local keys if server call is failed.
+     *
+     * @param userKey The [UserKey] to be deleted
+     * @param forceDelete Default to false, true will delete local keys even server key removal is failed.
      */
-    fun delete(userKey: UserKey)
+    suspend fun delete(userKey: UserKey, forceDelete: Boolean = false)
 }
 
 internal class UserDeviceKeyService(val context: Context,
-                                    private val deviceRepository: DeviceRepository = SharedPreferencesDeviceRepository(
+                                    private val remoteDeviceBindingRepository: DeviceBindingRepository = RemoteDeviceBindingRepository(),
+                                    private val localDeviceBindingRepository: DeviceBindingRepository = LocalDeviceBindingRepository(
                                         context)) : UserKeyService {
 
     /**
      * Get all the user keys in device.
      */
-    override var userKeys: MutableList<UserKey> = mutableListOf()
 
-    init {
-        getAllUsers()
+    override fun getAll(): List<UserKey> = runBlocking {
+        localDeviceBindingRepository.getAllKeys()
     }
 
-    private fun getAllUsers() {
-        deviceRepository.getAllKeys()?.mapNotNull {
-            val json = JSONObject(it.value as String)
-            UserKey(
-                json.getString(userIdKey),
-                json.getString(userNameKey),
-                json.getString(kidKey),
-                DeviceBindingAuthenticationType.valueOf(json.getString(authTypeKey)),
-                it.key,
-                json.getLong(createdAtKey)
-            )
-        }?.toMutableList()?.also {
-            userKeys = it
+    override suspend fun delete(userKey: UserKey, forceDelete: Boolean) {
+        try {
+            remoteDeviceBindingRepository.delete(userKey)
+            deleteLocal(userKey)
+        } catch (e: Exception) {
+            if (forceDelete) {
+                deleteLocal(userKey)
+            }
+            throw e
         }
     }
 
-    override fun delete(userKey: UserKey) {
-        deviceRepository.delete(userKey.keyAlias)
-        userKeys.remove(userKey)
+    private fun deleteLocal(userKey: UserKey) = runBlocking {
+        localDeviceBindingRepository.delete(userKey)
         userKey.authType.getAuthType().initialize(userKey.userId).deleteKeys(context)
     }
 
@@ -75,6 +77,7 @@ internal class UserDeviceKeyService(val context: Context,
      * @param  userId id optional and received from server
      */
     override fun getKeyStatus(userId: String?): KeyFoundStatus {
+        val userKeys = getAll()
         if (userId.isNullOrEmpty().not()) {
             val key = userKeys.firstOrNull { it.userId == userId }
             return key?.let {
@@ -95,20 +98,32 @@ internal class UserDeviceKeyService(val context: Context,
  */
 sealed class KeyFoundStatus
 data class SingleKeyFound(val key: UserKey) : KeyFoundStatus()
-data class MultipleKeysFound(val keys: MutableList<UserKey>) : KeyFoundStatus()
+data class MultipleKeysFound(val keys: List<UserKey>) : KeyFoundStatus()
 object NoKeysFound : KeyFoundStatus()
 
 /**
  * UserKey DTO
  */
 @Parcelize
+data class UserKey internal constructor(
+    val id: String,
+    val userId: String,
+    val userName: String,
+    val kid: String,
+    val authType: DeviceBindingAuthenticationType,
+    val createdAt: Long = System.currentTimeMillis()) : Parcelable {
 
-data class UserKey internal constructor(val userId: String,
-                                        val userName: String,
-                                        val kid: String,
-                                        val authType: DeviceBindingAuthenticationType,
-                                        val keyAlias: String,
-                                        val createdAt: Long) : Parcelable
+    fun asJSONObject(): JSONObject {
+        val json = JSONObject()
+        json.put(idKey, id)
+        json.put(userIdKey, userId)
+        json.put(userNameKey, userName)
+        json.put(kidKey, kid)
+        json.put(authTypeKey, authType.serializedValue)
+        json.put(createdAtKey, createdAt)
+        return json
+    }
+}
 
 @Parcelize
 data class UserKeys(

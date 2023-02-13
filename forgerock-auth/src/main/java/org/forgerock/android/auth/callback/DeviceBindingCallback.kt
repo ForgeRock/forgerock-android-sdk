@@ -22,14 +22,16 @@ import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.DeviceBindingStatus
-import org.forgerock.android.auth.devicebind.DeviceRepository
+import org.forgerock.android.auth.devicebind.DeviceBindingRepository
 import org.forgerock.android.auth.devicebind.KeyPair
 import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.Prompt
-import org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepository
+import org.forgerock.android.auth.devicebind.LocalDeviceBindingRepository
 import org.forgerock.android.auth.devicebind.Success
+import org.forgerock.android.auth.devicebind.UserKey
 import org.forgerock.android.auth.devicebind.initialize
 import org.json.JSONObject
+import java.util.UUID
 
 /**
  * Callback to collect the device binding information
@@ -179,13 +181,13 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param listener The Listener to listen for the result
      * @param deviceAuthenticator Interface to find the Authentication Type
-     * @param encryptedPreference Persist the values in encrypted shared preference
+     * @param deviceBindingRepository Persist the values in encrypted shared preference
      */
     @JvmOverloads
     internal suspend fun execute(context: Context,
                                  deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
                                      deviceBindingAuthenticationType),
-                                 encryptedPreference: DeviceRepository = SharedPreferencesDeviceRepository(
+                                 deviceBindingRepository: DeviceBindingRepository = LocalDeviceBindingRepository(
                                      context),
                                  deviceId: String = DeviceIdentifier.builder().context(context)
                                      .build().identifier) {
@@ -200,7 +202,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
 
         //TODO We may need to delete other keys if we only want to maintain one keys on the device
         //TODO However, we may want to have Application Pin as fallback, so for now, keep multiple keys.
-        var keyPair: KeyPair? = null
+        var keyPair: KeyPair?
+        var userKey: UserKey? = null
         try {
             val status: DeviceBindingStatus
             withTimeout(getDuration(timeout)) {
@@ -209,26 +212,29 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
             }
             when (status) {
                 is Success -> {
-                    keyPair?.let {
-                        val kid = encryptedPreference.persist(userId,
-                            userName,
-                            it.keyAlias,
-                            deviceBindingAuthenticationType)
-                        val jws = deviceAuthenticator.sign(it,
-                            kid,
-                            userId,
-                            challenge,
-                            getExpiration(timeout))
-                        setJws(jws)
-                        setDeviceId(deviceId)
-                    }
+                    keyPair?.let { kp ->
+                        userKey = UserKey(kp.keyAlias,
+                            userId, userName, kid = UUID.randomUUID().toString(),
+                            deviceBindingAuthenticationType
+                        )
+                        userKey?.let {
+                            deviceBindingRepository.persist(it)
+                            val jws = deviceAuthenticator.sign(kp,
+                                it.kid,
+                                userId,
+                                challenge,
+                                getExpiration(timeout))
+                            setJws(jws)
+                            setDeviceId(deviceId)
+                        }
+                   }
                 }
                 is DeviceBindingErrorStatus -> {
-                    handleException(DeviceBindingException(status))
+                    throw DeviceBindingException(status)
                 }
             }
         } catch (e: Exception) {
-            keyPair?.let { encryptedPreference.delete(it.keyAlias) }
+            userKey?.let { deviceBindingRepository.delete(it) }
             deviceAuthenticator.deleteKeys(context)
             handleException(e)
         }

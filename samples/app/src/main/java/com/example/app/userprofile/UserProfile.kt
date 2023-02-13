@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.app.Alert
 import com.example.app.Topbar
 
 @Composable
@@ -49,7 +50,7 @@ fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Un
             }
         }
         state.exception?.apply {
-            com.example.app.Error(this)
+            Alert(throwable = this)
         }
 
         Button(

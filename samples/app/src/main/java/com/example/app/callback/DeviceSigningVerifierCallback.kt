@@ -36,6 +36,8 @@ import org.forgerock.android.auth.devicebind.DeviceBindingException
 fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
                                   onCompleted: () -> Unit) {
 
+    //We should not put input callback function (onCompleted) to coroutineScope or LaunchEffect
+    //onCompleted may call after LaunchEffect finished
     val currentOnCompleted by rememberUpdatedState(onCompleted)
     val context = LocalContext.current
 

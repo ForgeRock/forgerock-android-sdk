@@ -8,12 +8,16 @@
 package com.example.app
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.app.theme.AppTheme
@@ -33,20 +37,24 @@ fun AuthApp() {
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val coroutineScope = rememberCoroutineScope()
 
-        ModalNavigationDrawer(
-            drawerContent = {
-                val logoutViewModel = viewModel<LogoutViewModel>()
-                AppDrawer(
-                    logoutViewModel = logoutViewModel,
-                    navigateTo = { dest -> navController.navigate(dest) },
-                    closeDrawer = { coroutineScope.launch { drawerState.close() } })
-            },
-            drawerState = drawerState,
-            gesturesEnabled = true) {
-            Box {
-                AppNavHost(navController = navController, openDrawer = {
-                    coroutineScope.launch { drawerState.open() }
-                })
+        Surface(modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background) {
+
+            ModalNavigationDrawer(
+                drawerContent = {
+                    val logoutViewModel = viewModel<LogoutViewModel>()
+                    AppDrawer(
+                        logoutViewModel = logoutViewModel,
+                        navigateTo = { dest -> navController.navigate(dest) },
+                        closeDrawer = { coroutineScope.launch { drawerState.close() } })
+                },
+                drawerState = drawerState,
+                gesturesEnabled = true) {
+                Box {
+                    AppNavHost(navController = navController, openDrawer = {
+                        coroutineScope.launch { drawerState.open() }
+                    })
+                }
             }
         }
     }

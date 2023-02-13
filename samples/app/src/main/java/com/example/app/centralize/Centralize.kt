@@ -45,7 +45,7 @@ fun Centralize(centralizeLoginViewModel: CentralizeLoginViewModel, openDrawer: (
             UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
         }
         state.exception?.apply {
-            Error(exception = this)
+            Error(exception = this, openDrawer)
         }
     }
 }

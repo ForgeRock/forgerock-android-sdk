@@ -38,9 +38,9 @@ class EnvViewModel : ViewModel() {
 
     val dbind = FROptionsBuilder.build {
         server {
-            url = "https://openam-dbind.forgeblocks.com/am"
+            url = "https://openam-sdks-dbind.forgeblocks.com/am"
             realm = "alpha"
-            cookieName = "afef1acb448a873"
+            cookieName = "ccdd0582e7262db"
             timeout = 50
         }
         oauth {
