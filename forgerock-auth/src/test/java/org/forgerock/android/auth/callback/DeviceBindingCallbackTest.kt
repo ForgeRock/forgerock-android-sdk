@@ -101,7 +101,7 @@ class DeviceBindingCallbackTest {
             getExpiration())).thenReturn("signedJWT")
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
-            authInterface = deviceAuthenticator,
+            deviceAuthenticator = deviceAuthenticator,
             encryptedPreference = encryptedPref,
             "device_id")
         verify(deviceAuthenticator).setKey(any())
@@ -131,7 +131,7 @@ class DeviceBindingCallbackTest {
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
-            authInterface = deviceAuthenticator,
+            deviceAuthenticator = deviceAuthenticator,
             encryptedPreference = encryptedPref,
             "device_id")
         verify(deviceAuthenticator).setKey(any())
@@ -153,7 +153,7 @@ class DeviceBindingCallbackTest {
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.testExecute(context,
-            authInterface = deviceAuthenticator,
+            deviceAuthenticator = deviceAuthenticator,
             encryptedPreference = encryptedPref,
             "device_id")
     }
@@ -171,7 +171,7 @@ class DeviceBindingCallbackTest {
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
-                authInterface = deviceAuthenticator,
+                deviceAuthenticator = deviceAuthenticator,
                 encryptedPreference = encryptedPref,
                 "device_id")
             fail()
@@ -183,7 +183,8 @@ class DeviceBindingCallbackTest {
         }
 
         verify(encryptedPref, times(0)).delete(any()) //The key reference has not been created
-        verify(deviceAuthenticator).deleteKeys(any())
+        //Delete before and delete after when failed
+        verify(deviceAuthenticator, times(2)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(any())
     }
@@ -200,7 +201,7 @@ class DeviceBindingCallbackTest {
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
-                authInterface = deviceAuthenticator,
+                deviceAuthenticator = deviceAuthenticator,
                 encryptedPreference = encryptedPref,
                 "device_id")
             fail()
@@ -210,7 +211,8 @@ class DeviceBindingCallbackTest {
         }
 
         verify(encryptedPref, times(0)).delete(any())
-        verify(deviceAuthenticator).deleteKeys(any())
+        //Delete before and delete after when failed
+        verify(deviceAuthenticator, times(2)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(any())
     }
@@ -223,7 +225,7 @@ class DeviceBindingCallbackTest {
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
-                authInterface = deviceAuthenticator,
+                deviceAuthenticator = deviceAuthenticator,
                 encryptedPreference = encryptedPref,
                 "device_id")
         } catch (e: Exception) {
@@ -256,7 +258,7 @@ class DeviceBindingCallbackTest {
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
-                authInterface = deviceAuthenticator,
+                deviceAuthenticator = deviceAuthenticator,
                 encryptedPreference = encryptedPref,
                 "device_id")
             fail()
@@ -266,7 +268,7 @@ class DeviceBindingCallbackTest {
         }
 
         verify(encryptedPref, times(0)).delete(any())
-        verify(deviceAuthenticator).deleteKeys(any())
+        verify(deviceAuthenticator, times(2)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
         verify(deviceAuthenticator, times(0)).sign(keyPair, kid, userid, challenge, getExpiration())
         verify(encryptedPref, times(0)).persist(any())
@@ -275,7 +277,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testWithApplicationPinBinding(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"uYksDJx878kl7B4u+wItpGXPozr8bzDTaJwHPJ06SIw=\"},{\"name\":\"title\",\"value\":\"jey\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=mockjey,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"jey\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"eMr63WsBtwgZkIvqmrldSYxYqrwHntYAwzAUrBFWhiY=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         val scenario: ActivityScenario<DummyActivity> =
             ActivityScenario.launch(DummyActivity::class.java)
@@ -303,11 +305,13 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
                                                 value: Int = 0) :
     DeviceBindingCallback(jsonObject, value) {
 
+    private val cryptoKey = mock<CryptoKey>()
+
     suspend fun testExecute(context: Context,
-                            authInterface: DeviceAuthenticator,
+                            deviceAuthenticator: DeviceAuthenticator,
                             encryptedPreference: DeviceBindingRepository,
                             deviceId: String) {
-        execute(context, authInterface, encryptedPreference, deviceId)
+        execute(context, deviceAuthenticator, encryptedPreference, deviceId)
     }
 
     suspend fun testExecute(context: Context,
@@ -316,6 +320,9 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
         execute(context, deviceBindingRepository = encryptedPreference, deviceId = deviceId)
     }
 
+    override fun getCryptoKey(): CryptoKey {
+        return cryptoKey
+    }
 
     override fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): DeviceAuthenticator {
 
@@ -350,7 +357,6 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
 
             }
 
-            deviceAuthenticator.setKey(CryptoKey(userId))
             return deviceAuthenticator
         }
         return super.getDeviceAuthenticator(type)

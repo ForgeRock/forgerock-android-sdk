@@ -27,16 +27,16 @@ import org.mockito.kotlin.whenever
 class UserDeviceKeyServiceTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
-    private val deviceBindingRepository = mock<DeviceBindingRepository>()
-    private lateinit var encryptedPreference: DeviceBindingRepository
+    private val remoteDeviceBindingRepository = mock<DeviceBindingRepository>()
+    private lateinit var localDeviceBindingRepository: DeviceBindingRepository
     private lateinit var userKeyService: UserKeyService
     private val sharedPreferences =
         context.getSharedPreferences("TestSharedPreferences", Context.MODE_PRIVATE)
 
     @Before
     fun setUp() {
-        encryptedPreference = LocalDeviceBindingRepository(context, sharedPreferences)
-        userKeyService = UserDeviceKeyService(context, deviceBindingRepository, encryptedPreference)
+        localDeviceBindingRepository = LocalDeviceBindingRepository(context, sharedPreferences)
+        userKeyService = UserDeviceKeyService(context, remoteDeviceBindingRepository, localDeviceBindingRepository)
     }
 
     @After
@@ -57,8 +57,8 @@ class UserDeviceKeyServiceTest {
             "user2",
             "kid2",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
-        encryptedPreference.persist(userKey2);
+        localDeviceBindingRepository.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey2);
         val keyStatus = userKeyService.getKeyStatus("")
         assertTrue(keyStatus is MultipleKeysFound)
     }
@@ -75,8 +75,8 @@ class UserDeviceKeyServiceTest {
             "user2",
             "kid2",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
-        encryptedPreference.persist(userKey2);
+        localDeviceBindingRepository.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey2);
         val keyStatus = userKeyService.getKeyStatus(null)
         assertTrue(keyStatus is MultipleKeysFound)
     }
@@ -88,7 +88,7 @@ class UserDeviceKeyServiceTest {
             "user1",
             "kid1",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey1);
         val keyStatus = userKeyService.getKeyStatus(null)
         assertTrue(keyStatus is SingleKeyFound)
     }
@@ -100,7 +100,7 @@ class UserDeviceKeyServiceTest {
             "userName1",
             "kid1",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey1);
         val keyStatus =
             userKeyService.getKeyStatus("user1")
         assertTrue(keyStatus is SingleKeyFound)
@@ -113,7 +113,7 @@ class UserDeviceKeyServiceTest {
             "userName1",
             "kid1",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey1);
 
         val keyStatus = userKeyService.getKeyStatus("invalid")
         assertTrue(keyStatus is NoKeysFound)
@@ -131,14 +131,14 @@ class UserDeviceKeyServiceTest {
             "user1",
             "user1",
             "kid1",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+            DeviceBindingAuthenticationType.APPLICATION_PIN)
         val userKey2 = UserKey("id2",
             "user2",
             "user2",
             "kid2",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
-        encryptedPreference.persist(userKey2);
+            DeviceBindingAuthenticationType.APPLICATION_PIN)
+        localDeviceBindingRepository.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey2);
 
         var userKeys = userKeyService.getAll()
         assertThat(userKeys).hasSize(2)
@@ -160,8 +160,8 @@ class UserDeviceKeyServiceTest {
             "user1",
             "user1",
             "kid1",
-            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
+            DeviceBindingAuthenticationType.APPLICATION_PIN)
+        localDeviceBindingRepository.persist(userKey1);
 
         var userKeys = userKeyService.getAll()
         assertThat(userKeys).hasSize(1)
@@ -169,13 +169,13 @@ class UserDeviceKeyServiceTest {
         userKeyService.delete(userKey)
         userKeys = userKeyService.getAll()
         assertThat(userKeys).hasSize(0)
-        verify(deviceBindingRepository).delete(userKey)
+        verify(remoteDeviceBindingRepository).delete(userKey)
 
     }
 
     @Test
     fun `Test remote api failed to delete due to 403 return`(): Unit = runBlocking {
-        whenever(deviceBindingRepository.delete(any())).thenThrow(ApiException(403,
+        whenever(remoteDeviceBindingRepository.delete(any())).thenThrow(ApiException(403,
             "Failed",
             "Failed"))
         val userKey1 = UserKey("id1",
@@ -183,7 +183,7 @@ class UserDeviceKeyServiceTest {
             "user1",
             "kid1",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        encryptedPreference.persist(userKey1);
+        localDeviceBindingRepository.persist(userKey1);
 
         var userKeys = userKeyService.getAll()
         assertThat(userKeys).hasSize(1)
@@ -196,14 +196,14 @@ class UserDeviceKeyServiceTest {
         userKeys = userKeyService.getAll()
         //user key should not be removed
         assertThat(userKeys).hasSize(1)
-        verify(deviceBindingRepository).delete(userKey)
+        verify(remoteDeviceBindingRepository).delete(userKey)
 
     }
 
     @Test
     fun `Test force delete when remote api failed to delete due to 403 return`(): Unit =
         runBlocking {
-            whenever(deviceBindingRepository.delete(any())).thenThrow(ApiException(403,
+            whenever(remoteDeviceBindingRepository.delete(any())).thenThrow(ApiException(403,
                 "Failed",
                 "Failed"))
             val userKey1 = UserKey("id1",
@@ -211,7 +211,7 @@ class UserDeviceKeyServiceTest {
                 "user1",
                 "kid1",
                 DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-            encryptedPreference.persist(userKey1);
+            localDeviceBindingRepository.persist(userKey1);
 
             var userKeys = userKeyService.getAll()
             assertThat(userKeys).hasSize(1)
@@ -224,7 +224,7 @@ class UserDeviceKeyServiceTest {
             userKeys = userKeyService.getAll()
             //user key should not be removed
             assertThat(userKeys).hasSize(0)
-            verify(deviceBindingRepository).delete(userKey)
+            verify(remoteDeviceBindingRepository).delete(userKey)
 
         }
 }

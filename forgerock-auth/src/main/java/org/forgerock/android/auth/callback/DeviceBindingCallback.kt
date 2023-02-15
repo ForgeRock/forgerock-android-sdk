@@ -11,27 +11,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.DeviceIdentifier
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
 import org.forgerock.android.auth.devicebind.BiometricAndDeviceCredential
+import org.forgerock.android.auth.devicebind.BiometricAuthenticator
 import org.forgerock.android.auth.devicebind.BiometricOnly
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.forgerock.android.auth.devicebind.DeviceBindingException
-import org.forgerock.android.auth.devicebind.DeviceBindingStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingRepository
+import org.forgerock.android.auth.devicebind.DeviceBindingStatus
 import org.forgerock.android.auth.devicebind.KeyPair
+import org.forgerock.android.auth.devicebind.LocalDeviceBindingRepository
 import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.Prompt
-import org.forgerock.android.auth.devicebind.LocalDeviceBindingRepository
 import org.forgerock.android.auth.devicebind.Success
 import org.forgerock.android.auth.devicebind.UserKey
 import org.forgerock.android.auth.devicebind.initialize
 import org.json.JSONObject
-import java.util.UUID
+import java.util.*
 
 /**
  * Callback to collect the device binding information
@@ -142,7 +144,9 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     }
 
     /**
-     * Bind the device.
+     * Bind the device. Calling the [bind] function, the existing bounded keys will be removed.
+     * If don't want to replace or remove existing keys, please use [FRUserKeys] to check existing
+     * keys before calling this method
      *
      * @param context  The Application Context
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
@@ -164,7 +168,9 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     }
 
     /**
-     * Bind the device.
+     * Bind the device. Calling the [bind] function, the existing bounded keys will be removed.
+     * If don't want to replace or remove existing keys, please use [FRUserKeys] to check existing
+     * keys before calling this method
      *
      * @param context  The Application Context
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
@@ -207,6 +213,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
         try {
             val status: DeviceBindingStatus
             withTimeout(getDuration(timeout)) {
+                clearKeys(context, deviceAuthenticator)
                 keyPair = deviceAuthenticator.generateKeys(context)
                 status = deviceAuthenticator.authenticate(context)
             }
@@ -227,7 +234,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                             setJws(jws)
                             setDeviceId(deviceId)
                         }
-                   }
+                    }
                 }
                 is DeviceBindingErrorStatus -> {
                     throw DeviceBindingException(status)
@@ -239,6 +246,25 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
             handleException(e)
         }
     }
+
+    /**
+     * For now we don't support multiple keys, so before we create new keys,
+     * we clean existing keys.
+     */
+    private fun clearKeys(context: Context, deviceAuthenticator: DeviceAuthenticator) {
+        when (deviceAuthenticator) {
+            is ApplicationPinDeviceAuthenticator -> {
+                //Delete Keys from keystore
+                getCryptoKey().deleteKeys()
+            }
+            is BiometricAuthenticator, is None -> {
+                ApplicationPinDeviceAuthenticator().initialize(userId).deleteKeys(context)
+            }
+        }
+        deviceAuthenticator.deleteKeys(context)
+    }
+
+    open fun getCryptoKey() = CryptoKey(userId)
 }
 
 
