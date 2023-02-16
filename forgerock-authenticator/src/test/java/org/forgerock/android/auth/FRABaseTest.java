@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Base64;
 
@@ -25,6 +26,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
@@ -75,6 +77,7 @@ public abstract class FRABaseTest {
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
+    public static final String POLICIES = "{\"biometricAvailable\": { },\"deviceTampering\": {\"score\": 0.8}}";
 
     @BeforeClass
     public static void setup() {
@@ -107,6 +110,7 @@ public abstract class FRABaseTest {
     public static PushMechanism mockPushMechanism(String mechanismUid) {
         final PushMechanism push = mock(PushMechanism.class);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
+        given(push.getAccountId()).willReturn(ISSUER + "-" + ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);
         given(push.getMechanismUID()).willReturn(mechanismUid);
@@ -117,7 +121,13 @@ public abstract class FRABaseTest {
     }
 
     public static PushMechanism mockPushMechanism(String mechanismUid, String serverUrl) {
+        return mockPushMechanism(mechanismUid, serverUrl, createAccount(ACCOUNT_NAME, ISSUER));
+    }
+
+    public static PushMechanism mockPushMechanism(String mechanismUid, String serverUrl, Account account) {
         final PushMechanism push = mock(PushMechanism.class);
+        given((push.getAccount())).willReturn(account);
+        given(push.getAccountId()).willReturn(ISSUER + "-" + ACCOUNT_NAME);
         given(push.getAccountName()).willReturn(ACCOUNT_NAME);
         given(push.getIssuer()).willReturn(ISSUER);
         given(push.getType()).willReturn(Mechanism.PUSH);
@@ -346,4 +356,47 @@ public abstract class FRABaseTest {
         return base64Url;
     }
 
+    static class DummyPolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "dummy";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            return true;
+        }
+    }
+
+    static class DummyWithDataPolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "dummyWithData";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            if(getData() != null && getData().has("result")) {
+                try {
+                    return getData().getBoolean("result");
+                } catch (JSONException e) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+
+    static class InvalidFakePolicy extends FRAPolicy {
+        @Override
+        public String getName() {
+            return "";
+        }
+
+        @Override
+        public boolean evaluate(Context context) {
+            return true;
+        }
+    }
 }

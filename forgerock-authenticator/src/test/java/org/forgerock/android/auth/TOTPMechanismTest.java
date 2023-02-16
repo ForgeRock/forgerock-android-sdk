@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,9 +7,11 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.android.auth.util.TimeKeeper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -156,7 +158,35 @@ public class TOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleTOTPCorrectly() throws OathMechanismException, MechanismCreationException {
+    public void testShouldFailToGetCodeDueAccountLocked() throws MechanismCreationException {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setLock(true)
+                .build();
+        OathMechanism oath = TOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setPeriod(PERIOD)
+                .build();
+        oath.setAccount(account);
+
+        try {
+            oath.getOathTokenCode();
+            Assert.fail("Should throw OathMechanismException");
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage().contains("Account is locked"));
+        }
+    }
+
+    @Test
+    public void testShouldHandleTOTPCorrectly()
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         TimeKeeper timeKeeper = new TimeKeeper() {
             long time = 1461773681957l;
             @Override

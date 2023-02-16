@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,7 +7,10 @@
 
 package org.forgerock.android.auth;
 
+import android.content.Context;
 import android.os.Build;
+
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.detector.*;
 import org.junit.Assert;
@@ -17,7 +20,9 @@ import org.junit.runner.RunWith;
 import static android.os.Build.VERSION.SDK_INT;
 
 @RunWith(AndroidJUnit4.class)
-public class RootDeviceTest extends AndroidBaseTest {
+public class RootDeviceTest {
+
+    protected Context context = ApplicationProvider.getApplicationContext();
 
     @Test
     public void testBuildTagDetector() {

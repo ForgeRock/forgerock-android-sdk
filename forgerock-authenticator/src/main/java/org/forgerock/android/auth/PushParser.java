@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -73,9 +73,11 @@ class PushParser extends MechanismParser {
             values.put(AM_LOAD_BALANCER_COOKIE, recodeBase64UrlValueToStringWithValidation(values, BASE_64_AM_LOAD_BALANCER_COOKIE_KEY));
         }
 
-        values.put(REGISTRATION_ENDPOINT, recodeBase64UrlValueToStringWithValidation(values, BASE_64_URL_REG_ENDPOINT));
+        if (containsNonEmpty(values, ISSUER) && isBase64Encoded(values.get(ISSUER))) {
+            values.put(ISSUER, recodeBase64UrlValueToStringWithValidation(values, ISSUER));
+        }
 
-        values.put(ISSUER, recodeBase64UrlValueToStringWithValidation(values, ISSUER));
+        values.put(REGISTRATION_ENDPOINT, recodeBase64UrlValueToStringWithValidation(values, BASE_64_URL_REG_ENDPOINT));
         values.put(AUTHENTICATION_ENDPOINT, recodeBase64UrlValueToStringWithValidation(values, BASE_64_URL_AUTH_ENDPOINT));
         values.put(SHARED_SECRET, recodeBase64UrlValueToBase64WithValidation(values, BASE_64_URL_SHARED_SECRET));
         values.put(CHALLENGE, recodeBase64UrlValueToBase64WithValidation(values, BASE_64_URL_CHALLENGE));

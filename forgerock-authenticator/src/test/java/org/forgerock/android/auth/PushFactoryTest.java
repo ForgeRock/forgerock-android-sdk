@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -172,7 +172,7 @@ public class PushFactoryTest extends FRABaseTest {
 
         try {
             factory.createFromUri(uri, pushListenerFuture);
-            PushMechanism push = (PushMechanism) pushListenerFuture.get();
+            pushListenerFuture.get();
             Assert.fail("Should throw MechanismCreationException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismCreationException);
@@ -416,6 +416,31 @@ public class PushFactoryTest extends FRABaseTest {
             assertTrue(e.getCause() instanceof MechanismCreationException);
             assertTrue(e.getLocalizedMessage().contains("Failed to register with server"));
         }
+    }
+
+    @Test
+    public void testShouldHandleCombinedURIAndRegisterPushMechanism() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        String uri = "mfauth://totp/forgerock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&";
+
+        factory.createFromUri(uri, pushListenerFuture);
+        PushMechanism push = (PushMechanism) pushListenerFuture.get();
+        assertEquals(push.getType(), Mechanism.PUSH);
+        assertEquals(push.getAccountName(), "demo");
+        assertEquals(push.getIssuer(), "forgerock");
     }
 
 }
