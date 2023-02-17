@@ -36,13 +36,7 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
     protected final static String APPLICATION_PIN = "1234";
 
-    @BeforeClass
-    public static void bindDevices() throws ExecutionException, InterruptedException {
-        bindDevice("bind-pin"); // Bind the device with APPLICATION_PIN
-        bindDevice("bind");     // Bind the device with NONE
-    }
-
-    public static void bindDevice(String nodeConfiguration) throws ExecutionException, InterruptedException {
+    public void bindDevice(String nodeConfiguration) throws ExecutionException, InterruptedException {
         if (FRSession.getCurrentSession() != null) {
             FRSession.getCurrentSession().logout();
         }
@@ -166,14 +160,17 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
 
     @Test
     public void testListAndDeleteKeys() throws ExecutionException, InterruptedException, IOException, ApiException {
+        bindDevice("bind-pin"); // Bind the device with APPLICATION_PIN
+        bindDevice("bind");     // Bind the device with NONE
+
         final int[] deletionFailure = {0};
         final int[] deletionSuccess = {0};
         FRUserKeys userKeys = new FRUserKeys(context);
-        assertThat(userKeys.loadAll().size()).isEqualTo(2);
+        //Make sure we only keep one key per user.
+        assertThat(userKeys.loadAll().size()).isEqualTo(1);
 
         // Assert that the keys are indeed associated with the correct user
         assertThat(userKeys.loadAll().get(0).getUserName()).isEqualTo(USERNAME);
-        assertThat(userKeys.loadAll().get(1).getUserName()).isEqualTo(USERNAME);
 
         // Attempt to remove a key without being authenticated with it should fail
         FRListenerFuture<Void> future = new FRListenerFuture<Void>();
@@ -190,7 +187,7 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
         assertThat(deletionFailure[0]).isEqualTo(1);
 
         // Make sure that none of the local keys were removed (should be still 2, since we didn't force local deletion)
-        assertThat(2).isEqualTo(userKeys.loadAll().size());
+        assertThat(1).isEqualTo(userKeys.loadAll().size());
 
         // Authenticate using the "NONE" authentication key
         loginWithKey();
@@ -222,12 +219,42 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
 
         assertThat(deletionSuccess[0]).isEqualTo(1);
         assertThat(deletionFailure[0]).isEqualTo(1);
-        assertThat(1).isEqualTo(userKeys.loadAll().size());
+        assertThat(0).isEqualTo(userKeys.loadAll().size());
 
         // Logout...
         if (FRSession.getCurrentSession() != null) {
             FRSession.getCurrentSession().logout();
         }
+    }
+
+    @Test
+    public void testForceDelete() throws ExecutionException, InterruptedException {
+        bindDevice("bind");     // Bind the device with NONE
+        final int[] deletionFailure = {0};
+        final int[] deletionSuccess = {0};
+        FRUserKeys userKeys = new FRUserKeys(context);
+        assertThat(userKeys.loadAll().size()).isEqualTo(1);
+
+        // Assert that the keys are indeed associated with the correct user
+        assertThat(userKeys.loadAll().get(0).getUserName()).isEqualTo(USERNAME);
+
+        // Attempt to remove a key without being authenticated with it should fail
+        FRListenerFuture<Void> future = new FRListenerFuture<Void>();
+        userKeys.delete(userKeys.loadAll().get(0), false, future);
+        try {
+            future.get();
+            Assertions.fail("Attempt to remove a device key without being authenticated with it should fail!");
+        }
+        catch (Exception e) {
+            assertThat(e.getCause().getMessage()).isEqualTo("Failed to delete resources");
+            deletionFailure[0]++;
+        }
+        assertThat(deletionSuccess[0]).isEqualTo(0);
+        assertThat(deletionFailure[0]).isEqualTo(1);
+
+        // Make sure that none of the local keys were removed (should be still 1, since we didn't force local deletion)
+        assertThat(1).isEqualTo(userKeys.loadAll().size());
+
 
         // Delete the second key with "force" and confirm it was deleted locally
         // Note that the remote deletion should still return an exception...
@@ -241,10 +268,11 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
             assertThat(e.getCause().getMessage()).isEqualTo("Failed to delete resources");
             deletionFailure[0]++;
         }
-        assertThat(deletionSuccess[0]).isEqualTo(1);
+        assertThat(deletionSuccess[0]).isEqualTo(0);
         assertThat(deletionFailure[0]).isEqualTo(2);
 
         // Make sure that even though we got an error from server, the local key was removed!
         assertThat(0).isEqualTo(userKeys.loadAll().size());
+
     }
 }

@@ -14,7 +14,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,12 +23,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.callback.DeviceSigningVerifierCallback
-import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Timeout
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnAuthorize
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnRegister
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 
 @Composable
@@ -67,14 +63,12 @@ fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
                             return@loop
                         } catch (e: DeviceBindingException) {
                             when (e.status) {
-                                is UnRegister -> {
-                                    callback.setClientError("UnReg")
-                                }
                                 is UnAuthorize -> {
-                                    callback.setClientError("UnAuth")
+                                    //custom error
+                                    //callback.setClientError("UnAuth")
                                 }
                             }
-                            if (it == 2 || e.status is Abort) {
+                            if (it == 2 || e.status is Abort || e.status is ClientNotRegistered) {
                                 currentOnCompleted()
                                 return@loop
                             }

@@ -28,7 +28,6 @@ import org.mockito.kotlin.whenever
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class ApplicationPinDeviceAuthenticatorTest {
@@ -60,7 +59,7 @@ class ApplicationPinDeviceAuthenticatorTest {
         val authenticator = getApplicationPinDeviceAuthenticator()
         val keyPair = authenticator.generateKeys(context)
         assertThat(keyPair).isNotNull
-        assertThat(keyPair.keyAlias).isEqualTo(cryptoKey.keyAlias + "_PIN")
+        assertThat(keyPair.keyAlias).isEqualTo(cryptoKey.keyAlias)
         //Test pin is cached for 1 sec
         assertThat(authenticator.size()).isGreaterThan(1000)
         assertThat(authenticator.pinRef.get()).isNotNull
@@ -86,14 +85,14 @@ class ApplicationPinDeviceAuthenticatorTest {
         whenever(mockAppPinAuthenticator.getPrivateKey(any(), any())).thenReturn(null)
         authenticator.appPinAuthenticator = mockAppPinAuthenticator
         authenticator.pinRef.set("1234".toCharArray())
-        assertThat(authenticator.authenticate(context)).isEqualTo(UnRegister())
+        assertThat(authenticator.authenticate(context)).isEqualTo(ClientNotRegistered())
     }
 
     @Test
     fun testUnRegister(): Unit = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
         val status = authenticator.authenticate(context)
-        assertThat(status).isEqualTo(UnRegister())
+        assertThat(status).isEqualTo(ClientNotRegistered())
     }
 
     //Provide wrong pin

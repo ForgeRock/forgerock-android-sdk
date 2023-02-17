@@ -212,7 +212,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
-                    assertThat(textOutputCallback.getMessage()).isEqualTo("Unsupported");
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Abort");
 
                     node.next(context, nodeListener);
                     return;
@@ -223,13 +223,9 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         };
 
         FRSession.authenticate(context, TREE, nodeListenerFuture);
-        // Ensure that the journey finishes with failure
-        thrown.expect(java.util.concurrent.ExecutionException.class);
-        thrown.expectMessage("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
-
-        Assert.assertNull(nodeListenerFuture.get());
-        Assert.assertNull(FRSession.getCurrentSession());
-        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
+        Assert.assertNotNull(nodeListenerFuture.get());
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
         assertThat(signFailure[0]).isEqualTo(1);
     }
 

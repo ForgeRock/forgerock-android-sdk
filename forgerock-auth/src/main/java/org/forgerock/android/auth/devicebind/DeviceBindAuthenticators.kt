@@ -43,7 +43,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.CryptoKey
-import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -52,6 +51,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 private val TAG = DeviceAuthenticator::class.java.simpleName
+
 /**
  * Device Authenticator Interface
  */
@@ -122,7 +122,7 @@ interface DeviceAuthenticator {
 
 }
 
-fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) : DeviceAuthenticator {
+fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt): DeviceAuthenticator {
 
     //Inject objects
     if (this is BiometricAuthenticator) {
@@ -136,7 +136,7 @@ fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt) : DeviceAuthe
     return this
 }
 
-fun DeviceAuthenticator.initialize(userId: String) : DeviceAuthenticator {
+fun DeviceAuthenticator.initialize(userId: String): DeviceAuthenticator {
     //Inject objects
     if (this is CryptoAware) {
         this.setKey(CryptoKey(userId))
@@ -172,11 +172,7 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
     }
 
     override fun deleteKeys(context: Context) {
-        try {
-            cryptoKey.deleteKeys()
-        } catch (e: Exception) {
-            Logger.warn(TAG, e, e.message)
-        }
+        cryptoKey.deleteKeys()
     }
 
     /**
@@ -190,7 +186,7 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                 //The keys may be removed due to pin change
                 val privateKey = cryptoKey.getPrivateKey()
                 if (privateKey == null) {
-                    continuation.resume(DeviceBindingErrorStatus.UnRegister())
+                    continuation.resume(DeviceBindingErrorStatus.ClientNotRegistered())
                 } else {
                     val listener = object : AuthenticationCallback() {
 
@@ -327,11 +323,7 @@ open class None : CryptoAware, DeviceAuthenticator {
     override fun isSupported(context: Context): Boolean = true
 
     override fun deleteKeys(context: Context) {
-        try {
-            cryptoKey.deleteKeys()
-        } catch (e: Exception) {
-            Logger.warn(TAG, e, e.message)
-        }
+        cryptoKey.deleteKeys()
     }
 
     final override fun type(): DeviceBindingAuthenticationType =
@@ -343,7 +335,7 @@ open class None : CryptoAware, DeviceAuthenticator {
     override suspend fun authenticate(context: Context): DeviceBindingStatus {
         cryptoKey.getPrivateKey()?.let {
             return Success(it)
-        } ?: return DeviceBindingErrorStatus.UnRegister()
+        } ?: return DeviceBindingErrorStatus.ClientNotRegistered()
     }
 
     final override fun setKey(cryptoKey: CryptoKey) {

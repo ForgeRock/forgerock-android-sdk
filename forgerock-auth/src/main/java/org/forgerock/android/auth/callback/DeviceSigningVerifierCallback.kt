@@ -16,7 +16,8 @@ import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.devicebind.DefaultUserKeySelector
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Unsupported
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.NoKeysFound
 import org.forgerock.android.auth.devicebind.Prompt
@@ -190,7 +191,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
         try {
             withTimeout(getDuration(timeout)) {
                 when (val status = userKeyService.getKeyStatus(userId)) {
-                    is NoKeysFound -> handleException(DeviceBindingException(UnRegister()))
+                    is NoKeysFound -> handleException(DeviceBindingException(ClientNotRegistered()))
                     is SingleKeyFound -> authenticate(context,
                         status.key,
                         deviceAuthenticator(status.key.authType))
