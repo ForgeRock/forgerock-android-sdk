@@ -5,6 +5,8 @@
 - Interface to set Device Name during WebAuthn Registration [SDKS-2296]
 - `DeviceBinding` callback support [SDKS-1747]
 - `DeviceSigningVerifier` callback support [SDKS-2022]
+- Added support for combined MFA in the Authenticator SDK [SDKS-2166]
+- Added support for policy enforcement in the Authenticator SDK [SDKS-2166]
 
 #### Fixed
 - Removed `MANAGE_ACCOUNTS` permission from `forgerock-auth` [SDKS-1367]
