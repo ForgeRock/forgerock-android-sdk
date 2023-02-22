@@ -14,6 +14,7 @@ import java.security.PrivateKey
 private const val TIMEOUT = "Timeout"
 private const val ABORT = "Abort"
 private const val UNSUPPORTED = "Unsupported"
+private const val CLIENT_NOT_REGISTERED = "ClientNotRegistered"
 
 sealed interface DeviceBindingStatus
 
@@ -38,13 +39,13 @@ abstract class DeviceBindingErrorStatus(var message: String,
                            private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
-    data class UnRegister(private val errorMessage: String = "PublicKey or PrivateKey Not found in Device",
-                          private val errorType: String = UNSUPPORTED,
-                          private val code: Int? = null) :
+    data class ClientNotRegistered(private val errorMessage: String = "PublicKey or PrivateKey Not found in Device",
+                                   private val errorType: String = CLIENT_NOT_REGISTERED,
+                                   private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 
     data class UnAuthorize(private val errorMessage: String = "Invalid Credentials",
-                           private val errorType: String = UNSUPPORTED,
+                           private val errorType: String = ABORT,
                            private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
 

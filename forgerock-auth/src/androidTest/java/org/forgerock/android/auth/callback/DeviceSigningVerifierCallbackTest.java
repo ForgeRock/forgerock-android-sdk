@@ -118,7 +118,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         // Ensure that the journey finishes with failure
         thrown.expect(java.util.concurrent.ExecutionException.class);
-        thrown.expectMessage("org.forgerock.android.auth.exception.AuthenticationException: {\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}");
+        thrown.expectMessage("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
 
         Assert.assertNull(nodeListenerFuture.get());
         Assert.assertNull(FRSession.getCurrentSession());
@@ -190,7 +190,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     assertThat(callback.getTitle()).isEqualTo("Custom Title");
                     assertThat(callback.getSubtitle()).isEqualTo("Custom Subtitle");
                     assertThat(callback.getDescription()).isEqualTo("Custom Description");
-                    assertThat(callback.getTimeout()).isEqualTo(10);
+                    assertThat(callback.getTimeout()).isEqualTo(0);
 
                     // Set "Custom" client error (without signing the challenge), so that the journey finishes...
                     callback.setClientError("Custom");

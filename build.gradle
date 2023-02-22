@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,6 +21,8 @@ buildscript {
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
         classpath 'com.google.gms:google-services:4.3.5'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -29,6 +31,7 @@ buildscript {
 plugins {
     id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
     id('org.sonatype.gradle.plugins.scan') version '2.4.0'
+    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 allprojects {
@@ -67,3 +70,6 @@ if (secretPropsFile.exists()) {
     }
 }
 
+tasks.dokkaHtmlMultiModule.configure {
+    outputDirectory.set(file("build/dokka/html/$rootProject.name"))
+}

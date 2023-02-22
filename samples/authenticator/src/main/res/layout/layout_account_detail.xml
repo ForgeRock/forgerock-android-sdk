@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,13 +8,13 @@
 
 <org.forgerock.authenticator.sample.view.layout.AccountDetailLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fra="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/account_detail">
 
     <RelativeLayout
+        android:id="@+id/account_detail_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -71,6 +71,28 @@
             />
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/account_detail_locked"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_gravity="center">
+        <TextView
+            android:id="@+id/lock_reason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lines="2"
+            android:text="@string/account_locked"
+            android:textAlignment="center"
+            android:textColor="#F44336"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 
 </org.forgerock.authenticator.sample.view.layout.AccountDetailLayout>

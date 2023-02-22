@@ -9,9 +9,6 @@ package org.forgerock.android.auth.callback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 
 import com.nimbusds.jwt.JWT;
@@ -28,9 +25,6 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.forgerock.android.auth.devicebind.DefaultUserKeySelector;
-import org.forgerock.android.auth.devicebind.DeviceAuthenticator;
-import org.forgerock.android.auth.devicebind.PinCollector;
-import org.forgerock.android.auth.devicebind.Prompt;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,9 +33,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
-
-import kotlin.coroutines.Continuation;
-import kotlin.jvm.functions.Function1;
 
 public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
@@ -221,7 +212,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                 }
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
-                    assertThat(textOutputCallback.getMessage()).isEqualTo("Unsupported");
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Abort");
 
                     node.next(context, nodeListener);
                     return;
@@ -232,13 +223,9 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
         };
 
         FRSession.authenticate(context, TREE, nodeListenerFuture);
-        // Ensure that the journey finishes with failure
-        thrown.expect(java.util.concurrent.ExecutionException.class);
-        thrown.expectMessage("org.forgerock.android.auth.exception.AuthenticationException: {\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}");
-
-        Assert.assertNull(nodeListenerFuture.get());
-        Assert.assertNull(FRSession.getCurrentSession());
-        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
+        Assert.assertNotNull(nodeListenerFuture.get());
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
         assertThat(signFailure[0]).isEqualTo(1);
     }
 

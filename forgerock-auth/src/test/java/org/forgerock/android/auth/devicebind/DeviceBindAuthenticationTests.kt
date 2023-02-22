@@ -293,7 +293,7 @@ class DeviceBindAuthenticationTests {
             testObject.setBiometricHandler(mockBiometricInterface)
             testObject.setKey(cryptoKey)
             testObject.isApi30OrAbove = false
-            assertEquals(UnRegister(), testObject.authenticate(context))
+            assertEquals(ClientNotRegistered(), testObject.authenticate(context))
             verify(mockBiometricInterface, never()).authenticate(any())
         } finally {
             Dispatchers.resetMain()

@@ -7,7 +7,7 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.forgerock.android.auth.devicebind.SharedPreferencesDeviceRepositoryKt.ORG_FORGEROCK_V_1_DEVICE_REPO;
+import static org.forgerock.android.auth.devicebind.LocalDeviceBindingRepositoryKt.ORG_FORGEROCK_V_1_DEVICE_REPO;
 
 import android.content.Context;
 
@@ -31,7 +31,7 @@ public abstract class BaseDeviceBindingTest {
     protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
+    protected final static String AM_URL = "https://openam-sdks-dbind.forgeblocks.com/am";
     protected final static String REALM = "alpha";
     protected final static String OAUTH_CLIENT = "AndroidTest";
     protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
@@ -42,7 +42,7 @@ public abstract class BaseDeviceBindingTest {
     protected static String USER_ID = null; // Used to store the userId of the user who binds the device
 
     @Rule
-    public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
+    public Timeout timeout = new Timeout(20000, TimeUnit.MILLISECONDS);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

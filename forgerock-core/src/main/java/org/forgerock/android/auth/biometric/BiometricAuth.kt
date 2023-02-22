@@ -1,13 +1,16 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.biometric
 
+import android.Manifest
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Context.KEYGUARD_SERVICE
+import android.content.pm.PackageManager
 import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import androidx.annotation.RestrictTo
@@ -216,6 +219,40 @@ class BiometricAuth @JvmOverloads constructor(
 
     companion object {
         private val TAG = BiometricAuth::class.java.simpleName
+
+        @JvmStatic
+        fun isBiometricAvailable(applicationContext: Context) : Boolean{
+            var canAuthenticate = true
+            if (Build.VERSION.SDK_INT < 28) {
+                val keyguardManager : KeyguardManager = applicationContext.getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+                val packageManager : PackageManager = applicationContext.packageManager
+                // Check if Fingerprint Sensor is supported
+                if(packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT).not()) {
+                    canAuthenticate = false
+                }
+                // Check if lock screen security is enabled in Settings
+                if (keyguardManager.isKeyguardSecure.not()) {
+                    canAuthenticate = false
+                }
+                // Check if Fingerprint Authentication Permission was granted
+                if (ContextCompat.checkSelfPermission(applicationContext,
+                        Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
+                    canAuthenticate = false
+                }
+            } else {
+                // Check if biometric is supported
+                val biometricManager : BiometricManager = BiometricManager.from(applicationContext)
+                if(biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) != BiometricManager.BIOMETRIC_SUCCESS){
+                    canAuthenticate = false
+                }
+                // Check if Fingerprint Authentication Permission was granted
+                if (ContextCompat.checkSelfPermission(applicationContext,
+                        Manifest.permission.USE_BIOMETRIC) != PackageManager.PERMISSION_GRANTED) {
+                    canAuthenticate = false
+                }
+            }
+            return canAuthenticate
+        }
     }
 
     init {

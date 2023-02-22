@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,6 +11,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.dokka'
 
 android {
     compileSdkVersion 33
@@ -68,7 +69,7 @@ android {
 }
 
 apply from: '../config/logger.gradle'
-apply from: '../config/javadoc.gradle'
+apply from: '../config/kdoc.gradle'
 apply from: '../config/publish.gradle'
 /**
  * Dependencies
@@ -97,10 +98,11 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
 
     //Make it optional for developer
-    compileOnly 'com.google.android.gms:play-services-location:21.0.1'
+    //There is an issue for later version of location services https://github.com/mapbox/mapbox-maps-android/issues/1752
+    compileOnly 'com.google.android.gms:play-services-location:20.0.0'
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
     compileOnly 'net.openid:appauth:0.7.1'
-    compileOnly 'com.google.android.gms:play-services-fido:19.0.0'
+    compileOnly 'com.google.android.gms:play-services-fido:19.0.1'
 
     //For Device Binding
     compileOnly 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
@@ -118,10 +120,10 @@ dependencies {
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    androidTestImplementation 'com.google.android.gms:play-services-location:21.0.1'
+    androidTestImplementation 'com.google.android.gms:play-services-location:20.0.0'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
-    androidTestImplementation 'com.google.android.gms:play-services-fido:19.0.0'
+    androidTestImplementation 'com.google.android.gms:play-services-fido:19.0.1'
 
     androidTestImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
     androidTestImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
@@ -144,7 +146,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.18.1'
     testImplementation "androidx.test.espresso:espresso-intents:3.5.0"
     testImplementation 'net.openid:appauth:0.7.1'
-    testImplementation 'com.google.android.gms:play-services-fido:19.0.0'
+    testImplementation 'com.google.android.gms:play-services-fido:19.0.1'
     testImplementation 'com.google.android.gms:play-services-auth:20.3.0'
     testImplementation 'com.facebook.android:facebook-login:7.1.0'
     testImplementation 'com.google.android.gms:play-services-safetynet:18.0.1'

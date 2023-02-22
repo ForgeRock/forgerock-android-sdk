@@ -34,6 +34,7 @@ private val TAG = AppPinAuthenticator::class.java.simpleName
 class AppPinAuthenticator(private val cryptoKey: CryptoKey,
                           private val keyStoreRepository: KeyStoreRepository = EncryptedFileKeyStore(cryptoKey.keyAlias)) {
 
+    private val keyStoreType = "PKCS12"
     /**
      * Generate [KeyPair], and persist the [KeyPair] to provided [KeyStoreRepository]
      * @param context The Application Context
@@ -55,7 +56,7 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
      */
     @Throws(IOException::class, UnrecoverableKeyException::class)
     fun getPrivateKey(context: Context, pin: CharArray): PrivateKey? {
-        val keyStore = getKeyStore(context)
+        val keyStore = getKeyStore(context, pin)
         val entry = keyStore.takeIf { it.isKeyEntry(cryptoKey.keyAlias) }
             ?.getEntry(cryptoKey.keyAlias,
                 KeyStore.PasswordProtection(pin)) as? KeyStore.PrivateKeyEntry
@@ -65,24 +66,15 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
     /**
      * Checks if the given alias exists in this keystore.
      * @param context the application context
-     * @return true if the key exists, false otherwise
-     * @exception KeyStoreException if the keystore cannot be initialized
+     * @return true if the file exists, false otherwise
      */
-    fun exists(context: Context): Boolean {
-        val keyStore: KeyStore
-        try {
-            keyStore = getKeyStore(context)
-        } catch (e: Exception) {
-            Logger.warn(TAG, e, "Failed to load Keystore.")
-            return false
-        }
-        return keyStore.containsAlias(getKeyAlias())
-    }
+    fun exists(context: Context): Boolean = keyStoreRepository.exist(context)
 
-    private fun getKeyStore(context: Context): KeyStore {
-        val keystore = KeyStore.getInstance(keyStoreRepository.getKeystoreType())
+    private fun getKeyStore(context: Context, pin: CharArray): KeyStore {
+        val keystore = KeyStore.getInstance(keyStoreType)
+
         keyStoreRepository.getInputStream(context).use {
-            keystore.load(it, null);
+            keystore.load(it, pin)
         }
         return keystore
     }
@@ -95,14 +87,14 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
     }
 
     private fun persist(context: Context, keyPair: KeyPair, pin: CharArray) {
-        val keyStore = KeyStore.getInstance(keyStoreRepository.getKeystoreType())
-        keyStore.load(null);
+        val keyStore = KeyStore.getInstance(keyStoreType)
+        keyStore.load(null)
         val privateKeyEntry = KeyStore.PrivateKeyEntry(keyPair.private,
             arrayOf(generateCertificate(keyPair, cryptoKey.keyAlias)))
         keyStore.setEntry(getKeyAlias(), privateKeyEntry, KeyStore.PasswordProtection(pin))
         keyStoreRepository.getOutputStream(context).use {
             it.flush()
-            keyStore.store(it, null)
+            keyStore.store(it, pin)
         }
     }
 

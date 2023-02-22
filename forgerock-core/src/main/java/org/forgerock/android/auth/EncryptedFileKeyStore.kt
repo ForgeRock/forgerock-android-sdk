@@ -31,6 +31,11 @@ class EncryptedFileKeyStore(val identifier: String,
         file.delete()
     }
 
+    override fun exist(context: Context): Boolean {
+        val file = File(context.filesDir, identifier)
+        return file.exists()
+    }
+
     private fun getEncryptedFile(context: Context, createNew: Boolean = false): EncryptedFile {
         val file = File(context.filesDir, identifier)
         if (createNew and file.exists()) {

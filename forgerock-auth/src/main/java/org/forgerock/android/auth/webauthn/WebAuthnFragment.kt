@@ -51,13 +51,10 @@ class WebAuthnFragment : Fragment() {
                 it.getParcelable(PENDING_INTENT)
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
         pendingIntent?.let {
             signIntentLauncher.launch(IntentSenderRequest.Builder(it).build())
         }
+
     }
 
     private fun handleSignResult(activityResult: ActivityResult) {

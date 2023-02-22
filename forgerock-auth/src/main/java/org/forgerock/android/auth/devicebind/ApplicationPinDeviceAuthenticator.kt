@@ -17,8 +17,9 @@ import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnAuthorize
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnRegister
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.KeyStore
@@ -39,22 +40,23 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
     @VisibleForTesting
     internal lateinit var appPinAuthenticator: AppPinAuthenticator
     private lateinit var keyStore: KeyStoreRepository
-
-    private val pinSuffix = "_PIN"
+    private lateinit var cryptoKey: CryptoKey
 
     protected lateinit var prompt: Prompt
 
     @VisibleForTesting
     internal val pinRef = AtomicReference<CharArray>()
 
-    internal val worker = Executors.newSingleThreadScheduledExecutor()
+    private val worker = Executors.newSingleThreadScheduledExecutor()
 
     override suspend fun generateKeys(context: Context): KeyPair {
         val pin = pinCollector.collectPin(prompt)
         pinRef.set(pin)
-        //This allow a user to have an biometric key + application pin
-        val alias = appPinAuthenticator.getKeyAlias() + pinSuffix
+        //If we want to allow a user to have an biometric key + application pin,
+        //we need different alias
+        val alias = appPinAuthenticator.getKeyAlias()
         val keyPair = appPinAuthenticator.generateKeys(context, pin)
+
         //Clean up the password from memory after 1 second
         worker.schedule({
             pinRef.set(null)
@@ -63,11 +65,9 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
     }
 
     override suspend fun authenticate(context: Context): DeviceBindingStatus {
-
         if (!appPinAuthenticator.exists(context)) {
-            return UnRegister()
+            return ClientNotRegistered()
         }
-
         var pin = pinRef.getAndSet(null)
         pin?.let {
             return getPrivateKey(context, it)
@@ -93,10 +93,14 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
      */
     private fun getPrivateKey(context: Context, pin: CharArray): DeviceBindingStatus {
         return try {
-            appPinAuthenticator.getPrivateKey(context, pin)?.let { Success(it) } ?: UnRegister()
+            appPinAuthenticator.getPrivateKey(context, pin)?.let { Success(it) } ?: ClientNotRegistered()
         } catch (e: FileNotFoundException) {
-            UnRegister()
+            ClientNotRegistered()
         } catch (e: UnrecoverableKeyException) {
+            // When user provides wrong pin for BKS type, it will throw UnrecoverableKeyException.
+            UnAuthorize()
+        } catch (e: IOException) {
+            // When the user provides wrong pin for the PCKS12 type , it will throw IOException.
             UnAuthorize()
         }
     }
@@ -104,6 +108,7 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
     final override fun setKey(cryptoKey: CryptoKey) {
         keyStore = EncryptedFileKeyStore(cryptoKey.keyAlias)
         appPinAuthenticator = AppPinAuthenticator(cryptoKey, this)
+        this.cryptoKey = cryptoKey
     }
 
     final override fun type(): DeviceBindingAuthenticationType =
@@ -127,6 +132,10 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
 
     override fun getKeystoreType(): String {
         return keyStore.getKeystoreType()
+    }
+
+    override fun exist(context: Context): Boolean {
+        return keyStore.exist(context)
     }
 
     override fun delete(context: Context) {

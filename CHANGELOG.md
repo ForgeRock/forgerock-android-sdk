@@ -3,7 +3,15 @@
 - Upgrade Google Fido Client to support PassKey [SDKS-2243]
 - Introduce FRWebAuthn interface to remove WebAuthn Reference Keys [SDKS-2272]
 - Interface to set Device Name during WebAuthn Registration [SDKS-2296]
+- `DeviceBinding` callback support [SDKS-1747]
+- `DeviceSigningVerifier` callback support [SDKS-2022]
+- Added support for combined MFA in the Authenticator SDK [SDKS-2166]
+- Added support for policy enforcement in the Authenticator SDK [SDKS-2166]
 
+#### Fixed
+- Removed `MANAGE_ACCOUNTS` permission from `forgerock-auth` [SDKS-1367]
+- Removed native SSO support (deprecated `sharedUserId` attribute) [SDKS-2260]
+- Fix for WebAuthn authentication for devices which use full screen biometric prompt [SDKS-2340]
 
 ## [3.4.0]
 #### Added

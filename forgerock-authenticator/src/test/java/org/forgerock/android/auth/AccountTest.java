@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,6 +7,9 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AccountLockException;
+import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -14,7 +17,11 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.TimeZone;
 
 @RunWith(RobolectricTestRunner.class)
 public class AccountTest extends FRABaseTest {
@@ -32,7 +39,6 @@ public class AccountTest extends FRABaseTest {
 
     @Test
     public void testCreateAccountWithOptionalParameters() {
-
         String imageUrl = IMAGE_URL;
         String backgroundColor = BACKGROUND_COLOR;
 
@@ -140,14 +146,23 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"policies\":\"{\\\"biometricAvailable\\\": { },\\\"deviceTampering\\\": {\\\"score\\\": 0.8}}\"," +
+                "\"lock\":false" +
                 "}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
+                .setTimeAdded(timeAdded)
+                .setPolicies(POLICIES)
+                .setLock(false)
                 .build();
 
         String accountAsJson = account.toJson();
@@ -163,14 +178,23 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"policies\":\"{\\\"biometricAvailable\\\": { },\\\"deviceTampering\\\": {\\\"score\\\": 0.8}}\"," +
+                "\"lock\":false" +
                 "}";
+
+        Calendar timeAdded = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        timeAdded.setTimeInMillis(1629261902660L);
 
         Account account = Account.builder()
                 .setAccountName(ACCOUNT_NAME)
                 .setIssuer(ISSUER)
                 .setImageURL(IMAGE_URL)
                 .setBackgroundColor(BACKGROUND_COLOR)
+                .setTimeAdded(timeAdded)
+                .setPolicies(POLICIES)
+                .setLock(false)
                 .build();
 
         String accountAsJson = account.serialize();
@@ -186,7 +210,8 @@ public class AccountTest extends FRABaseTest {
                 "\"issuer\":\"issuer1\"," +
                 "\"accountName\":\"user1\"," +
                 "\"imageURL\":\"http:\\/\\/forgerock.com\\/logo.jpg\"," +
-                "\"backgroundColor\":\"032b75\"" +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660" +
                 "}";
 
         Account account = Account.deserialize(json);
@@ -196,6 +221,37 @@ public class AccountTest extends FRABaseTest {
         assertEquals(account.getAccountName(), ACCOUNT_NAME);
         assertEquals(account.getImageURL(), IMAGE_URL);
         assertEquals(account.getBackgroundColor(), BACKGROUND_COLOR);
+    }
+
+    @Test
+    public void testShouldUnlockAccount() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLockingPolicy("deviceTampering")
+                .setLock(true)
+                .build();
+
+        account.unlock();
+
+        assertFalse(account.isLocked());
+        assertNull(account.getLockingPolicy());
+    }
+
+    @Test
+    public void testShouldLockAccount() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .build();
+
+        FRAPolicy policy = new DeviceTamperingPolicy();
+        account.lock(policy);
+
+        assertTrue(account.isLocked());
+        assertEquals(account.getLockingPolicy(), policy.getName());
     }
 
 }

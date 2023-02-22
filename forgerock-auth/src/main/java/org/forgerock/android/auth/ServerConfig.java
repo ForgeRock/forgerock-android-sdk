@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
+
+import static java.util.Collections.singletonList;
 
 import android.content.Context;
 
@@ -15,18 +17,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
 import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;
 
-import static java.util.Collections.singletonList;
-
 /**
  * Manages Server configuration information
  */
-@Getter
 public class ServerConfig extends NetworkConfig {
 
     public static final String API_VERSION_2_1 = "resource=2.1, protocol=1.0";
@@ -108,4 +106,43 @@ public class ServerConfig extends NetworkConfig {
         return pins == null ? Arrays.asList(context.getResources().getStringArray(R.array.forgerock_ssl_pinning_public_key_hashes)) : pins;
     }
 
+    public String getUrl() {
+        return this.url;
+    }
+
+    public String getRealm() {
+        return this.realm;
+    }
+
+    public String getCookieName() {
+        return this.cookieName;
+    }
+
+    public String getAuthenticateEndpoint() {
+        return this.authenticateEndpoint;
+    }
+
+    public String getAuthorizeEndpoint() {
+        return this.authorizeEndpoint;
+    }
+
+    public String getTokenEndpoint() {
+        return this.tokenEndpoint;
+    }
+
+    public String getRevokeEndpoint() {
+        return this.revokeEndpoint;
+    }
+
+    public String getUserInfoEndpoint() {
+        return this.userInfoEndpoint;
+    }
+
+    public String getSessionEndpoint() {
+        return this.sessionEndpoint;
+    }
+
+    public String getEndSessionEndpoint() {
+        return this.endSessionEndpoint;
+    }
 }

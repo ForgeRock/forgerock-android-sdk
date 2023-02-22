@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,8 +9,8 @@ package org.forgerock.android.auth;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
-import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.junit.After;
 import org.junit.Assert;
@@ -327,6 +327,40 @@ public class PushNotificationTest extends FRABaseTest {
             assertFalse(pushNotification.isPending());
             assertTrue(e.getCause() instanceof PushMechanismException);
             assertTrue(e.getLocalizedMessage().contains("PushNotification is not in a valid status to authenticate;"));
+        }
+    }
+
+    @Test
+    public void testAcceptFailureAccountLocked() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(HTTP_OK));
+
+        StorageClient storageClient = mock(DefaultStorageClient.class);
+        PushResponder.getInstance(storageClient);
+
+        HttpUrl baseUrl = server.url("/");
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setLock(true)
+                .build();
+        PushMechanism push = mockPushMechanism(MECHANISM_UID, baseUrl.toString(), account);
+
+        NotificationFactory notificationFactory = new NotificationFactory(storageClient);
+        given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
+        given(storageClient.getMechanismByUUID(any())).willReturn(push);
+        given(storageClient.getAccount(any())).willReturn(account);
+
+        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
+        PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
+
+        FRAListenerFuture pushListenerFuture = new FRAListenerFuture<Integer>();
+        try {
+            pushNotification.accept(pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage().contains("Account is locked"));
         }
     }
 
