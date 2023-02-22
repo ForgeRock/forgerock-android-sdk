@@ -49,7 +49,7 @@ fun PollingWaitCallback(callback: PollingWaitCallback, onTimeout: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         CircularProgressIndicator(progress = progressAnimationValue)
 
-        LaunchedEffect(true) {
+        LaunchedEffect(callback) {
             delay(callback.waitTime.toLong())
             currentOnTimeout()
         }
