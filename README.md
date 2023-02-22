@@ -68,7 +68,22 @@ Documentation for the SDKs is provided at **<https://sdks.forgerock.com>**, and 
 
 * Introducing the SDK Features
 * Preparing AM for use with the SDKS
-* API Reference documentation
+
+### Build API Reference Documentation
+
+You can build the API reference documentation, which uses Dokka to generate either Javadoc or HTML output.
+
+HTML
+: `./gradlew clean dokkaHtmlMultiModule` 
+: View the output at [`build/api-reference/html/`](build/api-reference/html/index.html).
+
+JavaDoc
+: `./gradlew clean dokkaJavadocCollector`
+: View the output at [`build/api-reference/javadoc/`](build/api-reference/javadoc/index.html).
+
+> **TIP**: Use the following command to build both HTML and JavaDoc: 
+> 
+>`./gradlew clean dokkaHtmlMultiModule dokkaJavadocCollector`
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- SUPPORT -->
