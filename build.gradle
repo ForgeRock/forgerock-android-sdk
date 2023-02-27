@@ -8,10 +8,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.7.20'
+    ext {
+        kotlin_version = '1.7.20'
+        customCSSFile = projectDir.toString() + "/dokka/fr-backstage-styles.css"
+        customLogoFile = projectDir.toString() + "/dokka/logo-icon.svg"
+        customTemplatesFolder = file(projectDir.toString() + "/dokka/templates")
+    }
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -21,7 +26,7 @@ buildscript {
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
         classpath 'com.google.gms:google-services:4.3.5'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.7.20"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -31,16 +36,66 @@ buildscript {
 plugins {
     id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
     id('org.sonatype.gradle.plugins.scan') version '2.4.0'
-    id("org.jetbrains.dokka") version "1.7.20"
 }
+
+apply plugin: "org.jetbrains.dokka"
 
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
+
+subprojects {
+    apply plugin: "org.jetbrains.dokka"
+
+    tasks.named("dokkaHtml") {
+        pluginsMapConfiguration.set(
+            [
+                "org.jetbrains.dokka.base.DokkaBase": """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "templatesDir": "$customTemplatesFolder"   
+                }"""
+            ]
+        )
+    }
+
+    tasks.named("dokkaHtmlPartial") {
+        pluginsMapConfiguration.set(
+            [
+                "org.jetbrains.dokka.base.DokkaBase": """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "templatesDir": "$customTemplatesFolder"   
+                }"""
+            ]
+        )
+    }
+}
+
+afterEvaluate {
+    tasks.named("dokkaHtmlMultiModule") {
+        moduleName.set("ForgeRock SDK for Android")
+        moduleVersion.set(project.property('VERSION'))
+        outputDirectory.set(file("build/api-reference/html"))
+        pluginsMapConfiguration.set(
+            [
+                "org.jetbrains.dokka.base.DokkaBase": """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "customAssets": ["$customLogoFile"],
+                    "templatesDir": "$customTemplatesFolder"
+                }"""
+            ]
+        )
+    }
+    tasks.named("dokkaJavadocCollector") {
+        moduleName.set("ForgeRock SDK for Android Javadoc")
+        moduleVersion.set(project.property('VERSION'))
+        outputDirectory.set(file("build/api-reference/javadoc"))
+    }
+
+}
+
 
 ossIndexAudit {
     username = System.properties['username']
@@ -68,8 +123,4 @@ if (secretPropsFile.exists()) {
     p.each { name, value ->
         ext[name] = value
     }
-}
-
-tasks.dokkaHtmlMultiModule.configure {
-    outputDirectory.set(file("build/dokka/html/$rootProject.name"))
 }

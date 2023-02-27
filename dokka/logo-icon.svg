@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="ede8ca5d-677a-4786-83dc-809e9b4a1e06"
+   data-name="Layer 1"
+   width="0.80000001in"
+   height="0.80000001in"
+   viewBox="0 0 64 64"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs102">
+    <style
+       id="style100">
+      .e7edbb4b-058f-425d-8420-cbd11034c9c0 {
+        fill: #032b75;
+      }
+
+      .a8b9360a-cc3d-4b85-874e-7609cbb6c949 {
+        fill: #f96700;
+      }
+    </style>
+  </defs>
+  <title
+     id="title104">ForgeRock_Vert_Color_Logo_RGB_R_med</title>
+  <g
+     id="g138"
+     transform="translate(-61.674672,3.333253)">
+    <g
+       id="g114">
+      <polygon
+         class="e7edbb4b-058f-425d-8420-cbd11034c9c0"
+         points="81.557,32.69 99.863,0 83.293,5.117 68.008,32.69 "
+         id="polygon106"
+         style="fill:#032b75;fill-opacity:1" />
+      <polygon
+         class="e7edbb4b-058f-425d-8420-cbd11034c9c0"
+         points="81.277,37.911 68.144,37.911 78.725,57.571 92.511,57.571 "
+         id="polygon108"
+         style="fill:#032b75;fill-opacity:1" />
+      <path
+         class="a8b9360a-cc3d-4b85-874e-7609cbb6c949"
+         d="M 119.10514,35.54565 110.567,19.53747 c -5.05555,8.93079 -13.982,25.33709 -17.02645,30.50084 l 4.20714,7.53316 h 8.87612 z"
+         id="path110" />
+      <path
+         class="a8b9360a-cc3d-4b85-874e-7609cbb6c949"
+         d="M 91.027,45.53763 108.07872,15.08811 102.53791,4.80816 c -4.35292,7.69337 -13.33935,23.55209 -17.299,30.36542 z"
+         id="path112" />
+    </g>
+  </g>
+  <metadata
+     id="metadata996">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>ForgeRock_Vert_Color_Logo_RGB_R_med</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
