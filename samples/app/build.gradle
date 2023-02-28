@@ -83,7 +83,7 @@ dependencies {
     implementation 'com.google.android.play:integrity:1.1.0'
 
     //Capture Location for Device Profile
-    implementation 'com.google.android.gms:play-services-location:20.0.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
 
     //End of SDK
 
