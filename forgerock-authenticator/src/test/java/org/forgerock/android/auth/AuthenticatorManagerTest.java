@@ -32,6 +32,7 @@ import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -229,7 +230,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
             pushListenerFuture.get();
             fail("Should throw MechanismCreationException");
         } catch (Exception e) {
-            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getCause() instanceof MechanismPolicyViolationException);
             assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device"));
         }
     }
