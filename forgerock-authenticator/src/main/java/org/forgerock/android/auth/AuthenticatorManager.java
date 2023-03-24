@@ -130,13 +130,13 @@ class AuthenticatorManager {
         return account;
     }
 
-    boolean updateAccount(Account account) {
+    boolean updateAccount(Account account) throws AccountLockException {
         Logger.debug(TAG, "Updating Account with ID '%s'", account.getId());
 
         // Check if Account is locked
         if (account.isLocked()) {
-            Logger.debug(TAG, "Error updating the Account with ID '%s: Account is locked.", account.getId());
-            return false;
+            throw new AccountLockException("This account is locked. It violates the following" +
+                    " policy: " + account.getLockingPolicy());
         }
 
         // Update the account object if it already exist, otherwise return false

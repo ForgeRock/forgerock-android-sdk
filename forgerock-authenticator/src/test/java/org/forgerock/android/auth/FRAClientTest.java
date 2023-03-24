@@ -554,6 +554,48 @@ public class FRAClientTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldFailToUpdateLockedAccount() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLock(true)
+                .setLockingPolicy("deviceTampering")
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        account.setDisplayAccountName("userOne");
+
+        try {
+            fraClient.updateAccount(account);
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage()
+                    .contains("This account is locked. It violates the following policy"));
+            assertTrue(account.isLocked());
+            assertNotNull(account.getLockingPolicy());
+        }
+    }
+
+    @Test
     public void testShouldGetStoredMechanismByPushNotification() throws Exception {
         FRAClient fraClient = FRAClient.builder()
                 .withContext(context)

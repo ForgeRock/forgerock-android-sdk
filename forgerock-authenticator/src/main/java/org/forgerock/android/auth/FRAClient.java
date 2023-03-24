@@ -188,8 +188,9 @@ public class FRAClient {
      * not be found or updated.
      * @param account The Account to update.
      * @return boolean as result of the operation
+     * @throws AccountLockException if account is locked
      */
-    public boolean updateAccount(@NonNull Account account) {
+    public boolean updateAccount(@NonNull Account account) throws AccountLockException {
         return this.authenticatorManager.updateAccount(account);
     }
 
