@@ -181,7 +181,6 @@ abstract class MechanismParser {
             Base64.decode(value, Base64.DEFAULT);
             return true;
         } catch (Exception e) {
-            Logger.warn(TAG, e,"Failed to decode the value: %s", value);
             return false;
         }
     }

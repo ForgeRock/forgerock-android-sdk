@@ -32,6 +32,7 @@ import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -229,7 +230,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
             pushListenerFuture.get();
             fail("Should throw MechanismCreationException");
         } catch (Exception e) {
-            assertTrue(e.getCause() instanceof MechanismCreationException);
+            assertTrue(e.getCause() instanceof MechanismPolicyViolationException);
             assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device"));
         }
     }
@@ -567,6 +568,39 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         assertEquals(account.getDisplayAccountName(), OTHER_ACCOUNT_NAME);
         assertEquals(account.getIssuer(), ISSUER);
         assertEquals(account.getDisplayIssuer(), OTHER_ISSUER);
+    }
+
+    @Test
+    public void testShouldFailToUpdateLockedAccount() {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLock(true)
+                .setLockingPolicy("deviceTampering")
+                .build();
+
+        Mechanism oath = createOathMechanism(ACCOUNT_NAME, ISSUER, OTHER_MECHANISM_UID);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+        mechanismList.add(oath);
+
+        given(storageClient.setAccount(any(Account.class))).willReturn(true);
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+
+        account.setDisplayAccountName("userOne");
+
+        try {
+            authenticatorManager.updateAccount(account);
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage()
+                    .contains("This account is locked. It violates the following policy"));
+            assertTrue(account.isLocked());
+            assertNotNull(account.getLockingPolicy());
+        }
     }
 
     @Test
