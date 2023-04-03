@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -26,7 +26,9 @@ class EncryptedPreferences {
          * create the encrypted shared preference for the given filename
          * @param context  The application context
          * @param fileName The default value is the secret_shared_prefs + (package name of the application)
+         * @param aliasName The alias name can be passed to create a master key
          */
+        @JvmOverloads
         fun getInstance(
             context: Context,
             fileName: String = "secret_shared_prefs" + context.packageName,
@@ -34,15 +36,15 @@ class EncryptedPreferences {
 
             return try {
                 // Creates or gets the key to encrypt and decrypt.
-                createEncryptedSharedPref(context, fileName, aliasName)
+                createPreferencesFile(context, fileName, aliasName)
             } catch (e: Exception) {
-                // This is the throwaway workaround code for crypto failure. This should be fixed by google.
+                // This is the workaround code when the file got corrupted.
                 // Issue - https://github.com/google/tink/issues/535
                 Logger.error(tag, e.message)
-                val deleted = deleteSharedPreferencesFile(context, fileName)
+                val deleted = deletePreferencesFile(context, fileName)
                 Logger.debug(tag, "Shared prefs file deleted: %s", deleted)
                 deleteMasterKeyEntry(aliasName)
-                createEncryptedSharedPref(context, fileName, aliasName)
+                createPreferencesFile(context, fileName, aliasName)
             }
         }
 
@@ -53,7 +55,7 @@ class EncryptedPreferences {
             }
         }
 
-        private fun deleteSharedPreferencesFile(context: Context, fileName: String): Boolean {
+        private fun deletePreferencesFile(context: Context, fileName: String): Boolean {
            // Clear the content of the file
             context.getSharedPreferences(fileName, MODE_PRIVATE).edit().clear().apply()
             // Delete the file
@@ -66,7 +68,7 @@ class EncryptedPreferences {
         }
 
         // Creates the instance for the encrypted preferences.
-        private fun createEncryptedSharedPref(context: Context,
+        private fun createPreferencesFile(context: Context,
                                               fileName: String,
                                               aliasName: String): SharedPreferences {
 

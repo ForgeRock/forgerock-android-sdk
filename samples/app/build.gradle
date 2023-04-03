@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -63,7 +70,7 @@ dependencies {
     implementation project(':forgerock-auth')
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
-    implementation 'androidx.security:security-crypto:1.0.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.23'
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
