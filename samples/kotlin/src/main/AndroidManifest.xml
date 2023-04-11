@@ -24,6 +24,7 @@
         android:name="${forgerock_sso_permission}"
         android:protectionLevel="signature" />
 
+    <!--   usesCleartextTraffic is for testing AM locally , and its a sample app, so no security Vulnerability should be reported   -->
     <application
         android:name="com.forgerock.kotlinapp.ForgeRockApplication"
         android:allowBackup="true"
@@ -31,6 +32,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.ForgeRockAndroid">
 
         <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
