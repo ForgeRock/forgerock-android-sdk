@@ -21,7 +21,6 @@ class EncryptedPreferences {
 
         private val tag = EncryptedPreferences::class.java.simpleName
         private const val androidKeyStore = "AndroidKeyStore"
-
         /**
          * create the encrypted shared preference for the given filename
          * @param context  The application context
@@ -38,11 +37,11 @@ class EncryptedPreferences {
                 // Creates or gets the key to encrypt and decrypt.
                 createPreferencesFile(context, fileName, aliasName)
             } catch (e: Exception) {
-                // This is the workaround code when the file got corrupted.
+                // This is the workaround code when the file got corrupted. Google should provide a fix.
                 // Issue - https://github.com/google/tink/issues/535
                 Logger.error(tag, e.message)
                 val deleted = deletePreferencesFile(context, fileName)
-                Logger.debug(tag, "Shared prefs file deleted: %s", deleted)
+                Logger.debug(tag, "Shared prefs file deleted: $deleted")
                 deleteMasterKeyEntry(aliasName)
                 createPreferencesFile(context, fileName, aliasName)
             }

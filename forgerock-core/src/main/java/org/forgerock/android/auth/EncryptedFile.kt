@@ -21,14 +21,14 @@ class EncryptedFile {
          */
         fun getInstance(context: Context, file: File, aliasName: String): EncryptedFile {
             // Creates or gets the key to encrypt and decrypt.
-
             val masterKeyAlias = MasterKey.Builder(context, aliasName)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
-
             return EncryptedFile.Builder(context, file,
                 masterKeyAlias,
                 EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB).build()
         }
+
     }
 }
+

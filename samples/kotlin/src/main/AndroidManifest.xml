@@ -24,6 +24,7 @@
         android:name="${forgerock_sso_permission}"
         android:protectionLevel="signature" />
 
+    <!--   usesCleartextTraffic is for testing AM locally , and its a sample app, so no security Vulnerability should be reported   -->
     <application
         android:name="com.forgerock.kotlinapp.ForgeRockApplication"
         android:allowBackup="true"
