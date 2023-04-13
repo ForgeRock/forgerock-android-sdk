@@ -34,15 +34,16 @@ import androidx.biometric.BiometricPrompt.ERROR_VENDOR
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
+import com.nimbusds.jose.util.Base64
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.CryptoKey
+import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -52,15 +53,19 @@ import kotlin.coroutines.suspendCoroutine
 
 private val TAG = DeviceAuthenticator::class.java.simpleName
 
+private const val ANDROID_VERSION = "android-version"
+private const val CHALLENGE = "challenge"
+private const val PLATFORM = "platform"
+
 /**
  * Device Authenticator Interface
  */
 interface DeviceAuthenticator {
 
     /**
-     * generate the public and private [KeyPair]
+     * generate the public and private [KeyPair] with Challenge
      */
-    suspend fun generateKeys(context: Context): KeyPair
+    suspend fun generateKeys(context: Context, attestation: Attestation = Attestation.None): KeyPair
 
     /**
      * Authenticate the user to access the
@@ -81,18 +86,35 @@ interface DeviceAuthenticator {
      * @param userId userId received from server
      * @param challenge challenge received from server
      */
-    fun sign(keyPair: KeyPair,
+    fun sign(context: Context,
+             keyPair: KeyPair,
              kid: String,
              userId: String,
              challenge: String,
-             expiration: Date): String {
-        val jwk: JWK = RSAKey.Builder(keyPair.publicKey).keyUse(KeyUse.SIGNATURE).keyID(kid)
-            .algorithm(JWSAlgorithm.RS512).build()
+             expiration: Date,
+             attestation: Attestation = Attestation.None): String {
+        val builder = RSAKey.Builder(keyPair.publicKey).keyUse(KeyUse.SIGNATURE).keyID(kid)
+            .algorithm(JWSAlgorithm.RS512)
+        if (attestation !is Attestation.None) {
+            builder.x509CertChain(getCertificateChain(userId))
+        }
+        val jwk = builder.build();
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(kid).jwk(jwk).build(),
-            JWTClaimsSet.Builder().subject(userId).expirationTime(expiration)
-                .claim("challenge", challenge).build())
+            JWTClaimsSet.Builder().subject(userId)
+                .issuer(context.packageName)
+                .expirationTime(expiration)
+                .claim(PLATFORM, "android")
+                .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
+                .claim(CHALLENGE, challenge).build())
         signedJWT.sign(RSASSASigner(keyPair.privateKey))
         return signedJWT.serialize()
+    }
+
+    private fun getCertificateChain(userId: String): List<Base64> {
+        val chain = CryptoKey(userId).getCertificateChain()
+        return chain.map {
+            Base64.encode(it.encoded)
+        }.toList()
     }
 
     /**
@@ -100,12 +122,15 @@ interface DeviceAuthenticator {
      * @param userKey User Information
      * @param challenge challenge received from server
      */
-    fun sign(userKey: UserKey,
+    fun sign(context: Context,
+             userKey: UserKey,
              privateKey: PrivateKey,
              challenge: String,
              expiration: Date): String {
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(userKey.kid).build(),
-            JWTClaimsSet.Builder().subject(userKey.userId).claim("challenge", challenge)
+            JWTClaimsSet.Builder().subject(userKey.userId)
+                .issuer(context.packageName)
+                .claim(CHALLENGE, challenge)
                 .expirationTime(expiration).build())
         signedJWT.sign(RSASSASigner(privateKey))
         return signedJWT.serialize()
@@ -239,8 +264,11 @@ open class BiometricOnly : BiometricAuthenticator() {
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override suspend fun generateKeys(context: Context): KeyPair {
+    override suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair {
         val builder = cryptoKey.keyBuilder()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setAttestationChallenge(attestation.challenge)
+        }
         if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(cryptoKey.timeout,
                 KeyProperties.AUTH_BIOMETRIC_STRONG)
@@ -274,8 +302,11 @@ open class BiometricAndDeviceCredential : BiometricAuthenticator() {
      * generate the public and private keypair
      */
     @SuppressLint("NewApi")
-    override suspend fun generateKeys(context: Context): KeyPair {
+    override suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair {
         val builder = cryptoKey.keyBuilder()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setAttestationChallenge(attestation.challenge)
+        }
         if (isApi30OrAbove) {
             builder.setUserAuthenticationParameters(cryptoKey.timeout,
                 KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
@@ -311,8 +342,11 @@ open class None : CryptoAware, DeviceAuthenticator {
     /**
      * generate the public and private keypair
      */
-    override suspend fun generateKeys(context: Context): KeyPair {
+    override suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair {
         val builder = cryptoKey.keyBuilder()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setAttestationChallenge(attestation.challenge)
+        }
         val key = cryptoKey.createKeyPair(builder.build())
         return KeyPair(key.public as RSAPublicKey, key.private, cryptoKey.keyAlias)
     }

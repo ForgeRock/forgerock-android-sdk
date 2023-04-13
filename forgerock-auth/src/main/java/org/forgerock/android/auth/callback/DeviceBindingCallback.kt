@@ -7,6 +7,7 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
+import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -94,6 +95,12 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     var timeout: Int? = null
         private set
 
+    /**
+     * Enable Attestation
+     */
+    var attestation: Attestation = Attestation.None
+        private set
+
     final override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" -> userId = value as String
         "username" -> userName = value as String
@@ -104,6 +111,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
         "subtitle" -> subtitle = value as? String ?: ""
         "description" -> description = value as? String ?: ""
         "timeout" -> timeout = value as? Int
+        "attestation" -> attestation = Attestation
+            .fromString(value as String, Base64.decode(challenge, Base64.NO_WRAP))
         else -> {}
     }
 
@@ -198,7 +207,6 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                                  deviceId: String = DeviceIdentifier.builder().context(context)
                                      .build().identifier) {
 
-
         deviceAuthenticator.initialize(userId, Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
@@ -214,7 +222,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
             val status: DeviceBindingStatus
             withTimeout(getDuration(timeout)) {
                 clearKeys(context, deviceAuthenticator)
-                keyPair = deviceAuthenticator.generateKeys(context)
+                keyPair =
+                    deviceAuthenticator.generateKeys(context, attestation)
                 status = deviceAuthenticator.authenticate(context)
             }
             when (status) {
@@ -226,11 +235,13 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                         )
                         userKey?.let {
                             deviceBindingRepository.persist(it)
-                            val jws = deviceAuthenticator.sign(kp,
+                            val jws = deviceAuthenticator.sign(context,
+                                kp,
                                 it.kid,
                                 userId,
                                 challenge,
-                                getExpiration(timeout))
+                                getExpiration(timeout),
+                                attestation)
                             setJws(jws)
                             setDeviceId(deviceId)
                         }

@@ -14,6 +14,7 @@ import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.EncryptedFileKeyStore
 import org.forgerock.android.auth.KeyStoreRepository
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.UnAuthorize
@@ -49,7 +50,10 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
 
     private val worker = Executors.newSingleThreadScheduledExecutor()
 
-    override suspend fun generateKeys(context: Context): KeyPair {
+    override suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair {
+        if (attestation !is Attestation.None) {
+            throw DeviceBindingException(DeviceBindingErrorStatus.Unsupported())
+        }
         val pin = pinCollector.collectPin(prompt)
         pinRef.set(pin)
         //If we want to allow a user to have an biometric key + application pin,

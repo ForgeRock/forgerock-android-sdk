@@ -10,7 +10,14 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import java.io.IOException
-import java.security.*
+import java.security.GeneralSecurityException
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.security.PrivateKey
+import java.security.cert.Certificate
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.AlgorithmParameterSpec
 
@@ -68,6 +75,15 @@ class CryptoKey(private var keyId: String) {
         val keyStore: KeyStore = getKeyStore()
         return keyStore.getKey(keyAlias, null) as? PrivateKey
     }
+
+    /**
+     * Get the Certificate chain
+     */
+    fun getCertificateChain(): Array<Certificate>{
+        val keyStore: KeyStore = getKeyStore()
+        return keyStore.getCertificateChain(keyAlias)
+    }
+
 
     /**
      * Delete keys from Android KeyStore

@@ -70,7 +70,7 @@ class DeviceBindAuthenticationTests {
         kpg.initialize(2048)
         val keys = kpg.generateKeyPair()
         val keyPair = KeyPair(keys.public as RSAPublicKey, keys.private, "jeyAlias")
-        val output = testObject.sign(keyPair, "1234", "3123123123", "77888", getExpiration())
+        val output = testObject.sign(context, keyPair, "1234", "3123123123", "77888", getExpiration())
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         assertEquals("1234", jws.header.keyID)
@@ -91,7 +91,7 @@ class DeviceBindAuthenticationTests {
         val expectedExp = Calendar.getInstance();
         expectedExp.add(Calendar.SECOND, 10);
         val exp = Date.from(Instant.ofEpochSecond(expectedExp.time.time / 1000));
-        val output = testObject.sign(keyPair, "1234", "3123123123", "77888", exp)
+        val output = testObject.sign(context, keyPair, "1234", "3123123123", "77888", exp)
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         val actualExp = Calendar.getInstance();

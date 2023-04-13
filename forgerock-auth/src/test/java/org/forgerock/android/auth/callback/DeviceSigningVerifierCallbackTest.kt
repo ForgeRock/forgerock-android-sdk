@@ -86,7 +86,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.sign(userKey,
+        whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
@@ -117,7 +117,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
 
-        whenever(deviceAuthenticator.sign(userKey,
+        whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
@@ -136,7 +136,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
 
-        whenever(deviceAuthenticator.sign(userKey,
+        whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")

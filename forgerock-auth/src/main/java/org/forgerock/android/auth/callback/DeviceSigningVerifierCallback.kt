@@ -168,7 +168,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
         }
         when (val status = deviceAuthenticator.authenticate(context)) {
             is Success -> {
-                val jws = deviceAuthenticator.sign(userKey,
+                val jws = deviceAuthenticator.sign(context,
+                    userKey,
                     status.privateKey,
                     challenge,
                     getExpiration(timeout))
