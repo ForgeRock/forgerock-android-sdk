@@ -19,15 +19,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Parcel;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.forgerock.android.auth.callback.CallbackFactory;
@@ -41,7 +41,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
@@ -170,16 +169,15 @@ public class SocialLoginTest extends BaseTest {
                 fail(e.getMessage());
             }
         });
-
-        SignInCredential signInCredential = new SignInCredential("1234", "", "", "", null, "", "dummy_id_token", "");
-
         Status status = Status.RESULT_SUCCESS;
         Parcel statusParcel = Parcel.obtain();
         status.writeToParcel(statusParcel, 0);
         byte[] bytes = statusParcel.marshall();
 
         Parcel signInCredentialParcel = Parcel.obtain();
-        signInCredential.writeToParcel(signInCredentialParcel, 0);
+        // NOTE: Upgrading the Google Library to latest breaks this test because,  SignInCredential class is package private now, cannot be used in test . keeping this for reference and applied a workaround.
+        // SignInCredential signInCredential = new SignInCredential("1234", "", "", "", null, "", "dummy_id_token", "");
+        writeToParcel(signInCredentialParcel, 0, "1234", "dummy_id_token");
         byte[] bytes2 = signInCredentialParcel.marshall();
 
 
@@ -219,6 +217,21 @@ public class SocialLoginTest extends BaseTest {
         assertThat(tokenType).isEqualTo("id_token");
 
     }
+
+
+    private void writeToParcel(@NonNull Parcel dest, int flags, String id, String token) {
+        int var10000 = SafeParcelWriter.beginObjectHeader(dest);
+        SafeParcelWriter.writeString(dest, 1, id, false);
+        SafeParcelWriter.writeString(dest, 2, "", false);
+        SafeParcelWriter.writeString(dest, 3,"", false);
+        SafeParcelWriter.writeString(dest, 4, "", false);
+        SafeParcelWriter.writeParcelable(dest, 5, Uri.EMPTY, flags, false);
+        SafeParcelWriter.writeString(dest, 6, "", false);
+        SafeParcelWriter.writeString(dest, 7, token, false);
+        SafeParcelWriter.writeString(dest, 8, "", false);
+        SafeParcelWriter.finishObjectHeader(dest, var10000);
+    }
+
 
     @Test
     public void testErrorWithGoogle() throws InterruptedException, ExecutionException, JSONException {

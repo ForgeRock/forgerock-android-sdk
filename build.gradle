@@ -9,7 +9,7 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.7.20'
+        kotlin_version = '1.8.0'
         customCSSFile = projectDir.toString() + "/dokka/fr-backstage-styles.css"
         customLogoFile = projectDir.toString() + "/dokka/logo-icon.svg"
         customTemplatesFolder = file(projectDir.toString() + "/dokka/templates")
@@ -22,9 +22,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
-        classpath 'com.google.gms:google-services:4.3.5'
+        classpath 'com.google.gms:google-services:4.3.15'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.7.20"
 
