@@ -84,7 +84,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-permissions:0.28.0"
 
     //Social Login
-    implementation 'com.facebook.android:facebook-login:12.3.0'
+    implementation 'com.facebook.android:facebook-login:16.0.0'
 
     //For App integrity
     implementation 'com.google.android.play:integrity:1.1.0'

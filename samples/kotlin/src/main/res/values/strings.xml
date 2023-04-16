@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -18,7 +18,7 @@
 
     <!-- AM Instance Details -->
 
-    <string name="forgerock_url" translatable="false">https://openam-sdks-dbind.forgeblocks.com/am</string>
+    <string name="forgerock_url" translatable="false">https://example.com/am</string>
 
     <string name="forgerock_cookie_name" translatable="false">ff55694c448e26e</string>
     <string name="forgerock_realm" translatable="false">alpha</string>
@@ -26,13 +26,13 @@
 
     <string name="asset_statements" translatable="false">
 [{
-  \"include\": \"https://openam-sdks-dbind.forgeblocks.com/.well-known/assetlinks.json\"
+  \"include\": \"https://example.com/.well-known/assetlinks.json\"
 }]
 </string>
 
     <!-- AM Tree Details -->
 
-    <string name="forgerock_auth_service" translatable="false">login-jey</string>
+    <string name="forgerock_auth_service" translatable="false">Login</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -48,8 +48,8 @@
 
     <!-- Facebook -->
     <string name="facebook_app_id">your facebook app id</string>
-    <string name="fb_login_protocol_scheme">your facebook scheme</string>
-
+    <string name="fb_login_protocol_scheme">your facebook app scheme</string>
+    <string name="facebook_client_token">your facebook app token</string>
 
     <!-- End of SDK Configuration -->
 
