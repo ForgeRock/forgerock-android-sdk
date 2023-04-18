@@ -25,6 +25,7 @@ class SerializableTest {
         //We generate String for Object type.
         val parameters = EasyRandomParameters()
         parameters.randomize(Any::class.java) { StringRandomizer().randomValue }
+        parameters.randomize(Attestation::class.java) { Attestation.Default("1234".toByteArray()) }
         parameters.stringLengthRange(3, 3)
         val generator = EasyRandom(parameters)
         for ((_, value) in CallbackFactory.getInstance().callbacks) {

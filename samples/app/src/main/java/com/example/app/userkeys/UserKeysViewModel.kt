@@ -32,7 +32,7 @@ class UserKeysViewModel(context: Context) : ViewModel() {
             fetch(t)
         }
         viewModelScope.launch(handler) {
-            frUserKeys.delete(userKey)
+            frUserKeys.delete(userKey, true)
             fetch(null)
         }
     }

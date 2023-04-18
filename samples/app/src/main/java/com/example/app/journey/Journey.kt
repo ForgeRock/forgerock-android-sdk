@@ -91,7 +91,7 @@ fun Journey(journeyName: String,
                     }
                     is TextOutputCallback -> TextOutputCallback(it)
                     is DeviceSigningVerifierCallback -> {
-                        DeviceSigningVerifierCallback(it, onCompleted = onNext)
+                        DeviceSigningVerifierCallback(it, true, onCompleted = onNext)
                         showNext = false
                     }
                     is ConfirmationCallback -> {

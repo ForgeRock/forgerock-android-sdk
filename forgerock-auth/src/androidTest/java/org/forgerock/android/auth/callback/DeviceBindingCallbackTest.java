@@ -48,6 +48,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
                     assertThat(callback.getSubtitle()).isEqualTo("Cryptography device binding");
                     assertThat(callback.getDescription()).isEqualTo("Please complete with biometric to proceed");
                     assertThat(callback.getTimeout()).isEqualTo(60);
+                    assertThat(callback.getAttestation()).isInstanceOf(Attestation.None.class);
 
                     // Set "Abort" outcome, so that the journey finishes...
                     callback.setClientError("Abort");
