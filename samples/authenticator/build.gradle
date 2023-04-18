@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -51,7 +51,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     // FCM Notifications
-    implementation "com.google.firebase:firebase-messaging:23.0.8"
+    implementation "com.google.firebase:firebase-messaging:23.1.2"
 
     // QRCode scanner - ML Kit dependencies and CameraX
     implementation 'com.google.mlkit:barcode-scanning:16.1.2'
@@ -74,7 +74,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
 
     // Biometric
-    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
 }
 

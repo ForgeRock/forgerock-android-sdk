@@ -87,46 +87,46 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.annotation:annotation:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     def coroutine_version = '1.6.4'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutine_version"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.fragment:fragment-ktx:1.5.4'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.5.6'
 
     //Make it optional for developer
-    //There is an issue for later version of location services https://github.com/mapbox/mapbox-maps-android/issues/1752
-    compileOnly 'com.google.android.gms:play-services-location:20.0.0'
+    compileOnly 'com.google.android.gms:play-services-location:21.0.1'
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
+    // Keeping this version for now, its breaking Apple SignIn for the later versions.
     compileOnly 'net.openid:appauth:0.7.1'
-    compileOnly 'com.google.android.gms:play-services-fido:19.0.1'
+    compileOnly 'com.google.android.gms:play-services-fido:20.0.1'
 
     //For Device Binding
-    compileOnly 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
-    compileOnly 'com.nimbusds:nimbus-jose-jwt:9.23'
+    compileOnly 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
+    compileOnly 'com.nimbusds:nimbus-jose-jwt:9.25'
 
     //Application Pin
     compileOnly 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
 
     //Social Login
-    compileOnly 'com.google.android.gms:play-services-auth:20.3.0'
-    compileOnly 'com.facebook.android:facebook-login:12.3.0'
+    compileOnly 'com.google.android.gms:play-services-auth:20.5.0'
+    compileOnly 'com.facebook.android:facebook-login:16.0.0'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    androidTestImplementation 'com.google.android.gms:play-services-location:20.0.0'
+    androidTestImplementation 'com.google.android.gms:play-services-location:21.0.1'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
-    androidTestImplementation 'com.google.android.gms:play-services-fido:19.0.1'
+    androidTestImplementation 'com.google.android.gms:play-services-fido:20.0.1'
 
-    androidTestImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
-    androidTestImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
+    androidTestImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
+    androidTestImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
     //For Application Pin
     androidTestImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
     androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
@@ -134,32 +134,32 @@ dependencies {
 
 
     testImplementation 'androidx.test:core:1.5.0'
-    testImplementation 'androidx.test.ext:junit:1.1.4'
-    testImplementation 'androidx.test:runner:1.5.1'
-    testImplementation 'androidx.fragment:fragment-testing:1.5.4'
-    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
+    testImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation 'androidx.test:runner:1.5.2'
+    testImplementation 'androidx.fragment:fragment-testing:1.5.6'
+    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
-    testImplementation 'org.assertj:assertj-core:3.18.1'
-    testImplementation "androidx.test.espresso:espresso-intents:3.5.0"
-    testImplementation 'net.openid:appauth:0.7.1'
-    testImplementation 'com.google.android.gms:play-services-fido:19.0.1'
-    testImplementation 'com.google.android.gms:play-services-auth:20.3.0'
-    testImplementation 'com.facebook.android:facebook-login:7.1.0'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
+    testImplementation "androidx.test.espresso:espresso-intents:3.5.1"
+    testImplementation 'net.openid:appauth:0.11.1'
+    testImplementation 'com.google.android.gms:play-services-fido:20.0.1'
+    testImplementation 'com.google.android.gms:play-services-auth:20.5.0'
+    testImplementation 'com.facebook.android:facebook-login:16.0.0'
     testImplementation 'com.google.android.gms:play-services-safetynet:18.0.1'
     testImplementation 'org.jeasy:easy-random-core:4.0.0'
-    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.23'
-    testImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha04'
+    testImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
+    testImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
     //Application Pin
     testImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
     testImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
 
-    testImplementation 'org.mockito:mockito-core:4.6.1'
+    testImplementation 'org.mockito:mockito-core:4.8.1'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
