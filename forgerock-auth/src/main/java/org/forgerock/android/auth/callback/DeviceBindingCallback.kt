@@ -98,8 +98,15 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     /**
      * Enable Attestation
      */
-    var attestation: Attestation = Attestation.None
+    lateinit var attestation: Attestation
         private set
+
+    init {
+        //If attestation is not provided, default to NONE
+        if (!::attestation.isInitialized) {
+            attestation = Attestation.None
+        }
+    }
 
     final override fun setAttribute(name: String, value: Any) = when (name) {
         "userId" -> userId = value as String

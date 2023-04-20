@@ -7,8 +7,8 @@
 
 package com.example.app.userprofile
 
-import org.forgerock.android.auth.UserInfo
+import org.json.JSONObject
 
 data class UserProfileState(
-    var user: UserInfo? = null,
+    var user: JSONObject? = null,
     var exception: Exception? = null)
