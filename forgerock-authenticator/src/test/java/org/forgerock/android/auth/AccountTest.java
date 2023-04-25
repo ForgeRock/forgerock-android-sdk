@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.junit.Test;
@@ -221,6 +220,36 @@ public class AccountTest extends FRABaseTest {
         assertEquals(account.getAccountName(), ACCOUNT_NAME);
         assertEquals(account.getImageURL(), IMAGE_URL);
         assertEquals(account.getBackgroundColor(), BACKGROUND_COLOR);
+    }
+
+    @Test
+    public void testShouldDeserializeWithNullableAttributesSuccessfully() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"displayIssuer\":null," +
+                "\"accountName\":\"user1\"," +
+                "\"displayAccountName\":null," +
+                "\"imageURL\":null," +
+                "\"backgroundColor\":\"032b75\"," +
+                "\"timeAdded\":1629261902660," +
+                "\"policies\":null," +
+                "\"lockingPolicy\":null," +
+                "\"lock\":false" +
+                "}";
+
+        Account account = Account.deserialize(json);
+
+        assertNotNull(account);
+        assertEquals(account.getIssuer(), ISSUER);
+        assertEquals(account.getDisplayIssuer(), ISSUER);
+        assertEquals(account.getAccountName(), ACCOUNT_NAME);
+        assertEquals(account.getDisplayAccountName(), ACCOUNT_NAME);
+        assertNull(account.getImageURL());
+        assertEquals(account.getBackgroundColor(), BACKGROUND_COLOR);
+        assertNull(account.getPolicies());
+        assertNull(account.getLockingPolicy());
+        assertFalse(account.isLocked());
     }
 
     @Test

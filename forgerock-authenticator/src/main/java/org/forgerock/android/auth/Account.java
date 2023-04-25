@@ -264,14 +264,14 @@ public class Account extends ModelObject<Account> {
             JSONObject jsonObject = new JSONObject(jsonString);
             return Account.builder()
                     .setIssuer(jsonObject.getString("issuer"))
-                    .setDisplayIssuer(jsonObject.has("displayIssuer") ? jsonObject.getString("displayIssuer") : null)
+                    .setDisplayIssuer(!jsonObject.isNull("displayIssuer") ? jsonObject.getString("displayIssuer") : null)
                     .setAccountName(jsonObject.getString("accountName"))
-                    .setDisplayAccountName(jsonObject.has("displayAccountName") ? jsonObject.getString("displayAccountName") : null)
-                    .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL") : null)
-                    .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
-                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
-                    .setPolicies(jsonObject.has("policies") ? jsonObject.getString("policies") : null)
-                    .setLockingPolicy(jsonObject.has("lockingPolicy") ? jsonObject.getString("lockingPolicy") : null)
+                    .setDisplayAccountName(!jsonObject.isNull("displayAccountName") ? jsonObject.getString("displayAccountName") : null)
+                    .setImageURL(!jsonObject.isNull("imageURL") ? jsonObject.getString("imageURL") : null)
+                    .setBackgroundColor(!jsonObject.isNull("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
+                    .setTimeAdded(!jsonObject.isNull("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
+                    .setPolicies(!jsonObject.isNull("policies") ? jsonObject.getString("policies") : null)
+                    .setLockingPolicy(!jsonObject.isNull("lockingPolicy") ? jsonObject.getString("lockingPolicy") : null)
                     .setLock(jsonObject.has("lock") && jsonObject.getBoolean("lock"))
                     .build();
         } catch (JSONException e) {
