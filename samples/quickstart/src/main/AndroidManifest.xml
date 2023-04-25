@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
-  ~
-  ~ This software may be modified and distributed under the terms
-  ~ of the MIT license. See the LICENSE file for details.
-  -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.forgerock.quickstart">
 
-    <!--
-    Set usesCleartextTraffic only for test purpose, it is highly recommend to set this attribute
-    to false in production
-    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,12 +14,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Forgerockandroidsdk"
         android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".ResetActivity"
+            android:exported="true">
+            <intent-filter
+                android:autoVerify="true"
+                android:order="0">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="id.bafaloukas.co.uk"
+                    android:scheme="https"
+                    android:pathPattern="/am/XUI" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="castrol" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
