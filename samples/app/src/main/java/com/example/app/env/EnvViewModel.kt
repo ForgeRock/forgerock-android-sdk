@@ -51,11 +51,33 @@ class EnvViewModel : ViewModel() {
             oauthThresholdSeconds = 0
         }
         service {
-            authServiceName = "sign-verifier-stoyan"
+            authServiceName = "login-jey"
+        }
+        sslPinning {
+            pins = listOf("WfA2wp20hOS+8OvRhKg1Rka+LLyuMFTbMB5DZ/DE+xo=")
         }
     }
 
     val sdk = FROptionsBuilder.build {
+        server {
+            url = "https://openam-forgerrock-sdks.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "43d72fc37bdde8c"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "WebAuthn-Android-Jey"
+        }
+    }
+
+    val test = FROptionsBuilder.build {
         server {
             url = "https://openam-forgerrock-sdksteanant.forgeblocks.com/am"
             realm = "alpha"
@@ -70,17 +92,20 @@ class EnvViewModel : ViewModel() {
             oauthThresholdSeconds = 0
         }
         service {
-            authServiceName = "WebAuthn"
+            authServiceName = "WebAuthn-Android-Jey"
         }
     }
 
-    var current by mutableStateOf(dbind)
+    //
+
+    var current by mutableStateOf(sdk)
         private set
 
     init {
         servers.add(localhost)
         servers.add(dbind)
         servers.add(sdk)
+        servers.add(test)
     }
 
     fun select(context: Context, options: FROptions) {

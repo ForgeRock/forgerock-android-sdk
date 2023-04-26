@@ -12,7 +12,7 @@ plugins {
 
 android {
     compileSdkVersion 33
-
+    namespace 'com.forgerock.kotlinapp'
     defaultConfig {
         applicationId "com.forgerock.kotlinapp"
         minSdk 23

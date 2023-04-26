@@ -11,24 +11,30 @@ plugins {
 }
 
 android {
-    namespace 'com.example.app'
-    compileSdk 33
 
+    compileSdk 33
+    namespace "com.example.app"
     defaultConfig {
-        applicationId "com.example.app"
+        applicationId "org.forgerock.auth"
         minSdk 23
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode 15
+        versionName "15.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
     }
     signingConfigs {
         debug {
@@ -37,13 +43,19 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file('../debug.jks')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -67,6 +79,7 @@ dependencies {
     androidTestImplementation composeBom
 
     //SDK
+//    implementation 'org.forgerock:forgerock-auth:4.0.0-beta5'
     implementation project(':forgerock-auth')
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN

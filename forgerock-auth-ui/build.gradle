@@ -13,7 +13,7 @@ apply plugin: 'org.jetbrains.dokka'
 
 android {
     compileSdkVersion 33
-
+    namespace "org.forgerock.android.auth.ui"
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 33

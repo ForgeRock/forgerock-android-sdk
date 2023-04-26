@@ -8,16 +8,12 @@
 package com.example.app.callback
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +44,7 @@ fun SelectIdPCallback(callback: SelectIdPCallback, onSelected: () -> Unit) {
                     }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
-                        painter = painterResource(R.drawable.com_facebook_favicon_blue),
+                        painter = painterResource(R.drawable.apple_black),
                         contentDescription = null,
                         tint = Color.Unspecified
                     )
@@ -76,7 +72,7 @@ fun SelectIdPCallback(callback: SelectIdPCallback, onSelected: () -> Unit) {
                     }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
-                        painter = painterResource(R.drawable.googleg_standard_color_18),
+                        painter = painterResource(R.drawable.apple_black),
                         contentDescription = null,
                         tint = Color.Unspecified
                     )

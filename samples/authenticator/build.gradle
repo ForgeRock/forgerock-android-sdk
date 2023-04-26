@@ -9,7 +9,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 33
-
+    namespace 'org.forgerock.authenticator.sample'
     defaultConfig {
         applicationId "org.forgerock.authenticator.sample"
         minSdkVersion 23

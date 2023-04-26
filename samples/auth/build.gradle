@@ -9,6 +9,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'org.forgerock.auth'
     compileSdkVersion 33
     defaultConfig {
         applicationId "org.forgerock.auth"

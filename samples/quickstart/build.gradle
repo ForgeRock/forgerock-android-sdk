@@ -11,7 +11,7 @@ plugins {
 
 android {
     compileSdkVersion 33
-
+    namespace 'com.forgerock.quickstart'
     defaultConfig {
         applicationId "org.forgerock.quickstart"
         minSdkVersion 23

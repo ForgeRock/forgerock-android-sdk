@@ -6,8 +6,7 @@
   ~ of the MIT license. See the LICENSE file for details.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.forgerock.kotlinapp">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <queries>
         <intent>
