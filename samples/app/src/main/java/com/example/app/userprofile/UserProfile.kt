@@ -46,7 +46,7 @@ fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Un
                 shape = MaterialTheme.shapes.medium) {
                 Text(
                     modifier = Modifier.padding(4.dp),
-                    text = userinfo.raw?.toString(4) ?: "")
+                    text = userinfo.toString(4) ?: "")
             }
         }
         state.exception?.apply {
@@ -55,7 +55,7 @@ fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Un
 
         Button(
             onClick = { userProfileViewModel.userinfo() }) {
-            Text(text = "Refresh")
+            Text(text = "Show UserInfo")
         }
     }
 }
