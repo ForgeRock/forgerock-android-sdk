@@ -63,7 +63,7 @@ class PushParser extends MechanismParser {
             throw new MechanismParsingException("Message ID is required");
         }
 
-        if (containsNonEmpty(values, BASE_64_URL_IMAGE)) {
+        if (containsNonEmpty(values, BASE_64_URL_IMAGE) && Objects.equals(values.get(SCHEME), Mechanism.PUSH)) {
             byte[] imageBytes = Base64.decode(values.get(BASE_64_URL_IMAGE), Base64.NO_WRAP);
             if (imageBytes != null) {
                 values.put(IMAGE, new String(imageBytes));

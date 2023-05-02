@@ -97,9 +97,9 @@ public class PushParserTest {
 
     @Test
     public void testShouldParseMfaUri() throws MechanismParsingException {
-        String uri = "mfauth://totp/Forgerock:demo?" +
+        String uri = "mfauth://totp/Test:demo?" +
                 "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
-                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "image=https://img.favpng.com/9/25/24/computer-icons-instagram-logo-sticker-png-favpng-LZmXr3KPyVbr8LkxNML458QV3.jpg&" +
                 "b=ff00ff&" +
                 "r=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&" +
                 "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
@@ -112,12 +112,14 @@ public class PushParserTest {
                 "period=30&";
         Map<String, String> result = pushParser.map(uri);
         assertEquals(result.get(PushParser.ACCOUNT_NAME), "demo");
-        assertEquals(result.get(PushParser.ISSUER), "Forgerock");
+        assertEquals(result.get(PushParser.ISSUER), "Test");
+        assertEquals(result.get(PushParser.IMAGE),"https://img.favpng.com/9/25/24/computer-icons-instagram-logo-sticker-png-favpng-LZmXr3KPyVbr8LkxNML458QV3.jpg");
         assertEquals(result.get(PushParser.MESSAGE_ID), "9326d19c-4d08-4538-8151-f8558e71475f1464361288472");
         assertEquals(result.get(PushParser.AM_LOAD_BALANCER_COOKIE), "amlbcookie=01");
         assertEquals(result.get(PushParser.AUTHENTICATION_ENDPOINT), "https://forgerock.example.com/openam/json/push/sns/message?_action=authenticate");
         assertEquals(result.get(PushParser.REGISTRATION_ENDPOINT), "https://forgerock.example.com/openam/json/push/sns/message?_action=register");
         assertEquals(result.get(PushParser.CHALLENGE), "Daf8vrc8onKu+dcptwCRS9UHmdui5u16vAdG2HMU4w0=");
+        assertEquals(result.get(PushParser.SHARED_SECRET), "ryJkqNRjXYd/nX523672AX/oKdVXrKExq+VjVeRKKTc=");
         assertEquals(result.get(PushParser.POLICIES), POLICIES);
     }
 
