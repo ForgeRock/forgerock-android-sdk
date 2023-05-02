@@ -720,4 +720,54 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(FRSession.getCurrentSession());
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
     }
+    @Test
+    public void testDeviceSigningVerifierNonMatchingAppIdError() {
+        final int[] signSuccess = {0};
+        boolean executionExceptionOccurred = false;
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "wrong-app-id")
+        {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+                    callback.sign(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            signSuccess[0]++;
+                            node.next(context, nodeListener);
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            Assert.fail("Unexpected failure.");
+                            node.next(context, nodeListener);
+                        }
+                    });
+
+                    return;
+                }
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+
+        // Ensure that the journey finishes with failure
+        try {
+            Assert.assertNull(nodeListenerFuture.get());
+        } catch (ExecutionException e) {
+            executionExceptionOccurred = true;
+            assertThat(e.getMessage()).isEqualTo("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
+        } catch (InterruptedException e) {
+        }
+        Assert.assertNull(FRSession.getCurrentSession());
+
+        assertThat(signSuccess[0]).isEqualTo(1);
+        assertThat(executionExceptionOccurred).isTrue();
+    }
+
 }

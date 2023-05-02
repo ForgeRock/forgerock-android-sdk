@@ -252,6 +252,51 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(FRSession.getCurrentSession());
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
     }
+
+    @Test
+    public void testDeviceBindApplicationIdNotMatchingError() {
+        final int[] bindSuccess = {0};
+        boolean executionExceptionOccurred = false;
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "wrong-app-id") {
+            final NodeListener<FRSession> nodeListener = this;
+            @Override
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceBindingCallback.class) != null) {
+                    DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
+                    callback.bind(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            node.next(context, nodeListener);
+                            bindSuccess[0]++;
+                        }
+                        @Override
+                        public void onException(Exception e) {
+                            Assert.fail("Unexpected failure.");
+                            node.next(context, nodeListener);
+                        }
+                    });
+                    return;
+                }
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+
+        // Ensure that the journey finishes with failure
+        try {
+            Assert.assertNull(nodeListenerFuture.get());
+        } catch (ExecutionException e) {
+            executionExceptionOccurred = true;
+            assertThat(e.getMessage()).isEqualTo("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
+        } catch (InterruptedException e) {
+            Assert.fail("Unexpected exception.");
+        }
+        Assert.assertNull(FRSession.getCurrentSession());
+
+        assertThat(bindSuccess[0]).isEqualTo(1);
+        assertThat(executionExceptionOccurred).isTrue();
+    }
 }
 
 
