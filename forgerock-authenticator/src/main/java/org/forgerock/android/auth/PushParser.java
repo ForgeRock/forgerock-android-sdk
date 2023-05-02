@@ -12,6 +12,7 @@ import android.util.Base64;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Provides the ability to parse URI scheme into a convenient format
@@ -73,7 +74,7 @@ class PushParser extends MechanismParser {
             values.put(AM_LOAD_BALANCER_COOKIE, recodeBase64UrlValueToStringWithValidation(values, BASE_64_AM_LOAD_BALANCER_COOKIE_KEY));
         }
 
-        if (containsNonEmpty(values, ISSUER) && isBase64Encoded(values.get(ISSUER))) {
+        if (containsNonEmpty(values, ISSUER) && Objects.equals(values.get(SCHEME), Mechanism.PUSH)) {
             values.put(ISSUER, recodeBase64UrlValueToStringWithValidation(values, ISSUER));
         }
 
