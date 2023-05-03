@@ -151,193 +151,206 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case org.forgerock.auth.R.id.login:
-                success.setVisibility(INVISIBLE);
-                content.setText("");
-                TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
-                return true;
 
-            case org.forgerock.auth.R.id.register:
-                success.setVisibility(INVISIBLE);
-                content.setText("");
-                Intent registerIntent = new Intent(this, SimpleRegisterActivity.class);
-                startActivityForResult(registerIntent, AUTH_REQUEST_CODE);
-                return true;
+        int itemId = item.getItemId();
 
-            case org.forgerock.auth.R.id.logout:
-                success.setVisibility(INVISIBLE);
-                content.setText("");
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().logout();
+        if(itemId == R.id.login) {
+            success.setVisibility(INVISIBLE);
+            content.setText("");
+            TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
+            return true;
+        }
+
+        if(itemId == R.id.register) {
+            success.setVisibility(INVISIBLE);
+            content.setText("");
+            Intent registerIntent = new Intent(this, SimpleRegisterActivity.class);
+            startActivityForResult(registerIntent, AUTH_REQUEST_CODE);
+            return true;
+        }
+
+        if(itemId == R.id.logout) {
+            success.setVisibility(INVISIBLE);
+            content.setText("");
+            if (FRUser.getCurrentUser() != null) {
+                FRUser.getCurrentUser().logout();
+            }
+            TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
+        }
+
+        if(itemId == R.id.profile) {
+            checkPermission();
+            success.setVisibility(View.GONE);
+            FRDevice.getInstance().getProfile(new FRListener<JSONObject>() {
+                @Override
+                public void onSuccess(JSONObject result) {
+                    runOnUiThread(() -> {
+                        try {
+                            content.setText(result.toString(4));
+                        } catch (JSONException e) {
+                            Logger.warn(TAG, e, "Failed to convert json to string");
+                        }
+                    });
                 }
-                TreeDialogFragment.newInstance().show(getSupportFragmentManager(), "TREE");
 
-                return true;
-            case org.forgerock.auth.R.id.profile:
-                checkPermission();
-                success.setVisibility(View.GONE);
-                FRDevice.getInstance().getProfile(new FRListener<JSONObject>() {
+                @Override
+                public void onException(Exception e) {
+                    Logger.warn(TAG, e, "Failed to retrieve device profile");
+                }
+            });
+            return true;
+        }
+
+        if(itemId == R.id.userinfo) {
+            userinfo();
+            return true;
+        }
+
+        if(itemId == R.id.invoke) {
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                    .followRedirects(false);
+
+            if (Logger.isDebugEnabled()) {
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+                interceptor.level(HttpLoggingInterceptor.Level.BODY);
+                builder.addInterceptor(interceptor);
+            }
+
+            builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
+                @Override
+                public AdviceHandler<Void> getAdviceHandler(PolicyAdvice advice) {
+                    return new AdviceDialogHandler();
+                }
+            });
+            builder.addInterceptor(new AccessTokenInterceptor());
+            builder.cookieJar(SecureCookieJar.builder()
+                    .context(this.getApplicationContext())
+                    .build());
+
+            OkHttpClient client = builder.build();
+            Request request = new Request.Builder().url("http://openig.example.com:9090/products").build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    runOnUiThread(() -> content.setText(e.getMessage()));
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    runOnUiThread(() -> {
+                        if (response.isSuccessful()) {
+                            try {
+                                content.setText("Response:" + response.body().string());
+                            } catch (IOException e) {
+                                content.setText(e.getMessage());
+                            }
+                        } else {
+                            content.setText("Failed:" + response.message());
+                        }
+                    });
+                }
+            });
+            return true;
+        }
+
+        if(itemId == R.id.token) {
+            JSONObject output = new JSONObject();
+            if (FRUser.getCurrentUser() != null) {
+                FRUser.getCurrentUser().getAccessToken(new FRListener<AccessToken>() {
                     @Override
-                    public void onSuccess(JSONObject result) {
+                    public void onSuccess(AccessToken result) {
+                        try {
+                            put(output, "ACCESS_TOKEN_RAW", new JSONObject(result.toJson()));
+                        } catch (JSONException e) {
+                            //ignore
+                        }
+                        try {
+                            put(output, "ACCESS_TOKEN", new JSONObject(JWTParser.parse(result.getValue()).getJWTClaimsSet().toString()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            put(output, "REFRESH_TOKEN", new JSONObject(JWTParser.parse(result.getRefreshToken()).getJWTClaimsSet().toString()));
+                        } catch (Exception e) {
+                        }
+                        try {
+                            put(output, "ID_TOKEN", new JSONObject(JWTParser.parse(result.getIdToken()).getJWTClaimsSet().toString()));
+                        } catch (Exception e) {
+                            //ignore
+                        }
+
                         runOnUiThread(() -> {
                             try {
-                                content.setText(result.toString(4));
+                                success.setVisibility(View.GONE);
+                                content.setText(output.toString(2));
                             } catch (JSONException e) {
-                                Logger.warn(TAG, e, "Failed to convert json to string");
+                                //ignore
                             }
                         });
                     }
 
                     @Override
                     public void onException(Exception e) {
-                        Logger.warn(TAG, e, "Failed to retrieve device profile");
+                        put(output, "ERROR", e.getMessage());
                     }
                 });
-                return true;
-            case R.id.userinfo:
-                userinfo();
-                return true;
-            case org.forgerock.auth.R.id.invoke:
 
-                OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                        .followRedirects(false);
-
-                if (Logger.isDebugEnabled()) {
-                    HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-                    interceptor.level(HttpLoggingInterceptor.Level.BODY);
-                    builder.addInterceptor(interceptor);
-                }
-
-                builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
-                    @Override
-                    public AdviceHandler<Void> getAdviceHandler(PolicyAdvice advice) {
-                        return new AdviceDialogHandler();
-                    }
-                });
-                builder.addInterceptor(new AccessTokenInterceptor());
-                builder.cookieJar(SecureCookieJar.builder()
-                        .context(this.getApplicationContext())
-                        .build());
-
-                OkHttpClient client = builder.build();
-                Request request = new Request.Builder().url("http://openig.example.com:9090/products").build();
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        runOnUiThread(() -> content.setText(e.getMessage()));
-                    }
-
-                    @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        runOnUiThread(() -> {
-                            if (response.isSuccessful()) {
-                                try {
-                                    content.setText("Response:" + response.body().string());
-                                } catch (IOException e) {
-                                    content.setText(e.getMessage());
-                                }
-                            } else {
-                                content.setText("Failed:" + response.message());
-                            }
-                        });
-                    }
-                });
-                return true;
-
-            case R.id.token:
-                JSONObject output = new JSONObject();
-                if (FRUser.getCurrentUser() != null) {
-                    FRUser.getCurrentUser().getAccessToken(new FRListener<AccessToken>() {
-                        @Override
-                        public void onSuccess(AccessToken result) {
-                            try {
-                                put(output, "ACCESS_TOKEN_RAW", new JSONObject(result.toJson()));
-                            } catch (JSONException e) {
-                                //ignore
-                            }
-                            try {
-                                put(output, "ACCESS_TOKEN", new JSONObject(JWTParser.parse(result.getValue()).getJWTClaimsSet().toString()));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            try {
-                                put(output, "REFRESH_TOKEN", new JSONObject(JWTParser.parse(result.getRefreshToken()).getJWTClaimsSet().toString()));
-                            } catch (Exception e) {
-                            }
-                            try {
-                                put(output, "ID_TOKEN", new JSONObject(JWTParser.parse(result.getIdToken()).getJWTClaimsSet().toString()));
-                            } catch (Exception e) {
-                                //ignore
-                            }
-
-                            runOnUiThread(() -> {
-                                try {
-                                    success.setVisibility(View.GONE);
-                                    content.setText(output.toString(2));
-                                } catch (JSONException e) {
-                                    //ignore
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onException(Exception e) {
-                            put(output, "ERROR", e.getMessage());
-                        }
-                    });
-
-                    if (FRSession.getCurrentSession() != null) {
-                        if (FRSession.getCurrentSession().getSessionToken() != null) {
-                            put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
-                        }
+                if (FRSession.getCurrentSession() != null) {
+                    if (FRSession.getCurrentSession().getSessionToken() != null) {
+                        put(output, "SESSION", FRSession.getCurrentSession().getSessionToken().getValue());
                     }
                 }
-                return true;
-
-            case R.id.revokeToken:
-                progressBar.setVisibility(VISIBLE);
-                revokeAccessToken();
-                return true;
-            case R.id.trustAllCert:
-
-                try {
-                    final TrustManager trustManager = new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                        }
-
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new java.security.cert.X509Certificate[] {};
-                        }
-                    };
-                    SSLContext sslContext = SSLContext.getInstance("SSL");
-                    sslContext.init(null, new TrustManager[] { trustManager }, new java.security.SecureRandom());
-                    Config.getInstance().reset();
-                    Config.getInstance().init(this, null);
-                    Config.getInstance().setBuildSteps(Collections.singletonList(builder1 -> {
-                        builder1.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager);
-                        builder1.hostnameVerifier((s, sslSession) -> true);
-                    }));
-
-                } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                    runOnUiThread(() -> content.setText(e.getMessage()));
-                }
-
-            case R.id.webAuthn:
-                success.setVisibility(INVISIBLE);
-                content.setText("");
-                listWebAuthnCredentials();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+            }
+            return true;
         }
+
+        if(itemId == R.id.revokeToken) {
+            progressBar.setVisibility(VISIBLE);
+            revokeAccessToken();
+            return true;
+        }
+
+        if(itemId == R.id.trustAllCert) {
+            try {
+                final TrustManager trustManager = new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                    }
+
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[] {};
+                    }
+                };
+                SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, new TrustManager[] { trustManager }, new java.security.SecureRandom());
+                Config.getInstance().reset();
+                Config.getInstance().init(this, null);
+                Config.getInstance().setBuildSteps(Collections.singletonList(builder1 -> {
+                    builder1.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager);
+                    builder1.hostnameVerifier((s, sslSession) -> true);
+                }));
+
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                runOnUiThread(() -> content.setText(e.getMessage()));
+            }
+            return true;
+        }
+
+        if(itemId == R.id.webAuthn) {
+            success.setVisibility(INVISIBLE);
+            content.setText("");
+            listWebAuthnCredentials();
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+
     }
 
     private void put(JSONObject object, String key, Object value) {

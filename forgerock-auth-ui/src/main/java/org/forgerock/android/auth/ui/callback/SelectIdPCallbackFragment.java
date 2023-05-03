@@ -101,7 +101,7 @@ public class SelectIdPCallbackFragment extends CallbackFragment<SelectIdPCallbac
             facebook.setMinimumWidth(100);
             facebook.setMaxHeight(100);
             facebook.setMinimumHeight(100);
-            facebook.setImageResource(R.drawable.com_facebook_favicon_blue);
+            facebook.setImageResource(R.drawable.apple_black);
             return facebook;
         }
 
@@ -111,7 +111,7 @@ public class SelectIdPCallbackFragment extends CallbackFragment<SelectIdPCallbac
             google.setMinimumWidth(100);
             google.setMaxHeight(100);
             google.setMinimumHeight(100);
-            google.setImageResource(R.drawable.googleg_standard_color_18);
+            google.setImageResource(R.drawable.apple_black);
             return google;
         }
 

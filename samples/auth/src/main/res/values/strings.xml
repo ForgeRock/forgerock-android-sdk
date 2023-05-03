@@ -30,7 +30,7 @@
 
     <!-- The following setting is for local development environment only -->
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">https://openam.example.com/am</string>
+    <string name="forgerock_url" translatable="false">http://192.168.1.93:8080/openam</string>
     <string name="forgerock_realm" translatable="false">root</string>
 
     <integer name="forgerock_timeout" translatable="false">30</integer>
@@ -39,7 +39,7 @@
     </string-array>
 
     <!-- Service -->
-    <string name="forgerock_auth_service" translatable="false">Login</string>
+    <string name="forgerock_auth_service" translatable="false">recaptcha</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree2</string>
 
     <string name="asset_statements" translatable="false">           [{

@@ -7,11 +7,18 @@
 
 package org.forgerock.android.auth.callback;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.safetynet.SafetyNet;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.recaptcha.Recaptcha;
+import com.google.android.recaptcha.RecaptchaAction;
+import com.google.android.recaptcha.RecaptchaTasksClient;
 
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.Listener;
@@ -49,6 +56,20 @@ public class ReCaptchaCallback extends AbstractCallback {
         }
     }
 
+    public void proceedNew(Application application, FRListener<Void> listener) {
+        Recaptcha.getTasksClient(application, reCaptchaSiteKey)
+                .addOnSuccessListener(recaptchaTasksClient -> recaptchaTasksClient.executeTask(RecaptchaAction.LOGIN)
+                        .addOnSuccessListener(token -> {
+                            setValue(token);
+                        })
+                        .addOnFailureListener(e -> {
+                            Listener.onException(listener, e);
+                        } ))
+                .addOnFailureListener(e -> {
+                    Listener.onException(listener, e);
+                });
+
+    }
     /**
      * Proceed to trigger the ReCAPTCHA
      *

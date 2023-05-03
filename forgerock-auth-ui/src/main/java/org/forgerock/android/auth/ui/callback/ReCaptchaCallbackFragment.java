@@ -50,13 +50,13 @@ public class ReCaptchaCallbackFragment extends CallbackFragment<ReCaptchaCallbac
             }
         };
 
-        callback.proceed(getContext(), listener);
+        callback.proceedNew(getActivity().getApplication(), listener);
 
         retry.setOnClickListener(v -> {
             retry.setVisibility(INVISIBLE);
             error.setVisibility(INVISIBLE);
 
-            callback.proceed(getContext(), listener);
+            callback.proceedNew(getActivity().getApplication(), listener);
         });
 
         return view;

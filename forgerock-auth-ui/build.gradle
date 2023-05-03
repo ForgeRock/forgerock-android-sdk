@@ -28,8 +28,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -57,8 +60,8 @@ dependencies {
 
     compileOnly 'com.google.android.gms:play-services-fido:19.0.1'
 
-    compileOnly "org.projectlombok:lombok:1.18.8"
-    delombok "org.projectlombok:lombok:1.18.8"
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly "org.projectlombok:lombok:1.18.26"
+    delombok "org.projectlombok:lombok:1.18.26"
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
 }
