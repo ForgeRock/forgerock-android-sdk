@@ -65,7 +65,7 @@ interface DeviceAuthenticator {
     /**
      * generate the public and private [KeyPair] with Challenge
      */
-    suspend fun generateKeys(context: Context, attestation: Attestation = Attestation.None): KeyPair
+    suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair
 
     /**
      * Authenticate the user to access the
@@ -137,9 +137,15 @@ interface DeviceAuthenticator {
     }
 
     /**
-     * check biometric is supported
+     * check if supported device binding
      */
-    fun isSupported(context: Context): Boolean
+    fun isSupported(context: Context, attestation: Attestation = Attestation.None): Boolean {
+        return if (attestation !is Attestation.None) {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+        } else {
+            true
+        }
+    }
 
     fun type(): DeviceBindingAuthenticationType
 
@@ -221,18 +227,23 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                                 ERROR_CANCELED, ERROR_USER_CANCELED, ERROR_NEGATIVE_BUTTON -> continuation.resume(
                                     DeviceBindingErrorStatus.Abort(errString.toString(),
                                         code = errorCode))
+
                                 ERROR_TIMEOUT -> continuation.resume(DeviceBindingErrorStatus.Timeout(
                                     errString.toString(),
                                     code = errorCode))
+
                                 ERROR_NO_BIOMETRICS, ERROR_NO_DEVICE_CREDENTIAL, ERROR_HW_NOT_PRESENT -> continuation.resume(
                                     DeviceBindingErrorStatus.Unsupported(errString.toString(),
                                         code = errorCode))
+
                                 ERROR_VENDOR -> continuation.resume(DeviceBindingErrorStatus.Unsupported(
                                     errString.toString(),
                                     code = errorCode))
+
                                 ERROR_LOCKOUT_PERMANENT, ERROR_LOCKOUT, ERROR_NO_SPACE, ERROR_HW_UNAVAILABLE, ERROR_UNABLE_TO_PROCESS -> continuation.resume(
                                     DeviceBindingErrorStatus.UnAuthorize(errString.toString(),
                                         code = errorCode))
+
                                 else -> {
                                     continuation.resume(DeviceBindingErrorStatus.Unknown(errString.toString(),
                                         code = errorCode))
@@ -283,8 +294,9 @@ open class BiometricOnly : BiometricAuthenticator() {
     /**
      * check biometric is supported
      */
-    override fun isSupported(context: Context): Boolean {
-        return biometricInterface.isSupported(BIOMETRIC_STRONG, BIOMETRIC_WEAK)
+    override fun isSupported(context: Context, attestation: Attestation): Boolean {
+        return super.isSupported(context, attestation) &&
+                biometricInterface.isSupported(BIOMETRIC_STRONG, BIOMETRIC_WEAK)
     }
 
     final override fun type(): DeviceBindingAuthenticationType =
@@ -321,9 +333,11 @@ open class BiometricAndDeviceCredential : BiometricAuthenticator() {
     /**
      * check biometric is supported
      */
-    override fun isSupported(context: Context): Boolean {
-        return biometricInterface.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL,
-            BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+    override fun isSupported(context: Context, attestation: Attestation): Boolean {
+        return super.isSupported(context, attestation) &&
+                biometricInterface.isSupported(
+                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL,
+                    BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
     }
 
     final override fun type(): DeviceBindingAuthenticationType =
@@ -350,11 +364,6 @@ open class None : CryptoAware, DeviceAuthenticator {
         val key = cryptoKey.createKeyPair(builder.build())
         return KeyPair(key.public as RSAPublicKey, key.private, cryptoKey.keyAlias)
     }
-
-    /**
-     * Default is true for None type
-     */
-    override fun isSupported(context: Context): Boolean = true
 
     override fun deleteKeys(context: Context) {
         cryptoKey.deleteKeys()

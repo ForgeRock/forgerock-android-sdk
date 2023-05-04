@@ -59,7 +59,7 @@ class ApplicationPinDeviceAuthenticatorTest {
     @Test
     fun testGenerateKeys() = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        val keyPair = authenticator.generateKeys(context)
+        val keyPair = authenticator.generateKeys(context, Attestation.None)
         assertThat(keyPair).isNotNull
         assertThat(keyPair.keyAlias).isEqualTo(cryptoKey.keyAlias)
         //Test pin is cached for 1 sec
@@ -72,7 +72,7 @@ class ApplicationPinDeviceAuthenticatorTest {
     @Test
     fun testSuccessAuthenticated() = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        val keyPair = authenticator.generateKeys(context)
+        val keyPair = authenticator.generateKeys(context, Attestation.None)
         val status = authenticator.authenticate(context)
         assertThat(status).isEqualTo(Success(keyPair.privateKey))
         assertThat(authenticator.pinRef.get()).isNull()
@@ -101,7 +101,7 @@ class ApplicationPinDeviceAuthenticatorTest {
     @Test
     fun testUnAuthorize(): Unit = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        authenticator.generateKeys(context)
+        authenticator.generateKeys(context, Attestation.None)
         //Using the same byte array buffer
         val authenticator2 =
             object :
@@ -136,7 +136,7 @@ class ApplicationPinDeviceAuthenticatorTest {
     @Test
     fun testAbort(): Unit = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        authenticator.generateKeys(context)
+        authenticator.generateKeys(context, Attestation.None)
         //Using the same byte array buffer
         val authenticator2 =
             object :
@@ -172,16 +172,11 @@ class ApplicationPinDeviceAuthenticatorTest {
 
     }
 
-    @Test(expected = DeviceBindingException::class)
+    @Test
     fun testWithAttestationNotNone(): Unit = runBlocking {
         val authenticator = getApplicationPinDeviceAuthenticator()
-        try {
-            authenticator.generateKeys(context, Attestation.Default("1234".toByteArray()))
-            Assertions.fail("Expected failed")
-        } catch (e: DeviceBindingException) {
-            assertThat(e.status).isEqualTo(Unsupported())
-            throw e
-        }
+        assertThat(authenticator.isSupported(context,
+            Attestation.Default("1234".toByteArray()))).isFalse()
     }
 
     private fun getApplicationPinDeviceAuthenticator(): NoEncryptionApplicationPinDeviceAuthenticator {

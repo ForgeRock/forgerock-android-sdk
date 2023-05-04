@@ -216,13 +216,11 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
 
         deviceAuthenticator.initialize(userId, Prompt(title, subtitle, description))
 
-        if (deviceAuthenticator.isSupported(context).not()) {
+        if (deviceAuthenticator.isSupported(context, attestation).not()) {
             handleException(DeviceBindingException(Unsupported()))
             return
         }
 
-        //TODO We may need to delete other keys if we only want to maintain one keys on the device
-        //TODO However, we may want to have Application Pin as fallback, so for now, keep multiple keys.
         var keyPair: KeyPair?
         var userKey: UserKey? = null
         try {
