@@ -8,6 +8,7 @@
 - Added support for combined MFA in the Authenticator SDK [SDKS-2166]
 - Added support for policy enforcement in the Authenticator SDK [SDKS-2166]
 - Remove Native SSO Support [SDKS-2260]
+- Added updated functionality for NetworkCollector [SDKS-2445]
 
 #### Fixed
 - Removed `MANAGE_ACCOUNTS` permission from `forgerock-auth` [SDKS-1367]
