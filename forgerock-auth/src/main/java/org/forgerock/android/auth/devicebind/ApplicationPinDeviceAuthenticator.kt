@@ -51,9 +51,6 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
     private val worker = Executors.newSingleThreadScheduledExecutor()
 
     override suspend fun generateKeys(context: Context, attestation: Attestation): KeyPair {
-        if (attestation !is Attestation.None) {
-            throw DeviceBindingException(DeviceBindingErrorStatus.Unsupported())
-        }
         val pin = pinCollector.collectPin(prompt)
         pinRef.set(pin)
         //If we want to allow a user to have an biometric key + application pin,
@@ -88,8 +85,8 @@ open class ApplicationPinDeviceAuthenticator(private val pinCollector: PinCollec
         this.prompt = prompt
     }
 
-    override fun isSupported(context: Context): Boolean {
-        return true
+    override fun isSupported(context: Context, attestation: Attestation): Boolean {
+        return attestation is Attestation.None
     }
 
     /**

@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.CryptoKey
+import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -114,7 +115,7 @@ class DeviceBindAuthenticationTests {
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
 
-        testObject.generateKeys(context)
+        testObject.generateKeys(context, Attestation.None)
 
         verify(keyBuilder).setUserAuthenticationValidityDurationSeconds(30)
         verify(keyBuilder).setUserAuthenticationRequired(true)
@@ -125,7 +126,7 @@ class DeviceBindAuthenticationTests {
         testObjectBiometric.setKey(cryptoKey)
         testObjectBiometric.isApi30OrAbove = false
 
-        testObjectBiometric.generateKeys(context)
+        testObjectBiometric.generateKeys(context, Attestation.None)
 
         verify(keyBuilder, times(2)).setUserAuthenticationValidityDurationSeconds(30)
         verify(keyBuilder, times(2)).setUserAuthenticationRequired(true)
@@ -145,7 +146,7 @@ class DeviceBindAuthenticationTests {
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = true
-        testObject.generateKeys(context)
+        testObject.generateKeys(context, Attestation.None)
 
         verify(keyBuilder).setUserAuthenticationParameters(30,
             KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
@@ -166,7 +167,7 @@ class DeviceBindAuthenticationTests {
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = true
-        testObject.generateKeys(context)
+        testObject.generateKeys(context, Attestation.None)
 
         verify(keyBuilder).setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
         verify(keyBuilder).setUserAuthenticationRequired(true)
@@ -183,7 +184,7 @@ class DeviceBindAuthenticationTests {
 
         val testObject = None()
         testObject.setKey(cryptoKey)
-        testObject.generateKeys(context)
+        testObject.generateKeys(context, Attestation.None)
 
         verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
@@ -195,7 +196,7 @@ class DeviceBindAuthenticationTests {
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertFalse(testObject.isSupported(context))
+        assertFalse(testObject.isSupported(context, Attestation.None))
     }
 
     @Test
@@ -206,7 +207,7 @@ class DeviceBindAuthenticationTests {
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertTrue(testObject.isSupported(context))
+        assertTrue(testObject.isSupported(context, Attestation.None))
     }
 
     @Test
@@ -216,13 +217,13 @@ class DeviceBindAuthenticationTests {
         testObject.setBiometricHandler(mockBiometricInterface)
         testObject.setKey(cryptoKey)
         testObject.isApi30OrAbove = false
-        assertTrue(testObject.isSupported(context))
+        assertTrue(testObject.isSupported(context, Attestation.None))
     }
 
     @Test
     fun testSupportedNone() {
         val testObject = None()
-        assertTrue(testObject.isSupported(context))
+        assertTrue(testObject.isSupported(context, Attestation.None))
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
