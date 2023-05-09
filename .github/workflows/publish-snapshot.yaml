@@ -1,0 +1,58 @@
+name: Publish Snapshot
+on:
+  workflow_call:
+    secrets:
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+      PUBLISHING_SIGNING_KEY_ID:
+        description: Signing key id
+        required: true
+      PUBLISHING_SIGNING_KEY_PASSWORD:
+        description: Signing key password
+        required: true
+      PUBLISHING_SIGNING_KEY_RING_FILE_BASE64:
+        description: Signing key ring file
+        required: true
+      PUBLISHING_USERNAME:
+        description: Publishing username
+        required: true
+      PUBLISHING_PASSWORD:
+        description: Publishing password
+        required: true
+
+jobs:
+  # Extract the version number from CHANGELOG.md
+  changelog-version:
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.version_output.outputs.version }}
+    steps:
+      # Clone the repo
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      # Extract version from CHANGELOG.md
+      - name: Extract version from CHANGELOG.md
+        id: changelog-version
+        run: |
+          echo "CHANGELOG_VERSION=$(echo $(awk '/[[0-9]+\.[0-9]+\.[0-9]]/{print;exit}' CHANGELOG.md | sed -E 's/(version)|[:,\",#]//gi' | tr -d '[[:space:]]'))" >> $GITHUB_ENV
+
+      # Set version as output...
+      - name: Set the version output
+        id: version_output
+        run: echo "version=${{ env.CHANGELOG_VERSION }}" >> "$GITHUB_OUTPUT"
+
+  # Publish SNAPSHOT to Nexus
+  publish-snapshot:
+    uses: ./.github/workflows/publish.yaml
+    needs: changelog-version
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
+      PUBLISHING_SIGNING_KEY_PASSWORD: ${{ secrets.PUBLISHING_SIGNING_KEY_PASSWORD }}
+      PUBLISHING_SIGNING_KEY_RING_FILE_BASE64: ${{ secrets.PUBLISHING_SIGNING_KEY_RING_FILE_BASE64 }}
+      PUBLISHING_USERNAME: ${{ secrets.PUBLISHING_USERNAME }}
+      PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
+    with: 
+      version: ${{ needs.changelog-version.outputs.version }}-SNAPSHOT

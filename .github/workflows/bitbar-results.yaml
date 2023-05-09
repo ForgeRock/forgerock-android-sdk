@@ -36,7 +36,7 @@ jobs:
           echo "Run ID - ${{ inputs.bitbar-run-id }}"
 
       - name: Wait for BitBar test run to finish...
-        timeout-minutes: 30
+        timeout-minutes: 60
         run: |
           (
             until [ "$(curl -s -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/projects/${{ inputs.bitbar-project-id }}/runs/${{ inputs.bitbar-run-id }} | jq -r '.state')" == "FINISHED" ];

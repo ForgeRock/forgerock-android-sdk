@@ -62,3 +62,18 @@ jobs:
     with:
       bitbar-project-id: 207047111 
       bitbar-run-id: ${{ needs.bitbar-run.outputs.bitbar-run-id }}
+
+  # Publish a SNAPSHOT release
+  # This is only run upon push to develop and if all tests pass...
+  publish-snapshot:
+    name: Publish SNAPSHOT release
+    uses: ./.github/workflows/publish-snapshot.yaml
+    if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
+    needs: [bitbar-results, sonatype-ossindex]
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
+      PUBLISHING_SIGNING_KEY_PASSWORD: ${{ secrets.PUBLISHING_SIGNING_KEY_PASSWORD }}
+      PUBLISHING_SIGNING_KEY_RING_FILE_BASE64: ${{ secrets.PUBLISHING_SIGNING_KEY_RING_FILE_BASE64 }}
+      PUBLISHING_USERNAME: ${{ secrets.PUBLISHING_USERNAME }}
+      PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
