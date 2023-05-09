@@ -1,4 +1,4 @@
-##[4.0.0]
+## [4.0.0]
 #### Added
 - Upgrade Google Fido Client to support PassKey [SDKS-2243]
 - Introduce FRWebAuthn interface to remove WebAuthn Reference Keys [SDKS-2272]

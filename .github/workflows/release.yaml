@@ -36,3 +36,22 @@ jobs:
       PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
     with: 
       version: ${{ needs.check-release-number.outputs.version }}
+
+  # Tag the repo, and create a new release
+  release:
+    name: Tag the repo and create a new release
+    needs: publish
+    steps:
+      # Clone the repo
+      - name: Clone the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check-release-number.outputs.version }}
+          release_name: $${{ needs.check-release-number.outputs.version }} Release
+          body: ForgeRock Android SDK ${{ needs.check-release-number.outputs.version }} Release

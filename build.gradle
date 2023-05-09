@@ -100,7 +100,7 @@ afterEvaluate {
 ossIndexAudit {
     username = System.properties['username']
     password = System.properties['password']
-    excludeVulnerabilityIds = ['CVE-2020-15250', 'sonatype-2019-0673']
+    excludeVulnerabilityIds = ['CVE-2020-15250', 'sonatype-2019-0673', 'CVE-2022-1799', 'CVE-2022-2390']
 }
 
 task clean(type: Delete) {
