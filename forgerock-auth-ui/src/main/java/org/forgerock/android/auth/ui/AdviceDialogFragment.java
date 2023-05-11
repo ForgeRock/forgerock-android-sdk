@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -26,6 +26,9 @@ import org.forgerock.android.auth.Listener;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.PolicyAdvice;
 
+import kotlin.Result;
+import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import lombok.Setter;
 
 /**
@@ -39,7 +42,7 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
     private boolean isCancel = true;
 
     @Setter
-    private FRListener<Void> listener;
+    private Continuation<? super Unit> listener;
     private PolicyAdvice advice;
 
     public static AdviceDialogFragment newInstance(PolicyAdvice advice) {
@@ -62,7 +65,7 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         if (isCancel) {
-            Listener.onException(listener, new OperationCanceledException("Cancel Policy Decision Request"));
+            listener.resumeWith(new Result.Failure(new OperationCanceledException("Cancel Policy Decision Request")));
         }
     }
 
@@ -95,7 +98,7 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
         viewModel.getResultLiveData().observe(getViewLifecycleOwner(), frSession ->  {
             isCancel = false;
             dismiss();
-            Listener.onSuccess(listener,null);
+            listener.resumeWith(Unit.INSTANCE);
         });
 
         viewModel.getExceptionLiveData().observe(getViewLifecycleOwner(), e -> {
@@ -103,7 +106,7 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
             dismiss();
             Exception exception = e.getValue();
             if (exception != null) {
-                Listener.onException(listener, exception);
+                listener.resumeWith(new Result.Failure(exception) );
             }
         });
 

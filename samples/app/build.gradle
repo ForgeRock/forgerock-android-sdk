@@ -70,7 +70,7 @@ dependencies {
     implementation project(':forgerock-auth')
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
-    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.25'
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
@@ -84,6 +84,9 @@ dependencies {
     implementation "com.google.accompanist:accompanist-permissions:0.28.0"
 
     //Social Login
+    implementation 'com.google.android.gms:play-services-auth:20.5.0'
+    implementation 'com.facebook.android:facebook-login:16.0.0'
+
     implementation 'com.facebook.android:facebook-login:16.0.0'
 
     //For App integrity
@@ -92,25 +95,30 @@ dependencies {
     //Capture Location for Device Profile
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
+    //For IG, invoke endpoint using okHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+
+
     //End of SDK
 
 
 // Material Design 3
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.core:core-splashscreen:1.0.0'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
 
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    implementation 'androidx.activity:activity-compose:1.7.0'
+    implementation 'androidx.activity:activity-compose:1.7.1'
 
     def nav_version = "2.5.3"
     implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation "androidx.compose.material:material-icons-extended:1.4.1"
+    implementation "androidx.compose.material:material-icons-extended:1.4.3"
 
-    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
