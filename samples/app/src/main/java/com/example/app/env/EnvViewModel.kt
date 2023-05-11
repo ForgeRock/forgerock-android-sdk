@@ -12,9 +12,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import okhttp3.OkHttpClient
+import org.forgerock.android.auth.BuildStep
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
+import org.forgerock.android.auth.SSLPinning
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 class EnvViewModel : ViewModel() {
 
@@ -74,6 +81,63 @@ class EnvViewModel : ViewModel() {
         }
     }
 
+    val local = FROptionsBuilder.build {
+        server {
+            url = "https://andy.petrov.ca/openam"
+            realm = "root"
+            cookieName = "iPlanetDirectoryPro"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "WebAuthn"
+        }
+    }
+
+    val ops = FROptionsBuilder.build {
+        server {
+            url = "https://default.forgeops.petrov.ca/am"
+            realm = "root"
+            cookieName = "iPlanetDirectoryPro"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "WebAuthn"
+        }
+    }
+
+    val forgeblock = FROptionsBuilder.build {
+        server {
+            url = "https://openam-sdks.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "iPlanetDirectoryPro"
+            timeout = 50
+        }
+        oauth {
+            oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthCacheSeconds = 0
+            oauthScope = "openid profile email address phone"
+            oauthThresholdSeconds = 0
+        }
+        service {
+            authServiceName = "WebAuthn"
+        }
+    }
+
     var current by mutableStateOf(dbind)
         private set
 
@@ -81,6 +145,9 @@ class EnvViewModel : ViewModel() {
         servers.add(localhost)
         servers.add(dbind)
         servers.add(sdk)
+        servers.add(local)
+        servers.add(ops)
+        servers.add(forgeblock)
     }
 
     fun select(context: Context, options: FROptions) {

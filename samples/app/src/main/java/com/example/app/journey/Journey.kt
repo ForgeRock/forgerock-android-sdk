@@ -50,14 +50,16 @@ import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 
 @Composable
-fun Journey(journeyName: String,
-            journeyViewModel: JourneyViewModel, openDrawer: () -> Unit) {
+fun <T> Journey(journeyName: String,
+                journeyViewModel: JourneyViewModel<T>,
+                openDrawer: () -> Unit,
+                onCompletion: (() -> Unit)? = null) {
 
     val context = LocalContext.current
     val state by journeyViewModel.state.collectAsState()
 
     Journey(journeyName, state = state, openDrawer,
-        onNext = { state.node?.let { journeyViewModel.next(context, it) } })
+        onNext = { state.node?.let { journeyViewModel.next(context, it) } }, onCompletion)
 
 }
 
@@ -65,7 +67,8 @@ fun Journey(journeyName: String,
 fun Journey(journeyName: String,
             state: JourneyState,
             openDrawer: () -> Unit,
-            onNext: () -> Unit) {
+            onNext: () -> Unit,
+            onCompletion: (() -> Unit)?) {
 
     Column(modifier = Modifier
         .padding(8.dp)
@@ -73,14 +76,17 @@ fun Journey(journeyName: String,
         state.session?.apply {
             val userProfileViewModel =
                 viewModel<UserProfileViewModel>()
-            UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
+            onCompletion?.let { it() } ?: UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
         }
         state.exception?.apply {
             Error(exception = this, openDrawer)
+            onCompletion?.let { it() }
         }
         state.node?.apply {
             var showNext = true
-            Topbar(heading = "Journey - $journeyName", openDrawer = openDrawer)
+            if (journeyName.isNotBlank()) {
+                Topbar(heading = "Journey - $journeyName", openDrawer = openDrawer)
+            }
             state.node.callbacks?.forEach {
                 when (it) {
                     is NameCallback -> NameCallback(it)
@@ -89,29 +95,36 @@ fun Journey(journeyName: String,
                         DeviceBindingCallback(it, onCompleted = onNext)
                         showNext = false
                     }
+
                     is TextOutputCallback -> TextOutputCallback(it)
                     is DeviceSigningVerifierCallback -> {
                         DeviceSigningVerifierCallback(it, true, onCompleted = onNext)
                         showNext = false
                     }
+
                     is ConfirmationCallback -> {
                         ConfirmationCallback(it, onSelected = onNext)
                         showNext = false
                     }
+
                     is WebAuthnRegistrationCallback -> {
                         WebAuthnRegistrationCallback(it, state.node, onCompleted = onNext)
                         showNext = false
                     }
+
                     is WebAuthnAuthenticationCallback -> {
                         WebAuthnAuthenticationCallback(it, state.node, onCompleted = onNext)
                         showNext = false
                     }
+
                     is ChoiceCallback -> {
                         ChoiceCallback(it)
                     }
+
                     is PollingWaitCallback -> {
                         PollingWaitCallback(it, onTimeout = onNext)
                     }
+
                     is SelectIdPCallback -> {
                         SelectIdPCallback(callback = it, onSelected = onNext)
                     }

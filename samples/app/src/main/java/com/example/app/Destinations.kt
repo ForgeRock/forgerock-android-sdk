@@ -14,6 +14,7 @@ object Destinations {
     const val TOKEN_ROUTE = "token"
     const val MANAGE_WEBAUTHN_KEYS = "webauthnKeys"
     const val MANAGE_USER_KEYS = "userKeys"
+    const val IG = "ig"
     const val CENTRALIZE_ROUTE = "centralize"
 }
 

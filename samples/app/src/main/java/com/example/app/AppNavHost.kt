@@ -21,6 +21,8 @@ import com.example.app.centralize.CentralizeLoginViewModel
 import com.example.app.journey.JourneyViewModel
 import com.example.app.env.EnvRoute
 import com.example.app.env.EnvViewModel
+import com.example.app.ig.IGRoute
+import com.example.app.ig.IGViewModel
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyRoute
 import com.example.app.token.Token
@@ -77,11 +79,19 @@ fun AppNavHost(navController: NavHostController,
             )
             UserKeysRoute(userKeysViewModel, openDrawer)
         }
+
+        composable(Destinations.IG) {
+            val viewModel = viewModel<IGViewModel>(
+                factory = IGViewModel.factory(LocalContext.current)
+            )
+            IGRoute(viewModel, openDrawer)
+        }
+
         composable("$Destinations.JOURNEY_ROUTE/{name}", arguments = listOf(
             navArgument("name") { type = NavType.StringType }
         )) {
             it.arguments?.getString("name")?.apply {
-                val journeyViewModel = viewModel<JourneyViewModel>(
+                val journeyViewModel = viewModel<JourneyViewModel<String>>(
                     factory = JourneyViewModel.factory(LocalContext.current, this)
                 )
                 Journey(this, journeyViewModel, openDrawer)

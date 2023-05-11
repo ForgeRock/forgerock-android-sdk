@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GeneratingTokens
 import androidx.compose.material.icons.filled.Key
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.app.Destinations.CENTRALIZE_ROUTE
 import com.example.app.Destinations.ENV_ROUTE
+import com.example.app.Destinations.IG
 import com.example.app.Destinations.LAUNCH_ROUTE
 import com.example.app.Destinations.MANAGE_USER_KEYS
 import com.example.app.Destinations.MANAGE_WEBAUTHN_KEYS
@@ -105,6 +107,17 @@ fun AppDrawer(
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
+        NavigationDrawerItem(
+            label = { Text("IG protected endpoint") },
+            selected = false,
+            icon = { Icon(Icons.Filled.Fence, null) },
+            onClick = {
+                navigateTo(IG);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
         NavigationDrawerItem(
             label = { Text("Logout") },
             selected = false,
