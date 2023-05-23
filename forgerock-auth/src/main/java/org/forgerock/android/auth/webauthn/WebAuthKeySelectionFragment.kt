@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@ package org.forgerock.android.auth.webauthn
 
 import android.os.Build
 import android.os.Bundle
+import android.os.OperationCanceledException
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +28,7 @@ import org.forgerock.android.auth.convertToTime
 import org.forgerock.android.auth.databinding.FragmentUserSelectBinding
 import org.forgerock.android.auth.databinding.FragmentUserSelectBinding.inflate
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * A Simple Dialog to display key selection using a spinner
@@ -38,17 +40,10 @@ class WebAuthKeySelectionFragment : DialogFragment() {
     private lateinit var binding: FragmentUserSelectBinding
 
     var continuation: CancellableContinuation<PublicKeyCredentialSource?>? = null
-        set(value) {
-            field = value
-            field?.invokeOnCancellation {
-                if (this.isVisible) {
-                    dismiss()
-                }
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isCancelable = false
         arguments?.let {
             sources = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 it.getParcelable(PUBLIC_KEY_CREDENTIAL_SOURCE,
@@ -119,7 +114,7 @@ class WebAuthKeySelectionFragment : DialogFragment() {
             dismiss()
         }
         binding.btnNegative.setOnClickListener {
-            continuation?.resume(null)
+            continuation?.resumeWithException(OperationCanceledException("No Key Selected"))
             dismiss()
         }
         return binding.root
