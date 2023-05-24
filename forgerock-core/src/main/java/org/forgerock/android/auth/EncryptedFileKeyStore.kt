@@ -16,7 +16,7 @@ import java.io.OutputStream
  * An implementation of [KeyStoreRepository] which use [EncryptedFile] to store the KeyStore
  */
 class EncryptedFileKeyStore(val identifier: String,
-                            private val aliasName: String = "org.forgerock.v1.DEVICE_REPO_BKS_$identifier") : KeyStoreRepository {
+                            private val aliasName: String = "org.forgerock.v1.KEY_STORE_MASTER_KEY_ALIAS") : KeyStoreRepository {
 
     override fun getInputStream(context: Context): InputStream {
         return getEncryptedFile(context).openFileInput();
