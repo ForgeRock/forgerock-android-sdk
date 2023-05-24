@@ -180,7 +180,7 @@ class DefaultTokenManagerTest : BaseTest() {
         tokenManager.persist(accessToken)
         val storedAccessToken1 = getAccessToken(tokenManager)
 
-        counDownLatch.await(200L, TimeUnit.MILLISECONDS)
+        Thread.sleep(200L)
         counDownLatch.countDown()
 
         val storedAccessToken2 = getAccessToken(tokenManager)
