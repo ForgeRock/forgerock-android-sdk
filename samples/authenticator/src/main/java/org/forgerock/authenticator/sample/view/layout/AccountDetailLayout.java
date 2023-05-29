@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -12,15 +12,18 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.forgerock.android.auth.Account;
 import org.forgerock.android.auth.OathMechanism;
 import org.forgerock.android.auth.OathTokenCode;
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.OathMechanismException;
 import org.forgerock.authenticator.sample.R;
 
@@ -33,14 +36,14 @@ public class AccountDetailLayout extends FrameLayout {
     private ProgressBar progressOuter;
     private TextView codeDisplay;
     private ImageButton refreshButton;
+    private RelativeLayout accountDetailContent;
+    private LinearLayout accountDetailLocked;
 
     private OathTokenCode tokenCode;
-    private String placeholder;
     private String code;
 
     private static final int HOTP_COOLDOWN = 5000;
     private static final int TOTP_TICK = 100;
-    private static final int MAX_VALUE = 1000;
 
     public AccountDetailLayout(@NonNull Context context) {
         super(context);
@@ -65,23 +68,37 @@ public class AccountDetailLayout extends FrameLayout {
         progressOuter = findViewById(R.id.progressOuter);
         codeDisplay = findViewById(R.id.code);
         refreshButton = findViewById(R.id.refresh);
+        accountDetailContent = findViewById(R.id.account_detail_content);
+        accountDetailLocked = findViewById(R.id.account_detail_locked);
     }
 
-    public void bind(final OathMechanism oath) {
-        tokenCode = null;
-        progressOuter.clearAnimation();
+    public void bind(final OathMechanism oath, final Account account) {
+        if (account.isLocked()) {
+            accountDetailLocked.setVisibility(View.VISIBLE);
+            accountDetailContent.setVisibility(View.GONE);
+            TextView lockReason = ((TextView) findViewById(R.id.lock_reason));
+            lockReason.setText(String.format(
+                    getContext().getString(R.string.account_locked),
+                    account.getLockingPolicy()
+            ));
+        } else {
+            accountDetailLocked.setVisibility(View.GONE);
+            accountDetailContent.setVisibility(View.VISIBLE);
+            tokenCode = null;
+            progressOuter.clearAnimation();
 
-        // Cancel all active animations.
-        setEnabled(true);
-        progressOuter.clearAnimation();
+            // Cancel all active animations.
+            setEnabled(true);
+            progressOuter.clearAnimation();
 
-        switch (oath.getOathType()) {
-            case HOTP:
-                setupHOTP(oath);
-                break;
-            case TOTP:
-                setupTOTP(oath);
-                break;
+            switch (oath.getOathType()) {
+                case HOTP:
+                    setupHOTP(oath);
+                    break;
+                case TOTP:
+                    setupTOTP(oath);
+                    break;
+            }
         }
     }
 
@@ -90,7 +107,7 @@ public class AccountDetailLayout extends FrameLayout {
         refreshButton.setVisibility(View.GONE);
         try {
             tokenCode = oath.getOathTokenCode();
-        } catch (OathMechanismException e) {
+        } catch (OathMechanismException | AccountLockException e) {
             e.printStackTrace();
         }
 
@@ -101,7 +118,7 @@ public class AccountDetailLayout extends FrameLayout {
                     if (!tokenCode.isValid()) {
                         try {
                             tokenCode = oath.getOathTokenCode();
-                        } catch (OathMechanismException e) {
+                        } catch (OathMechanismException | AccountLockException e) {
                         }
                     }
 
@@ -130,7 +147,7 @@ public class AccountDetailLayout extends FrameLayout {
                 placeholderBuilder.append(' ');
             }
         }
-        placeholder = new String(placeholderBuilder);
+        String placeholder = new String(placeholderBuilder);
 
         codeDisplay.setText(placeholder);
 
@@ -140,7 +157,7 @@ public class AccountDetailLayout extends FrameLayout {
                 // Update the code.
                 try {
                     code = oath.getOathTokenCode().getCurrentCode();
-                } catch (OathMechanismException e) {
+                } catch (OathMechanismException | AccountLockException e) {
                 }
                 setDisplayCode(code);
                 refreshButton.setEnabled(false);
@@ -157,7 +174,7 @@ public class AccountDetailLayout extends FrameLayout {
 
     private void setDisplayCode(String code) {
         String formattedCode = code.substring(0, code.length() / 2) + " " +
-                code.substring(code.length() / 2, code.length());
+                code.substring(code.length() / 2);
 
         codeDisplay.setText(formattedCode);
     }

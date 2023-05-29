@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,8 +17,8 @@ import lombok.NonNull;
 @RequiresApi(api = Build.VERSION_CODES.N)
 class AndroidNEncryptor extends AndroidMEncryptor {
 
-    AndroidNEncryptor(@NonNull String keyAlias, KeyUpdatedListener listener) {
-        super(keyAlias, listener);
+    AndroidNEncryptor(@NonNull String keyAlias) {
+        super(keyAlias);
         specBuilder.setInvalidatedByBiometricEnrollment(true);
     }
 }

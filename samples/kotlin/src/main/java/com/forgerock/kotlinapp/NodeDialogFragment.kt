@@ -6,7 +6,7 @@
  */
 package com.forgerock.kotlinapp
 
-import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +18,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.callback.ChoiceCallback
 import org.forgerock.android.auth.callback.NameCallback
@@ -25,8 +26,6 @@ import org.forgerock.android.auth.callback.PasswordCallback
 
 
 class NodeDialogFragment: DialogFragment() {
-    private var listener: MainActivity? = null
-    private var listenerSession: FRSessionActivity? = null
     private var node: Node? = null
     companion object {
         fun newInstance(node: Node?): NodeDialogFragment {
@@ -36,6 +35,7 @@ class NodeDialogFragment: DialogFragment() {
                 }
             }
         }
+        const val TAG: String = "NodeDialogFragment"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +43,11 @@ class NodeDialogFragment: DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        node = arguments?.getSerializable("NODE") as Node?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            node = arguments?.getSerializable("NODE", Node::class.java)
+        } else {
+            node = arguments?.getSerializable("NODE") as? Node
+        }
         val choiceNode: View = view.findViewById(R.id.choice_node)
         val choiceCallBack = node?.getCallback(ChoiceCallback::class.java)
         choiceCallBack?.let {
@@ -67,32 +71,47 @@ class NodeDialogFragment: DialogFragment() {
                 node?.getCallback(ChoiceCallback::class.java)?.setSelectedIndex(1)
             }
         }
-        node?.callbacks?.forEach {
-            when (it.type) {
-                "NameCallback" -> {
-                    (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "PasswordCallback" -> {
-                    (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility = View.VISIBLE
-                }
-                "ChoiceCallback" -> {
-                    choiceNode.visibility = View.VISIBLE
+        try {
+            node?.callbacks?.iterator()?.forEach {
+                when (it.type) {
+                    "NameCallback" -> {
+                        (view.findViewById(R.id.usernameLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                    }
+                    "PasswordCallback" -> {
+                        (view.findViewById(R.id.passwordLayout) as? TextInputLayout)?.visibility =
+                            View.VISIBLE
+                    }
+                    "ChoiceCallback" -> {
+                        choiceNode.visibility = View.VISIBLE
+                    }
                 }
             }
+        }
+        catch (e: Exception) {
+          Logger.error("",e.message)
         }
         val username: TextInputEditText = view.findViewById(R.id.username)
         val password: TextInputEditText = view.findViewById(R.id.password)
         val next: Button = view.findViewById(R.id.next)
         next.setOnClickListener {
-            dismiss()
+
             node?.getCallback(NameCallback::class.java)?.setName(username.text.toString())
             node?.getCallback(PasswordCallback::class.java)?.setPassword(password.text.toString().toCharArray())
-            if(listener != null) {
-                node?.next(context, listener)
+
+            val frSessionActivity: FRSessionActivity? = activity as? FRSessionActivity
+            val activity: MainActivity? = activity as? MainActivity
+
+            activity?.let {
+                node?.next(context, it)
             }
-            if(listenerSession != null) {
-                node?.next(context, listenerSession)
+
+            frSessionActivity?.let {
+                node?.next(context, it)
             }
+
+            dismiss()
+
         }
         val cancel: Button = view.findViewById(R.id.cancel)
         cancel.setOnClickListener { dismiss() }
@@ -106,13 +125,4 @@ class NodeDialogFragment: DialogFragment() {
         dialog?.window?.attributes = params as? WindowManager.LayoutParams
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is MainActivity) {
-            listener = context
-        }
-        if (context is FRSessionActivity) {
-            listenerSession = context
-        }
-    }
 }

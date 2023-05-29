@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth.callback;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,8 +15,6 @@ import org.json.JSONObject;
  * Abstract Callback that provides the raw content of the Callback, and allow sub classes to access
  * Callback's input and output
  */
-@NoArgsConstructor
-@Getter
 public abstract class AbstractCallback implements Callback {
 
     //The content is as JSON representation, JSONObject is not Serializable
@@ -27,6 +22,8 @@ public abstract class AbstractCallback implements Callback {
 
     protected String content;
     protected int _id;
+
+    public AbstractCallback() {}
 
     protected JSONObject getContentAsJson() throws JSONException {
         return new JSONObject(content);
@@ -122,4 +119,17 @@ public abstract class AbstractCallback implements Callback {
 
     }
 
+    /**
+     * Get the callback content
+     */
+    public String getContent() {
+        return this.content;
+    }
+
+    /**
+     * Get the _id received from server
+     */
+    public int get_id() {
+        return this._id;
+    }
 }

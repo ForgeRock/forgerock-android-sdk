@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,13 +7,19 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
 import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
-import org.forgerock.android.auth.exception.OathMechanismException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,17 +27,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 public class OathFactoryTest extends FRABaseTest {
@@ -511,6 +508,31 @@ public class OathFactoryTest extends FRABaseTest {
         OathMechanism secondOath = (OathMechanism) oathListenerFuture.get();
 
         assertNotEquals(secondOath, oath);
+    }
+
+    @Test
+    public void testShouldHandleCombinedURIAndRegisterOathMechanism() throws Exception {
+        String uri = "mfauth://totp/Forgerock:demo?" +
+                "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPXJlZ2lzdGVy&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&";
+
+        factory.createFromUri(uri, oathListenerFuture);
+        TOTPMechanism oath = (TOTPMechanism) oathListenerFuture.get();
+        assertEquals(oath.getOathType(), OathMechanism.TokenType.TOTP);
+        assertEquals(oath.getAccountName(), "demo");
+        assertEquals(oath.getIssuer(), "Forgerock");
+        assertEquals(oath.getDigits(), 6);
+        assertEquals(oath.getPeriod(), 30);
     }
 
 }

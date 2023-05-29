@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -64,7 +64,7 @@ abstract class MechanismFactory {
     final void createFromUri(String uri, FRAListener<Mechanism> listener) {
         // Parse uri
         MechanismParser parser = getParser();
-        Map<String, String> values = null;
+        Map<String, String> values;
         try {
             values = parser.map(uri);
         } catch (MechanismParsingException e) {
@@ -78,6 +78,7 @@ abstract class MechanismFactory {
         String accountName = getFromMap(values, MechanismParser.ACCOUNT_NAME, "");
         String imageURL = getFromMap(values, MechanismParser.IMAGE, null);
         String bgColor = getFromMap(values, MechanismParser.BG_COLOR, null);
+        String policies = getFromMap(values, MechanismParser.POLICIES, null);
 
         // Check version
         int version = 0;
@@ -96,6 +97,7 @@ abstract class MechanismFactory {
                 .setAccountName(accountName)
                 .setImageURL(imageURL)
                 .setBackgroundColor(bgColor)
+                .setPolicies(policies)
                 .build();
 
         // Constructs Mechanism object, and tries to store it

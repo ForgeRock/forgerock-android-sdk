@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -48,30 +48,32 @@ public class LoginFragment extends Fragment implements AuthHandler {
     private FRListener<Void> listener;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setListener(getParentFragment());
+        viewModel = new ViewModelProvider(this).get(FRSessionViewModel.class);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.login_fragment, container, false);
         progressBar = view.findViewById(R.id.progress);
-        setListener(getParentFragment());
+        return view;
+    }
 
-        viewModel = new ViewModelProvider(this).get(FRSessionViewModel.class);
-
-        if (savedInstanceState == null) {
-            if (loadOnStartup) {
-                start();
-            }
-        }
-
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         viewModel.getNodeLiveData().observe(getViewLifecycleOwner(), node -> {
             progressBar.setVisibility(INVISIBLE);
             Node n = node.getValue();
             if (n != null) {
                 Fragment callbackFragment = CallbackFragmentFactory.getInstance().getFragment(n);
                 getChildFragmentManager().beginTransaction()
-                        .replace(getId(), callbackFragment, CURRENT_EMBEDDED_FRAGMENT).commit();
+                        .replace(R.id.container, callbackFragment, CURRENT_EMBEDDED_FRAGMENT).commit();
             }
-
         });
 
         viewModel.getResultLiveData().observe(getViewLifecycleOwner(), frUser -> {
@@ -87,7 +89,11 @@ public class LoginFragment extends Fragment implements AuthHandler {
             }
         });
 
-        return view;
+        if (savedInstanceState == null) {
+            if (loadOnStartup) {
+                start();
+            }
+        }
     }
 
     @Override
@@ -129,7 +135,7 @@ public class LoginFragment extends Fragment implements AuthHandler {
         //We clean up the child fragment(s), so it won't be recreated with lifecycle method
         FragmentManager fm = getChildFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        for (Fragment fragment: fm.getFragments()) {
+        for (Fragment fragment : fm.getFragments()) {
             ft.remove(fragment);
         }
         ft.commit();

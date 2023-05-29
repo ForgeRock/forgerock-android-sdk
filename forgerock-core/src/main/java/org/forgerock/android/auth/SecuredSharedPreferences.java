@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,7 +34,7 @@ import static org.forgerock.android.auth.Encryptor.getEncryptor;
 /**
  * An implementation of {@link SharedPreferences} that encrypts values.
  */
-public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedListener {
+public class SecuredSharedPreferences implements SharedPreferences {
     public static final String TAG = SecuredSharedPreferences.class.getName();
 
     private static final int STRING_TYPE = 0;
@@ -63,9 +63,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
         this.keyAlias = keyAlias;
         if (encryptor == null) {
             this.encryptor = getEncryptor(context,
-                    keyAlias,
-                    new SharedPreferencesSecretKeyStore(keyAlias, sharedPreferences),
-                    this);
+                    keyAlias);
         } else {
             this.encryptor = encryptor;
         }
@@ -214,7 +212,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (EncryptionException e) {
             //Failed to decrypt the data, reset the encryptor
-            Logger.warn(TAG, "Failed to decrypt the data." );
+            Logger.warn(TAG, "Failed to decrypt the data.");
             edit().clear().commit();
             return null;
         }
@@ -237,11 +235,6 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
         }
     }
 
-
-    @Override
-    public void onKeyUpdated() {
-        edit().clear().commit();
-    }
 
     private static final class Editor implements SharedPreferences.Editor {
         private final SecuredSharedPreferences securedSharedPreferences;
@@ -315,8 +308,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             return this;
         }
 
-        @Override
-        public boolean commit() {
+        private void preClear() {
             if (clearRequest.getAndSet(false)) {
                 for (String key : securedSharedPreferences.keys()) {
                     if (!keysChanged.contains(key)
@@ -325,6 +317,11 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
                     }
                 }
             }
+        }
+
+        @Override
+        public boolean commit() {
+            preClear();
             try {
                 return editor.commit();
             } finally {
@@ -335,8 +332,10 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
 
         @Override
         public void apply() {
+            preClear();
             editor.apply();
             notifyListeners();
+            keysChanged.clear();
         }
 
         private void put(@lombok.NonNull String key, Object value, int type) {
@@ -381,7 +380,6 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
             editor.putString(key, v);
         }
 
-
         private void notifyListeners() {
             for (OnSharedPreferenceChangeListener listener :
                     securedSharedPreferences.listeners) {
@@ -390,10 +388,7 @@ public class SecuredSharedPreferences implements SharedPreferences, KeyUpdatedLi
                 }
             }
         }
-
     }
-
-
 }
 
 

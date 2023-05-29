@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,8 +15,11 @@ import androidx.annotation.VisibleForTesting;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.InvalidPolicyException;
+import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.List;
 
@@ -54,6 +57,7 @@ public class FRAClient {
         private StorageClient storageClient;
         private String fcmToken;
         private Context context;
+        private FRAPolicyEvaluator policyEvaluator;
 
         /**
          * Initialize the FRAClient instance with an Android Context.
@@ -89,6 +93,18 @@ public class FRAClient {
         }
 
         /**
+         * Initialize the FRAClient instance with your {@link FRAPolicyEvaluator}. You can define
+         * your own Policy Evaluator with custom policies {@link FRAPolicy} or use the default
+         * implementation.
+         * @param policyEvaluator the custom Policy Evaluator
+         * @return this builder
+         */
+        public FRAClientBuilder withPolicyEvaluator(@NonNull FRAPolicyEvaluator policyEvaluator) {
+            this.policyEvaluator = policyEvaluator;
+            return this;
+        }
+
+        /**
          * Initialize the authenticator client {@link FRAClient}.
          * @throws AuthenticatorException If {@link Context} was not provided
          */
@@ -103,12 +119,22 @@ public class FRAClient {
                 storageClient = new DefaultStorageClient(context);
             }
 
+            if(policyEvaluator == null) {
+                Logger.warn(TAG, "No custom FRAPolicyEvaluator provided, using default policies.");
+                try {
+                    policyEvaluator = FRAPolicyEvaluator.builder().build();
+                } catch (InvalidPolicyException e) {
+                    Logger.warn(TAG, "Error on building FRAPolicyEvaluator using default policies.");
+                }
+            }
+
             if (fcmToken == null) {
                 Logger.warn(TAG, "A FCM token must be provided to handle Push Registrations. The method" +
                         " FRAClient#registerForRemoteNotifications can also be used to register the device token.");
             }
 
-            return new FRAClient(new AuthenticatorManager(context, storageClient, fcmToken));
+            return new FRAClient(new AuthenticatorManager(context, storageClient, policyEvaluator,
+                    fcmToken));
         }
 
     }
@@ -116,7 +142,7 @@ public class FRAClient {
     /**
      * Create a Mechanism using the URL extracted from the QRCode. This URL contains information about
      * the mechanism itself, as the account. After validation the mechanism will be persisted and returned
-     * via the callback {@FRAListener<Mechanism>}.
+     * via the callback {@link FRAListener<Mechanism>}.
      * @param uri The URI extracted from the QRCode
      * @param listener Callback for receiving the mechanism registration result
      */
@@ -162,8 +188,9 @@ public class FRAClient {
      * not be found or updated.
      * @param account The Account to update.
      * @return boolean as result of the operation
+     * @throws AccountLockException if account is locked
      */
-    public boolean updateAccount(@NonNull Account account) {
+    public boolean updateAccount(@NonNull Account account) throws AccountLockException {
         return this.authenticatorManager.updateAccount(account);
     }
 
@@ -175,6 +202,30 @@ public class FRAClient {
      */
     public boolean removeAccount(@NonNull Account account) {
         return this.authenticatorManager.removeAccount(account);
+    }
+
+    /**
+     * Lock the {@link Account} that was passed in, limiting the access to all {@link Mechanism}
+     * objects and any {@link PushNotification} objects associated with it.
+     * @param account The account object to lock
+     * @param policy The non-compliance policy
+     * @return boolean as result of the operation
+     * @throws AccountLockException if account is already locked, policy name is invalid or
+     * the policy was not attached to the account during registration
+     */
+    public boolean lockAccount(@NonNull Account account, @NonNull FRAPolicy policy)
+            throws AccountLockException {
+        return this.authenticatorManager.lockAccount(account, policy);
+    }
+
+    /**
+     * Unlock the {@link Account} that was passed in.
+     * @param account The account object to unlock
+     * @return boolean as result of the operation
+     * @throws AccountLockException if account is not locked
+     */
+    public boolean unlockAccount(@NonNull Account account) throws AccountLockException {
+        return this.authenticatorManager.unlockAccount(account);
     }
 
     /**

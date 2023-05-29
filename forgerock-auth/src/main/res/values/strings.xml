@@ -36,10 +36,6 @@
     <string name="forgerock_endsession_endpoint" translatable="false" />
 
     <!-- SSO -->
-    <string name="forgerock">ForgeRock</string> <!-- Account Label -->
-    <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
-    <string name="forgerock_webauthn_account_name" translatable="false">WebAuthn</string>
-    <integer name="forgerock_webauthn_max_credential" translatable="false">10</integer>
     <string name="forgerock_sso_logout" translatable="false">org.forgerock.android.auth.broadcast.SSO_LOGOUT</string>
     <string name="forgerock_sso_permission" translatable="false">org.forgerock.android.auth.broadcast.SSO_PERMISSION</string>
 
@@ -50,7 +46,17 @@
     <!-- WebAuthn -->
     <string name="select_user">Select User</string>
     <string name="submit">Submit</string>
+
+    <!-- Device Binding -->
+    <string name="binding_title">Enter Application PIN</string>
+    <string name="binding_subtitle">Cryptography device binding</string>
+    <string name="binding_description">Please complete with application pin</string>
+    <string name="binding_pin">Pin</string>
+    <string name="binding_ok">OK</string>
+    <string name="binding_cancel">Cancel</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

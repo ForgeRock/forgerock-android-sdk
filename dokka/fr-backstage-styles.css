@@ -1,0 +1,148 @@
+/* Copyright 2023 ForgeRock AS. All Rights Reserved. */
+
+:root {
+  --forgerock-dark-blue: #032B75;
+  --forgerock-light-blue: #006AC8;
+  --forgerock-green: #00BB86;
+  --forgerock-light-yellow: #F9E486;
+  --forgerock-yellow: #F99900;
+  --forgerock-orange: #F96700;
+  --forgerock-red: #CC0937;
+  --forgerock-violet: #732F9D;
+  --forgerock-dark-grey: #505151;
+  --backstage-site-footer-position: relative;
+  --top-navigation-height: 50px;
+  --sidemenu-section-active-color: #F96700;
+  --default-font-family: "Open Sans", sans-serif;
+  --default-font-size: 16px;
+  --active-tab-border-color: --forgerock-dark-blue;
+  --active-section-color: --forgerock-dark-blue;
+}
+
+body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding-top: var(--top-navigation-height);
+    background-color: #EFF0F2;
+}
+
+.main-col {
+    flex-grow: 1;
+}
+
+.main-grid {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+#leftColumn {
+    width: 20% !important;
+    min-width: 300px;
+    box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
+    background-color: white;
+}
+
+#titlePanel {
+    border-bottom: solid 1px #e7eef4;
+    padding: 1.2em 1em;
+}
+
+#titlePanel h2 {
+  margin: 0 0 0.1em 0 !important
+}
+
+#titlePanel h2 a {
+    color: var(--forgerock-dark-blue);
+    display: block;
+    letter-spacing: normal;
+    font-size: 0.6em;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+#titlePanel h2 a:hover {
+    color: var(--forgerock-orange);
+}
+
+#versionPanel {
+    color: var(--forgerock-dark-grey);
+    font-style: italic;
+}
+
+#sideMenu {
+    font-size: 0.9em;
+    line-height: 1.4em;
+    padding-top: 0px !important
+}
+
+
+.sideMenuPart > .overview:before {
+    width: 100%;
+    z-index: -1;
+}
+
+.sideMenuPart[data-active] > .overview:before {
+    background: var(--forgerock-light-blue) !important;
+    z-index: 0;
+}
+
+.sideMenuPart > .overview {
+    padding: 0.4em 0;
+}
+
+.sideMenuPart[data-active] > .overview > a {
+    z-index: 1;
+}
+
+#content-container {
+  flex-grow: 1;
+  background-color: #EFF0F2;
+}
+
+.main-content {
+    background-color: white;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 13%);
+    -webkit-box-shadow: 0 1px 3px rgb(0 0 0 / 13%);
+    line-height: var(--doc-line-height);
+    padding: 1.5rem 2.5rem;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    width: calc(80% - 1em);
+}
+
+h1.cover {
+    font-size: 40px;
+    font-weight: normal;
+    letter-spacing: normal !important;
+}
+
+h2 {
+    font-weight: normal;
+}
+
+#searchBar {
+    display: inline-block;
+    position: fixed;
+    right: 1.6em;
+    top: calc(var(--top-navigation-height) + 1.6em);
+}
+
+.search button {
+    margin-top: 0px !important;
+    border-radius: 6px;
+    padding: 8px 3px 0 8px;
+    background: var(--forgerock-green)
+}
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -59,10 +59,12 @@ class DefaultStorageClient implements StorageClient {
 
         Map<String,?> keys = accountData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
-            Logger.debug(TAG, "Account map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            Account account = Account.deserialize(entry.getValue().toString());
-            if(account != null)
-                accountList.add(account);
+            if(entry.getValue() != null) {
+                Logger.debug(TAG, "Account map values: ", entry.getKey() + ": " + entry.getValue().toString());
+                Account account = Account.deserialize(entry.getValue().toString());
+                if (account != null)
+                    accountList.add(account);
+            }
         }
 
         return accountList;
@@ -94,12 +96,14 @@ class DefaultStorageClient implements StorageClient {
 
         Map<String,?> keys = mechanismData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
-            Logger.debug(TAG, "Mechanism map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            String jsonData = entry.getValue().toString();
+            if(entry.getValue() != null) {
+                Logger.debug(TAG, "Mechanism map values: ", entry.getKey() + ": " + entry.getValue().toString());
+                String jsonData = entry.getValue().toString();
 
-            Mechanism mechanism = Mechanism.deserialize(jsonData);
-            if(mechanism != null)
-                mechanismList.add(mechanism);
+                Mechanism mechanism = Mechanism.deserialize(jsonData);
+                if (mechanism != null)
+                    mechanismList.add(mechanism);
+            }
         }
 
         return mechanismList;
@@ -157,10 +161,12 @@ class DefaultStorageClient implements StorageClient {
 
         Map<String,?> keys = notificationData.getAll();
         for(Map.Entry<String,?> entry : keys.entrySet()){
-            Logger.debug(TAG, "PushNotification map values: ",entry.getKey() + ": " + entry.getValue().toString());
-            PushNotification pushNotification = PushNotification.deserialize(entry.getValue().toString());
-            if(pushNotification != null)
-                pushNotificationList.add(pushNotification);
+            if(entry.getValue() != null) {
+                Logger.debug(TAG, "PushNotification map values: ", entry.getKey() + ": " + entry.getValue().toString());
+                PushNotification pushNotification = PushNotification.deserialize(entry.getValue().toString());
+                if (pushNotification != null)
+                    pushNotificationList.add(pushNotification);
+            }
         }
 
         return pushNotificationList;

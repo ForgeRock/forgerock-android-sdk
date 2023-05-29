@@ -35,8 +35,6 @@ jobs:
       - name: Clone the repository
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
       # Setup JDK and cache and restore dependencies.
@@ -57,7 +55,6 @@ jobs:
 
       # Prepare credentials for publishing (local.properties)
       - name: Prepare local.properties file with publishing credentials
-        if: success()
         run: |
             cat <<EOF > local.properties
             signing.keyId=${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
@@ -68,25 +65,12 @@ jobs:
             EOF
 
       - name: Update the version number in the gradle.properties files
-        if: success()
         run: sed -i -e s/^VERSION=.*$/VERSION=${{ inputs.version }}/g gradle.properties
 
       # Publish to Nexus
       - name: Publish the SDK to Nexus repository
         timeout-minutes: 5
-        if: success()
         run: ./gradlew publishReleasePublicationToSonatypeRepository closeAndReleaseStagingRepository --no-daemon
-
-      # Finally, tag the repo, and create a new release
-      - name: Tag the repo and create a new release
-        if: success()
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ inputs.version }}
-          release_name: ${{ inputs.version }} Release
-          body: ForgeRock Android SDK ${{ inputs.version }} Release
 
       # Send slack notification with result status
       - name: Send slack notification

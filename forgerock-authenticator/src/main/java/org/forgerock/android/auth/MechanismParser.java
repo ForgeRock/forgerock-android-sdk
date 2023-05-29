@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,9 @@ package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.MechanismParsingException;
 
+import android.net.Uri;
+import android.util.Base64;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -16,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for converting mechanism URIs to useful data. Extracts common information (scheme, type,
@@ -40,6 +44,8 @@ abstract class MechanismParser {
     public static final String BG_COLOR = "b";
     /** Unknown identity **/
     public static final String UNTITLED = "Untitled";
+    /** The Authenticator Policies. */
+    public static final String POLICIES = "policies";
 
     private static final String SLASH = "/";
 
@@ -71,7 +77,7 @@ abstract class MechanismParser {
      * @throws MechanismParsingException If there was an unexpected error parsing.
      */
     private Map<String, String> map(URI uri) throws MechanismParsingException {
-        Map<String, String> r = new HashMap<String, String>();
+        Map<String, String> r = new HashMap<>();
         r.put(SCHEME, uri.getScheme());
         r.put(TYPE, uri.getAuthority());
 
@@ -86,6 +92,7 @@ abstract class MechanismParser {
             r.put(ACCOUNT_NAME, pathParts[1]);
         }
 
+        // Extract query parameters
         Collection<String> queryParts = Collections.emptySet();
         if (uri.getQuery() != null) {
             queryParts = Arrays.asList(uri.getQuery().split("&"));
@@ -100,6 +107,7 @@ abstract class MechanismParser {
             }
         }
 
+        // Parse color
         if (r.containsKey(BG_COLOR) && !r.get(BG_COLOR).startsWith("#")) {
             r.put(BG_COLOR, "#" + r.get(BG_COLOR));
         }
@@ -109,6 +117,11 @@ abstract class MechanismParser {
             throw new MechanismParsingException("No identity is associated with this MFA account. Missing account name and issuer.");
         } else if (r.get(ACCOUNT_NAME).isEmpty()) {
             r.put(ACCOUNT_NAME, UNTITLED);
+        }
+
+        // Check policy
+        if (containsNonEmpty(r, POLICIES) && isBase64Encoded(r.get(POLICIES))) {
+            r.put(POLICIES, getBase64DecodedString(r.get(POLICIES)));
         }
 
         return r;
@@ -127,7 +140,7 @@ abstract class MechanismParser {
         return values.containsKey(key) && !values.get(key).isEmpty();
     }
 
-    private static String[] split(String s, String sep) {
+    protected static String[] split(String s, String sep) {
         int index = s.indexOf(sep);
         if (index == -1) {
             return null;
@@ -146,5 +159,31 @@ abstract class MechanismParser {
         }
         return s;
     }
+
+    protected static Map<String, String> getUriParameters(String uriString) {
+        Uri uri = Uri.parse(uriString);
+        HashMap<String, String> keyValueMap = new HashMap<>();
+        Set<String> keyNamesList = uri.getQueryParameterNames();
+        for (String key : keyNamesList) {
+            String value = uri.getQueryParameter(key);
+            keyValueMap.put(key, value);
+        }
+        return keyValueMap;
+    }
+
+    protected static String getBase64DecodedString(String value) {
+        byte[] bytes = Base64.decode(value, Base64.NO_WRAP + Base64.URL_SAFE);
+        return new String(bytes);
+    }
+
+    protected boolean isBase64Encoded(String value) {
+        try {
+            Base64.decode(value, Base64.DEFAULT);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
 

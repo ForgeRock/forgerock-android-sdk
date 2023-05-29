@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -60,7 +60,7 @@ class DefaultTokenManager implements TokenManager {
      * The {@link OAuth2Client} to auto refresh {@link AccessToken}
      */
     private final OAuth2Client oAuth2Client;
-    private final AtomicReference<AccessToken> accessTokenRef;
+    private final AtomicReference<CacheEntry<AccessToken>> accessTokenRef;
     private static final ScheduledExecutorService worker =
             Executors.newSingleThreadScheduledExecutor();
 
@@ -69,7 +69,7 @@ class DefaultTokenManager implements TokenManager {
     /**
      * Threshold to refresh the {@link AccessToken}
      */
-    private long threshold;
+    private final long threshold;
 
 
     @Builder
@@ -87,7 +87,7 @@ class DefaultTokenManager implements TokenManager {
         this.oAuth2Client = oAuth2Client;
         this.accessTokenRef = new AtomicReference<>();
         this.cacheIntervalMillis = cacheIntervalMillis == null
-                ? context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000 : cacheIntervalMillis;
+                ? context.getResources().getInteger(R.integer.forgerock_oauth_cache) * 1000L : cacheIntervalMillis;
         this.threshold = threshold == null
                 ? context.getResources().getInteger(R.integer.forgerock_oauth_threshold) : threshold;
     }
@@ -205,11 +205,17 @@ class DefaultTokenManager implements TokenManager {
      */
     private AccessToken getAccessTokenLocally() {
 
-        if (accessTokenRef.get() != null) {
-            Logger.debug(TAG, "Retrieving Access Token from cache");
-            return accessTokenRef.get();
+        CacheEntry<AccessToken> entry = accessTokenRef.get();
+        if (entry != null) {
+            if (entry.isExpired()) {
+                //There is a scheduled task to remove the cache, however scheduled task may not run
+                //exact time.
+                accessTokenRef.set(null);
+            } else {
+                Logger.debug(TAG, "Retrieving Access Token from cache");
+                return entry.getValue();
+            }
         }
-
         //Consider null if Access token does not exists
         String value = sharedPreferences.getString(ACCESS_TOKEN, null);
         if (value == null) {
@@ -227,7 +233,7 @@ class DefaultTokenManager implements TokenManager {
      */
     private void cache(AccessToken accessToken) {
         if (cacheIntervalMillis > 0) {
-            accessTokenRef.set(accessToken);
+            accessTokenRef.set(new CacheEntry<>(accessToken, cacheIntervalMillis));
             worker.schedule(() -> {
                 Logger.debug(TAG, "Removing Access Token from cache.");
                 accessTokenRef.set(null);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,8 +7,10 @@
 
 package org.forgerock.android.auth;
 
+import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.OathMechanismException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -155,7 +157,36 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleHOTPCorrectlyWith6Digits() throws OathMechanismException, MechanismCreationException {
+    public void testShouldFailToGetCodeDueAccountLocked() throws MechanismCreationException {
+        Account account = Account.builder()
+                .setAccountName(ACCOUNT_NAME)
+                .setIssuer(ISSUER)
+                .setPolicies(POLICIES)
+                .setLock(true)
+                .build();
+        OathMechanism oath = HOTPMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAlgorithm(ALGORITHM)
+                .setSecret(SECRET)
+                .setDigits(DIGITS)
+                .setCounter(COUNTER)
+                .build();
+        oath.setAccount(account);
+
+        try {
+            oath.getOathTokenCode();
+            Assert.fail("Should throw OathMechanismException");
+        } catch (Exception e) {
+            assertTrue(e instanceof AccountLockException);
+            assertTrue(e.getLocalizedMessage().contains("Account is locked"));
+        }
+    }
+
+    @Test
+    public void testShouldHandleHOTPCorrectlyWith6Digits()
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -174,7 +205,8 @@ public class HOTPMechanismTest extends FRABaseTest {
     }
 
     @Test
-    public void shouldHandleHOTPCorrectlyWith8Digits() throws OathMechanismException, MechanismCreationException {
+    public void testShouldHandleHOTPCorrectlyWith8Digits()
+            throws OathMechanismException, MechanismCreationException, AccountLockException {
         OathMechanism oath = HOTPMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)

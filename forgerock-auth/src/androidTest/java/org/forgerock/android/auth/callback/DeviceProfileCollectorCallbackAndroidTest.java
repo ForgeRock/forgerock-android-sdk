@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,12 +7,17 @@
 
 package org.forgerock.android.auth.callback;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.Manifest;
 import android.content.Context;
+import android.location.LocationManager;
 import android.os.Build;
 
-import androidx.test.core.app.ApplicationProvider;
+import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.forgerock.android.auth.AndroidBaseTest;
@@ -20,13 +25,7 @@ import org.forgerock.android.auth.FRListenerFuture;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
@@ -34,6 +33,7 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
             Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH
     );
 
@@ -76,6 +76,7 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testLocation() throws Exception {
 
         JSONObject raw = new JSONObject("{\n" +
@@ -110,7 +111,11 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
 
         assertTrue(content.contains("identifier"));
 
-        if (!isEmulator()) {
+        int backgroundLocationPermissionApproved =
+                ActivityCompat.checkSelfPermission(context,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
             assertTrue(content.contains("location"));
         }
     }

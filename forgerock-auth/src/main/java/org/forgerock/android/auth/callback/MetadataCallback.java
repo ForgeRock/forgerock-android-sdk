@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,12 +9,8 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
 
-import org.forgerock.android.auth.Node;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * A callback that allows some extra metadata to be sent in the response.
@@ -43,11 +39,12 @@ import lombok.NoArgsConstructor;
  * }
  * </pre>
  */
-@NoArgsConstructor
-@Getter
 public class MetadataCallback extends AbstractCallback implements DerivableCallback {
 
     private String value;
+
+    public MetadataCallback() {
+    }
 
     public JSONObject getValue() {
         if (value != null) {

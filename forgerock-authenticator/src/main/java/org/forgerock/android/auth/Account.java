@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,7 +8,9 @@
 package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,21 +40,33 @@ public class Account extends ModelObject<Account> {
     private final String backgroundColor;
     /** Date this object was stored */
     private final Calendar timeAdded;
+    /** Authenticator Policies in a JSON String format */
+    private final String policies;
+    /** Name of the Policy locking the Account */
+    private String lockingPolicy;
+    /** Account lock flag */
+    private boolean lock;
     /** List of Mechanism objects associated with this account **/
     private List<Mechanism> mechanismList;
 
     /**
      * Creates Account object with given information.
-     * @param issuer String value of issuer
-     * @param displayIssuer String alternative value of the issuer
-     * @param accountName String value of accountName or username
+     *
+     * @param issuer             String value of issuer
+     * @param displayIssuer      String alternative value of the issuer
+     * @param accountName        String value of accountName or username
      * @param displayAccountName String alternative value of the accountName
-     * @param imageURL URL of account's logo image (optional)
-     * @param backgroundColor String HEX code of account's background color (optional)
-     * @param timeAdded Date and Time this Account was stored
+     * @param imageURL           URL of account's logo image (optional)
+     * @param backgroundColor    String HEX code of account's background color (optional)
+     * @param timeAdded          Date and Time this Account was stored
+     * @param policies           Policies used to enforce device security (optional)
+     * @param lockingPolicy      Indicates the policy locking the account (optional)
+     * @param lock               Indicates if the account is locked (optional)
      */
-    public Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
-                   String imageURL, String backgroundColor, Calendar timeAdded) {
+    protected Account(String issuer, String displayIssuer, String accountName, String displayAccountName,
+                   String imageURL, String backgroundColor, Calendar timeAdded,
+                   String policies, String lockingPolicy, boolean lock) {
+        this.lockingPolicy = lockingPolicy;
         this.id = issuer + "-" + accountName;
         this.issuer = issuer;
         this.displayIssuer = displayIssuer;
@@ -61,6 +75,8 @@ public class Account extends ModelObject<Account> {
         this.imageURL = imageURL;
         this.backgroundColor = backgroundColor;
         this.timeAdded = timeAdded;
+        this.policies = policies;
+        this.lock = lock;
     }
 
     /**
@@ -154,6 +170,49 @@ public class Account extends ModelObject<Account> {
     }
 
     /**
+     * Return the Policies used to enforce App security.
+     * @return Policies in a JSON String format.
+     */
+    @Nullable
+    public String getPolicies() {
+        return policies;
+    }
+
+    /**
+     * Return the name of the policy locking the Account.
+     * @return Policy name as String.
+     */
+    @Nullable
+    public String getLockingPolicy() {
+        return lockingPolicy;
+    }
+
+    /**
+     * Determine whether the this Account should be locked by the app.
+     * @return True if the Account should be locked, false otherwise.
+     */
+    public boolean isLocked() {
+        return lock;
+    }
+
+    /**
+     * Lock this Account.
+     * @param policy The non-compliance policy.
+     */
+    void lock(@NonNull FRAPolicy policy) {
+        this.lockingPolicy = policy.getName();
+        this.lock = true;
+    }
+
+    /**
+     * Unlock this Account.
+     */
+    void unlock() {
+        this.lockingPolicy = null;
+        this.lock = false;
+    }
+
+    /**
      * Get the list of mechanisms associates with this account.
      * @return List<Mechanism> list of mechanisms
      */
@@ -182,6 +241,9 @@ public class Account extends ModelObject<Account> {
             jsonObject.put("imageURL", imageURL);
             jsonObject.put("backgroundColor", backgroundColor);
             jsonObject.put("timeAdded", timeAdded != null ? timeAdded.getTimeInMillis() : null);
+            jsonObject.put("policies", policies);
+            jsonObject.put("lock", isLocked());
+            jsonObject.put("lockingPolicy", lockingPolicy);
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing Account object to JSON string representation.", e);
         }
@@ -202,12 +264,15 @@ public class Account extends ModelObject<Account> {
             JSONObject jsonObject = new JSONObject(jsonString);
             return Account.builder()
                     .setIssuer(jsonObject.getString("issuer"))
-                    .setDisplayIssuer(jsonObject.has("displayIssuer") ? jsonObject.getString("displayIssuer") : null)
+                    .setDisplayIssuer(!jsonObject.isNull("displayIssuer") ? jsonObject.getString("displayIssuer") : null)
                     .setAccountName(jsonObject.getString("accountName"))
-                    .setDisplayAccountName(jsonObject.has("displayAccountName") ? jsonObject.getString("displayAccountName") : null)
-                    .setImageURL(jsonObject.has("imageURL") ? jsonObject.getString("imageURL") : null)
-                    .setBackgroundColor(jsonObject.has("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
-                    .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
+                    .setDisplayAccountName(!jsonObject.isNull("displayAccountName") ? jsonObject.getString("displayAccountName") : null)
+                    .setImageURL(!jsonObject.isNull("imageURL") ? jsonObject.getString("imageURL") : null)
+                    .setBackgroundColor(!jsonObject.isNull("backgroundColor") ? jsonObject.getString("backgroundColor") : null)
+                    .setTimeAdded(!jsonObject.isNull("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
+                    .setPolicies(!jsonObject.isNull("policies") ? jsonObject.getString("policies") : null)
+                    .setLockingPolicy(!jsonObject.isNull("lockingPolicy") ? jsonObject.getString("lockingPolicy") : null)
+                    .setLock(jsonObject.has("lock") && jsonObject.getBoolean("lock"))
                     .build();
         } catch (JSONException e) {
             return null;
@@ -268,6 +333,9 @@ public class Account extends ModelObject<Account> {
         private String imageURL;
         private String backgroundColor;
         private Calendar timeCreated;
+        private String policies;
+        private String lockingPolicy;
+        private boolean lock = false;
 
         /**
          * Sets the name of the IDP that issued this account.
@@ -333,12 +401,39 @@ public class Account extends ModelObject<Account> {
         }
 
         /**
+         * Sets policies to enforce App security.
+         * @param policies True if the Device Tampering Detection should be used, false otherwise.
+         */
+        public AccountBuilder setPolicies(String policies) {
+            this.policies = policies;
+            return this;
+        }
+
+        /**
+         * Sets the policy locking the Account.
+         * @param lockingPolicy The name of the policy locking the account.
+         */
+        public AccountBuilder setLockingPolicy(String lockingPolicy) {
+            this.lockingPolicy = lockingPolicy;
+            return this;
+        }
+
+        /**
+         * Sets to lock the Account.
+         * @param lock True if the Account should be locked, false otherwise.
+         */
+        public AccountBuilder setLock(boolean lock) {
+            this.lock = lock;
+            return this;
+        }
+
+        /**
          * Produces the Account object that was being constructed.
          * @return The account.
          */
         protected Account build() {
             return new Account(issuer, displayIssuer, accountName, displayAccountName,
-                    imageURL, backgroundColor, timeCreated);
+                    imageURL, backgroundColor, timeCreated, policies, lockingPolicy, lock);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -36,8 +36,12 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     private Account account;
 
 
+    /** URI scheme for PUSH registration */
     public static final String PUSH = "pushauth";
+    /** URI scheme for OATH registration */
     public static final String OATH = "otpauth";
+    /** URI scheme for combined registration OATH and PUSH at once */
+    public static final String MFAUTH = "mfauth";
 
     /**
      * Base constructor which encapsulates common elements of all Mechanisms.
@@ -65,6 +69,14 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * Gets the storage Account id associated with this Mechanism.
+     * @return The Account unique identifier.
+     */
+    public String getAccountId() {
+        return issuer + "-" + accountName;
     }
 
     /**

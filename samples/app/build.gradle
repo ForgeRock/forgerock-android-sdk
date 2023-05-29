@@ -1,0 +1,118 @@
+/*
+ * Copyright (c) 2023 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.example.app'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.app"
+        minSdk 23
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file('../debug.jks')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.1"
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.android.gms:play-services-basement:18.1.0'
+    }
+}
+dependencies {
+
+    def composeBom = platform('androidx.compose:compose-bom:2022.10.00')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    //SDK
+    implementation project(':forgerock-auth')
+    //Device Binding + JWT + Application Pin
+    implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
+    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.25'
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
+
+    //WebAuthn
+    implementation 'com.google.android.gms:play-services-fido:20.0.1'
+
+    //Centralize Login
+    implementation 'net.openid:appauth:0.11.1'
+
+    //Device Profile to retrieve Location
+    implementation "com.google.accompanist:accompanist-permissions:0.28.0"
+
+    //Social Login
+    implementation 'com.facebook.android:facebook-login:16.0.0'
+
+    //For App integrity
+    implementation 'com.google.android.play:integrity:1.1.0'
+
+    //Capture Location for Device Profile
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    //End of SDK
+
+
+// Material Design 3
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.core:core-splashscreen:1.0.0'
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    implementation 'androidx.activity:activity-compose:1.7.0'
+
+    def nav_version = "2.5.3"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation "androidx.compose.material:material-icons-extended:1.4.1"
+
+    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

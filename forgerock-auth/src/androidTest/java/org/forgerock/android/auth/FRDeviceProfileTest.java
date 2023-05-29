@@ -7,12 +7,24 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.Manifest;
 import android.content.Context;
 import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
-import org.forgerock.android.auth.collector.*;
+
+import org.forgerock.android.auth.collector.BluetoothCollector;
+import org.forgerock.android.auth.collector.DeviceCollector;
+import org.forgerock.android.auth.collector.FRDeviceCollector;
+import org.forgerock.android.auth.collector.TelephonyCollector;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -22,14 +34,13 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
-
 @RunWith(AndroidJUnit4.class)
 public class FRDeviceProfileTest extends AndroidBaseTest {
 
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
             Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH
     );
 
@@ -39,6 +50,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
 
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
@@ -85,8 +97,13 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
         assertFalse(result.getJSONObject("telephony").getBoolean("isRoamingNetwork"));
         */
 
-        //Location may not be captured using emulator.
-        if (!isEmulator()) {
+        // Location may not be captured using emulator
+        // or if ACCESS_BACKGROUND_LOCATION permission is not granted
+        int backgroundLocationPermissionApproved =
+                ActivityCompat.checkSelfPermission(context,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
             result.getJSONObject("location").getDouble("latitude");
             result.getJSONObject("location").getDouble("longitude");
         }

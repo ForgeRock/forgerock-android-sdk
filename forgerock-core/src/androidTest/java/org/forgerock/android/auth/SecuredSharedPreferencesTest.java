@@ -161,40 +161,4 @@ public class SecuredSharedPreferencesTest {
         assertNull(sharedPreferences.getString("Test", null));
     }
 
-    @TargetApi(23)
-    @Test
-    public void upgradeFromAndroidLToAndroidMGet() {
-        AndroidLSecuredSharedPreferences androidL = new AndroidLSecuredSharedPreferences(context, "test", TEST_ALIAS);
-        AndroidMSecuredSharedPreferences androidM = new AndroidMSecuredSharedPreferences(context, "test", TEST_ALIAS);
-
-        //Using android L to store data
-        androidL.edit().putString("Test", "AndroidL").commit();
-
-        //Get after upgrade to android M, expect null since key is changed.
-        assertNull(androidM.getString("Test", null));
-
-        //After upgrade, should back to normal
-        androidM.edit().putString("Test", "AndroidM").commit();
-        assertEquals("AndroidM", sharedPreferences.getString("Test", null));
-    }
-
-    @TargetApi(23)
-    @Test
-    public void upgradeFromAndroidLToAndroidMPut() {
-        AndroidLSecuredSharedPreferences androidL = new AndroidLSecuredSharedPreferences(context, "test", TEST_ALIAS);
-        AndroidMSecuredSharedPreferences androidM = new AndroidMSecuredSharedPreferences(context, "test", TEST_ALIAS);
-
-        //Using android L to store data
-        androidL.edit().putString("Test", "AndroidL").commit();
-
-        //Get after upgrade to android M, set new Value.
-        androidM.edit().putString("Test2", "AndroidM").commit();
-
-        //Old value are gone
-        assertNull(androidM.getString("Test", null));
-
-        //New value persist
-        assertEquals("AndroidM", sharedPreferences.getString("Test2", null));
-
-    }
 }

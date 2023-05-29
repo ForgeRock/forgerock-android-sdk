@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">forgerock-core</string>
+    <string name="biometric_title">Device Credentials for login</string>
+    <string name="biometric_subtitle">Device credentials required to approve Push authentication request</string>
 </resources>

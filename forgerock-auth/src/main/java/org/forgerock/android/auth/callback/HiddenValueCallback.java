@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,11 +11,9 @@ import androidx.annotation.Keep;
 
 import org.json.JSONObject;
 
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@Getter
 public class HiddenValueCallback extends AbstractCallback {
 
     private String value;
@@ -53,4 +51,15 @@ public class HiddenValueCallback extends AbstractCallback {
         return "HiddenValueCallback";
     }
 
+    public String getValue() {
+        return this.value;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getDefaultValue() {
+        return this.defaultValue;
+    }
 }

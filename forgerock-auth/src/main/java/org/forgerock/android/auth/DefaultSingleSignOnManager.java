@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,7 +7,10 @@
 
 package org.forgerock.android.auth;
 
-import android.accounts.AccountManager;
+import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
+import static org.forgerock.android.auth.ServerConfig.API_VERSION_3_1;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -27,19 +30,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static org.forgerock.android.auth.ServerConfig.ACCEPT_API_VERSION;
-import static org.forgerock.android.auth.ServerConfig.API_VERSION_3_1;
-import static org.forgerock.android.auth.StringUtils.isNotEmpty;
-
 /**
- * Manage the Single Sign On Token, the token will be encrypted and store to {@link AccountManager}
- * or {@link SharedPreferences}.
+ * Manage the Single Sign On Token, the token will be encrypted and store
+ * to {@link SharedPreferences}.
  */
 class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler {
 
     private static final String TAG = DefaultSingleSignOnManager.class.getSimpleName();
 
-    private SingleSignOnManager singleSignOnManager;
+    private final SingleSignOnManager singleSignOnManager;
     private final ServerConfig serverConfig;
     private final SSOBroadcastModel ssoBroadcastModel;
     private static final Action LOGOUT = new Action(Action.LOGOUT);
@@ -48,21 +47,11 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     private DefaultSingleSignOnManager(@NonNull Context context,
                                        ServerConfig serverConfig,
                                        SSOBroadcastModel ssoBroadcastModel,
-                                       String accountName,
-                                       Encryptor encryptor,
                                        SharedPreferences sharedPreferences) {
-        try {
-            singleSignOnManager = AccountSingleSignOnManager.builder()
-                    .context(context)
-                    .accountName(accountName == null ? context.getString(R.string.forgerock_account_name) : accountName)
-                    .encryptor(encryptor).build();
-        } catch (Exception e) {
-            Logger.debug(TAG, "Single Sign On is disabled");
-            Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
-            singleSignOnManager = SharedPreferencesSignOnManager.builder()
-                    .context(context)
-                    .sharedPreferences(sharedPreferences).build();
-        }
+        Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
+        singleSignOnManager = SharedPreferencesSignOnManager.builder()
+                .context(context)
+                .sharedPreferences(sharedPreferences).build();
 
         this.ssoBroadcastModel = ssoBroadcastModel;
         this.serverConfig = serverConfig;

@@ -25,12 +25,6 @@
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <string name="forgerock_cookie_name" translatable="false">iPlanetDirectoryPro</string>
 
-    <!-- SSO -->
-    <string name="forgerock">ForgeRock</string> <!-- Account Label -->
-    <string name="forgerock_account_name" translatable="false">ForgeRock</string> <!-- Account Name -->
-    <string name="forgerock_webauthn_account_name" translatable="false">WebAuthn</string>
-    <integer name="forgerock_webauthn_max_credential" translatable="false">10</integer>
-
     <!-- Service -->
     <string name="forgerock_auth_service" translatable="false">Test</string>
     <string name="forgerock_registration_service" translatable="false">Registration Tree</string>

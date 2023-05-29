@@ -50,6 +50,12 @@
                 <data
                     android:host="push"
                     android:scheme="pushauth" />
+                <data
+                    android:host="totp"
+                    android:scheme="mfauth" />
+                <data
+                    android:host="hotp"
+                    android:scheme="mfauth" />
             </intent-filter>
         </activity>
         <activity

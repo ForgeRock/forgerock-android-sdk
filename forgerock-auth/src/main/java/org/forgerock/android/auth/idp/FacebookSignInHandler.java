@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -67,13 +67,7 @@ public class FacebookSignInHandler extends Fragment implements IdPHandler {
                 Listener.onException(listener, exception);
             }
         });
-        LoginManager.getInstance().logInWithReadPermissions(this, getPermissions(idPClient));
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+        LoginManager.getInstance().logInWithReadPermissions(this, callbackManager, getPermissions(idPClient));
     }
 
     @Override
