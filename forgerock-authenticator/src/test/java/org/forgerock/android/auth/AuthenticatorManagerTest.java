@@ -189,7 +189,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                     "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                     "digits=6&" +
                     "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                    "period=30&";
+                    "period=30&" +
+                    "issuer=Rm9yZ2VSb2Nr";
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
             pushListenerFuture.get();
@@ -253,7 +254,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&";
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
 
         authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
