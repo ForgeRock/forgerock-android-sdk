@@ -13,7 +13,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.RadioButton
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
@@ -21,6 +23,7 @@ import com.google.android.material.textfield.TextInputLayout
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.callback.ChoiceCallback
+import org.forgerock.android.auth.callback.ConfirmationCallback
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
 
@@ -71,6 +74,25 @@ class NodeDialogFragment: DialogFragment() {
                 node?.getCallback(ChoiceCallback::class.java)?.setSelectedIndex(1)
             }
         }
+
+        val confirmationCallbackView: View = view.findViewById(R.id.confirmation_node)
+        val confirmationCallback = node?.getCallback(ConfirmationCallback::class.java)
+        confirmationCallback?.let {
+            val prompt = confirmationCallbackView.findViewById<TextView>(R.id.prompt)
+            prompt.text = it.getPrompt()
+            val confirmation = confirmationCallbackView.findViewById<LinearLayout>(R.id.confirmation)
+            it.options.forEachIndexed { index, item ->
+                val button = Button(context)
+                button.text = it.options[index]
+                button.tag = index
+                button.setOnClickListener {v ->
+                    v.isSelected = true
+                    confirmationCallback.selectedIndex = index
+                }
+                confirmation.addView(button, index)
+            }
+        }
+
         try {
             node?.callbacks?.iterator()?.forEach {
                 when (it.type) {
@@ -84,6 +106,9 @@ class NodeDialogFragment: DialogFragment() {
                     }
                     "ChoiceCallback" -> {
                         choiceNode.visibility = View.VISIBLE
+                    }
+                    "ConfirmationCallback" -> {
+                        confirmationCallbackView.visibility = View.VISIBLE
                     }
                 }
             }

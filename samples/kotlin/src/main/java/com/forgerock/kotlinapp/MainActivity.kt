@@ -28,6 +28,7 @@ import org.forgerock.android.auth.callback.DeviceBindingCallback
 import org.forgerock.android.auth.callback.DeviceProfileCallback
 import org.forgerock.android.auth.callback.DeviceSigningVerifierCallback
 import org.forgerock.android.auth.callback.IdPCallback
+import org.forgerock.android.auth.callback.ReCaptchaCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
@@ -238,6 +239,20 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                             }
                         })
                     }
+                    "ReCaptchaCallback" -> {
+                        val recaptcha = node.getCallback(ReCaptchaCallback::class.java)
+
+                        recaptcha.proceed(this, object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
+                                node.next(activity, activity)
+                            }
+
+                            override fun onException(e: java.lang.Exception) {
+                                node.next(activity, activity)
+                            }
+
+                        })
+                    }
                     "IdPCallback" -> {
                         val idp: IdPCallback = node.getCallback(IdPCallback::class.java)
                         idp.signIn(null, object : FRListener<Void> {
@@ -282,6 +297,12 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                             NodeDialogFragment.TAG)
                     }
                     "ChoiceCallback" -> {
+                        nodeDialog?.dismiss()
+                        nodeDialog = NodeDialogFragment.newInstance(it)
+                        nodeDialog?.show(supportFragmentManager,
+                            NodeDialogFragment.TAG)
+                    }
+                    "ConfirmationCallback" -> {
                         nodeDialog?.dismiss()
                         nodeDialog = NodeDialogFragment.newInstance(it)
                         nodeDialog?.show(supportFragmentManager,
