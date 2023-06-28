@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020-2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
  * <li>LOGOUT - AM Session logout request to revoke SSO Token: '/json/realms/{realm}/sessions?_action=logout'</li>
  * <li>USER_INFO - Retrieving user info: `/oauth2/realms/{realm}/userinfo`</li>
  * <li>END_SESSION - End session API: `/oauth2/realms/{realm}/connect/endSession`</li>
+ * <li>PUSH_REGISTER - AM Push registration for Authenticator SDK: `/json/push/sns/message?_action=register`</li>
+ * <li>PUSH_AUTHENTICATE - AM Push authentication for Authenticator SDK: `/json/push/sns/message?_action=authenticate`</li>
  * </ul>
  */
 @Getter
@@ -48,6 +50,8 @@ public class Action {
     public static final String LOGOUT = "LOGOUT";
     public static final String USER_INFO = "USER_INFO";
     public static final String END_SESSION = "END_SESSION";
+    public static final String PUSH_REGISTER = "PUSH_REGISTER";
+    public static final String PUSH_AUTHENTICATE = "PUSH_AUTHENTICATE";
 
     private final String type;
 
