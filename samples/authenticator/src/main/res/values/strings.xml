@@ -92,4 +92,8 @@
     <string name="notification_remove_error">Unable to remove Authentication Request.</string>
     <string name="notification_remove_success">Authentication Request successfully removed.</string>
 
+    <!-- SDO Token -->
+    <string name="title_menu_item_token">Display SDO Token</string>
+    <string name="sdo_dialog_title">SDO Token</string>
+    <string name="sdo_dialog_no_token">No SDO Token found</string>
 </resources>

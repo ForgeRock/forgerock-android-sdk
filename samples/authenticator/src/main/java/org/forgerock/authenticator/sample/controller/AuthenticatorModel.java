@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,6 +18,7 @@ import org.forgerock.android.auth.FRAClient;
 import org.forgerock.android.auth.FRAListener;
 import org.forgerock.android.auth.Mechanism;
 import org.forgerock.android.auth.PushNotification;
+import org.forgerock.android.auth.SDOTokenHandler;
 import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 
@@ -34,6 +35,8 @@ public class AuthenticatorModel {
     private String fcmToken;
     private List<AuthenticatorModelListener> listeners;
     private List<Account> allAccounts;
+
+    private final SDOTokenHandler sdoTokenHandler;
 
     private static final String TAG = AuthenticatorModel.class.getSimpleName();
 
@@ -71,6 +74,9 @@ public class AuthenticatorModel {
         } catch (AuthenticatorException e) {
             Log.e(TAG,"Error initializing Authenticator SDK: ", e);
         }
+
+        // Initialize SDO Token Handler
+        sdoTokenHandler = new SDOTokenHandler(context);
 
         // Initialize listener array
         listeners = new ArrayList<>();
@@ -163,6 +169,8 @@ public class AuthenticatorModel {
             throws InvalidNotificationException {
         PushNotification notification = fraClient.handleMessage(message);
         if(notification != null) {
+            Mechanism mechanism = fraClient.getMechanism(notification);
+            sdoTokenHandler.processSdoTokenFromPushNotification(notification, mechanism);
             notifyDataChanged();
         }
         return notification;
@@ -211,4 +219,11 @@ public class AuthenticatorModel {
         return fraClient.getAllNotifications(mechanism);
     }
 
+    /**
+     * Retrieves the SDO token.
+     * @return The SDO token as string. Returns {null} if no token is available.
+     */
+    public String getSdoToken() {
+        return sdoTokenHandler.getToken();
+    }
 }

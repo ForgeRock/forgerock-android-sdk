@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -187,6 +187,18 @@ public class AccountsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_scan:
                 startActivity(new Intent(this, AddMechanismActivity.class));
+                return true;
+            case R.id.action_display_sdo_token:
+                String sdoToken = authenticatorModel.getSdoToken();
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.sdo_dialog_title)
+                        .setMessage(sdoToken != null ? sdoToken : String.valueOf(R.string.sdo_dialog_no_token))
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
                 return true;
             default:
                 super.onOptionsItemSelected(item);
