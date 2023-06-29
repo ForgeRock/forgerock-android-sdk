@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GeneratingTokens
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.OnDeviceTraining
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.app.Destinations.CENTRALIZE_ROUTE
+import com.example.app.Destinations.DEVICE_PROFILE
 import com.example.app.Destinations.ENV_ROUTE
+import com.example.app.Destinations.IG
 import com.example.app.Destinations.LAUNCH_ROUTE
 import com.example.app.Destinations.MANAGE_USER_KEYS
 import com.example.app.Destinations.MANAGE_WEBAUTHN_KEYS
@@ -47,7 +53,11 @@ fun AppDrawer(
     navigateTo: (String) -> Unit,
     closeDrawer: () -> Unit) {
 
-    ModalDrawerSheet {
+    val scroll = rememberScrollState(0)
+
+    ModalDrawerSheet(
+        modifier = Modifier
+            .verticalScroll(scroll)) {
         Logo(
             modifier = Modifier.padding(horizontal = 28.dp, vertical = 48.dp)
         )
@@ -101,6 +111,26 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.Key, null) },
             onClick = {
                 navigateTo(MANAGE_USER_KEYS);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            label = { Text("IG protected endpoint") },
+            selected = false,
+            icon = { Icon(Icons.Filled.Fence, null) },
+            onClick = {
+                navigateTo(IG);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            label = { Text("Device Profile") },
+            selected = false,
+            icon = { Icon(Icons.Filled.OnDeviceTraining, null) },
+            onClick = {
+                navigateTo(DEVICE_PROFILE);
                 closeDrawer()
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

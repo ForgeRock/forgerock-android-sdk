@@ -18,12 +18,13 @@ import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRSession
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.NodeListener
+import org.forgerock.android.auth.PolicyAdvice
 import java.lang.Exception
 
 /**
  * Should avoid passing context to ViewModel
  */
-class JourneyViewModel(context: Context, journeyName: String) : ViewModel() {
+class JourneyViewModel<T>(context: Context, journeyName: T) : ViewModel() {
 
     val sharedPreferences = context.getSharedPreferences("JourneyPreferences", Context.MODE_PRIVATE)
 
@@ -70,9 +71,13 @@ class JourneyViewModel(context: Context, journeyName: String) : ViewModel() {
         }
     }
 
-    private fun start(context: Context, journeyName: String) {
+    private fun start(context: Context, journeyName: T) {
         viewModelScope.launch {
-            FRSession.authenticate(context, journeyName, nodeListener)
+            if (journeyName is String) {
+                FRSession.authenticate(context, journeyName, nodeListener)
+            } else if (journeyName is PolicyAdvice) {
+                FRSession.getCurrentSession().authenticate(context, journeyName, nodeListener)
+            }
         }
     }
 
@@ -86,5 +91,15 @@ class JourneyViewModel(context: Context, journeyName: String) : ViewModel() {
                 return JourneyViewModel(context.applicationContext, journeyName) as T
             }
         }
+        fun factory(
+            context: Context,
+            journeyName: PolicyAdvice,
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return JourneyViewModel(context.applicationContext, journeyName) as T
+            }
+        }
+
     }
 }

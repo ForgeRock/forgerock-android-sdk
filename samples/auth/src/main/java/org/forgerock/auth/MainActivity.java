@@ -209,9 +209,9 @@ public class MainActivity extends AppCompatActivity {
                     builder.addInterceptor(interceptor);
                 }
 
-                builder.addInterceptor(new IdentityGatewayAdviceInterceptor<Void>() {
+                builder.addInterceptor(new IdentityGatewayAdviceInterceptor() {
                     @Override
-                    public AdviceHandler<Void> getAdviceHandler(PolicyAdvice advice) {
+                    public AdviceHandler getAdviceHandler(PolicyAdvice advice) {
                         return new AdviceDialogHandler();
                     }
                 });
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                         .build());
 
                 OkHttpClient client = builder.build();
-                Request request = new Request.Builder().url("http://openig.example.com:9090/products").build();
+                Request request = new Request.Builder().url("https://openig.petrov.ca/products").build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
