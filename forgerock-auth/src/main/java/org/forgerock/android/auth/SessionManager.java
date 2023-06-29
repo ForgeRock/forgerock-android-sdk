@@ -44,6 +44,11 @@ public class SessionManager {
     }
 
     @WorkerThread
+    public void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException {
+        tokenManager.refresh(accessToken, listener);
+    }
+
+    @WorkerThread
     public AccessToken getAccessToken() throws AuthenticationRequiredException {
         FRListenerFuture<AccessToken> listener = new FRListenerFuture<>();
         getAccessToken(listener);
