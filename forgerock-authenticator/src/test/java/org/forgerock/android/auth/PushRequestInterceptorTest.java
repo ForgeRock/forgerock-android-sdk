@@ -26,9 +26,15 @@ import okhttp3.mockwebserver.RecordedRequest;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.forgerock.android.auth.Action.PUSH_AUTHENTICATE;
+import static org.forgerock.android.auth.Action.PUSH_REGISTER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import android.net.Uri;
+
+import androidx.annotation.NonNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class PushRequestInterceptorTest extends FRABaseTest {
@@ -112,4 +118,39 @@ public class PushRequestInterceptorTest extends FRABaseTest {
                 .build();
         return push;
     }
+
+    private class PushRequestInterceptor implements FRRequestInterceptor<Action> {
+        @NonNull
+        @Override
+        public Request intercept(@NonNull Request request, Action tag) {
+            if (tag.getType().equals(PUSH_REGISTER)) {
+                return request.newBuilder()
+                        // Add query parameter:
+                        .url(Uri.parse(request.url().toString())
+                                .buildUpon()
+                                .appendQueryParameter("testParameter", "PUSH_REGISTER").toString())
+
+                        // Add additional header:
+                        .addHeader("testHeader", "PUSH_REGISTER")
+
+                        // Construct the updated request:
+                        .build();
+            } else if (tag.getType().equals(PUSH_AUTHENTICATE)) {
+                return request.newBuilder()
+                        // Add query parameter:
+                        .url(Uri.parse(request.url().toString())
+                                .buildUpon()
+                                .appendQueryParameter("testParameter", "PUSH_AUTHENTICATE").toString())
+
+                        // Add additional header:
+                        .addHeader("testHeader", "PUSH_AUTHENTICATE")
+
+                        // Construct the updated request:
+                        .build();
+            }
+            return request;
+        }
+    }
 }
+
+
