@@ -140,10 +140,12 @@ public class OathParserTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&";
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
+
         Map<String, String> result = oathParser.map(uri);
         assertEquals(result.get(OathParser.ACCOUNT_NAME), "demo");
-        assertEquals(result.get(OathParser.ISSUER), "Forgerock");
+        assertEquals(result.get(OathParser.ISSUER), "ForgeRock");
         assertEquals(result.get(OathParser.TYPE), "totp");
         assertEquals(result.get(OathParser.SECRET), "R2PYFZRISXA5L25NVSSYK2RQ6E======");
         assertEquals(result.get(OathParser.PERIOD), "30");

@@ -1,20 +1,29 @@
+## [4.1.0]
+#### Fixed
+- Fixed an issue in the Authenticator module related to combined MFA registration [SDKS-2542]
+
 ## [4.0.0]
 #### Added
 - Upgrade Google Fido Client to support PassKey [SDKS-2243]
-- Introduce FRWebAuthn interface to remove WebAuthn Reference Keys [SDKS-2272]
+- FRWebAuthn interface to remove WebAuthn Reference Keys [SDKS-2272]
 - Interface to set Device Name during WebAuthn Registration [SDKS-2296]
 - `DeviceBinding` callback support [SDKS-1747]
 - `DeviceSigningVerifier` callback support [SDKS-2022]
-- Added support for combined MFA in the Authenticator SDK [SDKS-2166]
-- Added support for policy enforcement in the Authenticator SDK [SDKS-2166]
-- Remove Native SSO Support [SDKS-2260]
-- Added updated functionality for NetworkCollector [SDKS-2445]
-- Process IG policy advice as JSON [SDKS-2240]
+- Support for combined MFA in the Authenticator SDK [SDKS-2166]
+- Support for policy enforcement in the Authenticator SDK [SDKS-2166]
 
 #### Fixed
-- Removed `MANAGE_ACCOUNTS` permission from `forgerock-auth` [SDKS-1367]
-- Removed native SSO support (deprecated `sharedUserId` attribute) [SDKS-2260]
 - Fix for WebAuthn authentication for devices which use full screen biometric prompt [SDKS-2340]
+- Fixed functionality for NetworkCollector [SDKS-2445]
+
+#### Changed
+- `public void WebAuthnRegistrationCallback.register(Node node,FRListener<Void> listener)` to `suspend fun register(context: Context, node: Node)`
+- `public void WebAuthAuthenticationCallback.authenticate(@NonNull Fragment fragment, @NonNull Node node, @Nullable WebAuthnKeySelector selector, FRListener<Void> listener)` to `suspend fun authenticate(context: Context, node: Node, selector: WebAuthnKeySelector = WebAuthnKeySelector.DEFAULT)`
+- `FRAClient.updateAccount` now throws `AccountLockException` upon attempt to update a locked account [SDKS-2166]
+- `OathMechanism.getOathTokenCode()`, `HOTPMechanism.getOathTokenCode()` and `TOTPMechanism.getOathTokenCode()`  now throws `AccountLockException` upon attempt to get an OATH token for a locked account [SDKS-2166]
+
+#### Deprecated
+- Removed support for native single sign-on (SSO) [SDKS-2260], [SDKS-1367]
 
 ## [3.4.0]
 #### Added

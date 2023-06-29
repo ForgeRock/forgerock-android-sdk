@@ -74,7 +74,8 @@ class PushParser extends MechanismParser {
             values.put(AM_LOAD_BALANCER_COOKIE, recodeBase64UrlValueToStringWithValidation(values, BASE_64_AM_LOAD_BALANCER_COOKIE_KEY));
         }
 
-        if (containsNonEmpty(values, ISSUER) && Objects.equals(values.get(SCHEME), Mechanism.PUSH)) {
+        if (containsNonEmpty(values, ISSUER) &&
+                (Objects.equals(values.get(SCHEME), Mechanism.PUSH) || Objects.equals(values.get(SCHEME), Mechanism.MFAUTH))) {
             values.put(ISSUER, recodeBase64UrlValueToStringWithValidation(values, ISSUER));
         }
 
