@@ -21,8 +21,13 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // User this activity to display animations, initialize some stuff and then proceed to
+        // Use this activity to display animations, initialize some stuff and then proceed to
         // the Accounts activity
+
+        // Uncomment the next lines to enable a sample/test HTTP request interceptor
+        // Logger.set(Logger.Level.DEBUG);
+        // RequestInterceptorRegistry.getInstance().register(new TestPushRequestInterceptor());
+
         proceed();
     }
 
