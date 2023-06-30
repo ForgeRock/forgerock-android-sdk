@@ -52,6 +52,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -265,6 +266,21 @@ public class FRUserMockTest extends BaseTest {
         FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
         FRUser.getCurrentUser().getAccessToken(future);
         assertNotNull(future.get());
+    }
+
+    @Test
+    public void testRefreshTokenAsync() throws Exception {
+        frUserHappyPath();
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        FRUser.getCurrentUser().getAccessToken(future);
+        assertNotNull(future.get());
+        enqueue("/authTreeMockTest_Authenticate_accessToken_no_RefreshToken_shortlife.json", HttpURLConnection.HTTP_OK);
+        FRListenerFuture<AccessToken> refreshTokenFuture = new FRListenerFuture<>();
+        FRUser.getCurrentUser().refresh(future.get(), refreshTokenFuture);
+        server.takeRequest();
+        assertNotEquals(future.get().getExpiresIn(), refreshTokenFuture.get().getExpiresIn());
+        assertNotEquals(future.get().getValue(), refreshTokenFuture.get().getValue());
+        assertNotEquals(future.get().getIdToken(), refreshTokenFuture.get().getIdToken());
     }
 
     @Test(expected = AuthenticationException.class)
