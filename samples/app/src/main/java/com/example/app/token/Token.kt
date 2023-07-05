@@ -8,9 +8,12 @@
 package com.example.app.token
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -37,6 +40,22 @@ fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
         .fillMaxWidth()
     ) {
         Topbar(heading = "Access Token", openDrawer = openDrawer)
+        Row(modifier = Modifier
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+            Button(
+                onClick = { tokenViewModel.getAccessToken() }) {
+                Text(text = "Refresh")
+            }
+            Button(
+                onClick = { tokenViewModel.forceRefresh()  }) {
+                Text(text = "ForceRefresh")
+            }
+            Button(
+                onClick = { tokenViewModel.setNullState() }) {
+                Text(text = "Clear")
+            }
+        }
         Card(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 10.dp,
@@ -53,10 +72,7 @@ fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
                 text = accessToken?.toJson()?.let { JSONObject(it).toString(4) }
                     ?: "")
         }
-        Button(
-            onClick = { tokenViewModel.getAccessToken() }) {
-            Text(text = "Refresh")
-        }
+
     }
 }
 
