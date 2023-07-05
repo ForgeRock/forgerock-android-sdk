@@ -1,6 +1,8 @@
 ## [4.1.0]
 #### Added
-- Interceptor Support for Authenticator module [SDKS-2544]
+- Interceptor support for the Authenticator module [SDKS-2544]
+- Interface for access_token refresh [SDKS-2567]
+- Ability to process new JSON format of IG policy advice [SDKS-2240]
 
 #### Fixed
 - Fixed an issue in the Authenticator module related to combined MFA registration [SDKS-2542]
