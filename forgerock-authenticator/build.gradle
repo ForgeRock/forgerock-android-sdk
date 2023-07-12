@@ -100,8 +100,8 @@ dependencies {
     compileOnly 'com.google.firebase:firebase-messaging:23.1.2'
 
     // Networking
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
 
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
