@@ -99,13 +99,11 @@ public class FRUser {
      * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not
      * refresh the token and persist it.
      *
-     * @param accessToken AccessToken
      * @param listener    Listener to listen for refresh event.
-     * @throws AuthenticationRequiredException When failed to Refresh the {@link AccessToken}
      */
     @WorkerThread
-    public void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException {
-        sessionManager.refresh(accessToken, listener);
+    public void refresh(FRListener<AccessToken> listener) {
+        sessionManager.refresh(listener);
     }
 
     /**

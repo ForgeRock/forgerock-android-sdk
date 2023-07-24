@@ -82,7 +82,7 @@ public class FRUserTest extends AndroidBaseTest {
         AccessToken token = future.get();
         assertNotNull(token);
         FRListenerFuture<AccessToken> refreshTokenFuture = new FRListenerFuture<>();
-        FRUser.getCurrentUser().refresh(token, refreshTokenFuture);
+        FRUser.getCurrentUser().refresh(refreshTokenFuture);
         AccessToken token1 = future.get();
         assertNotNull(token1);
     }
