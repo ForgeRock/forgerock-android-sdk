@@ -5,7 +5,8 @@
 - Ability to process new JSON format of IG policy advice [SDKS-2240]
 
 #### Fixed
-- Fixed an issue in the Authenticator module related to combined MFA registration [SDKS-2542]
+- Fixed an issue on parsing `issuer` from combined MFA registration uri [SDKS-2542]
+- Added error message about duplicated accounts while performing combined MFA registration [SDKS-2627]
 
 ## [4.0.0]
 #### Added
