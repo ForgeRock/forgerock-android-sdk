@@ -79,6 +79,7 @@ configurations.all {
     resolutionStrategy {
         force 'com.google.android.gms:play-services-basement:18.1.0'
         force 'junit:junit:4.13.2'
+        force 'org.bouncycastle:bcprov-jdk15on:1.68'
     }
 }
 dependencies {
