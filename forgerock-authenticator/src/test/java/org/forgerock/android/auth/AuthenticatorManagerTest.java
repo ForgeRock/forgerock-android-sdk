@@ -224,8 +224,10 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                     "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                     "digits=6&" +
                     "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                    "period=30&";
+                    "period=30&"+
+                    "issuer=Rm9yZ2VSb2Nr";
 
+            given(storageClient.getAccount(anyString())).willReturn(null);
             doReturn(result).when(policyEvaluator).evaluate(any(), anyString());
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
