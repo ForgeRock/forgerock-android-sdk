@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
@@ -43,11 +44,32 @@ public class SessionManager {
                 new AccessTokenStoreInterceptor(this.tokenManager));
     }
 
+    /**
+     * Refresh the Access Token.
+     *
+     * @param listener Listener to listen for refresh event.
+     */
     @WorkerThread
-    public void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException {
-        tokenManager.refresh(accessToken, listener);
+    public void refresh(FRListener<AccessToken> listener) {
+        getAccessToken(new FRListener<AccessToken>() {
+            @Override
+            public void onSuccess(AccessToken result) {
+                tokenManager.refresh(result, listener);
+            }
+
+            @Override
+            public void onException(@NonNull Exception e) {
+                Listener.onException(listener, e);
+            }
+        });
     }
 
+    /**
+     * Retrieve the Access Token.
+     *
+     * @return The Access Token
+     * @throws AuthenticationRequiredException Authentication is required to retrieve the Access Token
+     */
     @WorkerThread
     public AccessToken getAccessToken() throws AuthenticationRequiredException {
         FRListenerFuture<AccessToken> listener = new FRListenerFuture<>();

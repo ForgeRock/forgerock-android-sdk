@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -22,17 +21,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.app.Alert
 import com.example.app.Topbar
-import org.forgerock.android.auth.AccessToken
 import org.json.JSONObject
 
 @Composable
 fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
 
-    val accessToken: AccessToken? = tokenViewModel.state
+    val tokenState by tokenViewModel.state.collectAsState()
     val scroll = rememberScrollState(0)
 
     Column(modifier = Modifier
@@ -48,7 +49,7 @@ fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
                 Text(text = "Refresh")
             }
             Button(
-                onClick = { tokenViewModel.forceRefresh()  }) {
+                onClick = { tokenViewModel.forceRefresh() }) {
                 Text(text = "ForceRefresh")
             }
             Button(
@@ -69,10 +70,13 @@ fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
                 modifier = Modifier
                     .padding(4.dp)
                     .verticalScroll(scroll),
-                text = accessToken?.toJson()?.let { JSONObject(it).toString(4) }
-                    ?: "")
+                text = tokenState.accessToken?.toJson()?.let {
+                    JSONObject(it).toString(4)
+                } ?: "")
         }
-
+        tokenState.exception?.apply {
+            Alert(throwable = this)
+        }
     }
 }
 
