@@ -29,6 +29,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
+import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
@@ -223,8 +224,10 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                     "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                     "digits=6&" +
                     "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                    "period=30&";
+                    "period=30&"+
+                    "issuer=Rm9yZ2VSb2Nr";
 
+            given(storageClient.getAccount(anyString())).willReturn(null);
             doReturn(result).when(policyEvaluator).evaluate(any(), anyString());
 
             authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
@@ -233,6 +236,90 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof MechanismPolicyViolationException);
             assertTrue(e.getLocalizedMessage().contains("This account cannot be registered on this device"));
+        }
+    }
+
+    @Test
+    public void testCreateCombinedMechanismsDuplicatedOathFailure() {
+        authenticatorManager.setPushFactory(pushFactory);
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        Account account = createAccount("demo", "ForgeRock");
+        Mechanism oath = createOathMechanism("demo", "ForgeRock", OTHER_MECHANISM_UID);
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(oath);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        String combinedUri = "mfauth://totp/ForgeRock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
+
+        try {
+            authenticatorManager.createMechanismFromUri(combinedUri, oathListenerFuture);
+            oathListenerFuture.get();
+            fail("Should throw DuplicateMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DuplicateMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Matching mechanism already exists"));
+            assertTrue(((DuplicateMechanismException) e.getCause()).getCausingMechanism() instanceof OathMechanism);
+        }
+    }
+
+    @Test
+    public void testCreateCombinedMechanismsDuplicatedPushFailure() {
+        authenticatorManager.setPushFactory(pushFactory);
+        server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK));
+
+        Account account = createAccount("demo", "ForgeRock");
+        Mechanism push = createPushMechanism("demo", "ForgeRock", MECHANISM_UID);
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(push);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        String combinedUri = "mfauth://totp/ForgeRock:demo?" +
+                "a=" + getBase64PushActionUrl(server, "authenticate") + "&" +
+                "image=aHR0cDovL3NlYXR0bGV3cml0ZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDEzLzAxL3dlaWdodC13YXRjaGVycy1zbWFsbC5naWY&" +
+                "b=ff00ff&" +
+                "r=" + getBase64PushActionUrl(server, "register") + "&" +
+                "s=ryJkqNRjXYd_nX523672AX_oKdVXrKExq-VjVeRKKTc&" +
+                "c=Daf8vrc8onKu-dcptwCRS9UHmdui5u16vAdG2HMU4w0&" +
+                "l=YW1sYmNvb2tpZT0wMQ==&" +
+                "m=9326d19c-4d08-4538-8151-f8558e71475f1464361288472&" +
+                "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
+                "digits=6&" +
+                "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
+
+        try {
+            authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
+            pushListenerFuture.get();
+            fail("Should throw DuplicateMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof DuplicateMechanismException);
+            assertTrue(e.getLocalizedMessage().contains("Matching mechanism already exists"));
+            assertTrue(((DuplicateMechanismException) e.getCause()).getCausingMechanism() instanceof PushMechanism);
         }
     }
 
@@ -256,6 +343,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
                 "period=30&" +
                 "issuer=Rm9yZ2VSb2Nr";
+
+        given(storageClient.getAccount(anyString())).willReturn(null);
 
         authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();
