@@ -237,7 +237,6 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         }
     }
 
-
     @Test
     public void testCreateCombinedMechanismsDuplicatedOathFailure() {
         authenticatorManager.setPushFactory(pushFactory);
@@ -342,6 +341,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
                 "period=30&" +
                 "issuer=Rm9yZ2VSb2Nr";
+
+        given(storageClient.getAccount(anyString())).willReturn(null);
 
         authenticatorManager.createMechanismFromUri(combinedUri, pushListenerFuture);
         PushMechanism push = (PushMechanism) pushListenerFuture.get();

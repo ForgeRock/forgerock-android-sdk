@@ -19,6 +19,7 @@ import org.forgerock.android.auth.exception.AuthenticatorException;
 import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
@@ -375,10 +376,21 @@ class AuthenticatorManager {
     }
 
     private List<Mechanism> returnDuplicatedMechanisms(String uri) {
-        Map<String, String> map = MechanismParser.getUriParameters(uri);
-        String accountId = map.get(MechanismParser.ISSUER)+"-"+map.get(MechanismParser.ACCOUNT_NAME);
-        Account account = storageClient.getAccount(accountId);
-        return storageClient.getMechanismsForAccount(account);
+        PushParser parser = new PushParser();
+        Map<String, String> map;
+
+        try {
+            map = parser.map(uri);
+            String id = map.get(MechanismParser.ISSUER) + "-" + map.get(MechanismParser.ACCOUNT_NAME);
+            Account account = storageClient.getAccount(id);
+            if (account != null) {
+                return storageClient.getMechanismsForAccount(account);
+            }
+        } catch (MechanismParsingException e) {
+            Logger.error(TAG, "Error parsing URI.", e);
+        }
+
+        return null;
     }
 
     @VisibleForTesting
