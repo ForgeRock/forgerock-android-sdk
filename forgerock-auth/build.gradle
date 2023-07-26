@@ -102,7 +102,7 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-location:21.0.1'
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
     // Keeping this version for now, its breaking Apple SignIn for the later versions.
-    compileOnly 'net.openid:appauth:0.7.1'
+    compileOnly 'net.openid:appauth:0.11.1'
     compileOnly 'com.google.android.gms:play-services-fido:20.0.1'
 
     //For Device Binding
