@@ -122,7 +122,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.google.android.gms:play-services-location:21.0.1'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
-    androidTestImplementation 'org.assertj:assertj-core:2.9.1'
+    androidTestImplementation 'org.assertj:assertj-core:3.24.2'
     androidTestImplementation 'com.google.android.gms:play-services-fido:20.0.1'
 
     androidTestImplementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
@@ -143,7 +143,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
-    testImplementation 'org.assertj:assertj-core:3.23.1'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
     testImplementation "androidx.test.espresso:espresso-intents:3.5.1"
     testImplementation 'net.openid:appauth:0.11.1'
     testImplementation 'com.google.android.gms:play-services-fido:20.0.1'
