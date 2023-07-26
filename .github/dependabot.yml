@@ -8,6 +8,8 @@ updates:
     target-branch: "develop"
     schedule:
       interval: "daily"
+    labels:
+      - "library update"
     assignees:
       - "spetrov"
     reviewers:
@@ -19,6 +21,8 @@ updates:
     target-branch: "develop"
     schedule:
       interval: "daily"
+    labels:
+      - "library update"
     assignees:
       - "spetrov"
     reviewers:
@@ -30,6 +34,8 @@ updates:
     target-branch: "develop"
     schedule:
       interval: "daily"
+    labels:
+      - "library update"
     assignees:
       - "spetrov"
     reviewers:

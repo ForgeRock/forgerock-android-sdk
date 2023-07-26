@@ -3,6 +3,7 @@ name: CI
 # Trigger on push or pull request
 on:
   pull_request:
+    permissions: write-all
     types: [opened, reopened, synchronize, edited]
 
   push:
