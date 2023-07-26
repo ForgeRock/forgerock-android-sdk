@@ -36,7 +36,19 @@ open class WebAuthnDataRepository internal constructor(val context: Context,
                 ?: SecuredSharedPreferences(context,
                     ORG_FORGEROCK_V_1_WEBAUTHN,
                     ORG_FORGEROCK_V_1_WEBAUTHN_KEYS)
-            dataRepository = this.migrate(dataRepository)
+
+            Logger.debug("---->${dataRepository.all}", "one 0")
+
+         //  dataRepository = migrate(dataRepository)
+            dataRepository.getBoolean("caching", false).apply {
+                if(this.not()) {
+                    dataRepository = migrate(dataRepository)
+                    dataRepository = migrateToAlpha(dataRepository)
+                } else {
+                    dataRepository = migrateToAlpha(null)
+                }
+            }
+
         } catch (error: Error) {
             //Something wrong cannot support Usernameless
             error(TAG, error, "UsernameLess cannot be supported.")
@@ -47,17 +59,53 @@ open class WebAuthnDataRepository internal constructor(val context: Context,
         return EncryptedPreferences.getInstance(context, ORG_FORGEROCK_V_2_WEBAUTHN)
     }
 
+    private fun migrateToAlpha(encryptedPreferences: SharedPreferences?): SharedPreferences {
+        val map = mutableMapOf<String, MutableSet<String>>()
+
+        encryptedPreferences?.let {
+
+            Logger.debug("---->${encryptedPreferences.all}", "one 4")
+            val keys: List<String> = encryptedPreferences.all.entries.map { it.key }
+
+            Logger.debug("---->$keys", "tested0")
+            Logger.debug("---->${encryptedPreferences.all}", "tested1")
+
+            keys.forEach { key ->
+                encryptedPreferences.getStringSet(key, emptySet())?.let {
+                    val result = mutableSetOf<String>()
+                    result.addAll(it)
+                    map[key] = result
+                }
+            }
+
+            encryptedPreferences.edit().clear().apply()
+            NewEncryptedPreferences.deletePreferencesFile(context, ORG_FORGEROCK_V_2_WEBAUTHN)
+        }
+
+        Logger.debug("---->${map}", "testedEnd")
+
+        val newDataRepository = NewEncryptedPreferences.getInstance(context, ORG_FORGEROCK_V_2_WEBAUTHN)
+        newDataRepository.edit().apply {
+          map.forEach {
+              this.putStringSet(it.key, it.value)
+          }
+        }.apply()
+
+        Logger.debug("---->${newDataRepository.all}", "tested2")
+
+       return newDataRepository
+    }
     /**
      * Migrate data from [SecuredSharedPreferences] to [EncryptedSharePreference]
      */
     private fun migrate(sharedPreferences: SharedPreferences): SharedPreferences {
         val encryptedPreferences = getNewSharedPreferences()
-        //We store all credentials in one attribute before, but now we change the model with
-        //rpid as the key, and the string set contains all credentials that has the same rpid
-        //rpid -> [credential1, credential2, ...]
 
-
+        Logger.debug("---->${sharedPreferences.getString(ALLOW_CREDENTIALS, null)}", "one 1")
         sharedPreferences.getString(ALLOW_CREDENTIALS, null)?.apply {
+
+            Logger.debug("---->i am inside", "one 2")
+
             val map = mutableMapOf<String, MutableSet<String>>()
             val array = JSONArray(this)
 
@@ -77,6 +125,9 @@ open class WebAuthnDataRepository internal constructor(val context: Context,
 
             sharedPreferences.edit().remove(ALLOW_CREDENTIALS).apply()
         }
+
+        sharedPreferences.edit().putBoolean("caching", true).apply()
+
         return encryptedPreferences
     }
 

@@ -70,7 +70,7 @@ class EnvViewModel : ViewModel() {
             oauthThresholdSeconds = 0
         }
         service {
-            authServiceName = "WebAuthn"
+            authServiceName = "jeywebAuthn"
         }
     }
 
