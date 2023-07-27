@@ -10,6 +10,7 @@ package org.forgerock.android.auth;
 import android.net.Uri;
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.forgerock.android.auth.exception.ApiException;
@@ -27,7 +28,6 @@ import java.security.SecureRandom;
 import java.util.Map;
 
 import lombok.Getter;
-import lombok.NonNull;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;

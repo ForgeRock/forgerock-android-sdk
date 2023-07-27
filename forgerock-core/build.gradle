@@ -13,7 +13,9 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 
 android {
-    compileSdkVersion 33
+    namespace 'org.forgerock.android.core'
+
+    compileSdk 33
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
@@ -39,15 +41,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     packagingOptions {
         jniLibs {
             pickFirsts += ['**/*.so']
         }
     }
-
 
     testOptions {
         unitTests.all {
@@ -75,8 +76,8 @@ configurations.all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
 
@@ -114,9 +115,9 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
-    compileOnly "org.projectlombok:lombok:1.18.8"
-    delombok "org.projectlombok:lombok:1.18.8"
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly "org.projectlombok:lombok:1.18.28"
+    delombok "org.projectlombok:lombok:1.18.28"
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
 }
 
 repositories {

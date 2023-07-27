@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 /**
  * A callback to collect a user's choice of security question and their answer to that question.
  */
-@NoArgsConstructor
 @Getter
 public class KbaCreateCallback extends AbstractPromptCallback {
 
@@ -33,6 +32,10 @@ public class KbaCreateCallback extends AbstractPromptCallback {
      * @return the list of predefined questions
      */
     private List<String> predefinedQuestions;
+
+    @Keep
+    public KbaCreateCallback() {
+    }
 
     @Keep
     public KbaCreateCallback(JSONObject raw, int index) {

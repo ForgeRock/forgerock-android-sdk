@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback designed for usage with the ReCaptchaNode.
  */
-@NoArgsConstructor
 @Getter
 public class ReCaptchaCallback extends AbstractCallback {
 
@@ -33,6 +32,10 @@ public class ReCaptchaCallback extends AbstractCallback {
      * @return the site key.
      */
     private String reCaptchaSiteKey;
+
+    @Keep
+    public ReCaptchaCallback() {
+    }
 
     /**
      * Constructor that creates a {@link ReCaptchaCallback}.

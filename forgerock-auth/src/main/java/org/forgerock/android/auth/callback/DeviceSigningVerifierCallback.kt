@@ -7,6 +7,7 @@
 package org.forgerock.android.auth.callback
 
 import android.content.Context
+import androidx.annotation.Keep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,9 +38,11 @@ import org.json.JSONObject
  */
 open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
 
+    @Keep
     @JvmOverloads
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
+    @Keep
     @JvmOverloads
     constructor() : super()
 

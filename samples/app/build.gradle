@@ -26,7 +26,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,11 +40,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -52,6 +53,13 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.1"
+    }
+
+}
+
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 }
 
@@ -68,6 +76,7 @@ dependencies {
 
     //SDK
     implementation project(':forgerock-auth')
+    //implementation 'org.forgerock:forgerock-auth:4.2.0-SNAPSHOT'
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
@@ -96,8 +105,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
     //For IG, invoke endpoint using okHttp
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
 
 
     //End of SDK
@@ -112,9 +121,9 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    implementation 'androidx.activity:activity-compose:1.7.1'
+    implementation 'androidx.activity:activity-compose:1.7.2'
 
-    def nav_version = "2.5.3"
+    def nav_version = "2.6.0"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation "androidx.compose.material:material-icons-extended:1.4.3"
 

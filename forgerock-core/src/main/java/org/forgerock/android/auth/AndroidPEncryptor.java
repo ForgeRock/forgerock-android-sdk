@@ -11,14 +11,13 @@ import android.content.Context;
 import android.os.Build;
 import android.security.keystore.StrongBoxUnavailableException;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 import javax.crypto.SecretKey;
-
-import lombok.NonNull;
 
 import static android.content.pm.PackageManager.FEATURE_STRONGBOX_KEYSTORE;
 

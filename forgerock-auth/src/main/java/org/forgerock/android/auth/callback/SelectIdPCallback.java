@@ -23,11 +23,14 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect an Identity Provider
  */
-@NoArgsConstructor
 public class SelectIdPCallback extends AbstractCallback {
 
     @Getter
     private List<IdPValue> providers;
+
+    @Keep
+    public SelectIdPCallback() {
+    }
 
     @Keep
     public SelectIdPCallback(JSONObject jsonObject, int index) {

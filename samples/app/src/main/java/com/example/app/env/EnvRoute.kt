@@ -28,16 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.app.PreferenceViewModel
-import com.example.app.Topbar
 import org.forgerock.android.auth.FROptions
 
 @Composable
-fun EnvRoute(envViewModel: EnvViewModel, preferenceViewModel: PreferenceViewModel, openDrawer: () -> Unit) {
+fun EnvRoute(envViewModel: EnvViewModel, preferenceViewModel: PreferenceViewModel) {
     val context = LocalContext.current
     envViewModel.select(context, preferenceViewModel.getLastEnv())
     EnvRoute(envViewModel.getAll(),
         envViewModel.current,
-        openDrawer = openDrawer,
         onServerSelected = {
             envViewModel.select(context, it)
             preferenceViewModel.saveEnv(it.server.url)
@@ -48,10 +46,7 @@ fun EnvRoute(envViewModel: EnvViewModel, preferenceViewModel: PreferenceViewMode
 @Composable
 fun EnvRoute(servers: List<FROptions>,
              current: FROptions,
-             openDrawer: () -> Unit,
              onServerSelected: (FROptions) -> Unit) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Topbar(heading = "Select Environment", openDrawer)
         LazyColumn(modifier = Modifier) {
             servers.forEach {
                 item {
@@ -59,7 +54,6 @@ fun EnvRoute(servers: List<FROptions>,
                 }
             }
         }
-    }
 }
 
 @Composable

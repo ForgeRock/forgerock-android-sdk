@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
  * Class representative of a PollingWaitCallback Callback Object which instructs a client to wait for the given period
  * and then resubmit their request.
  */
-@NoArgsConstructor
 @Getter
 public class PollingWaitCallback extends AbstractCallback {
 
@@ -30,6 +29,10 @@ public class PollingWaitCallback extends AbstractCallback {
      * The message which should be displayed to the user
      */
     private String message;
+
+    @Keep
+    public PollingWaitCallback() {
+    }
 
     /**
      * Constructor for creating this Callback

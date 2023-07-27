@@ -8,7 +8,9 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 33
+
+    namespace 'org.forgerock.authenticator.sample'
+    compileSdk 33
 
     defaultConfig {
         applicationId "org.forgerock.authenticator.sample"
@@ -28,8 +30,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     lintOptions {

@@ -96,7 +96,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
 
     @Nullable
     @Override
-    public Set<String> getStringSet(@lombok.NonNull String key, @Nullable Set<String> defValues) {
+    public Set<String> getStringSet(@NonNull String key, @Nullable Set<String> defValues) {
         Set<String> returnValues;
         Object value = get(key);
         if (value instanceof Set) {
@@ -108,31 +108,31 @@ public class SecuredSharedPreferences implements SharedPreferences {
     }
 
     @Override
-    public int getInt(@lombok.NonNull String key, int defValue) {
+    public int getInt(@NonNull String key, int defValue) {
         Object value = get(key);
         return (value instanceof Integer ? (Integer) value : defValue);
     }
 
     @Override
-    public long getLong(@lombok.NonNull String key, long defValue) {
+    public long getLong(@NonNull String key, long defValue) {
         Object value = get(key);
         return (value instanceof Long ? (Long) value : defValue);
     }
 
     @Override
-    public float getFloat(@lombok.NonNull String key, float defValue) {
+    public float getFloat(@NonNull String key, float defValue) {
         Object value = get(key);
         return (value instanceof Float ? (Float) value : defValue);
     }
 
     @Override
-    public boolean getBoolean(@lombok.NonNull String key, boolean defValue) {
+    public boolean getBoolean(@NonNull String key, boolean defValue) {
         Object value = get(key);
         return (value instanceof Boolean ? (Boolean) value : defValue);
     }
 
     @Override
-    public boolean contains(@lombok.NonNull String key) {
+    public boolean contains(@NonNull String key) {
         return sharedPreferences.contains(key);
     }
 
@@ -158,7 +158,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
         return get(key, true);
     }
 
-    private Object get(@lombok.NonNull String key, boolean retry) {
+    private Object get(@NonNull String key, boolean retry) {
         Reject.ifTrue(isKeyAlias(key), "Extract key is not allowed!");
         try {
             String encryptedValue = sharedPreferences.getString(key, null);
@@ -207,7 +207,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
         return keyAlias.equals(key);
     }
 
-    private String decrypt(@lombok.NonNull String data) {
+    private String decrypt(@NonNull String data) {
         try {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (EncryptionException e) {
@@ -294,7 +294,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
 
         @Override
         @NonNull
-        public SharedPreferences.Editor remove(@lombok.NonNull String key) {
+        public SharedPreferences.Editor remove(@NonNull String key) {
             Reject.ifTrue(securedSharedPreferences.isKeyAlias(key), "Remove SecretKey is not allowed!");
             editor.remove(key);
             keysChanged.remove(key);
@@ -338,7 +338,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             keysChanged.clear();
         }
 
-        private void put(@lombok.NonNull String key, Object value, int type) {
+        private void put(@NonNull String key, Object value, int type) {
             Reject.ifTrue(securedSharedPreferences.isKeyAlias(key), "Update SecretKey is not allowed!");
             if (value == null) {
                 remove(key);
@@ -354,7 +354,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             }
         }
 
-        private void put(@lombok.NonNull String key, Set<String> value) {
+        private void put(@NonNull String key, Set<String> value) {
             Reject.ifTrue(securedSharedPreferences.isKeyAlias(key), "Update SecretKey is not allowed!");
             if (value == null) {
                 remove(key);

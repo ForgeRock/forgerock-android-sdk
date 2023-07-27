@@ -7,11 +7,10 @@
 
 package org.forgerock.android.auth;
 
-import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import androidx.annotation.RequiresApi;
-import lombok.NonNull;
+
+import androidx.annotation.NonNull;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

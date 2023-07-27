@@ -8,8 +8,9 @@
 package org.forgerock.android.auth;
 
 import android.os.Build;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import lombok.NonNull;
 
 /**
  * Provide data encryption and decryption for Android N+ device.

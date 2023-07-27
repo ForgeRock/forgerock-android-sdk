@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @Getter
 public class DeviceProfileCallback extends AbstractCallback implements ActionCallback {
 
@@ -40,6 +39,10 @@ public class DeviceProfileCallback extends AbstractCallback implements ActionCal
      * The message which should be displayed to the user
      */
     private String message;
+
+    @Keep
+    public DeviceProfileCallback() {
+    }
 
     @Keep
     public DeviceProfileCallback(JSONObject jsonObject, int index) {

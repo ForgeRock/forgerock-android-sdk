@@ -13,15 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app.Error
-import com.example.app.Topbar
 import com.example.app.callback.ChoiceCallback
 import com.example.app.callback.ConfirmationCallback
 import com.example.app.callback.DeviceBindingCallback
@@ -35,8 +35,6 @@ import com.example.app.callback.SelectIdPCallback
 import com.example.app.callback.TextOutputCallback
 import com.example.app.callback.WebAuthnAuthenticationCallback
 import com.example.app.callback.WebAuthnRegistrationCallback
-import com.example.app.userprofile.UserProfile
-import com.example.app.userprofile.UserProfileViewModel
 import org.forgerock.android.auth.callback.ChoiceCallback
 import org.forgerock.android.auth.callback.ConfirmationCallback
 import org.forgerock.android.auth.callback.DeviceBindingCallback
@@ -52,43 +50,44 @@ import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 
 @Composable
-fun <T> Journey(journeyName: String,
-                journeyViewModel: JourneyViewModel<T>,
-                openDrawer: () -> Unit,
-                onCompletion: (() -> Unit)? = null) {
+fun <T> Journey(journeyViewModel: JourneyViewModel<T>,
+                onSuccess: (() -> Unit)? = null,
+                onFailure: ((Exception) -> Unit)? = null) {
 
     val context = LocalContext.current
     val state by journeyViewModel.state.collectAsState()
+    val currentOnSuccess by rememberUpdatedState(onSuccess)
+    val currentOnFailure by rememberUpdatedState(onFailure)
 
-    Journey(journeyName, state = state, openDrawer,
-        onNext = { state.node?.let { journeyViewModel.next(context, it) } }, onCompletion)
+    Journey(state = state,
+        onNext = { state.node?.let { journeyViewModel.next(context, it) } },
+        currentOnSuccess, currentOnFailure)
 
 }
 
 @Composable
-fun Journey(journeyName: String,
-            state: JourneyState,
-            openDrawer: () -> Unit,
+fun Journey(state: JourneyState,
             onNext: () -> Unit,
-            onCompletion: (() -> Unit)?) {
+            onSuccess: (() -> Unit)?,
+            onFailure: ((Exception) -> Unit)?) {
 
     Column(modifier = Modifier
         .padding(8.dp)
         .fillMaxWidth()) {
         state.session?.apply {
-            val userProfileViewModel =
-                viewModel<UserProfileViewModel>()
-            onCompletion?.let { it() } ?: UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
+            LaunchedEffect(true) {
+                onSuccess?.let { onSuccess() }
+            }
         }
         state.exception?.apply {
-            Error(exception = this, openDrawer)
-            onCompletion?.let { it() }
+            val exception = this
+            Error(exception)
+            LaunchedEffect(true) {
+                onFailure?.let { onFailure(exception) }
+            }
         }
         state.node?.apply {
             var showNext = true
-            if (journeyName.isNotBlank()) {
-                Topbar(heading = "Journey - $journeyName", openDrawer = openDrawer)
-            }
             state.node.callbacks?.forEach {
                 when (it) {
                     is NameCallback -> NameCallback(it)
@@ -140,6 +139,7 @@ fun Journey(journeyName: String,
                         DeviceProfileCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
+
                     is IdPCallback -> {
                         IdPCallback(callback = it, onCompleted = onNext)
                         showNext = false

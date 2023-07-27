@@ -22,7 +22,7 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.22:8080/openam"
+            url = "http://192.168.86.30:8080/openam"
             realm = "root"
             cookieName = "iPlanetDirectoryPro"
             timeout = 50

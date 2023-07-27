@@ -29,6 +29,13 @@ task delombok {
 dokkaJavadoc.dependsOn delombok
 dokkaHtml.dependsOn delombok
 
+tasks.named("dokkaJavadoc").configure {
+    dependsOn("generateDebugRFile")
+    dependsOn("bundleLibCompileToJarDebug")
+    dependsOn("generateReleaseRFile")
+    dependsOn("bundleLibCompileToJarRelease")
+}
+
 dokkaJavadoc {
     dokkaSourceSets {
         named("main") {
