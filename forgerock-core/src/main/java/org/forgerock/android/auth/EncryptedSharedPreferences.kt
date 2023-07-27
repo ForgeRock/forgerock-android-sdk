@@ -6,7 +6,6 @@
  */
 package org.forgerock.android.auth
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
@@ -34,13 +33,14 @@ class EncryptedPreferences {
         fun getInstance(
             context: Context,
             fileName: String = "secret_shared_prefs" + context.packageName,
-            aliasName: String = fileName): SharedPreferences {
+            aliasName: String = fileName
+        ): SharedPreferences {
 
             return try {
                 // Creates or gets the key to encrypt and decrypt.
-               migrationFromBeta(context, fileName)?.let {
-                   return it
-               } ?: createPreferencesFile(context, fileName, aliasName)
+                migrate(context, fileName)?.let {
+                    return it
+                } ?: createPreferencesFile(context, fileName, aliasName)
 
             } catch (e: Exception) {
                 // This is the workaround code when the file got corrupted. Google should provide a fix.
@@ -52,15 +52,16 @@ class EncryptedPreferences {
                 createPreferencesFile(context, fileName, aliasName)
             }
         }
-         fun deleteMasterKeyEntry(masterKeyAlias: String) {
+
+        private fun deleteMasterKeyEntry(masterKeyAlias: String) {
             KeyStore.getInstance(androidKeyStore).apply {
                 load(null)
                 deleteEntry(masterKeyAlias)
             }
         }
 
-         fun deletePreferencesFile(context: Context, fileName: String): Boolean {
-           // Clear the content of the file
+        private fun deletePreferencesFile(context: Context, fileName: String): Boolean {
+            // Clear the content of the file
             context.getSharedPreferences(fileName, MODE_PRIVATE).edit().clear().apply()
             // Delete the file
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -72,10 +73,11 @@ class EncryptedPreferences {
         }
 
         // Creates the instance for the encrypted preferences.
-        fun createPreferencesFile(context: Context,
-                                              fileName: String,
-                                              aliasName: String): SharedPreferences {
-
+        private fun createPreferencesFile(
+            context: Context,
+            fileName: String,
+            aliasName: String
+        ): SharedPreferences {
 
             val masterKeyAlias = MasterKey.Builder(context, aliasName)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -88,6 +90,57 @@ class EncryptedPreferences {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
+        }
+
+        private fun migrate(
+            context: Context,
+            fileName: String = "secret_shared_prefs" + context.packageName,
+            aliasName: String = fileName,
+            sharedPreferences: SharedPreferences = context.getSharedPreferences(
+                "ORG_FORGEROCK_V_1_MIGRATION",
+                MODE_PRIVATE
+            )
+        ): SharedPreferences? {
+
+            var secureSharedPreferences: SharedPreferences? = null
+            val preferenceKey = "migrate"
+            val alreadyMigrated = sharedPreferences.getBoolean(preferenceKey, false)
+
+            if (alreadyMigrated.not()) {
+                val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                // Creates the instance for the encrypted preferences.
+                val preferences = EncryptedSharedPreferences.create(
+                    fileName,
+                    masterKeyAlias,
+                    context,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+
+                val cache = mutableMapOf<String, MutableSet<String>>()
+                preferences.all.entries.map { it.key }.forEach { key ->
+                    preferences.getStringSet(key, emptySet())?.let {
+                        val result = mutableSetOf<String>()
+                        result.addAll(it)
+                        cache[key] = result
+                    }
+                }
+                // deleting all the 1.0.0 files
+                preferences.edit().clear().apply()
+                deleteMasterKeyEntry(masterKeyAlias)
+                deletePreferencesFile(context, fileName)
+
+                // creating all 1.0.5 alpha files
+                secureSharedPreferences =
+                    createPreferencesFile(context, fileName, aliasName)
+                secureSharedPreferences.edit().apply {
+                    cache.forEach {
+                        this.putStringSet(it.key, it.value)
+                    }
+                }.apply()
+                sharedPreferences.edit()?.putBoolean(preferenceKey, true)?.apply()
+            }
+            return secureSharedPreferences
         }
     }
 }
