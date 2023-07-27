@@ -19,60 +19,10 @@ import java.security.KeyStore
 
 class EncryptedPreferences {
     companion object {
+
         private val tag = EncryptedPreferences::class.java.simpleName
-
-        /**
-         * create the encrypted shared preference for the given filename
-         * @param context  The application context
-         * @param fileName The default value is the secret_shared_prefs + (package name of the application)
-         */
-        @SuppressLint("SuspiciousIndentation")
-        fun getInstance(
-            context: Context,
-            fileName: String = "secret_shared_prefs" + context.packageName
-        ): SharedPreferences {
-
-            var masterKeyAlias: String? = null
-            try {
-                 masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-                // Creates the instance for the encrypted preferences.
-                return EncryptedSharedPreferences.create(
-                    fileName,
-                    masterKeyAlias,
-                    context,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                )
-            }
-            catch (e: java.lang.Exception) {
-                Logger.error(EncryptedPreferences.tag, e.message)
-                val deleted = NewEncryptedPreferences.deletePreferencesFile(context, fileName)
-                Logger.debug(EncryptedPreferences.tag, "Shared prefs file deleted: $deleted")
-                masterKeyAlias?.let {
-                    NewEncryptedPreferences.deleteMasterKeyEntry(it)
-                }
-                masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-                    return EncryptedSharedPreferences.create(
-                        fileName,
-                        masterKeyAlias,
-                        context,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    )
-            }
-            // Creates or gets the key to encrypt and decrypt.
-
-        }
-    }
-}
-
-
-class NewEncryptedPreferences {
-    companion object {
-
-        private val tag = NewEncryptedPreferences::class.java.simpleName
         private const val androidKeyStore = "AndroidKeyStore"
+
         /**
          * create the encrypted shared preference for the given filename
          * @param context  The application context
@@ -88,7 +38,10 @@ class NewEncryptedPreferences {
 
             return try {
                 // Creates or gets the key to encrypt and decrypt.
-                createPreferencesFile(context, fileName, aliasName)
+               migrationFromBeta(context, fileName)?.let {
+                   return it
+               } ?: createPreferencesFile(context, fileName, aliasName)
+
             } catch (e: Exception) {
                 // This is the workaround code when the file got corrupted. Google should provide a fix.
                 // Issue - https://github.com/google/tink/issues/535
@@ -99,7 +52,6 @@ class NewEncryptedPreferences {
                 createPreferencesFile(context, fileName, aliasName)
             }
         }
-
          fun deleteMasterKeyEntry(masterKeyAlias: String) {
             KeyStore.getInstance(androidKeyStore).apply {
                 load(null)
@@ -120,7 +72,7 @@ class NewEncryptedPreferences {
         }
 
         // Creates the instance for the encrypted preferences.
-        private fun createPreferencesFile(context: Context,
+        fun createPreferencesFile(context: Context,
                                               fileName: String,
                                               aliasName: String): SharedPreferences {
 
