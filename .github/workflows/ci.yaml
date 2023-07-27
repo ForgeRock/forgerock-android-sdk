@@ -3,14 +3,14 @@ name: CI
 # Trigger on push or pull request
 on:
   pull_request:
-    permissions: write-all
     types: [opened, reopened, synchronize, edited]
-
+  
   push:
     branches:
       - master
       - develop
-
+      
+permissions: write-all
 jobs:
   # Build and run unit tests
   build-and-test:
