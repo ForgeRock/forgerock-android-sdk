@@ -7,6 +7,7 @@
 #### Fixed
 - Fixed an issue on parsing `issuer` from combined MFA registration uri [SDKS-2542]
 - Added error message about duplicated accounts while performing combined MFA registration [SDKS-2627]
+- Fixed an issue related to "lost" WebAuthn credentials upon upgrade from 4.0.0-beta4 to newer version [SDKS-2576]
 
 ## [4.0.0]
 #### Added
