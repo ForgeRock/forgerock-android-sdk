@@ -164,6 +164,10 @@ class DefaultTokenManager implements TokenManager {
             Listener.onException(listener, new AuthenticationRequiredException("Refresh Token does not exists."));
             return;
         }
+        //If the access token is not expired yet, revoke it
+        if (!accessToken.isExpired()) {
+            oAuth2Client.revoke(accessToken, false, null);
+        }
         Logger.debug(TAG, "Exchange AccessToken with Refresh Token");
         oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<AccessToken>() {
             @Override

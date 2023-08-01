@@ -11,6 +11,7 @@ import org.forgerock.android.auth.exception.MechanismParsingException;
 
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Provides the ability to parse URI scheme into a convenient format
@@ -52,6 +53,11 @@ class OathParser extends MechanismParser {
         // Secret is REQUIRED
         if (!containsNonEmpty(values, SECRET)) {
             throw new MechanismParsingException("Secret is required");
+        }
+
+        // Decode Issuer for MFAUTH schemes
+        if (containsNonEmpty(values, ISSUER) && Objects.equals(values.get(SCHEME), Mechanism.MFAUTH)) {
+            values.put(ISSUER, getBase64DecodedString(values.get(ISSUER)));
         }
 
         return values;

@@ -11,6 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.app.userprofile.UserProfileState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import org.forgerock.android.auth.AccessToken
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.FRUser
@@ -18,7 +21,7 @@ import java.lang.Exception
 
 class TokenViewModel : ViewModel() {
 
-    var state by mutableStateOf<AccessToken?>(null)
+    var state = MutableStateFlow(TokenState())
         private set
 
     init {
@@ -28,13 +31,41 @@ class TokenViewModel : ViewModel() {
     fun getAccessToken() {
         FRUser.getCurrentUser()?.getAccessToken(object : FRListener<AccessToken> {
             override fun onSuccess(result: AccessToken) {
-                state = result
+                state.update {
+                    it.copy(result, null)
+                }
             }
 
             override fun onException(e: Exception) {
-                state = null
+                state.update {
+                    it.copy(null, e)
+                }
             }
         })
+    }
+
+    fun forceRefresh(token: AccessToken? = FRUser.getCurrentUser()?.accessToken) {
+        token?.let {
+            FRUser.getCurrentUser()?.refresh(object : FRListener<AccessToken> {
+                override fun onSuccess(result: AccessToken) {
+                    state.update {
+                        it.copy(result, null)
+                    }
+                }
+
+                override fun onException(e: Exception) {
+                    state.update {
+                        it.copy(null, e)
+                    }
+                }
+            })
+        }
+    }
+
+    fun setNullState() {
+        state.update {
+            it.copy(null, null)
+        }
     }
 
 }

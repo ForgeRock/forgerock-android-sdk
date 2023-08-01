@@ -1,3 +1,14 @@
+## [4.1.0]
+#### Added
+- Interceptor support for the Authenticator module [SDKS-2544]
+- Interface for access_token refresh [SDKS-2567]
+- Ability to process new JSON format of IG policy advice [SDKS-2240]
+
+#### Fixed
+- Fixed an issue on parsing `issuer` from combined MFA registration uri [SDKS-2542]
+- Added error message about duplicated accounts while performing combined MFA registration [SDKS-2627]
+- Fixed an issue related to "lost" WebAuthn credentials upon upgrade from 4.0.0-beta4 to newer version [SDKS-2576]
+
 ## [4.0.0]
 #### Added
 - Upgrade Google Fido Client to support PassKey [SDKS-2243]

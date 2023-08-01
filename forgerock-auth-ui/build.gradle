@@ -40,6 +40,12 @@ android {
 apply from: '../config/kdoc.gradle'
 apply from: '../config/publish.gradle'
 
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.android.gms:play-services-basement:18.1.0'
+    }
+}
+
 dependencies {
 
     api project(':forgerock-auth')
@@ -55,7 +61,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.5.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
-    compileOnly 'com.google.android.gms:play-services-fido:19.0.1'
+    compileOnly 'com.google.android.gms:play-services-fido:20.0.1'
 
     compileOnly "org.projectlombok:lombok:1.18.8"
     delombok "org.projectlombok:lombok:1.18.8"

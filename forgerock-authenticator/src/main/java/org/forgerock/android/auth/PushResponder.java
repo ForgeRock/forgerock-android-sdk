@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -47,6 +47,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -201,7 +202,8 @@ class PushResponder {
                     amlbCookie,
                     base64Secret,
                     messageId,
-                    payload);
+                    payload,
+                    Action.PUSH_REGISTER);
 
             // Invoke URL
             okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -262,7 +264,8 @@ class PushResponder {
                 pushNotification.getAmlbCookie(),
                 pushNotification.getPushMechanism().getSecret(),
                 pushNotification.getMessageId(),
-                payload);
+                payload,
+                Action.PUSH_AUTHENTICATE);
 
         // Invoke URL
         okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
@@ -314,6 +317,7 @@ class PushResponder {
                 .timeout(TIMEOUT)
                 .timeUnit(SECONDS)
                 .host(url.getAuthority())
+                .interceptorSupplier(() -> singletonList(new OkHttpRequestInterceptor()))
                 .build();
 
         // Obtain instance of OkHttp client
@@ -330,7 +334,7 @@ class PushResponder {
      * @return the request object
      */
     private Request buildRequest(URL url, String amlbCookie, String base64Secret,
-                                 String messageId, Map<String, Object> data)
+                                 String messageId, Map<String, Object> data, String action)
             throws IllegalArgumentException, JOSEException, JSONException {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(url.toString());
@@ -348,6 +352,7 @@ class PushResponder {
         message.put("jwt", generateJwt(base64Secret, data));
         RequestBody body = RequestBody.create(message.toString(), MediaType.parse("application/json; charset=utf-8"));
         requestBuilder.post(body);
+        requestBuilder.tag(new Action(action));
 
         return requestBuilder.build();
     }

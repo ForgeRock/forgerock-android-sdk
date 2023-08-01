@@ -16,16 +16,16 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.AuthenticatorException;
+import org.forgerock.android.auth.exception.DuplicateMechanismException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.FRAPolicy;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 class AuthenticatorManager {
 
@@ -296,6 +296,14 @@ class AuthenticatorManager {
     }
 
     private void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
+        // Check if account already exist
+        List<Mechanism> mechanismList = returnDuplicatedMechanisms(uri);
+        if (mechanismList != null && !mechanismList.isEmpty()) {
+            listener.onException(new DuplicateMechanismException("Matching mechanism already exists",
+                    mechanismList.get(0)));
+            return;
+        }
+
         // Check if security policies are available in the URI before proceed with registration
         Logger.debug(TAG, "Evaluating policies for the new Account");
         FRAPolicyEvaluator.Result result = policyEvaluator.evaluate(context, uri);
@@ -365,6 +373,24 @@ class AuthenticatorManager {
             account.unlock();
             storageClient.setAccount(account);
         }
+    }
+
+    private List<Mechanism> returnDuplicatedMechanisms(String uri) {
+        PushParser parser = new PushParser();
+        Map<String, String> map;
+
+        try {
+            map = parser.map(uri);
+            String id = map.get(MechanismParser.ISSUER) + "-" + map.get(MechanismParser.ACCOUNT_NAME);
+            Account account = storageClient.getAccount(id);
+            if (account != null) {
+                return storageClient.getMechanismsForAccount(account);
+            }
+        } catch (MechanismParsingException e) {
+            Logger.error(TAG, "Error parsing URI.", e);
+        }
+
+        return null;
     }
 
     @VisibleForTesting

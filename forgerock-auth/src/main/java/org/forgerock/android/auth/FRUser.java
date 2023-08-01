@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -93,6 +93,17 @@ public class FRUser {
 
     public void revokeAccessToken(FRListener<Void> listener) {
         sessionManager.revokeAccessToken(listener);
+    }
+
+    /**
+     * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not
+     * refresh the token and persist it.
+     *
+     * @param listener    Listener to listen for refresh event.
+     */
+    @WorkerThread
+    public void refresh(FRListener<AccessToken> listener) {
+        sessionManager.refresh(listener);
     }
 
     /**

@@ -5,58 +5,36 @@
  *  of the MIT license. See the LICENSE file for details.
  */
 
-package com.example.app.token
+package com.example.app.device
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.app.Alert
 import com.example.app.Topbar
 import org.json.JSONObject
 
 @Composable
-fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
+fun DeviceProfileRoute(deviceProfileViewModel: DeviceProfileViewModel, openDrawer: () -> Unit) {
 
-    val tokenState by tokenViewModel.state.collectAsState()
+    val result: JSONObject? = deviceProfileViewModel.state
     val scroll = rememberScrollState(0)
 
     Column(modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()
     ) {
-        Topbar(heading = "Access Token", openDrawer = openDrawer)
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(
-                onClick = { tokenViewModel.getAccessToken() }) {
-                Text(text = "Refresh")
-            }
-            Button(
-                onClick = { tokenViewModel.forceRefresh() }) {
-                Text(text = "ForceRefresh")
-            }
-            Button(
-                onClick = { tokenViewModel.setNullState() }) {
-                Text(text = "Clear")
-            }
-        }
+        Topbar(heading = "Device Profile", openDrawer = openDrawer)
         Card(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 10.dp,
@@ -70,12 +48,8 @@ fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
                 modifier = Modifier
                     .padding(4.dp)
                     .verticalScroll(scroll),
-                text = tokenState.accessToken?.toJson()?.let {
-                    JSONObject(it).toString(4)
-                } ?: "")
-        }
-        tokenState.exception?.apply {
-            Alert(throwable = this)
+                text = result?.toString(4)
+                    ?: "")
         }
     }
 }

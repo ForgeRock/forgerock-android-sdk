@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -212,12 +212,25 @@ public class OAuth2Client {
      * @param listener    Listener to listen for revoke event
      */
     public void revoke(@NonNull AccessToken accessToken, final FRListener<Void> listener) {
+        revoke(accessToken, true, listener);
+    }
+
+    /**
+     * Revoke the AccessToken, to revoke the access token, first look for refresh token to revoke, if
+     * not provided or useRefreshToken = false, will revoke with the access token.
+     *
+     * @param accessToken The AccessToken to be revoked
+     * @param useRefreshToken If true, revoke with refresh token, otherwise revoke access token
+     * @param listener    Listener to listen for revoke event
+     */
+    public void revoke(@NonNull AccessToken accessToken, boolean useRefreshToken, final FRListener<Void> listener) {
         Logger.debug(TAG, "Revoking Access Token & Refresh Token");
         final OAuth2ResponseHandler handler = new OAuth2ResponseHandler();
         try {
             FormBody.Builder builder = new FormBody.Builder();
 
-            String token = accessToken.getRefreshToken() == null ? accessToken.getValue() : accessToken.getRefreshToken();
+            String token = accessToken.getRefreshToken() == null || !useRefreshToken
+                    ? accessToken.getValue() : accessToken.getRefreshToken();
 
             RequestBody body = builder
                     .add(OAuth2.CLIENT_ID, clientId)

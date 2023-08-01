@@ -1,13 +1,11 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
-
-import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
 import java.util.Map;
 
@@ -50,9 +48,8 @@ public interface TokenManager {
      *
      * @param accessToken AccessToken
      * @param listener    Listener to listen for refresh event.
-     * @throws AuthenticationRequiredException When failed to Refresh the {@link AccessToken}
      */
-    void refresh(AccessToken accessToken, FRListener<AccessToken> listener) throws AuthenticationRequiredException;
+    void refresh(AccessToken accessToken, FRListener<AccessToken> listener);
 
     /**
      * Get the {@link AccessToken} asynchronously,

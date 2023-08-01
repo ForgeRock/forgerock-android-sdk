@@ -1,0 +1,43 @@
+# Documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/forgerock-core" # Location of package manifests
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
+    labels:
+      - "library update"
+    assignees:
+      - "spetrov"
+    reviewers:
+      - "witrisna"
+      - "jeyanthanperiyasamy"
+
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/forgerock-auth" # Location of package manifests
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
+    labels:
+      - "library update"
+    assignees:
+      - "spetrov"
+    reviewers:
+      - "witrisna"
+      - "jeyanthanperiyasamy"
+
+  - package-ecosystem: "gradle" # See documentation for possible values
+    directory: "/forgerock-authenticator" # Location of package manifests
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
+    labels:
+      - "library update"
+    assignees:
+      - "spetrov"
+    reviewers:
+      - "witrisna"
+      - "jeyanthanperiyasamy"

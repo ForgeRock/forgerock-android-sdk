@@ -97,7 +97,7 @@ public class PushParserTest {
 
     @Test
     public void testShouldParseMfaUri() throws MechanismParsingException {
-        String uri = "mfauth://totp/Test:demo?" +
+        String uri = "mfauth://totp/ForgeRock:demo?" +
                 "a=aHR0cHM6Ly9mb3JnZXJvY2suZXhhbXBsZS5jb20vb3BlbmFtL2pzb24vcHVzaC9zbnMvbWVzc2FnZT9fYWN0aW9uPWF1dGhlbnRpY2F0ZQ&" +
                 "image=https://img.favpng.com/9/25/24/computer-icons-instagram-logo-sticker-png-favpng-LZmXr3KPyVbr8LkxNML458QV3.jpg&" +
                 "b=ff00ff&" +
@@ -109,10 +109,11 @@ public class PushParserTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&";
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
         Map<String, String> result = pushParser.map(uri);
         assertEquals(result.get(PushParser.ACCOUNT_NAME), "demo");
-        assertEquals(result.get(PushParser.ISSUER), "Test");
+        assertEquals(result.get(PushParser.ISSUER), "ForgeRock");
         assertEquals(result.get(PushParser.IMAGE),"https://img.favpng.com/9/25/24/computer-icons-instagram-logo-sticker-png-favpng-LZmXr3KPyVbr8LkxNML458QV3.jpg");
         assertEquals(result.get(PushParser.MESSAGE_ID), "9326d19c-4d08-4538-8151-f8558e71475f1464361288472");
         assertEquals(result.get(PushParser.AM_LOAD_BALANCER_COOKIE), "amlbcookie=01");

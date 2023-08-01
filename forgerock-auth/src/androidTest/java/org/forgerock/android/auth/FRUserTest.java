@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -73,6 +73,18 @@ public class FRUserTest extends AndroidBaseTest {
         FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
         FRUser.getCurrentUser().getAccessToken(future);
         assertNotNull(future.get());
+    }
+    @Test
+    public void testRefreshTokenAsync() throws Exception {
+        testLogin();
+        FRListenerFuture<AccessToken> future = new FRListenerFuture<>();
+        FRUser.getCurrentUser().getAccessToken(future);
+        AccessToken token = future.get();
+        assertNotNull(token);
+        FRListenerFuture<AccessToken> refreshTokenFuture = new FRListenerFuture<>();
+        FRUser.getCurrentUser().refresh(refreshTokenFuture);
+        AccessToken token1 = future.get();
+        assertNotNull(token1);
     }
 
     @Test

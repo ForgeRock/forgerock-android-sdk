@@ -524,13 +524,14 @@ public class OathFactoryTest extends FRABaseTest {
                 "policies=eyJiaW9tZXRyaWNBdmFpbGFibGUiOiB7IH0sImRldmljZVRhbXBlcmluZyI6IHsic2NvcmUiOiAwLjh9fQ&" +
                 "digits=6&" +
                 "secret=R2PYFZRISXA5L25NVSSYK2RQ6E======&" +
-                "period=30&";
+                "period=30&" +
+                "issuer=Rm9yZ2VSb2Nr";
 
         factory.createFromUri(uri, oathListenerFuture);
         TOTPMechanism oath = (TOTPMechanism) oathListenerFuture.get();
         assertEquals(oath.getOathType(), OathMechanism.TokenType.TOTP);
         assertEquals(oath.getAccountName(), "demo");
-        assertEquals(oath.getIssuer(), "Forgerock");
+        assertEquals(oath.getIssuer(), "ForgeRock");
         assertEquals(oath.getDigits(), 6);
         assertEquals(oath.getPeriod(), 30);
     }
