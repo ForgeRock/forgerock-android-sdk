@@ -18,9 +18,12 @@ import lombok.NoArgsConstructor;
  * Callback to display information messages,
  * warning messages and error messages.
  */
-@NoArgsConstructor
 @Getter
 public class SuspendedTextOutputCallback extends TextOutputCallback {
+
+    @Keep
+    public SuspendedTextOutputCallback() {
+    }
 
     @Keep
     public SuspendedTextOutputCallback(JSONObject raw, int index) {

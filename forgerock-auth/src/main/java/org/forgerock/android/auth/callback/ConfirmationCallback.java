@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to retrieve the selected option from a list of options
  */
-@NoArgsConstructor
 @Getter
 public class ConfirmationCallback extends AbstractPromptCallback {
 
@@ -68,6 +67,10 @@ public class ConfirmationCallback extends AbstractPromptCallback {
     private int messageType;
 
     private int selectedIndex;
+
+    @Keep
+    public ConfirmationCallback() {
+    }
 
     @Keep
     public ConfirmationCallback(JSONObject jsonObject, int index) throws JSONException {

@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect user's Consent.
  */
-@NoArgsConstructor
 @Getter
 public class ConsentMappingCallback extends AbstractCallback {
 
@@ -29,6 +28,10 @@ public class ConsentMappingCallback extends AbstractCallback {
     private boolean isRequired;
     private String[] fields;
     private String message;
+
+    @Keep
+    public ConsentMappingCallback() {
+    }
 
     @Keep
     public ConsentMappingCallback(JSONObject jsonObject, int index) {

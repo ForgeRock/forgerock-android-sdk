@@ -21,9 +21,9 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect a password and validate it using IDM policy.
  */
-@NoArgsConstructor
 @Getter
 public class ValidatedPasswordCallback extends AbstractValidatedCallback {
+
 
     /**
      * Return whether the password
@@ -37,6 +37,10 @@ public class ValidatedPasswordCallback extends AbstractValidatedCallback {
     private boolean echoOn;
 
     private String prompt;
+
+    @Keep
+    public ValidatedPasswordCallback() {
+    }
 
     @Keep
     public ValidatedPasswordCallback(@NotNull JSONObject raw, int index) throws JSONException {

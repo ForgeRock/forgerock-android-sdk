@@ -5,8 +5,7 @@
   ~ of the MIT license. See the LICENSE file for details.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.forgerock.android.auth">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
 

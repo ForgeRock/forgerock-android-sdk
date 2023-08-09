@@ -19,20 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.app.Alert
-import com.example.app.Topbar
 
 @Composable
-fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Unit) {
+fun UserProfile(userProfileViewModel: UserProfileViewModel) {
 
     val state by userProfileViewModel.state.collectAsState()
 
-    Column(modifier = Modifier
+    Column(modifier = Modifier.padding(8.dp)
         .fillMaxWidth()) {
-        Topbar(heading = "UserInfo", openDrawer = openDrawer)
         state.user?.apply {
             val userinfo = this
             Card(
@@ -40,8 +39,7 @@ fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Un
                     defaultElevation = 10.dp,
                 ),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                    .fillMaxWidth(),
                 border = BorderStroke(2.dp, Color.Black),
                 shape = MaterialTheme.shapes.medium) {
                 Text(
@@ -54,6 +52,7 @@ fun UserProfile(userProfileViewModel: UserProfileViewModel, openDrawer: () -> Un
         }
 
         Button(
+            modifier = Modifier.align(Alignment.End),
             onClick = { userProfileViewModel.userinfo() }) {
             Text(text = "Show UserInfo")
         }

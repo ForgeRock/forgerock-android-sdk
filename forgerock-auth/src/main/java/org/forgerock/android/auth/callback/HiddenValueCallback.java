@@ -13,12 +13,14 @@ import org.json.JSONObject;
 
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class HiddenValueCallback extends AbstractCallback {
 
     private String value;
     private String id;
     private String defaultValue = "";
+
+    public HiddenValueCallback() {
+    }
 
     @Keep
     public HiddenValueCallback(JSONObject jsonObject, int index) {

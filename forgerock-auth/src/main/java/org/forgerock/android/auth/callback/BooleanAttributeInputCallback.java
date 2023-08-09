@@ -13,12 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Implements a Callback for collection of a single identity object attribute from a user.
  */
-@NoArgsConstructor
 @Getter
 public class BooleanAttributeInputCallback extends AttributeInputCallback {
 
@@ -27,6 +25,10 @@ public class BooleanAttributeInputCallback extends AttributeInputCallback {
      */
     private Boolean value;
 
+    @Keep
+    public BooleanAttributeInputCallback() {
+    }
+
     /**
      * Constructor for this Callback.
      */
@@ -34,6 +36,7 @@ public class BooleanAttributeInputCallback extends AttributeInputCallback {
     public BooleanAttributeInputCallback(JSONObject jsonObject, int index) throws JSONException {
         super(jsonObject, index);
     }
+
 
     @Override
     protected void setAttribute(String name, Object value) {

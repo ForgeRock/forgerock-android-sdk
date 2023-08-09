@@ -8,6 +8,7 @@ package org.forgerock.android.auth.callback
 
 import android.content.Context
 import android.util.Base64
+import androidx.annotation.Keep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,9 +42,11 @@ import java.util.*
  */
 open class DeviceBindingCallback : AbstractCallback, Binding {
 
+    @Keep
     @JvmOverloads
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
+    @Keep
     @JvmOverloads
     constructor() : super()
 

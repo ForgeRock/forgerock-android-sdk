@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth;
+
+import androidx.annotation.NonNull;
 
 import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationException;
@@ -15,9 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
-import java.util.Objects;
 
-import lombok.NonNull;
 import okhttp3.Response;
 
 /**

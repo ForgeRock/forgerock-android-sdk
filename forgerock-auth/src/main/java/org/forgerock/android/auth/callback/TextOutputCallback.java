@@ -12,22 +12,26 @@ import androidx.annotation.Keep;
 import org.json.JSONObject;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Callback to display information messages,
  * warning messages and error messages.
  */
-@NoArgsConstructor
 @Getter
 public class TextOutputCallback extends AbstractCallback {
 
     //Message Type
-    /** Information message. */
+    /**
+     * Information message.
+     */
     public static final int INFORMATION = 0;
-    /** Warning message. */
+    /**
+     * Warning message.
+     */
     public static final int WARNING = 1;
-    /** Error message. */
+    /**
+     * Error message.
+     */
     public static final int ERROR = 2;
 
     /**
@@ -43,6 +47,10 @@ public class TextOutputCallback extends AbstractCallback {
     @Keep
     public TextOutputCallback(JSONObject raw, int index) {
         super(raw, index);
+    }
+
+    @Keep
+    public TextOutputCallback() {
     }
 
     @Override

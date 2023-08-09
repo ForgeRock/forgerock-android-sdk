@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect a username and validate it against IDM policy.
  */
-@NoArgsConstructor
 @Getter
 public class ValidatedUsernameCallback extends AbstractValidatedCallback {
 
@@ -28,6 +27,10 @@ public class ValidatedUsernameCallback extends AbstractValidatedCallback {
     @Keep
     public ValidatedUsernameCallback(@NotNull JSONObject raw, int index) throws JSONException {
         super(raw, index);
+    }
+
+    @Keep
+    public ValidatedUsernameCallback() {
     }
 
     @Override

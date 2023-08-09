@@ -30,12 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.app.Topbar
 import org.forgerock.android.auth.webauthn.PublicKeyCredentialSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WebAuthRoute(webAuthnViewModel: WebAuthnViewModel, openDrawer: () -> Unit) {
+fun WebAuthRoute(webAuthnViewModel: WebAuthnViewModel) {
 
     val sources by webAuthnViewModel.sources.collectAsState()
 
@@ -75,8 +74,7 @@ fun WebAuthRoute(webAuthnViewModel: WebAuthnViewModel, openDrawer: () -> Unit) {
         )
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Topbar(heading = "WebAuthn Keys", openDrawer)
+    Column(modifier = Modifier.padding(8.dp)) {
         Row(modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()) {

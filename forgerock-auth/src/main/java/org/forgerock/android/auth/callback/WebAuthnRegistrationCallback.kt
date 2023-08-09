@@ -8,6 +8,7 @@ package org.forgerock.android.auth.callback
 
 import android.annotation.TargetApi
 import android.content.Context
+import androidx.annotation.Keep
 import com.google.android.gms.fido.fido2.api.common.ResidentKeyRequirement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,9 +28,11 @@ import org.json.JSONObject
 @TargetApi(24)
 open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
 
+    @Keep
     @JvmOverloads
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
+    @Keep
     @JvmOverloads
     constructor() : super()
 

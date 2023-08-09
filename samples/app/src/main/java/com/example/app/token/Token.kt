@@ -27,21 +27,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.app.Alert
-import com.example.app.Topbar
 import org.json.JSONObject
 
 @Composable
-fun Token(tokenViewModel: TokenViewModel, openDrawer: () -> Unit) {
+fun Token(tokenViewModel: TokenViewModel) {
 
     val tokenState by tokenViewModel.state.collectAsState()
     val scroll = rememberScrollState(0)
 
     Column(modifier = Modifier
-        .padding(16.dp)
         .fillMaxWidth()
     ) {
-        Topbar(heading = "Access Token", openDrawer = openDrawer)
-        Row(modifier = Modifier
+        Row(modifier = Modifier.padding(8.dp)
             .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(

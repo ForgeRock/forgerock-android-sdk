@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth.callback;
 
+import androidx.annotation.Keep;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

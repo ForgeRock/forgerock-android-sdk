@@ -25,10 +25,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.Builder;
-import lombok.NonNull;
 
 import static org.forgerock.android.auth.OAuth2.ACCESS_TOKEN;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
+
+import androidx.annotation.NonNull;
 
 /**
  * Default implementation for {@link TokenManager}. By default this class uses {@link SecuredSharedPreferences} to persist

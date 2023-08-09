@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -15,9 +15,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import lombok.Builder;
-import lombok.NonNull;
 
 import static java.util.Collections.emptySet;
+
+import androidx.annotation.NonNull;
 
 /**
  * Manage SSO Token with {@link SharedPreferences} as the storage.

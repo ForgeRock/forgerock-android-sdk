@@ -24,7 +24,7 @@ import com.example.app.userprofile.UserProfile
 import com.example.app.userprofile.UserProfileViewModel
 
 @Composable
-fun Centralize(centralizeLoginViewModel: CentralizeLoginViewModel, openDrawer: () -> Unit) {
+fun Centralize(centralizeLoginViewModel: CentralizeLoginViewModel) {
 
     val activity = LocalContext.current as FragmentActivity
 
@@ -42,10 +42,10 @@ fun Centralize(centralizeLoginViewModel: CentralizeLoginViewModel, openDrawer: (
         state.user?.apply {
             val userProfileViewModel =
                 viewModel<UserProfileViewModel>()
-            UserProfile(userProfileViewModel = userProfileViewModel, openDrawer)
+            UserProfile(userProfileViewModel = userProfileViewModel)
         }
         state.exception?.apply {
-            Error(exception = this, openDrawer)
+            Error(exception = this)
         }
     }
 }
