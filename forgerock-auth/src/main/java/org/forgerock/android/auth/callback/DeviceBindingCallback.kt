@@ -122,7 +122,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
         "description" -> description = value as? String ?: ""
         "timeout" -> timeout = value as? Int
         "attestation" -> attestation = Attestation
-            .fromString(value as String, Base64.decode(challenge, Base64.NO_WRAP))
+            .fromBoolean(value as Boolean, Base64.decode(challenge, Base64.NO_WRAP))
         else -> {}
     }
 

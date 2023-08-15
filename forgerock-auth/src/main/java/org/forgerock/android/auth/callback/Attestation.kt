@@ -10,15 +10,13 @@ package org.forgerock.android.auth.callback
 sealed class Attestation(val challenge: ByteArray? = null) : java.io.Serializable {
     object None : Attestation()
     class Default(challenge: ByteArray) : Attestation(challenge)
-    class Custom(challenge: ByteArray) : Attestation(challenge)
 
     companion object {
-        fun fromString(value: String, challenge: ByteArray): Attestation =
-            when (value.lowercase()) {
-                "none" -> None
-                "default" -> Default(challenge)
-                "custom" -> Custom(challenge)
-                else -> throw java.lang.IllegalArgumentException("Unsupported attestation parameter")
+        fun fromBoolean(value: Boolean, challenge: ByteArray): Attestation =
+            if (value) {
+                Default(challenge)
+            } else {
+                None
             }
     }
 }
