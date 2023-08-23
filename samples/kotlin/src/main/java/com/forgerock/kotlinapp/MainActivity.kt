@@ -216,20 +216,20 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                     "WebAuthnAuthenticationCallback" -> {
                         val webAuthCallback =
                             node.getCallback(WebAuthnAuthenticationCallback::class.java)
-                        webAuthCallback?.authenticate(this, node, listener = object : FRListener<Void> {
+                        webAuthCallback?.authenticate(this, node, listener = object : FRListener<Void?> {
                             override fun onException(e: Exception) {
                                 node.next(activity, activity)
                             }
 
-                            override fun onSuccess(result: Void) {
+                            override fun onSuccess(result: Void?) {
                                 node.next(activity, activity)
                             }
                         })
                     }
                     "WebAuthnRegistrationCallback" -> {
                         val callback = node.getCallback(WebAuthnRegistrationCallback::class.java)
-                        callback?.register(this, node= node, listener = object : FRListener<Void> {
-                            override fun onSuccess(result: Void) {
+                        callback?.register(this, node= node, listener = object : FRListener<Void?> {
+                            override fun onSuccess(result: Void?) {
                                 node.next(activity, activity)
                             }
 

@@ -77,7 +77,7 @@ open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
      */
     @JvmOverloads
     fun register(context: Context, deviceName: String? = null, node: Node,
-                 listener: FRListener<Void>) {
+                 listener: FRListener<Void?>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
