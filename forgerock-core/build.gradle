@@ -15,14 +15,14 @@ apply plugin: 'org.jetbrains.dokka'
 android {
     namespace 'org.forgerock.android.core'
 
-    compileSdk 33
+    compileSdk 34
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         buildConfigField 'String', 'VERSION_NAME', "\"" + VERSION + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -78,8 +78,8 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
-    implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
@@ -100,11 +100,11 @@ dependencies {
 
     //For Application Pin
     androidTestImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
-    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     testImplementation 'androidx.test.ext:junit:1.1.5'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'org.robolectric:robolectric:4.9.2'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.23.1'

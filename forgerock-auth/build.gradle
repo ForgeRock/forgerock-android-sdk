@@ -17,13 +17,13 @@ android {
     namespace 'org.forgerock.android.auth'
     testNamespace 'org.forgerock.android.auth.androidTest'
 
-    compileSdk 33
+    compileSdk 34
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 'appAuthRedirectScheme': 'org.forgerock.demo'
@@ -95,12 +95,12 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    def coroutine_version = '1.6.4'
+    def coroutine_version = '1.7.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutine_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.fragment:fragment-ktx:1.5.6'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
 
     //Make it optional for developer
     compileOnly 'com.google.android.gms:play-services-location:21.0.1'
@@ -117,7 +117,7 @@ dependencies {
     compileOnly 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
 
     //Social Login
-    compileOnly 'com.google.android.gms:play-services-auth:20.5.0'
+    compileOnly 'com.google.android.gms:play-services-auth:20.6.0'
     compileOnly 'com.facebook.android:facebook-login:16.0.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -134,25 +134,23 @@ dependencies {
     androidTestImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
     //For Application Pin
     androidTestImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
-    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
-
-
+    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'androidx.test.ext:junit:1.1.5'
     testImplementation 'androidx.test:runner:1.5.2'
-    testImplementation 'androidx.fragment:fragment-testing:1.5.6'
+    testImplementation 'androidx.fragment:fragment-testing:1.6.1'
     testImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'org.robolectric:robolectric:4.9.2'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.23.1'
     testImplementation "androidx.test.espresso:espresso-intents:3.5.1"
     testImplementation 'net.openid:appauth:0.11.1'
     testImplementation 'com.google.android.gms:play-services-fido:20.0.1'
-    testImplementation 'com.google.android.gms:play-services-auth:20.5.0'
+    testImplementation 'com.google.android.gms:play-services-auth:20.6.0'
     testImplementation 'com.facebook.android:facebook-login:16.0.0'
     testImplementation 'com.google.android.gms:play-services-safetynet:18.0.1'
     testImplementation 'org.jeasy:easy-random-core:4.0.0'
@@ -161,8 +159,8 @@ dependencies {
 
     //Application Pin
     testImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
-    testImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
+    testImplementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.2'
 
     testImplementation 'org.mockito:mockito-core:4.8.1'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'

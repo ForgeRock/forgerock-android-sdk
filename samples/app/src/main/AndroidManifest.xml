@@ -33,6 +33,10 @@
         android:theme="@style/Theme.AuthApp"
         android:usesCleartextTraffic="true"> <!-- usesCleartextTraffic set to true for testing purpose, DO NOT use this for production -->
 
+        <!-- Support Facebook Login, make sure request for email scope App-> App Review -> Request for Permission -->
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -53,6 +57,7 @@
                     android:scheme="org.forgerock.demo" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
