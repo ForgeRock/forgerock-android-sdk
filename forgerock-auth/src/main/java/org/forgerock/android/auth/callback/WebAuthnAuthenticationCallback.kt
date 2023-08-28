@@ -50,9 +50,10 @@ open class WebAuthnAuthenticationCallback : MetadataCallback, WebAuthnCallback {
      * @param selector  Optional - The selector to select which credential key to use. Apply to Username-less only.
      * @param listener  Listener to listen for result
      */
+    @JvmOverloads
     fun authenticate(context: Context, node: Node,
                      selector: WebAuthnKeySelector = WebAuthnKeySelector.DEFAULT,
-                     listener: FRListener<Void>) {
+                     listener: FRListener<Void?>) {
 
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
