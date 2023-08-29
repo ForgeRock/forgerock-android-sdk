@@ -15,14 +15,14 @@ apply plugin: 'org.jetbrains.dokka'
 android {
     namespace 'org.forgerock.android.authenticator'
 
-    compileSdk 33
+    compileSdk 34
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
