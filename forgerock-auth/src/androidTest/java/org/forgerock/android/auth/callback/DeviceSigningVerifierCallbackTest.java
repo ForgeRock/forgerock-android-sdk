@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +37,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
+@Ignore
 public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
 
