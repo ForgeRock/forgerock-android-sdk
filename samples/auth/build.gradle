@@ -57,12 +57,17 @@ android {
 repositories {
     maven {
         url 'https://oss.sonatype.org/content/repositories/snapshots/'
+
     }
 }
 
 configurations.all {
     resolutionStrategy {
         force 'com.google.android.gms:play-services-basement:18.1.0'
+        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
+        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
+        //to be reviewed
+        force 'com.squareup.okio:okio:3.4.0'
     }
 }
 

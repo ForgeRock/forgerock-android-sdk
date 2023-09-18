@@ -84,6 +84,10 @@ configurations.all {
         force 'com.google.android.gms:play-services-basement:18.1.0'
         force 'junit:junit:4.13.2'
         force 'org.bouncycastle:bcprov-jdk15on:1.68'
+        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
+        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
+        //to be reviewed
+        force 'com.squareup.okio:okio:3.4.0'
     }
 }
 dependencies {
