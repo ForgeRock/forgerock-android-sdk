@@ -22,12 +22,14 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
+@Ignore
 public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-bind";
 

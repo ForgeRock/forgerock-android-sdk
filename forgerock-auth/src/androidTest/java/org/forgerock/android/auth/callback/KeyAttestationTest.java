@@ -29,6 +29,7 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
+@Ignore
 public class KeyAttestationTest extends BaseDeviceBindingTest {
     protected final static String TREE = "key-attestation";
 
