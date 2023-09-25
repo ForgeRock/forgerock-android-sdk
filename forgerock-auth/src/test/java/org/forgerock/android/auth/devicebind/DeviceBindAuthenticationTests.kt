@@ -23,8 +23,10 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.assertj.core.api.Assertions
+import org.assertj.core.data.Offset
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.callback.Attestation
+import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -75,8 +77,37 @@ class DeviceBindAuthenticationTests {
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         assertEquals("1234", jws.header.keyID)
-        assertEquals("3123123123", jws.payload.toJSONObject().get("sub"))
-        assertNotNull(jws.payload.toJSONObject().get("exp"))
+        assertEquals("3123123123", jws.payload.toJSONObject()["sub"])
+        Assertions.assertThat(jws.payload.toJSONObject()["nbf"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+        Assertions.assertThat(jws.payload.toJSONObject()["iat"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+
+        assertNotNull(jws.payload.toJSONObject()["exp"])
+    }
+
+    @Test
+    fun testSigningDataWithPrivateKey() {
+        val testObject = BiometricAndDeviceCredential()
+        testObject.setBiometricHandler(mockBiometricInterface)
+        testObject.setKey(cryptoKey)
+        testObject.isApi30OrAbove = false
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(2048)
+        val keys = kpg.generateKeyPair()
+        val userKey = UserKey("id", "3123123123", "username", "1234",
+            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        val output = testObject.sign(context, userKey, keys.private, "77888", getExpiration() )
+        assertNotNull(output)
+        val jws = JWSObject.parse(output);
+        assertEquals("1234", jws.header.keyID)
+        assertEquals("3123123123", jws.payload.toJSONObject()["sub"])
+        Assertions.assertThat(jws.payload.toJSONObject()["nbf"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+        Assertions.assertThat(jws.payload.toJSONObject()["iat"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+
+        assertNotNull(jws.payload.toJSONObject()["exp"])
     }
 
     @Test
