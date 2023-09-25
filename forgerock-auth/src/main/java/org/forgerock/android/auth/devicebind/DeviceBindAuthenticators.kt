@@ -99,10 +99,13 @@ interface DeviceAuthenticator {
             builder.x509CertChain(getCertificateChain(userId))
         }
         val jwk = builder.build();
+        val now = Calendar.getInstance().time
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(kid).jwk(jwk).build(),
             JWTClaimsSet.Builder().subject(userId)
                 .issuer(context.packageName)
                 .expirationTime(expiration)
+                .issueTime(now)
+                .notBeforeTime(now)
                 .claim(PLATFORM, "android")
                 .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
                 .claim(CHALLENGE, challenge).build())
@@ -127,10 +130,15 @@ interface DeviceAuthenticator {
              privateKey: PrivateKey,
              challenge: String,
              expiration: Date): String {
+
+        val now = Calendar.getInstance().time
+
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(userKey.kid).build(),
             JWTClaimsSet.Builder().subject(userKey.userId)
                 .issuer(context.packageName)
                 .claim(CHALLENGE, challenge)
+                .notBeforeTime(now)
+                .issueTime(now)
                 .expirationTime(expiration).build())
         signedJWT.sign(RSASSASigner(privateKey))
         return signedJWT.serialize()
