@@ -98,7 +98,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
 

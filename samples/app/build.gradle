@@ -92,6 +92,8 @@ dependencies {
 
     //Centralize Login
     implementation 'net.openid:appauth:0.11.1'
+    //Captcha
+    implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
 
     //Device Profile to retrieve Location
     implementation "com.google.accompanist:accompanist-permissions:0.30.1"
