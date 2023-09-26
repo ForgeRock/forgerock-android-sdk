@@ -68,7 +68,9 @@ public class ReCaptchaCallback extends AbstractCallback {
                             }
                             Listener.onSuccess(listener, null);
                         })
-                .addOnFailureListener(e -> Listener.onException(listener, e));
+                .addOnFailureListener(e ->
+                        Listener.onException(listener, e)
+                );
     }
 
     @Override
