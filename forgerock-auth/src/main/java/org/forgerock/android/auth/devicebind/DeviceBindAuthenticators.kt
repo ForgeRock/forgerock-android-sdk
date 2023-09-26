@@ -99,13 +99,12 @@ interface DeviceAuthenticator {
             builder.x509CertChain(getCertificateChain(userId))
         }
         val jwk = builder.build();
-        val now = Calendar.getInstance().time
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(kid).jwk(jwk).build(),
             JWTClaimsSet.Builder().subject(userId)
                 .issuer(context.packageName)
                 .expirationTime(expiration)
-                .issueTime(now)
-                .notBeforeTime(now)
+                .issueTime(getIssueTime())
+                .notBeforeTime(getNotBeforeTime())
                 .claim(PLATFORM, "android")
                 .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
                 .claim(CHALLENGE, challenge).build())
@@ -131,14 +130,12 @@ interface DeviceAuthenticator {
              challenge: String,
              expiration: Date): String {
 
-        val now = Calendar.getInstance().time
-
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS512).keyID(userKey.kid).build(),
             JWTClaimsSet.Builder().subject(userKey.userId)
                 .issuer(context.packageName)
                 .claim(CHALLENGE, challenge)
-                .notBeforeTime(now)
-                .issueTime(now)
+                .issueTime(getIssueTime())
+                .notBeforeTime(getNotBeforeTime())
                 .expirationTime(expiration).build())
         signedJWT.sign(RSASSASigner(privateKey))
         return signedJWT.serialize()
@@ -158,6 +155,22 @@ interface DeviceAuthenticator {
     fun type(): DeviceBindingAuthenticationType
 
     fun deleteKeys(context: Context)
+
+    /**
+     * Get the token signed issue time.
+     * @return The issue time
+     */
+    fun getIssueTime(): Date {
+        return Calendar.getInstance().time
+    }
+
+    /**
+     * Get the token not before time.
+     * @return The not before time
+     */
+    fun getNotBeforeTime(): Date {
+        return Calendar.getInstance().time
+    }
 
 }
 
