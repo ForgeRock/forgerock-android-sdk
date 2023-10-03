@@ -18,8 +18,11 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect a username
  */
-@NoArgsConstructor
 public class PasswordCallback extends AbstractPromptCallback {
+
+    @Keep
+    public PasswordCallback() {
+    }
 
     @Keep
     public PasswordCallback(JSONObject jsonObject, int index) {

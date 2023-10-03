@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.app.Topbar
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyViewModel
 import org.forgerock.android.auth.PolicyAdvice
@@ -50,8 +49,7 @@ import kotlin.coroutines.resume
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IGRoute(viewModel: IGViewModel, openDrawer: () -> Unit) {
-
+fun IGRoute(viewModel: IGViewModel) {
 
     val igState by viewModel.state.collectAsState()
 
@@ -71,12 +69,12 @@ fun IGRoute(viewModel: IGViewModel, openDrawer: () -> Unit) {
         onDispose {
             if (igState.transitionState is IGTransitionState.Authenticate) {
                 if ((igState.transitionState as IGTransitionState.Authenticate).continuation.isActive) {
-                    (igState.transitionState as IGTransitionState.Authenticate).continuation.cancel(null)
+                    (igState.transitionState as IGTransitionState.Authenticate).continuation.cancel(
+                        null)
                 }
             }
         }
     }
-
 
     val scroll = rememberScrollState(0)
 
@@ -93,9 +91,7 @@ fun IGRoute(viewModel: IGViewModel, openDrawer: () -> Unit) {
             }
         }
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            Topbar(heading = "IG - IG protected endpoint", openDrawer)
-
+        Column(modifier = Modifier.padding(8.dp)) {
             val context = LocalContext.current
 
             when (igState.transitionState) {
@@ -141,15 +137,20 @@ fun IGRoute(viewModel: IGViewModel, openDrawer: () -> Unit) {
                     val journeyViewModel = viewModel<JourneyViewModel<PolicyAdvice>>(
                         factory = JourneyViewModel.factory(LocalContext.current,
                             state.policyAdvice))
-                    Journey(journeyName = "",
-                        journeyViewModel = journeyViewModel,
-                        openDrawer,
-                        onCompletion = {
+                    Journey(journeyViewModel = journeyViewModel,
+                        onSuccess = {
                             showProgress = true
                             if ((state).continuation.isActive) {
                                 (state).continuation.resume(Unit) //Just to notify it is completed, it does not matter success or failed
                             }
-                        })
+                        },
+                        onFailure = {
+                            showProgress = true
+                            if ((state).continuation.isActive) {
+                                (state).continuation.resume(Unit) //Just to notify it is completed, it does not matter success or failed
+                            }
+                        }
+                    )
                 }
 
                 is IGTransitionState.Finished -> {

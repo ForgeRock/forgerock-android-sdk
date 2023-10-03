@@ -13,14 +13,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 
 android {
-    compileSdkVersion 33
+    namespace 'org.forgerock.android.core'
+
+    compileSdk 34
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         buildConfigField 'String', 'VERSION_NAME', "\"" + VERSION + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -39,15 +41,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     packagingOptions {
         jniLibs {
             pickFirsts += ['**/*.so']
         }
     }
-
 
     testOptions {
         unitTests.all {
@@ -67,6 +68,10 @@ configurations.all {
         force 'org.mockito:mockito-core:3.12.4'
         // this is for the mockwebserver
         force 'org.bouncycastle:bcprov-jdk15on:1.68'
+        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
+        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
+        //to be reviewed
+        force 'com.squareup.okio:okio:3.4.0'
     }
 }
 /**
@@ -75,10 +80,10 @@ configurations.all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
@@ -99,11 +104,11 @@ dependencies {
 
     //For Application Pin
     androidTestImplementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
-    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    androidTestImplementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
     testImplementation 'androidx.test.ext:junit:1.1.5'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'org.robolectric:robolectric:4.9.2'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.23.1'
@@ -114,9 +119,9 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
-    compileOnly "org.projectlombok:lombok:1.18.8"
-    delombok "org.projectlombok:lombok:1.18.8"
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compileOnly "org.projectlombok:lombok:1.18.28"
+    delombok "org.projectlombok:lombok:1.18.28"
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
 }
 
 repositories {

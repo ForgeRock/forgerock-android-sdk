@@ -8,14 +8,15 @@
 package com.example.app
 
 object Destinations {
-    const val ENV_ROUTE = "env"
-    const val LAUNCH_ROUTE = "launch"
-    const val JOURNEY_ROUTE = "journey"
-    const val TOKEN_ROUTE = "token"
-    const val MANAGE_WEBAUTHN_KEYS = "webauthnKeys"
-    const val MANAGE_USER_KEYS = "userKeys"
-    const val IG = "ig"
-    const val DEVICE_PROFILE = "deviceProfile"
-    const val CENTRALIZE_ROUTE = "centralize"
+    const val ENV_ROUTE = "Environment"
+    const val LAUNCH_ROUTE = "Launch Journey"
+    const val JOURNEY_ROUTE = "Journey"
+    const val TOKEN_ROUTE = "Access Token"
+    const val MANAGE_WEBAUTHN_KEYS = "WebAuthn Keys"
+    const val MANAGE_USER_KEYS = "User Keys"
+    const val IG = "IG protected endpoint"
+    const val DEVICE_PROFILE = "Device Profile"
+    const val CENTRALIZE_ROUTE = "Centralize Login"
+    const val USER_SESSION = "User Session"
 }
 

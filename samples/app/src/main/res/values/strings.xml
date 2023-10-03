@@ -16,4 +16,8 @@
     <string name="app_name">Demo App</string>
     <string name="submit">submit</string>
 
+    <string name="facebook_app_id">Your App Client Id</string>
+    <!-- App -> Settings -> Advance -> Security -> client token -->
+    <string name="facebook_client_token">Your client token</string>
+
 </resources>

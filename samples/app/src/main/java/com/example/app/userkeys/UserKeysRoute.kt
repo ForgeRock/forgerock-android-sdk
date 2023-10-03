@@ -28,11 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.app.Alert
-import com.example.app.Topbar
 import org.forgerock.android.auth.devicebind.UserKey
 
 @Composable
-fun UserKeysRoute(viewModel: UserKeysViewModel, openDrawer: () -> Unit) {
+fun UserKeysRoute(viewModel: UserKeysViewModel) {
 
     val userKeysState by viewModel.userKeys.collectAsState()
 
@@ -71,8 +70,7 @@ fun UserKeysRoute(viewModel: UserKeysViewModel, openDrawer: () -> Unit) {
         userKeysState.throwable = null
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Topbar(heading = "User Keys - Device Binding", openDrawer)
+    Column(modifier = Modifier) {
         UserKeys(userKeysState.userKeys,
             onSelected = {
                 showConfirmation = true

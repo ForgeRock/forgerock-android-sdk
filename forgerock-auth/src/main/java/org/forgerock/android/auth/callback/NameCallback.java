@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to collect a username
  */
-@NoArgsConstructor
 public class NameCallback extends AbstractPromptCallback {
 
 
@@ -37,6 +36,11 @@ public class NameCallback extends AbstractPromptCallback {
     ]
 }
  */
+
+    @Keep
+    public NameCallback() {
+    }
+
     @Keep
     public NameCallback(JSONObject jsonObject, int index) {
         super(jsonObject, index);

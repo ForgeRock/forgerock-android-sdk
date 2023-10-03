@@ -29,9 +29,11 @@ jobs:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
   # Build and sign BitBar test artifacts (auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk)
+  # Skip this step for PRs created by dependabot
   bitbar-prepare-artifacts:
     name: Prepare device farm artifacts
     uses: ./.github/workflows/bitbar-prepare-artifacts.yaml
+    if: ${{ github.actor != 'dependabot[bot]' }}
     needs: build-and-test
     secrets:
       SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}

@@ -43,6 +43,7 @@ public class MetadataCallback extends AbstractCallback implements DerivableCallb
 
     private String value;
 
+    @Keep
     public MetadataCallback() {
     }
 

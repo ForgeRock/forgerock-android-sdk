@@ -7,15 +7,15 @@
 
 package org.forgerock.android.auth.callback;
 
+import androidx.annotation.Keep;
+
 import org.json.JSONObject;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Callback that has prompt attribute
  */
-@NoArgsConstructor
 @Getter
 public abstract class AbstractPromptCallback extends AbstractCallback {
 
@@ -25,6 +25,9 @@ public abstract class AbstractPromptCallback extends AbstractCallback {
      * @return this callback's prompt
      */
     public String prompt;
+
+    public AbstractPromptCallback() {
+    }
 
     public AbstractPromptCallback(JSONObject raw, int index) {
         super(raw, index);

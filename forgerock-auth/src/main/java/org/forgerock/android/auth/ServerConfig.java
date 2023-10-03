@@ -11,13 +11,14 @@ import static java.util.Collections.singletonList;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import lombok.NonNull;
 import lombok.Singular;
 import okhttp3.CookieJar;
 import okhttp3.OkHttpClient;

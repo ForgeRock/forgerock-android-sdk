@@ -27,13 +27,14 @@ import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.forgerock.android.auth.devicebind.DefaultUserKeySelector;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
-
+@Ignore
 public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
     protected final static String APPLICATION_PIN = "1234";

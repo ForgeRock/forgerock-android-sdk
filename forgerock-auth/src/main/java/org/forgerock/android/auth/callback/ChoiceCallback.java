@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to retrieve the selected choice(s) from a list of choices
  */
-@NoArgsConstructor
 @Getter
 public class ChoiceCallback extends AbstractPromptCallback {
 
@@ -45,6 +44,10 @@ public class ChoiceCallback extends AbstractPromptCallback {
      *          the {@code choices} list.
      */
     private int defaultChoice;
+
+    @Keep
+    public ChoiceCallback() {
+    }
 
     @Keep
     public ChoiceCallback(JSONObject jsonObject, int index) throws JSONException {

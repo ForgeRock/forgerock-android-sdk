@@ -266,7 +266,8 @@ class DefaultTokenManagerTest : BaseTest() {
     @Test
     @Throws(Throwable::class)
     fun testTokenRefreshWithThreshold() {
-        server.enqueue(MockResponse().setResponseCode(HttpURLConnection.HTTP_OK))
+        //asyn revoke call
+        enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK)
         enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK)
         val oAuth2Client = OAuth2Client.builder()
             .clientId("andy_app")

@@ -21,11 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.app.Topbar
 import org.json.JSONObject
 
 @Composable
-fun DeviceProfileRoute(deviceProfileViewModel: DeviceProfileViewModel, openDrawer: () -> Unit) {
+fun DeviceProfileRoute(deviceProfileViewModel: DeviceProfileViewModel) {
 
     val result: JSONObject? = deviceProfileViewModel.state
     val scroll = rememberScrollState(0)
@@ -34,7 +33,6 @@ fun DeviceProfileRoute(deviceProfileViewModel: DeviceProfileViewModel, openDrawe
         .padding(16.dp)
         .fillMaxWidth()
     ) {
-        Topbar(heading = "Device Profile", openDrawer = openDrawer)
         Card(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 10.dp,

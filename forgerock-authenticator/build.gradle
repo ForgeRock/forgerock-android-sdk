@@ -12,16 +12,17 @@ apply plugin: 'signing'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 
-
 android {
-    compileSdkVersion 33
+    namespace 'org.forgerock.android.authenticator'
+
+    compileSdk 34
 
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,8 +42,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     packagingOptions {
         jniLibs {
@@ -85,6 +86,14 @@ apply from: '../config/publish.gradle'
 /**
  * Dependencies
  */
+configurations.all {
+    resolutionStrategy {
+        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
+        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
+        //to be reviewed
+        force 'com.squareup.okio:okio:3.4.0'
+    }
+}
 dependencies {
     api project(':forgerock-core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -100,8 +109,8 @@ dependencies {
     compileOnly 'com.google.firebase:firebase-messaging:23.1.2'
 
     // Networking
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
 
     // Biometric
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'

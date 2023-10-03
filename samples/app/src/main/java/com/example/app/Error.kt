@@ -21,15 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Error(exception: Exception, openDrawer: () -> Unit) {
+fun Error(exception: Exception) {
     Column(modifier = Modifier
         .padding(16.dp)
         .fillMaxWidth()) {
-        Topbar(heading = "Error" ,
-            openDrawer = openDrawer)
-        Divider(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-        )
         Text(text = exception.javaClass.name,
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.titleMedium
@@ -44,5 +39,5 @@ fun Error(exception: Exception, openDrawer: () -> Unit) {
 @Preview
 @Composable
 fun ComposablePreview() {
-    Error(java.lang.NullPointerException("This is a test")) {}
+    Error(java.lang.NullPointerException("This is a test"))
 }

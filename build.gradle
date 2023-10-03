@@ -22,7 +22,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
         classpath 'com.google.gms:google-services:4.3.15'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -59,7 +59,7 @@ subprojects {
                 }"""
             ]
         )
-    }
+   }
 
     tasks.named("dokkaHtmlPartial") {
         pluginsMapConfiguration.set(
@@ -71,6 +71,14 @@ subprojects {
             ]
         )
     }
+
+    //Powermock compatibility with jdk 17
+    tasks.withType(Test).configureEach{
+        jvmArgs = jvmArgs + ['--add-opens=java.base/java.lang=ALL-UNNAMED']
+        jvmArgs = jvmArgs + ['--add-opens=java.base/java.security=ALL-UNNAMED']
+        jvmArgs = jvmArgs + ['--add-opens=java.base/java.security.cert=ALL-UNNAMED']
+    }
+
 }
 
 afterEvaluate {
@@ -100,7 +108,7 @@ afterEvaluate {
 ossIndexAudit {
     username = System.properties['username']
     password = System.properties['password']
-    excludeVulnerabilityIds = ['CVE-2020-15250', 'sonatype-2019-0673', 'CVE-2022-1799', 'CVE-2022-2390']
+    excludeVulnerabilityIds = ['CVE-2020-15250']
 }
 
 task clean(type: Delete) {

@@ -13,12 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * A callback to collect a user's acceptance of the configured Terms &amp; Conditions.
  */
-@NoArgsConstructor
 @Getter
 public class TermsAndConditionsCallback extends AbstractCallback {
 
@@ -46,6 +44,10 @@ public class TermsAndConditionsCallback extends AbstractCallback {
     @Keep
     public TermsAndConditionsCallback(JSONObject raw, int index) throws JSONException {
         super(raw, index);
+    }
+
+    @Keep
+    public TermsAndConditionsCallback() {
     }
 
     @Override

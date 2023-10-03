@@ -20,24 +20,25 @@ import com.example.app.centralize.Centralize
 import com.example.app.centralize.CentralizeLoginViewModel
 import com.example.app.device.DeviceProfileRoute
 import com.example.app.device.DeviceProfileViewModel
-import com.example.app.journey.JourneyViewModel
 import com.example.app.env.EnvRoute
 import com.example.app.env.EnvViewModel
 import com.example.app.ig.IGRoute
 import com.example.app.ig.IGViewModel
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyRoute
+import com.example.app.journey.JourneyViewModel
 import com.example.app.token.Token
 import com.example.app.token.TokenViewModel
 import com.example.app.userkeys.UserKeysRoute
 import com.example.app.userkeys.UserKeysViewModel
+import com.example.app.userprofile.UserProfile
+import com.example.app.userprofile.UserProfileViewModel
 import com.example.app.webauthn.WebAuthRoute
 import com.example.app.webauthn.WebAuthnViewModel
 
 @Composable
 fun AppNavHost(navController: NavHostController,
-               startDestination: String = Destinations.ENV_ROUTE,
-               openDrawer: () -> Unit) {
+               startDestination: String = Destinations.ENV_ROUTE) {
 
     NavHost(navController = navController,
         startDestination = startDestination) {
@@ -47,7 +48,7 @@ fun AppNavHost(navController: NavHostController,
             val preferenceViewModel = viewModel<PreferenceViewModel>(
                 factory = PreferenceViewModel.factory(LocalContext.current)
             )
-            EnvRoute(envViewModel, preferenceViewModel, openDrawer)
+            EnvRoute(envViewModel, preferenceViewModel)
         }
 
         composable(Destinations.LAUNCH_ROUTE) {
@@ -56,55 +57,62 @@ fun AppNavHost(navController: NavHostController,
             )
             JourneyRoute(modifier = Modifier,
                 preferenceViewModel = preferenceViewModel,
-                openDrawer = openDrawer,
                 onSubmit = { journeyName ->
-                    navController.navigate("$Destinations.JOURNEY_ROUTE/$journeyName")
+                    navController.navigate(Destinations.JOURNEY_ROUTE + "/$journeyName")
                 })
         }
         composable(Destinations.TOKEN_ROUTE) {
             val tokenViewModel = viewModel<TokenViewModel>()
-            Token(tokenViewModel, openDrawer)
+            Token(tokenViewModel)
         }
         composable(Destinations.CENTRALIZE_ROUTE) {
             val centralizeLoginViewModel = viewModel<CentralizeLoginViewModel>()
-            Centralize(centralizeLoginViewModel, openDrawer)
+            Centralize(centralizeLoginViewModel)
         }
         composable(Destinations.MANAGE_WEBAUTHN_KEYS) {
             val webAuthnViewModel = viewModel<WebAuthnViewModel>(
                 factory = WebAuthnViewModel.factory(LocalContext.current)
             )
-            WebAuthRoute(webAuthnViewModel, openDrawer)
+            WebAuthRoute(webAuthnViewModel)
         }
         composable(Destinations.MANAGE_USER_KEYS) {
             val userKeysViewModel = viewModel<UserKeysViewModel>(
                 factory = UserKeysViewModel.factory(LocalContext.current)
             )
-            UserKeysRoute(userKeysViewModel, openDrawer)
+            UserKeysRoute(userKeysViewModel)
         }
 
         composable(Destinations.IG) {
             val viewModel = viewModel<IGViewModel>(
                 factory = IGViewModel.factory(LocalContext.current)
             )
-            IGRoute(viewModel, openDrawer)
+            IGRoute(viewModel)
         }
 
         composable(Destinations.DEVICE_PROFILE) {
             val viewModel = viewModel<DeviceProfileViewModel>()
-            DeviceProfileRoute(viewModel, openDrawer)
+            DeviceProfileRoute(viewModel)
         }
 
-        composable("$Destinations.JOURNEY_ROUTE/{name}", arguments = listOf(
+        composable(Destinations.JOURNEY_ROUTE + "/{name}", arguments = listOf(
             navArgument("name") { type = NavType.StringType }
         )) {
             it.arguments?.getString("name")?.apply {
                 val journeyViewModel = viewModel<JourneyViewModel<String>>(
                     factory = JourneyViewModel.factory(LocalContext.current, this)
                 )
-                Journey(this, journeyViewModel, openDrawer)
+                Journey(journeyViewModel, onSuccess = {
+                        navController.navigate(Destinations.USER_SESSION)
+                }) {
+                }
             }
         }
 
+        composable(Destinations.USER_SESSION) {
+            val userProfileViewModel = viewModel<UserProfileViewModel>()
+            UserProfile(userProfileViewModel)
+        }
+        
     }
 
 }

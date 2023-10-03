@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 /**
  * Implements a Callback for collection of a single identity object attribute from a user.
  */
-@NoArgsConstructor
 @Getter
 public class NumberAttributeInputCallback extends AttributeInputCallback {
 
@@ -26,6 +25,10 @@ public class NumberAttributeInputCallback extends AttributeInputCallback {
      * The attribute Value
      */
     private Double value;
+
+    @Keep
+    public NumberAttributeInputCallback() {
+    }
 
     /**
      * Constructor for this Callback.

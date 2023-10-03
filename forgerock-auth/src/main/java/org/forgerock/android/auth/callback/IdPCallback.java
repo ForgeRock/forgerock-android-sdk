@@ -34,7 +34,6 @@ import lombok.NoArgsConstructor;
 /**
  * Callback to handle Identity Provider SignIn
  */
-@NoArgsConstructor
 @Getter
 public class IdPCallback extends AbstractCallback implements IdPClient, AdditionalParameterCallback {
 
@@ -47,6 +46,10 @@ public class IdPCallback extends AbstractCallback implements IdPClient, Addition
     private String request;
     private String requestUri;
     private final Map<String, String> additionalParameters = new HashMap<>();
+
+    @Keep
+    public IdPCallback() {
+    }
 
     @Keep
     public IdPCallback(JSONObject jsonObject, int index) {
