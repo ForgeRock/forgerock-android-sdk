@@ -1,3 +1,10 @@
+## [4.2.0]
+#### Added
+- Gradle 8 and JDK 17 support  [SDKS-2451]
+- Android 14 support [SDKS-2636]
+- Key pair verification with key attestation during device binding enrollment [SDKS-2412]
+- Added `iat` and `nbf` claims in the Device Binding and Device Signed JWT [SDKS-2747]
+
 ## [4.1.0]
 #### Added
 - Interceptor support for the Authenticator module [SDKS-2544]
