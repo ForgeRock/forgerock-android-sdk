@@ -55,6 +55,13 @@ dokkaJavadoc {
     }
 }
 
+tasks.named("dokkaHtml").configure {
+    dependsOn("generateDebugRFile")
+    dependsOn("bundleLibCompileToJarDebug")
+    dependsOn("generateReleaseRFile")
+    dependsOn("bundleLibCompileToJarRelease")
+}
+
 dokkaHtml {
     dokkaSourceSets {
         named("main") {

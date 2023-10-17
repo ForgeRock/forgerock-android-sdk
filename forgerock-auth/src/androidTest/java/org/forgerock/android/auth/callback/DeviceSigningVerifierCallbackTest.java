@@ -27,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,7 +36,6 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
-@Ignore
 public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
 
@@ -243,6 +241,10 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                         public void onSuccess(Void result) {
                             // Verify the JWT attributes
                             try {
+                                Calendar nowMinus5 = Calendar.getInstance();
+                                Calendar nowPlus5 = Calendar.getInstance();
+                                nowMinus5.add(Calendar.SECOND, -5);
+                                nowPlus5.add(Calendar.SECOND, 5);
                                 Calendar expMin = Calendar.getInstance();
                                 Calendar expMax = Calendar.getInstance();
                                 expMin.add(Calendar.SECOND, 55);
@@ -251,11 +253,15 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                                 JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
                                 String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
                                 Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                Date jwtIat = jwt.getJWTClaimsSet().getIssueTime();
+                                Date jwtNbf = jwt.getJWTClaimsSet().getNotBeforeTime();
                                 String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
                                 String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
                                 assertThat(jwtKid).isEqualTo(KID);
                                 assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
+                                assertThat(jwtIat).isBetween(nowMinus5.getTime(), nowPlus5.getTime());
+                                assertThat(jwtNbf).isBetween(nowMinus5.getTime(), nowPlus5.getTime());
                                 assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
                                 assertThat(jwtSub).isEqualTo(callback.getUserId());
 
