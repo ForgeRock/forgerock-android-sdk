@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
         }
     }
 
-    override fun onSuccess(result: FRUser?) {
+    override fun onSuccess(result: FRUser) {
         getUserInfo(result)
     }
 
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    override fun onCallbackReceived(node: Node?) {
+    override fun onCallbackReceived(node: Node) {
         val activity = this
 
         var nodeDialog = supportFragmentManager.findFragmentByTag(NodeDialogFragment.TAG) as? NodeDialogFragment

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2023 ForgeRock. All rights reserved.
+  ~
+  ~  This software may be modified and distributed under the terms
+  ~  of the MIT license. See the LICENSE file for details.
+  -->
+
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="2000">
+    <propertyValuesHolder
+        android:propertyName="rotation"
+        android:valueFrom="0.0"
+        android:valueTo="360.0"
+        android:valueType="floatType" />
+    <propertyValuesHolder
+        android:propertyName="scaleX"
+        android:valueFrom="0.0"
+        android:valueTo="0.4"
+        android:valueType="floatType" />
+    <propertyValuesHolder
+        android:propertyName="scaleY"
+        android:valueFrom="0.0"
+        android:valueTo="0.4"
+        android:valueType="floatType" />
+
+</objectAnimator>

@@ -9,8 +9,11 @@ package com.example.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class MainViewModel : ViewModel() {
 
@@ -19,7 +22,9 @@ class MainViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
+            delay(2.toDuration(DurationUnit.SECONDS))
             isLoading.value = false
+
         }
     }
 }

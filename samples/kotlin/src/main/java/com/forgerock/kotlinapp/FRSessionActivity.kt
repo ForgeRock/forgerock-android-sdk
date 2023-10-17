@@ -42,7 +42,7 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
         }
     }
 
-    override fun onSuccess(result: FRSession?) {
+    override fun onSuccess(result: FRSession) {
         getAccessToken()
     }
 
@@ -51,7 +51,7 @@ class FRSessionActivity: AppCompatActivity(), NodeListener<FRSession>, ActivityL
       print("------> $e")
     }
 
-    override fun onCallbackReceived(node: Node?) {
+    override fun onCallbackReceived(node: Node) {
         nodeDialog?.dismiss()
         nodeDialog = NodeDialogFragment.newInstance(node)
         nodeDialog?.show(supportFragmentManager, NodeDialogFragment::class.java.name)
