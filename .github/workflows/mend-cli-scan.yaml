@@ -1,0 +1,107 @@
+name: Run Mend CLS Scan
+on:
+  workflow_call:
+    secrets:
+      MEND_EMAIL:
+        description: Mend email
+        required: true
+      MEND_USER_KEY:
+        description: Mend user key
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+      
+jobs:
+  mend-cli-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone the repo
+      - name: Clone the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      # Setup JDK and cache and restore dependencies.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      # Setup Mend CLI
+      - name: Download and cache the Mend CLI executable
+        id: cache-mend
+        uses: actions/cache@v3
+        env:
+          mend-cache-name: cache-mend-executable
+        with:
+          path: /usr/local/bin/mend
+          key: ${{ runner.os }}-${{ env.mend-cache-name }}-${{ hashFiles('/usr/local/bin/mend') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.mend-cache-name }}-
+
+      # Download Mend CLI if it's not cached...
+      - if: ${{ steps.cache-mend.outputs.cache-hit != 'true' }}
+        name: Download Mend CLI executable (cache miss...)
+        continue-on-error: true
+        run: |
+          echo "Download Mend CLI executable (cache miss...)"
+          curl https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend && chmod +x /usr/local/bin/mend
+
+      # Execute the Mend CLI scan
+      - name: Mend CLI Scan
+        env:
+          MEND_EMAIL: ${{secrets.MEND_EMAIL}}
+          MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
+          MEND_URL: ${{ vars.MEND_SERVER_URL }}
+        run: |
+            mend dep --no-color -s ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} -u > mend-scan-result.txt
+            echo "MEND_SCAN_URL=$(cat mend-scan-result.txt | grep -Eo '(http|https)://[a-zA-Z0-9./?!=_%:-\#]*')" >> $GITHUB_ENV
+            echo "MEND_SCAN_SUMMARY=$(cat mend-scan-result.txt | grep -Eoiw '(Detected [0-9]* vulnerabilities.*)')" >> $GITHUB_ENV
+            echo "MEND_CRITICAL_COUNT=$(cat mend-scan-result.txt | grep -Eoiw '(Detected [0-9]* vulnerabilities.*)' | grep -oi '[0-9]* Critical' | grep -o [0-9]*)" >> $GITHUB_ENV
+            echo "MEND_HIGH_COUNT=$(cat mend-scan-result.txt | grep -Eoiw '(Detected [0-9]* vulnerabilities.*)' | grep -oi '[0-9]* High' | grep -o [0-9]*)" >> $GITHUB_ENV
+
+      # Check for failures and set the outcome of the workflow
+      - name: Parse the result and set job status
+        if: always()
+        run: |
+          if [ '${{ env.MEND_CRITICAL_COUNT }}' -gt '0' ] || [ '${{ env.MEND_HIGH_COUNT }}' -gt '0' ]; then
+            exit 1
+          else
+            exit 0
+          fi
+
+      # Publish the result
+      - name: Mend Scan Result
+        uses: LouisBrunner/checks-action@v1.6.1
+        if: always()
+        with:
+          name: "Mend Scan Result"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          conclusion: ${{ job.status }}
+          output_text_description_file: mend-scan-result.txt
+          output: |
+            {"title":"Mend Scan Result", "summary":"${{ job.status }}"}
+
+      # Send slack notification with result status
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: 'ForgeRock Android SDK Mend Scan',
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `\nStatus: ${{ job.status }}\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}\nSummary: ${{ env.MEND_SCAN_SUMMARY }}\nScan URL: ${{ env.MEND_SCAN_URL }}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
