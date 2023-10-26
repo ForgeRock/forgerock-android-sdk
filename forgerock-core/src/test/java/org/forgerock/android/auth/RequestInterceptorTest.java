@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,11 +8,12 @@
 package org.forgerock.android.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static java.util.Collections.singletonList;
 
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
@@ -28,12 +29,18 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import kotlin.Pair;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -437,6 +444,41 @@ public class RequestInterceptorTest {
         assertThat(RequestInterceptorRegistry.getInstance().getRequestInterceptors().length).isEqualTo(2);
     }
 
+    @Test
+    public void testCookieIntercept() throws InterruptedException {
+
+        RequestInterceptorRegistry.getInstance().register((CustomCookieInterceptor) httpUrl -> {
+            List<Cookie> cookies = new ArrayList<>();
+            cookies.add(new Cookie.Builder().domain("localhost").name("test").value("testValue").build());
+            return cookies;
+        });
+
+        NetworkConfig networkConfig = NetworkConfig.networkBuilder()
+                .host(server.getHostName())
+                .cookieJarSupplier(() -> new CustomCookieJar() {}).build();
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(getUrl())
+                .get()
+                .build();
+        send(networkConfig, request);
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getHeader("Cookie")).isEqualTo("test=testValue");
+    }
+
+    private interface CustomCookieJar extends CookieJar, OkHttpCookieInterceptor {
+        @NonNull
+        @Override
+        default List<Cookie> loadForRequest(@NonNull HttpUrl httpUrl) {
+            return intercept(Collections.emptyList());
+        }
+
+        @Override
+        default void saveFromResponse(@NonNull HttpUrl httpUrl, @NonNull List<Cookie> list) {
+        }
+    }
+
+
+
     private void send(NetworkConfig networkConfig, okhttp3.Request request) throws InterruptedException {
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(networkConfig);
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -454,6 +496,14 @@ public class RequestInterceptorTest {
         });
         countDownLatch.await();
     }
+    private interface CustomCookieInterceptor extends FRRequestInterceptor<Action>, CookieInterceptor {
+        @NonNull
+        @Override
+        default Request intercept(@NonNull Request request, Action tag) {
+            return request;
+        }
+    }
+
 
 
 }

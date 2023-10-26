@@ -1,3 +1,27 @@
+## [4.X.X]
+#### Added
+Allow developer to customize the cookie header to the outgoing request from the SDK [SDKS-2780]
+```kotlin
+RequestInterceptorRegistry.getInstance()
+            .register(object : CustomCookieInterceptor {
+                override fun intercept(cookies: List<Cookie>): List<Cookie> {
+                    val updated = mutableListOf<Cookie>()
+                    updated.add(Cookie.Builder().domain("localhost").name("test").value("testValue")
+                        .build())
+                    updated.addAll(cookies)
+                    return updated
+                }
+            })
+
+private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
+    CookieInterceptor {
+    override fun intercept(request: Request, tag: Action): Request {
+        return request
+    }
+} 
+```
+
+
 ## [4.2.0]
 #### Added
 - Gradle 8 and JDK 17 support  [SDKS-2451]
