@@ -147,7 +147,7 @@ dependencies {
     testImplementation 'com.nimbusds:nimbus-jose-jwt:9.25'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.9.2'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
     testImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     testImplementation 'commons-io:commons-io:2.6'
     testImplementation 'org.assertj:assertj-core:3.23.1'
