@@ -7,11 +7,24 @@
 
 package org.forgerock.android.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
@@ -44,21 +57,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import okhttp3.Cookie;
 
 @RunWith(RobolectricTestRunner.class)
 public class FRUserMockTest extends BaseTest {
@@ -1074,6 +1080,43 @@ public class FRUserMockTest extends BaseTest {
     }
 
     @Test
+    public void testCookieInterceptor() throws InterruptedException, ExecutionException, MalformedURLException, JSONException, ParseException {
+
+        //Total e request will be intercepted
+        CountDownLatch countDownLatch = new CountDownLatch(8);
+        RequestInterceptorRegistry.getInstance().register((CustomCookieInterceptor) cookies -> {
+            countDownLatch.countDown();
+            List<Cookie> customizedCookies = new ArrayList<>();
+            customizedCookies.add(new Cookie.Builder().domain("localhost").name("test").value("testValue").build());
+            customizedCookies.addAll(cookies);
+            return customizedCookies;
+        });
+
+        frUserHappyPath();
+
+        //Logout
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody("{}"));
+        enqueue("/sessions_logout.json", HttpURLConnection.HTTP_OK);
+
+
+        FRUser.getCurrentUser().logout();
+        countDownLatch.await();
+
+        //Take few requests and make sure it contains the custom header.
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getHeader("Cookie")).isEqualTo("test=testValue");
+        recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getHeader("Cookie")).isEqualTo("test=testValue");
+        recordedRequest = server.takeRequest();
+
+
+    }
+
+
+    @Test
     public void testAccessTokenWithExpiredRefreshToken() throws ExecutionException, InterruptedException, AuthenticationRequiredException, ApiException, IOException {
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);
@@ -1458,5 +1501,13 @@ public class FRUserMockTest extends BaseTest {
         Assertions.assertThat(FRUser.getCurrentUser().getAccessToken()).isNotNull();
         Assertions.assertThat(Config.getInstance().getSingleSignOnManager().getToken()).isNotNull();
 
+    }
+
+    private interface CustomCookieInterceptor extends FRRequestInterceptor<Action>, CookieInterceptor {
+        @NonNull
+        @Override
+        default Request intercept(@NonNull Request request, Action tag) {
+            return request;
+        }
     }
 }
