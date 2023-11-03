@@ -256,6 +256,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceBindApplicationIdNotMatchingError() {
         final int[] bindSuccess = {0};
+        final int[] errorReported = {0};
         boolean executionExceptionOccurred = false;
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "wrong-app-id") {
             final NodeListener<FRSession> nodeListener = this;
@@ -277,6 +278,13 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
                     });
                     return;
                 }
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback callback = node.getCallback(TextOutputCallback.class);
+                    assertThat(callback.getMessage()).isEqualTo("Device Binding Failed");
+                    errorReported[0]++;
+                    node.next(context, nodeListener);
+                    return;
+                }
                 super.onCallbackReceived(node);
             }
         };
@@ -288,7 +296,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
             Assert.assertNull(nodeListenerFuture.get());
         } catch (ExecutionException e) {
             executionExceptionOccurred = true;
-            assertThat(e.getMessage()).isEqualTo("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
+            assertThat(e.getMessage()).contains("{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}");
         } catch (InterruptedException e) {
             Assert.fail("Unexpected exception.");
         }
