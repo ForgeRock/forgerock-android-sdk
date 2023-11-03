@@ -382,7 +382,7 @@ public class PushNotification extends ModelObject<PushNotification> {
                     //Ignore to allow fingerprint retry
                 }
             });
-            biometricAuth.authenticate();
+            biometricAuth.authenticate(null);
         } else {
             listener.onException(new PushMechanismException("Error processing the Push " +
                     "Authentication request. This method cannot be used to process notification " +

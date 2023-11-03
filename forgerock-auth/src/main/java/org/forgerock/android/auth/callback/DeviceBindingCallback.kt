@@ -245,6 +245,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                             deviceBindingRepository.persist(it)
                             val jws = deviceAuthenticator.sign(context,
                                 kp,
+                                status.signature,
                                 it.kid,
                                 userId,
                                 challenge,
