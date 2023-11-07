@@ -44,6 +44,8 @@ import org.forgerock.android.auth.callback.IdPCallback
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
 import org.forgerock.android.auth.callback.PollingWaitCallback
+import org.forgerock.android.auth.callback.ReCaptchaCallback
+import com.example.app.callback.ReCaptchaCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
@@ -129,6 +131,12 @@ fun Journey(state: JourneyState,
                     is SelectIdPCallback -> {
                         SelectIdPCallback(callback = it, onSelected = onNext)
                     }
+
+                    is ReCaptchaCallback -> {
+                        ReCaptchaCallback(it, state.node, onCompleted = onNext)
+                        showNext = false
+                    }
+
                     /*
                     is AppIntegrityCallback -> {
                         AppIntegrityCallback(callback = it, onCompleted = onNext)

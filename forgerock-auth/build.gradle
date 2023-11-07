@@ -110,7 +110,7 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-location:21.0.1'
     compileOnly 'com.google.android.gms:play-services-safetynet:18.0.1'
     // Keeping this version for now, its breaking Apple SignIn for the later versions.
-    compileOnly 'net.openid:appauth:0.7.1'
+    compileOnly 'net.openid:appauth:0.11.1'
     compileOnly 'com.google.android.gms:play-services-fido:20.0.1'
 
     //For Device Binding
@@ -128,7 +128,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'
     androidTestImplementation 'commons-io:commons-io:2.6'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'com.google.android.gms:play-services-location:21.0.1'
     //Do not update to the latest library, Only 2.x compatible with Android M and below.
     androidTestImplementation 'org.assertj:assertj-core:2.9.1'
