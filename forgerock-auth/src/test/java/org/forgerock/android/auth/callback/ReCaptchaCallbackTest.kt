@@ -7,6 +7,7 @@
 package org.forgerock.android.auth.callback
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
@@ -36,5 +37,34 @@ class ReCaptchaCallbackTest {
         val reCaptchaCallback = ReCaptchaCallback(raw, 0)
         Assert.assertEquals("6Lf3tbYUAAAAAEm78fAOFRKb-n1M67FDtmpczIBK",
             reCaptchaCallback.reCaptchaSiteKey)
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testCustomCaptchaCallback() {
+        val raw = JSONObject(""" {
+            "type": "ReCaptchaCallback",
+            "output": [
+                {
+                    "name": "recaptchaSiteKey",
+                    "value": "6Lf3tbYUAAAAAEm78fAOFRKb-n1M67FDtmpczIBK"
+                }
+            ],
+            "input": [
+                {
+                    "name": "IDToken1",
+                    "value": ""
+                }
+            ]
+        }""")
+        val reCaptchaCallback = ReCaptchaCallback(raw, 0)
+        val expectedValue = "custom_captcha_token"
+        Assert.assertEquals("6Lf3tbYUAAAAAEm78fAOFRKb-n1M67FDtmpczIBK",
+            reCaptchaCallback.reCaptchaSiteKey)
+        reCaptchaCallback.setValue("custom_captcha_token")
+        val jsonArray: JSONArray = reCaptchaCallback.contentAsJson.get("input") as JSONArray
+        val inputValue = (jsonArray[0] as JSONObject).get("value")
+        Assert.assertEquals(expectedValue,
+            inputValue)
     }
 }
