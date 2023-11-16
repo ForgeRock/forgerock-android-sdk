@@ -88,6 +88,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
+            null,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
 
@@ -119,6 +120,7 @@ class DeviceSigningVerifierCallbackTest {
 
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
+            null,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
         val key = UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
@@ -138,6 +140,7 @@ class DeviceSigningVerifierCallbackTest {
 
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
+            null,
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
 

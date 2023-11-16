@@ -1,6 +1,6 @@
 ## [4.X.X]
 #### Added
-Allow developer to customize the cookie header to the outgoing request from the SDK [SDKS-2780]
+- Allow developer to customize the cookie header to the outgoing request from the SDK [SDKS-2780]
 ```kotlin
 RequestInterceptorRegistry.getInstance()
             .register(object : CustomCookieInterceptor {
@@ -20,6 +20,8 @@ private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
     }
 } 
 ```
+#### Fixed
+- Use auth-per-use Key for Device Binding [SDKS-2792]
 
 
 ## [4.2.0]

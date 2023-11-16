@@ -80,7 +80,7 @@ dependencies {
 
     //SDK
     implementation project(':forgerock-auth')
-    //implementation 'org.forgerock:forgerock-auth:4.2.0-SNAPSHOT'
+    //implementation 'org.forgerock:forgerock-auth:4.2.0'
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'

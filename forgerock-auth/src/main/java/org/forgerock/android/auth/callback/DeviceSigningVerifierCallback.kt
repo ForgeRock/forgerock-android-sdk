@@ -174,6 +174,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                 val jws = deviceAuthenticator.sign(context,
                     userKey,
                     status.privateKey,
+                    status.signature,
                     challenge,
                     getExpiration(timeout))
                 setJws(jws)
