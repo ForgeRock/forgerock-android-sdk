@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -66,20 +66,20 @@ internal class ConfigHelper {
 
             return FROptionsBuilder.build {
                 server {
-                    url = sharedPreferences.getString(ConfigHelper.url, null) ?: ""
-                    realm = sharedPreferences.getString(ConfigHelper.realm, null) ?: ""
-                    cookieName = sharedPreferences.getString(ConfigHelper.cookieName, null) ?: ""
+                    url = sharedPreferences.getString(ConfigHelper.url, null) ?: context.getString(R.string.forgerock_url)
+                    realm = sharedPreferences.getString(ConfigHelper.realm, null) ?: context.getString(R.string.forgerock_realm)
+                    cookieName = sharedPreferences.getString(ConfigHelper.cookieName, null) ?: context.getString(R.string.forgerock_cookie_name)
                 }
                 oauth {
-                    oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null) ?: ""
-                    oauthScope = sharedPreferences.getString(ConfigHelper.scope, null) ?: ""
-                    oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null) ?: ""
+                    oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null) ?: context.getString(R.string.forgerock_oauth_client_id)
+                    oauthScope = sharedPreferences.getString(ConfigHelper.scope, null) ?: context.getString(R.string.forgerock_oauth_scope)
+                    oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null) ?: context.getString(R.string.forgerock_oauth_redirect_uri)
                 }
                 urlPath {
                     endSessionEndpoint =
-                        sharedPreferences.getString(ConfigHelper.endSessionEndpoint, null)
-                    revokeEndpoint = sharedPreferences.getString(ConfigHelper.revokeEndpoint, null)
-                    sessionEndpoint = sharedPreferences.getString(ConfigHelper.sessionEndpoint, null)
+                        sharedPreferences.getString(ConfigHelper.endSessionEndpoint, null) ?: context.getString(R.string.forgerock_endsession_endpoint)
+                    revokeEndpoint = sharedPreferences.getString(ConfigHelper.revokeEndpoint, null) ?: context.getString(R.string.forgerock_revoke_endpoint)
+                    sessionEndpoint = sharedPreferences.getString(ConfigHelper.sessionEndpoint, null) ?: context.getString(R.string.forgerock_session_endpoint)
                 }
             }
         }

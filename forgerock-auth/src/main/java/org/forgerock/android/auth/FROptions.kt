@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -34,6 +34,13 @@ data class FROptions(val server: Server,
                     && old?.logger == new?.logger
         }
     }
+    @Throws(IllegalArgumentException::class)
+    @JvmName("validateConfig")
+    internal fun validateConfig() {
+        require(server.url.isNotBlank()) { "AM URL cannot be blank" }
+        require(server.realm.isNotBlank()) { "Realm cannot be blank" }
+        require(server.cookieName.isNotBlank()) { "cookieName cannot be blank" }
+    }
 }
 
 /**
@@ -41,7 +48,7 @@ data class FROptions(val server: Server,
  */
 class FROptionsBuilder {
 
-    private var server: Server = Server("", "")
+    private lateinit var server: Server
     private var oauth: OAuth = OAuth()
     private var service: Service = Service()
     private var urlPath: UrlPath = UrlPath()
@@ -117,7 +124,7 @@ class FROptionsBuilder {
  * Data class for the server configurations
  */
 data class Server(val url: String,
-                  val realm: String,
+                  val realm: String = "root",
                   val timeout: Int = 30,
                   val cookieName: String = "iPlanetDirectoryPro",
                   val cookieCacheSeconds: Long = 0)
@@ -127,12 +134,13 @@ data class Server(val url: String,
  */
 class ServerBuilder {
     lateinit var url: String
-    lateinit var realm: String
+    var realm: String = "root"
     var timeout: Int = 30
     var cookieName: String = "iPlanetDirectoryPro"
     var cookieCacheSeconds: Long = 0
-
-    fun build(): Server = Server(url, realm, timeout, cookieName, cookieCacheSeconds)
+    fun build(): Server {
+        return Server(url, realm, timeout, cookieName, cookieCacheSeconds)
+    }
 }
 
 /**

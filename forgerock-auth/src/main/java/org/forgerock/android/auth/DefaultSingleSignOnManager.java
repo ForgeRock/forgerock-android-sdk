@@ -91,7 +91,6 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
     @Override
     public void revoke(final FRListener<Void> listener) {
-
         SSOToken token = getToken();
         if (token == null) {
             Listener.onException(listener, new IllegalStateException("SSO Token not found."));

@@ -22,6 +22,7 @@ private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
 ```
 #### Fixed
 - Use auth-per-use Key for Device Binding [SDKS-2792]
+- Making (cookieName, AM URL, realm) as a mandatory fields for configuring the SDK [SDKS-2782]
 
 
 ## [4.2.0]
