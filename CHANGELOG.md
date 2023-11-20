@@ -22,7 +22,7 @@ private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
 ```
 #### Fixed
 - Use auth-per-use Key for Device Binding [SDKS-2792]
-
+- Handle WebAuthn cancellation inconsistency [SDKS-2819]
 
 ## [4.2.0]
 #### Added

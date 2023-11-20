@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -12,14 +12,11 @@ import com.google.android.gms.fido.fido2.api.common.ErrorCode
 /**
  * An Exception representation of [AuthenticatorErrorResponse]
  */
-class WebAuthnResponseException(authenticatorErrorResponse: AuthenticatorErrorResponse) :
-    Exception(authenticatorErrorResponse.errorMessage) {
-    val errorCode: ErrorCode
-    val errorCodeAsInt: Int
+class WebAuthnResponseException(val errorCode: ErrorCode, errorMessage: String?) :
+    Exception(errorMessage) {
 
-    init {
-        errorCode = authenticatorErrorResponse.errorCode
-        errorCodeAsInt = authenticatorErrorResponse.errorCodeAsInt
+    constructor(authenticatorErrorResponse: AuthenticatorErrorResponse) :
+            this(authenticatorErrorResponse.errorCode, authenticatorErrorResponse.errorMessage) {
     }
 
     /**
