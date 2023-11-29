@@ -16,6 +16,7 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.util.Base64
+import com.nimbusds.jwt.JWTClaimNames
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import kotlinx.parcelize.Parcelize
@@ -71,6 +72,7 @@ interface DeviceAuthenticator {
      * @param kid Generated kid from the Preference
      * @param userId userId received from server
      * @param challenge challenge received from server
+     * @param customClaims A map of custom claims to be added to the jws payload
      */
     fun sign(context: Context,
              keyPair: KeyPair,
@@ -79,7 +81,8 @@ interface DeviceAuthenticator {
              userId: String,
              challenge: String,
              expiration: Date,
-             attestation: Attestation = Attestation.None): String {
+             attestation: Attestation = Attestation.None,
+             customClaims: Map<String, Any> = emptyMap()): String {
         val builder = RSAKey.Builder(keyPair.publicKey)
             .keyUse(KeyUse.SIGNATURE)
             .keyID(kid)
@@ -88,16 +91,21 @@ interface DeviceAuthenticator {
             builder.x509CertChain(getCertificateChain(userId))
         }
         val jwk = builder.build();
+        val customClaimsSetBuilder = JWTClaimsSet.Builder()
+            customClaims.forEach { (key, value) ->
+                customClaimsSetBuilder.claim(key, value)
+            }
         val signedJWT = SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
             .keyID(kid).jwk(jwk).build(),
-            JWTClaimsSet.Builder().subject(userId)
+            JWTClaimsSet.Builder(customClaimsSetBuilder.build()).subject(userId)
                 .issuer(context.packageName)
                 .expirationTime(expiration)
                 .issueTime(getIssueTime())
                 .notBeforeTime(getNotBeforeTime())
                 .claim(PLATFORM, "android")
                 .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
-                .claim(CHALLENGE, challenge).build())
+                .claim(CHALLENGE, challenge)
+                .build())
         signature?.let {
             //Using CryptoObject
             Logger.info(TAG, "Use CryptObject signature for Signing")
@@ -121,18 +129,23 @@ interface DeviceAuthenticator {
      * sign the challenge sent from the server and generate signed JWT
      * @param userKey User Information
      * @param challenge challenge received from server
+     * @param customClaims A map of custom claims to be added to the jws payload
      */
     fun sign(context: Context,
              userKey: UserKey,
              privateKey: PrivateKey,
              signature: Signature?,
              challenge: String,
-             expiration: Date): String {
-
+             expiration: Date,
+             customClaims: Map<String, Any> = emptyMap()): String {
+        val customClaimsSetBuilder = JWTClaimsSet.Builder()
+        customClaims.forEach { (key, value) ->
+            customClaimsSetBuilder.claim(key, value)
+        }
         val signedJWT =
             SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
                 .keyID(userKey.kid).build(),
-                JWTClaimsSet.Builder().subject(userKey.userId)
+                JWTClaimsSet.Builder(customClaimsSetBuilder.build()).subject(userKey.userId)
                     .issuer(context.packageName)
                     .claim(CHALLENGE, challenge)
                     .issueTime(getIssueTime())
@@ -180,6 +193,26 @@ interface DeviceAuthenticator {
      */
     fun getNotBeforeTime(): Date {
         return Calendar.getInstance().time
+    }
+
+    /** Validate custom claims
+    * @param  customClaims: A map of custom claims to be validated
+    * @return Boolean value indicating whether the custom claims are valid or not
+     */
+    fun validateCustomClaims(customClaims: Map<String, Any>): Boolean {
+        val registeredKeys = listOf(
+            JWTClaimNames.SUBJECT,
+            JWTClaimNames.EXPIRATION_TIME,
+            JWTClaimNames.ISSUED_AT,
+            JWTClaimNames.NOT_BEFORE,
+            JWTClaimNames.ISSUER,
+            CHALLENGE,
+            PLATFORM,
+            ANDROID_VERSION
+        )
+        val customKeys = customClaims.keys.toList()
+        val conflictingKeys = customKeys.filter { it in registeredKeys }
+        return conflictingKeys.isEmpty()
     }
 
 }

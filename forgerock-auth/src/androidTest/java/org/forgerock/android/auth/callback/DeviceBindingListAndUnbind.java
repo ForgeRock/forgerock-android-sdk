@@ -29,6 +29,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
@@ -56,7 +57,7 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
                         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
                         scenario.onActivity(InitProvider::setCurrentActivity);
 
-                        callback.bind(context, deviceBindingAuthenticationType ->
+                        callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
                             new FRListener<Void>() {
                                 @Override

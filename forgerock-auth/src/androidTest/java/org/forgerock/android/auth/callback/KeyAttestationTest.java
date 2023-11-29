@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -306,7 +307,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
-                    callback.bind(context, deviceBindingAuthenticationType ->
+                    callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "1234".toCharArray()),
                             new FRListener<Void>() {
                                 @Override
@@ -371,7 +372,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
-                    callback.bind(context, deviceBindingAuthenticationType ->
+                    callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "1234".toCharArray()),
                             new FRListener<Void>() {
                                 @Override
