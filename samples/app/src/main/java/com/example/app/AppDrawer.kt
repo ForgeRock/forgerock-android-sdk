@@ -9,10 +9,9 @@ package com.example.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,9 +24,9 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.OnDeviceTraining
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -35,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.app.Destinations.CENTRALIZE_ROUTE
@@ -44,6 +44,7 @@ import com.example.app.Destinations.IG
 import com.example.app.Destinations.LAUNCH_ROUTE
 import com.example.app.Destinations.MANAGE_USER_KEYS
 import com.example.app.Destinations.MANAGE_WEBAUTHN_KEYS
+import com.example.app.Destinations.SETTING
 import com.example.app.Destinations.TOKEN_ROUTE
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +60,7 @@ fun AppDrawer(
         modifier = Modifier
             .verticalScroll(scroll)) {
         Logo(
-            modifier = Modifier.padding(horizontal = 28.dp, vertical = 48.dp)
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
             label = { Text("Environment") },
@@ -136,6 +137,16 @@ fun AppDrawer(
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
+            label = { Text("Setting") },
+            selected = false,
+            icon = { Icon(Icons.Filled.Settings, null) },
+            onClick = {
+                navigateTo(SETTING);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
             label = { Text("Logout") },
             selected = false,
             icon = { Icon(Icons.Filled.Logout, null) },
@@ -150,17 +161,19 @@ fun AppDrawer(
 }
 
 @Composable
-private fun Logo(modifier: Modifier = Modifier) {
+private fun Logo(modifier: Modifier) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(MaterialTheme.colorScheme.primary)
+        .background(colorResource(id = R.color.black))
         .then(modifier)) {
         Icon(
-            painterResource(R.drawable.forgerock),
-            contentDescription = null
+            painterResource(R.drawable.ping_logo),
+            contentDescription = null,
+            modifier = Modifier
+                .height(100.dp).padding(8.dp)
+                .then(modifier),
+            tint = Color.Unspecified,
         )
-        Spacer(Modifier.width(8.dp))
-        Text(text = "ForgeRock")
     }
 
 }

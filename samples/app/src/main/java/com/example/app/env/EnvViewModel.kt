@@ -22,7 +22,7 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.30:8080/openam"
+            url = "http://192.168.86.248:8080/openam"
             realm = "root"
             cookieName = "iPlanetDirectoryPro"
             timeout = 50
@@ -38,8 +38,8 @@ class EnvViewModel : ViewModel() {
 
     val dbind = FROptionsBuilder.build {
         server {
-            url = "https://openam-dbind-upgrade.forgeblocks.com/am"
-            realm = "alpha"
+            url = "https://openam-updbind.forgeblocks.com/am"
+            realm = "bravo"
             cookieName = "ccdd0582e7262db"
             timeout = 50
         }
@@ -57,7 +57,7 @@ class EnvViewModel : ViewModel() {
 
     val sdk = FROptionsBuilder.build {
         server {
-            url = "https://openam-forgerrock-sdksteanant.forgeblocks.com/am"
+            url = "https://openam-dbind.forgeblocks.com/am"
             realm = "alpha"
             cookieName = "43d72fc37bdde8c"
             timeout = 50
