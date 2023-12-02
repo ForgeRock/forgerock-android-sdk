@@ -99,6 +99,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
     implementation 'com.facebook.android:facebook-login:16.0.0'
 
+    //For App integrity
+    implementation 'com.google.android.play:integrity:1.3.0'
+
     //Device Binding + JWT
     implementation 'com.nimbusds:nimbus-jose-jwt:9.25'
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
