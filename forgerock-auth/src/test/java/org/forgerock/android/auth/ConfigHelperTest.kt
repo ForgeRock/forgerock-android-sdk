@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -68,69 +68,141 @@ class ConfigHelperTest {
             urlPath {
                 revokeEndpoint = "https://revoke"
                 endSessionEndpoint = "https://endsession"
+                sessionEndpoint = "https://sessionEndpoint"
             }
         }
         val cookieChanged = FROptionsBuilder.build {
             server {
-                url = ""
-                realm = ""
+                url = "https://dummy"
+                realm = "realm123"
                 cookieName = "cookieName1"
+            }
+            oauth {
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
         val realmChanged = FROptionsBuilder.build {
             server {
-                url = ""
-                realm = ""
-                realm = "realm1"
+                url = "https://dummy"
+                realm = "realm1234"
+                cookieName = "cookieName"
+            }
+            oauth {
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
         val clientChanged = FROptionsBuilder.build {
             server {
-                url = ""
-                realm = ""
-                cookieName = "cookieName1"
+                url = "https://dummy"
+                realm = "realm123"
+                cookieName = "cookieName"
             }
             oauth {
-               oauthClientId  = "clientId"
+                oauthClientId = "client_id_1"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
         val redirectURIChanged = FROptionsBuilder.build {
             server {
-                url = ""
-                realm = ""
-                cookieName = "cookieName1"
+                url = "https://dummy"
+                realm = "realm123"
+                cookieName = "cookieName"
             }
             oauth {
-                oauthRedirectUri  = "https://redirectURI"
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi_uri"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
         val scopeChanged = FROptionsBuilder.build {
             server {
-                url = ""
-                realm = ""
-                cookieName = "cookieName1"
+                url = "https://dummy"
+                realm = "realm123"
+                cookieName = "cookieName"
             }
             oauth {
-                oauthScope  = "scope"
+                oauthClientId = "client_id"
+                oauthScope = "scope_test"
+                oauthRedirectUri = "redirecturi"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
-        val urlChanged = FROptionsBuilder.build {
+        val expectedURL = FROptionsBuilder.build {
             server {
-                url  = "dummy"
-                realm = ""
+                url = "https://dummynew"
+                realm = "realm123"
+                cookieName = "cookieName"
+            }
+            oauth {
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
             }
         }
         ConfigHelper.persist(context, frOptions)
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, cookieChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, realmChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, clientChanged))
-        assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, urlChanged))
+        assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, expectedURL))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, redirectURIChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, scopeChanged))
         assertFalse(ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions))
 
         val preference = ConfigHelper.loadFromPreference(context)
-        assertTrue(preference == frOptions)
+        assertEquals(preference, frOptions)
+
+    }
+
+    @Test
+    fun loadDefaultValueFromPreference() {
+        val expectedValue = FROptionsBuilder.build {
+            server {
+                url = "https://openam.example.com:8081/openam"
+                realm = "root"
+                cookieName = "iPlanetDirectoryPro"
+            }
+            oauth {
+                oauthClientId = "andy_app"
+                oauthScope = "openid email address"
+                oauthRedirectUri = "https://www.example.com:8080/callback"
+            }
+            urlPath {
+                revokeEndpoint = ""
+                endSessionEndpoint = ""
+                sessionEndpoint = ""
+
+            }
+        }
+        val preference = ConfigHelper.loadFromPreference(context)
+        assertEquals(preference, expectedValue)
     }
 
     @Test

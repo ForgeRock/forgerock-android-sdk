@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -59,10 +59,39 @@ class FROptionTest {
         assertTrue(option.logger.customLogger == logger)
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun testInValidConfigRealm() {
+        val option1 = FROptionsBuilder.build { server {
+            url = "https://stoyan.com"
+            realm = ""
+        }}
+        option1.validateConfig()
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testInValidConfigCookieName() {
+        val option1 = FROptionsBuilder.build { server {
+            url = "https://stoyan.com"
+            cookieName = ""
+        }}
+        option1.validateConfig()
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testInValidConfigUrl() {
+        val option1 = FROptionsBuilder.build { server {
+            url = ""
+        }}
+        option1.validateConfig()
+    }
     @Test
     fun testReferenceAndValue() {
-        val option1 = FROptionsBuilder.build {  }
-        var option2 = FROptionsBuilder.build {  }
+        val option1 = FROptionsBuilder.build { server {
+            url = "https://stoyan.com"
+        }}
+        var option2 = FROptionsBuilder.build { server {
+            url = "https://stoyan.com"
+        }}
         assertTrue(FROptions.equals(option1, option2))
         option2 = FROptionsBuilder.build { server {
             url = "https://andy.com"

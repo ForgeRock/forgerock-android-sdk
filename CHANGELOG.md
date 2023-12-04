@@ -23,6 +23,7 @@ private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
 #### Fixed
 - Use auth-per-use Key for Device Binding [SDKS-2792]
 - Handle WebAuthn cancellation inconsistency [SDKS-2819]
+- Making `forgerock_url`, `forgerock_realm`, and `forgerock_cookie_name` params mandatory for dynamically configuring the SDK [SDKS-2782]
 
 ## [4.2.0]
 #### Added
