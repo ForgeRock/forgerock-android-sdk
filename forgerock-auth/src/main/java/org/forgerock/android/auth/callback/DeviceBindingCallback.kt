@@ -208,12 +208,10 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * Helper method to execute binding , signing, show biometric prompt.
      *
      * @param context  The Application Context
-     * @param listener The Listener to listen for the result
      * @param deviceAuthenticator Interface to find the Authentication Type
      * @param deviceBindingRepository Persist the values in encrypted shared preference
      * @param customClaims A map of custom claims to be added to the jws payload
      */
-    @JvmOverloads
     internal suspend fun execute(context: Context,
                                  deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
                                      deviceBindingAuthenticationType),
@@ -230,8 +228,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
             return
         }
 
-        if (!deviceAuthenticator.validateCustomClaims(customClaims)) {
-            handleException(DeviceBindingException(Unsupported("Invalid custom claims")))
+        if (deviceAuthenticator.validateCustomClaims(customClaims).not()) {
+            handleException(DeviceBindingException(InvalidCustomClaims()))
             return
         }
 

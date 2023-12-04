@@ -54,6 +54,11 @@ abstract class DeviceBindingErrorStatus(var message: String,
                        private val errorType: String = ABORT,
                        private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
+
+    data class InvalidCustomClaims(private val errorMessage: String = "Invalid Custom Claims",
+                       private val errorType: String = ABORT,
+                       private val code: Int? = null) :
+        DeviceBindingErrorStatus(errorMessage, errorType, code)
 }
 
 /**

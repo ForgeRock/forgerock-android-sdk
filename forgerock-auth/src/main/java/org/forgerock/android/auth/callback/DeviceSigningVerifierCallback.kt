@@ -19,6 +19,7 @@ import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Unsupported
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.InvalidCustomClaims
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.NoKeysFound
 import org.forgerock.android.auth.devicebind.Prompt
@@ -177,8 +178,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
             handleException(DeviceBindingException(Unsupported()))
         }
 
-        if (!deviceAuthenticator.validateCustomClaims(customClaims)) {
-            handleException(DeviceBindingException(Unsupported("Invalid custom claims")))
+        if (deviceAuthenticator.validateCustomClaims(customClaims).not()) {
+            handleException(DeviceBindingException(InvalidCustomClaims()))
             return
         }
 

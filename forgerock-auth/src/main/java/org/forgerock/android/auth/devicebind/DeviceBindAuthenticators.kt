@@ -91,21 +91,20 @@ interface DeviceAuthenticator {
             builder.x509CertChain(getCertificateChain(userId))
         }
         val jwk = builder.build();
-        val customClaimsSetBuilder = JWTClaimsSet.Builder()
-            customClaims.forEach { (key, value) ->
-                customClaimsSetBuilder.claim(key, value)
-            }
+        val claimsSet = JWTClaimsSet.Builder().subject(userId)
+            .issuer(context.packageName)
+            .expirationTime(expiration)
+            .issueTime(getIssueTime())
+            .notBeforeTime(getNotBeforeTime())
+            .claim(PLATFORM, "android")
+            .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
+            .claim(CHALLENGE, challenge)
+        customClaims.forEach { (key, value) ->
+            claimsSet.claim(key, value)
+        }
         val signedJWT = SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
             .keyID(kid).jwk(jwk).build(),
-            JWTClaimsSet.Builder(customClaimsSetBuilder.build()).subject(userId)
-                .issuer(context.packageName)
-                .expirationTime(expiration)
-                .issueTime(getIssueTime())
-                .notBeforeTime(getNotBeforeTime())
-                .claim(PLATFORM, "android")
-                .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
-                .claim(CHALLENGE, challenge)
-                .build())
+            claimsSet.build())
         signature?.let {
             //Using CryptoObject
             Logger.info(TAG, "Use CryptObject signature for Signing")
@@ -138,19 +137,19 @@ interface DeviceAuthenticator {
              challenge: String,
              expiration: Date,
              customClaims: Map<String, Any> = emptyMap()): String {
-        val customClaimsSetBuilder = JWTClaimsSet.Builder()
+        val claimsSet = JWTClaimsSet.Builder().subject(userKey.userId)
+            .issuer(context.packageName)
+            .claim(CHALLENGE, challenge)
+            .issueTime(getIssueTime())
+            .notBeforeTime(getNotBeforeTime())
+            .expirationTime(expiration)
         customClaims.forEach { (key, value) ->
-            customClaimsSetBuilder.claim(key, value)
+            claimsSet.claim(key, value)
         }
         val signedJWT =
             SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
                 .keyID(userKey.kid).build(),
-                JWTClaimsSet.Builder(customClaimsSetBuilder.build()).subject(userKey.userId)
-                    .issuer(context.packageName)
-                    .claim(CHALLENGE, challenge)
-                    .issueTime(getIssueTime())
-                    .notBeforeTime(getNotBeforeTime())
-                    .expirationTime(expiration).build())
+                claimsSet.build())
         //Use provided signature to sign if available otherwise use private key
         signature?.let {
             //Using CryptoObject
@@ -210,9 +209,7 @@ interface DeviceAuthenticator {
             PLATFORM,
             ANDROID_VERSION
         )
-        val customKeys = customClaims.keys.toList()
-        val conflictingKeys = customKeys.filter { it in registeredKeys }
-        return conflictingKeys.isEmpty()
+        return customClaims.keys.intersect(registeredKeys).isEmpty()
     }
 
 }
