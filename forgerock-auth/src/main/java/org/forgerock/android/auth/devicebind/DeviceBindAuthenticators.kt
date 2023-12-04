@@ -199,6 +199,10 @@ interface DeviceAuthenticator {
     * @return Boolean value indicating whether the custom claims are valid or not
      */
     fun validateCustomClaims(customClaims: Map<String, Any>): Boolean {
+        return customClaims.keys.intersect(registeredKeys).isEmpty()
+    }
+
+    companion object {
         val registeredKeys = listOf(
             JWTClaimNames.SUBJECT,
             JWTClaimNames.EXPIRATION_TIME,
@@ -209,7 +213,6 @@ interface DeviceAuthenticator {
             PLATFORM,
             ANDROID_VERSION
         )
-        return customClaims.keys.intersect(registeredKeys).isEmpty()
     }
 
 }
