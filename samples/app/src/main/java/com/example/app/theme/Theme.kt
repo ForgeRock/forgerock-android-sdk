@@ -7,71 +7,11 @@
 
 package com.example.app.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.ui.platform.LocalContext
-import com.example.app.md_theme_dark_background
-import com.example.app.md_theme_dark_error
-import com.example.app.md_theme_dark_errorContainer
-import com.example.app.md_theme_dark_inverseOnSurface
-import com.example.app.md_theme_dark_inversePrimary
-import com.example.app.md_theme_dark_inverseSurface
-import com.example.app.md_theme_dark_onBackground
-import com.example.app.md_theme_dark_onError
-import com.example.app.md_theme_dark_onErrorContainer
-import com.example.app.md_theme_dark_onPrimary
-import com.example.app.md_theme_dark_onPrimaryContainer
-import com.example.app.md_theme_dark_onSecondary
-import com.example.app.md_theme_dark_onSecondaryContainer
-import com.example.app.md_theme_dark_onSurface
-import com.example.app.md_theme_dark_onSurfaceVariant
-import com.example.app.md_theme_dark_onTertiary
-import com.example.app.md_theme_dark_onTertiaryContainer
-import com.example.app.md_theme_dark_outline
-import com.example.app.md_theme_dark_primary
-import com.example.app.md_theme_dark_primaryContainer
-import com.example.app.md_theme_dark_secondary
-import com.example.app.md_theme_dark_secondaryContainer
-import com.example.app.md_theme_dark_surface
-import com.example.app.md_theme_dark_surfaceTint
-import com.example.app.md_theme_dark_surfaceVariant
-import com.example.app.md_theme_dark_tertiary
-import com.example.app.md_theme_dark_tertiaryContainer
-import com.example.app.md_theme_light_background
-import com.example.app.md_theme_light_error
-import com.example.app.md_theme_light_errorContainer
-import com.example.app.md_theme_light_inverseOnSurface
-import com.example.app.md_theme_light_inversePrimary
-import com.example.app.md_theme_light_inverseSurface
-import com.example.app.md_theme_light_onBackground
-import com.example.app.md_theme_light_onError
-import com.example.app.md_theme_light_onErrorContainer
-import com.example.app.md_theme_light_onPrimary
-import com.example.app.md_theme_light_onPrimaryContainer
-import com.example.app.md_theme_light_onSecondary
-import com.example.app.md_theme_light_onSecondaryContainer
-import com.example.app.md_theme_light_onSurface
-import com.example.app.md_theme_light_onSurfaceVariant
-import com.example.app.md_theme_light_onTertiary
-import com.example.app.md_theme_light_onTertiaryContainer
-import com.example.app.md_theme_light_outline
-import com.example.app.md_theme_light_primary
-import com.example.app.md_theme_light_primaryContainer
-import com.example.app.md_theme_light_secondary
-import com.example.app.md_theme_light_secondaryContainer
-import com.example.app.md_theme_light_surface
-import com.example.app.md_theme_light_surfaceTint
-import com.example.app.md_theme_light_surfaceVariant
-import com.example.app.md_theme_light_tertiary
-import com.example.app.md_theme_light_tertiaryContainer
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -101,7 +41,10 @@ private val LightColors = lightColorScheme(
     inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,
     surfaceTint = md_theme_light_surfaceTint,
+    outlineVariant = md_theme_light_outlineVariant,
+    scrim = md_theme_light_scrim,
 )
+
 
 private val DarkColors = darkColorScheme(
     primary = md_theme_dark_primary,
@@ -131,24 +74,23 @@ private val DarkColors = darkColorScheme(
     inverseSurface = md_theme_dark_inverseSurface,
     inversePrimary = md_theme_dark_inversePrimary,
     surfaceTint = md_theme_dark_surfaceTint,
+    outlineVariant = md_theme_dark_outlineVariant,
+    scrim = md_theme_dark_scrim,
 )
-
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable() () -> Unit
 ) {
-    val colorScheme =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        } else {
-            if (darkTheme) DarkColors else LightColors
-        }
+    val colors = if (!useDarkTheme) {
+        LightColors
+    } else {
+        DarkColors
+    }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         shapes = AppShapes,
         typography = AppTypography,
         content = content

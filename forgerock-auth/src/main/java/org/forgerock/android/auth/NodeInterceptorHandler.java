@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ class NodeInterceptorHandler extends InterceptorHandler implements NodeListener<
     }
 
     @Override
-    public void onCallbackReceived(Node node) {
+    public void onCallbackReceived(@NonNull Node node) {
         ((NodeListener<?>)getListener()).onCallbackReceived(node);
     }
 
@@ -32,9 +34,7 @@ class NodeInterceptorHandler extends InterceptorHandler implements NodeListener<
     }
 
     @Override
-    public void onException(Exception e) {
+    public void onException(@NonNull Exception e) {
         getListener().onException(e);
     }
-
-
 }

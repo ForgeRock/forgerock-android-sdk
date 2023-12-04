@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -17,9 +17,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.gms.fido.Fido
 import com.google.android.gms.fido.fido2.api.common.AuthenticatorErrorResponse
+import com.google.android.gms.fido.fido2.api.common.ErrorCode
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.exception.WebAuthnException
@@ -35,6 +35,7 @@ private const val PENDING_INTENT = "pendingIntent"
 class WebAuthnFragment : Fragment() {
 
     private var pendingIntent: PendingIntent? = null
+
     //Cannot cancel the pending Intent when cancel, the pendingIntent is with com.google.android.gms
     private var continuation: CancellableContinuation<PublicKeyCredential>? = null
 
@@ -60,8 +61,15 @@ class WebAuthnFragment : Fragment() {
     private fun handleSignResult(activityResult: ActivityResult) {
         val bytes = activityResult.data?.getByteArrayExtra(Fido.FIDO2_KEY_CREDENTIAL_EXTRA)
         when {
+            //Android FIDO SDK is inconsistent of handling user cancellation, it may returns
+            //RESULT_CANCELED in some cases, translate to WebAuthn error code
+            activityResult.resultCode == Activity.RESULT_CANCELED -> continuation?.resumeWithException(
+                WebAuthnResponseException(ErrorCode.NOT_ALLOWED_ERR,
+                    "Did not get user selected credential"))
+
             activityResult.resultCode != Activity.RESULT_OK -> continuation?.resumeWithException(
                 WebAuthnException("error"))
+
             bytes == null -> continuation?.resumeWithException(WebAuthnException("error"))
             else -> {
                 val credential = PublicKeyCredential.deserializeFromBytes(bytes)

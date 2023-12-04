@@ -8,7 +8,6 @@
 package com.example.app.journey
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -24,21 +23,26 @@ import java.lang.Exception
 /**
  * Should avoid passing context to ViewModel
  */
-class JourneyViewModel<T>(context: Context, journeyName: T) : ViewModel() {
+class JourneyViewModel<T>(context: Context, private var journeyName: T) : ViewModel() {
 
-    val sharedPreferences = context.getSharedPreferences("JourneyPreferences", Context.MODE_PRIVATE)
+    private val sharedPreferences =
+        context.getSharedPreferences("JourneyPreferences", Context.MODE_PRIVATE)
+
+    var processing: Boolean = false
 
     var state = MutableStateFlow(JourneyState())
         private set
 
     private val nodeListener = object : NodeListener<FRSession> {
         override fun onSuccess(result: FRSession) {
+            processing = false
             state.update {
                 it.copy(null, null, result)
             }
         }
 
         override fun onException(e: Exception) {
+            processing = false
             state.update {
                 //Not keep the node, so that we can retry with previous state
                 it.copy(node = null, exception = e)
@@ -53,7 +57,7 @@ class JourneyViewModel<T>(context: Context, journeyName: T) : ViewModel() {
     }
 
     init {
-        start(context, journeyName)
+        start(context)
     }
 
     fun saveJourney(journeyName: String) {
@@ -71,12 +75,22 @@ class JourneyViewModel<T>(context: Context, journeyName: T) : ViewModel() {
         }
     }
 
-    private fun start(context: Context, journeyName: T) {
-        viewModelScope.launch {
-            if (journeyName is String) {
-                FRSession.authenticate(context, journeyName, nodeListener)
-            } else if (journeyName is PolicyAdvice) {
-                FRSession.getCurrentSession().authenticate(context, journeyName, nodeListener)
+    fun clear() {
+        state.update {
+            it.copy(null, null, null)
+        }
+    }
+
+    fun start(context: Context) {
+        if (!processing) {
+            processing = true
+            viewModelScope.launch {
+                if (journeyName is String) {
+                    FRSession.authenticate(context, journeyName as String, nodeListener)
+                } else if (journeyName is PolicyAdvice) {
+                    FRSession.getCurrentSession()
+                        .authenticate(context, journeyName as PolicyAdvice, nodeListener)
+                }
             }
         }
     }
@@ -91,6 +105,7 @@ class JourneyViewModel<T>(context: Context, journeyName: T) : ViewModel() {
                 return JourneyViewModel(context.applicationContext, journeyName) as T
             }
         }
+
         fun factory(
             context: Context,
             journeyName: PolicyAdvice,
