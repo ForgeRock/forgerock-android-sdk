@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.KeyPair
 import org.forgerock.android.auth.devicebind.MultipleKeysFound
@@ -24,6 +25,7 @@ import org.forgerock.android.auth.devicebind.UserKeySelector
 import org.forgerock.android.auth.devicebind.UserKeyService
 import org.forgerock.android.auth.devicebind.UserKeys
 import org.json.JSONObject
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,6 +88,7 @@ class DeviceSigningVerifierCallbackTest {
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
             null,
@@ -117,6 +120,7 @@ class DeviceSigningVerifierCallbackTest {
             userKey1)))
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
 
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
@@ -154,6 +158,57 @@ class DeviceSigningVerifierCallbackTest {
         date.add(Calendar.SECOND, 60)
         return date.time;
     }
+
+    fun testSignForForValidClaims() = runBlocking {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val userKey =
+            UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
+        whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
+        whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
+        whenever(deviceAuthenticator.sign(context, userKey,
+            keyPair.privateKey,
+            null,
+            "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
+            getExpiration())).thenReturn("jws")
+
+        val testObject =
+            DeviceSigningVerifierCallbackMock(rawContent)
+        testObject.executeAuthenticate(context, userKey, deviceAuthenticator)
+    }
+
+
+    fun testSignForForInvalidClaims() = runBlocking {
+        val errorCode = -1
+        val invalidCustomClaims = DeviceBindingErrorStatus.InvalidCustomClaims(code = errorCode)
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val userKey =
+            UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
+        whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
+        whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(false)
+        whenever(deviceAuthenticator.sign(context, userKey,
+            keyPair.privateKey,
+            null,
+            "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
+            getExpiration())).thenReturn("jws")
+
+        val testObject =
+            DeviceSigningVerifierCallbackMock(rawContent)
+        try {
+            testObject.executeAuthenticate(context, userKey, deviceAuthenticator)
+            Assert.fail()
+        } catch (e: Exception) {
+            Assert.assertTrue(e.message == invalidCustomClaims.message)
+            Assert.assertTrue(e is DeviceBindingException)
+            val deviceBindException = e as DeviceBindingException
+            Assert.assertTrue(deviceBindException.message == invalidCustomClaims.message)
+        }
+    }
 }
 
 
@@ -175,6 +230,6 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String,
                                                fragmentActivity: FragmentActivity): UserKey {
                 return UserKey("id1" , "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
             }
-        }, deviceAuthenticator = authenticator)
+        }, deviceAuthenticator = authenticator, customClaims = emptyMap())
     }
 }
