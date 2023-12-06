@@ -31,7 +31,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-@Ignore
 public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
     protected final static String APPLICATION_PIN = "1234";
