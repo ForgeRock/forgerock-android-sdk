@@ -93,7 +93,6 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
@@ -117,7 +116,6 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
@@ -146,7 +144,6 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
@@ -168,7 +165,6 @@ class DeviceBindingCallbackTest {
         val abort = Abort(code = errorCode)
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(abort)
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
@@ -205,7 +201,6 @@ class DeviceBindingCallbackTest {
             "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Timeout())
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
@@ -277,7 +272,6 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(),
             any())).thenThrow(NullPointerException::class.java)
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
@@ -326,57 +320,6 @@ class DeviceBindingCallbackTest {
         date.add(Calendar.SECOND, 60)
         return date.time;
     }
-
-    @Test
-    fun testExecuteForValidClaims() = runBlocking {
-        val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
-        val encryptedPref = mock<DeviceBindingRepository>()
-        val deviceAuthenticator = mock<None>()
-        whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
-        whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
-        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
-        whenever(deviceAuthenticator.sign(context, keyPair, null,
-            kid,
-            userid,
-            challenge,
-            getExpiration())).thenReturn("signedJWT")
-        val testObject = DeviceBindingCallbackMockTest(rawContent)
-        testObject.testExecute(context,
-            deviceAuthenticator = deviceAuthenticator,
-            encryptedPreference = encryptedPref,
-            "device_id")
-        verify(deviceAuthenticator).setKey(any())
-
-    }
-
-
-    @Test
-    fun testExecuteForInvalidClaims(): Unit = runBlocking {
-        val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
-        val errorCode = -1
-        val invalidCustomClaims = InvalidCustomClaims(code = errorCode)
-        whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
-        whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(false)
-
-        val testObject = DeviceBindingCallbackMockTest(rawContent)
-        try {
-            testObject.testExecute(context,
-                deviceAuthenticator = deviceAuthenticator,
-                encryptedPreference = encryptedPref,
-                "device_id")
-            fail()
-        } catch (e: Exception) {
-            assertTrue(e.message == invalidCustomClaims.message)
-            assertTrue(e is DeviceBindingException)
-            val deviceBindException = e as DeviceBindingException
-            assertTrue(deviceBindException.message == invalidCustomClaims.message)
-        }
-    }
-
 }
 
 

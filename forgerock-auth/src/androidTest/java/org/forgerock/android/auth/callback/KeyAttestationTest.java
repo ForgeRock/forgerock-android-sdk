@@ -307,7 +307,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
-                    callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
+                    callback.bind(context, deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "1234".toCharArray()),
                             new FRListener<Void>() {
                                 @Override
@@ -372,7 +372,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                 if (node.getCallback(DeviceBindingCallback.class) != null) {
                     DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
 
-                    callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
+                    callback.bind(context, deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "1234".toCharArray()),
                             new FRListener<Void>() {
                                 @Override

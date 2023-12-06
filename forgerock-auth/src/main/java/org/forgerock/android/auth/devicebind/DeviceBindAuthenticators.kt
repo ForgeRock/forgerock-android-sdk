@@ -81,8 +81,7 @@ interface DeviceAuthenticator {
              userId: String,
              challenge: String,
              expiration: Date,
-             attestation: Attestation = Attestation.None,
-             customClaims: Map<String, Any> = emptyMap()): String {
+             attestation: Attestation = Attestation.None): String {
         val builder = RSAKey.Builder(keyPair.publicKey)
             .keyUse(KeyUse.SIGNATURE)
             .keyID(kid)
@@ -91,20 +90,16 @@ interface DeviceAuthenticator {
             builder.x509CertChain(getCertificateChain(userId))
         }
         val jwk = builder.build();
-        val claimsSet = JWTClaimsSet.Builder().subject(userId)
-            .issuer(context.packageName)
-            .expirationTime(expiration)
-            .issueTime(getIssueTime())
-            .notBeforeTime(getNotBeforeTime())
-            .claim(PLATFORM, "android")
-            .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
-            .claim(CHALLENGE, challenge)
-        customClaims.forEach { (key, value) ->
-            claimsSet.claim(key, value)
-        }
         val signedJWT = SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
             .keyID(kid).jwk(jwk).build(),
-            claimsSet.build())
+            JWTClaimsSet.Builder().subject(userId)
+                .issuer(context.packageName)
+                .expirationTime(expiration)
+                .issueTime(getIssueTime())
+                .notBeforeTime(getNotBeforeTime())
+                .claim(PLATFORM, "android")
+                .claim(ANDROID_VERSION, Build.VERSION.SDK_INT)
+                .claim(CHALLENGE, challenge).build())
         signature?.let {
             //Using CryptoObject
             Logger.info(TAG, "Use CryptObject signature for Signing")
@@ -195,8 +190,8 @@ interface DeviceAuthenticator {
     }
 
     /** Validate custom claims
-    * @param  customClaims: A map of custom claims to be validated
-    * @return Boolean value indicating whether the custom claims are valid or not
+     * @param  customClaims: A map of custom claims to be validated
+     * @return Boolean value indicating whether the custom claims are valid or not
      */
     fun validateCustomClaims(customClaims: Map<String, Any>): Boolean {
         return customClaims.keys.intersect(registeredKeys).isEmpty()
@@ -209,9 +204,7 @@ interface DeviceAuthenticator {
             JWTClaimNames.ISSUED_AT,
             JWTClaimNames.NOT_BEFORE,
             JWTClaimNames.ISSUER,
-            CHALLENGE,
-            PLATFORM,
-            ANDROID_VERSION
+            CHALLENGE
         )
     }
 

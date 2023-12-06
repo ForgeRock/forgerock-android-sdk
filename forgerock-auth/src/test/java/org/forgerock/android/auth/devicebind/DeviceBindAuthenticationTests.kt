@@ -467,9 +467,7 @@ class DeviceBindAuthenticationTests {
         assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUED_AT to "demo")))
         assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.NOT_BEFORE to "demo")))
         assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo")))
-        assertFalse(testObject.validateCustomClaims(mapOf("platform" to "demo")))
         assertFalse(testObject.validateCustomClaims(mapOf("challenge" to "demo")))
-        assertFalse(testObject.validateCustomClaims(mapOf("android-version" to "demo")))
         assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo", JWTClaimNames.EXPIRATION_TIME to Date())))
     }
 

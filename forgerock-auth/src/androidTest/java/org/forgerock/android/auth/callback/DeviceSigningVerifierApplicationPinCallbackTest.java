@@ -56,7 +56,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     USER_ID = callback.getUserId();
 
                     // Bind the device...
-                    callback.bind(context, Collections.emptyMap(), deviceBindingAuthenticationType ->
+                    callback.bind(context, deviceBindingAuthenticationType ->
                                     new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
                             new FRListener<Void>() {
                                 @Override
@@ -113,7 +113,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new DefaultUserKeySelector(), Collections.emptyMap(),
+                    callback.sign(context, Collections.emptyMap(), new DefaultUserKeySelector(),
                             deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
                             new FRListener<Void>() {
                                 @Override
@@ -193,7 +193,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     Assert.assertNotNull(callback.getUserId());
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new DefaultUserKeySelector(), Collections.emptyMap(),
+                    callback.sign(context, Collections.emptyMap(), new DefaultUserKeySelector(),
                             deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> "WRONG".toCharArray()),
                             new FRListener<Void>() {
                                 @Override
@@ -249,7 +249,7 @@ public class DeviceSigningVerifierApplicationPinCallbackTest extends BaseDeviceB
                     assertThat(callback.getUserId()).isEmpty();
                     Assert.assertNotNull(callback.getChallenge());
 
-                    callback.sign(context, new DefaultUserKeySelector(), Collections.emptyMap(),
+                    callback.sign(context, Collections.emptyMap(), new DefaultUserKeySelector(),
                             deviceBindingAuthenticationType -> new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()),
                             new FRListener<Void>() {
                                 @Override

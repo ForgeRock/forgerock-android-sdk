@@ -87,8 +87,8 @@ class DeviceSigningVerifierCallbackTest {
             UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(SingleKeyFound(userKey))
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
-        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
         whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
+        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,
             null,
@@ -118,9 +118,9 @@ class DeviceSigningVerifierCallbackTest {
         whenever(userKeyService.getKeyStatus("jey")).thenReturn(MultipleKeysFound(mutableListOf(
             userKey,
             userKey1)))
+        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
         whenever(deviceAuthenticator.isSupported(context)).thenReturn(true)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.validateCustomClaims(any())).thenReturn(true)
 
         whenever(deviceAuthenticator.sign(context, userKey,
             keyPair.privateKey,

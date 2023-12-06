@@ -110,8 +110,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * Input the Client Error to the server
      * @param value DeviceSign ErrorType .
      */
-    override fun setClientError(value: String?) {
-        super.setValue(value, 1)
+    override fun setClientError(clientError: String?) {
+        super.setValue(clientError, 1)
     }
 
     /**
@@ -123,9 +123,9 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
     open suspend fun sign(context: Context,
-                          userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                           customClaims: Map<String, Any> = emptyMap(),
-                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier, ) {
+                          userKeySelector: UserKeySelector = DefaultUserKeySelector(),
+                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
         execute(context,
             userKeySelector = userKeySelector,
             deviceAuthenticator = deviceAuthenticator,
@@ -144,14 +144,14 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      */
     @JvmOverloads
     open fun sign(context: Context,
-                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                   customClaims: Map<String, Any> = emptyMap(),
+                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                   deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
                   listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                sign(context, userKeySelector, customClaims, deviceAuthenticator)
+                sign(context, customClaims, userKeySelector, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -190,7 +190,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                     status.privateKey,
                     status.signature,
                     challenge,
-                    getExpiration(timeout))
+                    getExpiration(timeout),
+                    customClaims)
                 setJws(jws)
             }
             is DeviceBindingErrorStatus -> {
@@ -201,7 +202,6 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
 
     }
 
-    @JvmOverloads
     internal suspend fun execute(context: Context,
                                  userKeyService: UserKeyService = UserDeviceKeyService(context),
                                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),

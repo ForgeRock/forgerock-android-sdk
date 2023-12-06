@@ -168,19 +168,17 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * keys before calling this method
      *
      * @param context  The Application Context
-     * @param customClaims A map of custom claims to be added to the jwt payload
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
      */
     @JvmOverloads
     open fun bind(context: Context,
-                  customClaims: Map<String, Any> = emptyMap(),
                   deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
                   listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                bind(context, customClaims, deviceAuthenticator)
+                bind(context, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -194,13 +192,11 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * keys before calling this method
      *
      * @param context  The Application Context
-     * @param customClaims A map of custom claims to be added to the jws payload
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
     open suspend fun bind(context: Context,
-                          customClaims: Map<String, Any> = emptyMap(),
-                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier, ) {
-        execute(context, deviceAuthenticator(deviceBindingAuthenticationType), customClaims = customClaims)
+                          deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
+        execute(context, deviceAuthenticator(deviceBindingAuthenticationType))
     }
 
 
@@ -210,7 +206,6 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param deviceAuthenticator Interface to find the Authentication Type
      * @param deviceBindingRepository Persist the values in encrypted shared preference
-     * @param customClaims A map of custom claims to be added to the jws payload
      */
     internal suspend fun execute(context: Context,
                                  deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
@@ -218,18 +213,12 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                                  deviceBindingRepository: DeviceBindingRepository = LocalDeviceBindingRepository(
                                      context),
                                  deviceId: String = DeviceIdentifier.builder().context(context)
-                                     .build().identifier,
-                                 customClaims: Map<String, Any> = emptyMap()) {
+                                     .build().identifier) {
 
         deviceAuthenticator.initialize(userId, Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context, attestation).not()) {
             handleException(DeviceBindingException(Unsupported()))
-            return
-        }
-
-        if (deviceAuthenticator.validateCustomClaims(customClaims).not()) {
-            handleException(DeviceBindingException(InvalidCustomClaims()))
             return
         }
 
