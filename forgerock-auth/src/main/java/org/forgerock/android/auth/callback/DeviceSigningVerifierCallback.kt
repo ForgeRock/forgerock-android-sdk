@@ -19,6 +19,7 @@ import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Unsupported
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.InvalidCustomClaims
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.NoKeysFound
 import org.forgerock.android.auth.devicebind.Prompt
@@ -109,8 +110,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * Input the Client Error to the server
      * @param value DeviceSign ErrorType .
      */
-    override fun setClientError(value: String?) {
-        super.setValue(value, 1)
+    override fun setClientError(clientError: String?) {
+        super.setValue(clientError, 1)
     }
 
     /**
@@ -118,14 +119,17 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      *
      * @param context  The Application Context
      * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
+     * @param customClaims A map of custom claims to be added to the jws payload
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
     open suspend fun sign(context: Context,
+                          customClaims: Map<String, Any> = emptyMap(),
                           userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                           deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
         execute(context,
             userKeySelector = userKeySelector,
-            deviceAuthenticator = deviceAuthenticator)
+            deviceAuthenticator = deviceAuthenticator,
+            customClaims = customClaims)
     }
 
 
@@ -134,18 +138,20 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      *
      * @param context  The Application Context
      * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
+     * @param customClaims A map of custom claims to be added to the jws payload
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
      */
     @JvmOverloads
     open fun sign(context: Context,
+                  customClaims: Map<String, Any> = emptyMap(),
                   userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                   deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
                   listener: FRListener<Void>) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                sign(context, userKeySelector, deviceAuthenticator)
+                sign(context, customClaims, userKeySelector, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -159,16 +165,24 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param context Application Context
      * @param userKey User Information
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [getDeviceAuthenticator] will be used if not provided
+     * @param customClaims A map of custom claims to be added to the jws payload
      */
     protected open suspend fun authenticate(context: Context,
                                             userKey: UserKey,
-                                            deviceAuthenticator: DeviceAuthenticator) {
+                                            deviceAuthenticator: DeviceAuthenticator,
+                                            customClaims: Map<String, Any> = emptyMap()) {
 
         deviceAuthenticator.initialize(userKey.userId, Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
             handleException(DeviceBindingException(Unsupported()))
         }
+
+        if (deviceAuthenticator.validateCustomClaims(customClaims).not()) {
+            handleException(DeviceBindingException(InvalidCustomClaims()))
+            return
+        }
+
         when (val status = deviceAuthenticator.authenticate(context)) {
             is Success -> {
                 val jws = deviceAuthenticator.sign(context,
@@ -176,7 +190,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                     status.privateKey,
                     status.signature,
                     challenge,
-                    getExpiration(timeout))
+                    getExpiration(timeout),
+                    customClaims)
                 setJws(jws)
             }
             is DeviceBindingErrorStatus -> {
@@ -187,11 +202,11 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
 
     }
 
-    @JvmOverloads
     internal suspend fun execute(context: Context,
                                  userKeyService: UserKeyService = UserDeviceKeyService(context),
                                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),
-                                 deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator) {
+                                 deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator,
+                                 customClaims: Map<String, Any> = emptyMap()) {
 
         try {
             withTimeout(getDuration(timeout)) {
@@ -199,11 +214,12 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                     is NoKeysFound -> handleException(DeviceBindingException(ClientNotRegistered()))
                     is SingleKeyFound -> authenticate(context,
                         status.key,
-                        deviceAuthenticator(status.key.authType))
+                        deviceAuthenticator(status.key.authType),
+                        customClaims)
                     else -> {
                         val userKey =
                             userKeySelector.selectUserKey(UserKeys(userKeyService.getAll()))
-                        authenticate(context, userKey, deviceAuthenticator(userKey.authType))
+                        authenticate(context, userKey, deviceAuthenticator(userKey.authType), customClaims)
                     }
                 }
             }

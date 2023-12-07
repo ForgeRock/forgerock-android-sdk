@@ -16,6 +16,7 @@ import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.AuthenticationResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nimbusds.jose.JWSObject
+import com.nimbusds.jwt.JWTClaimNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -451,5 +452,29 @@ class DeviceBindAuthenticationTests {
         return date.time;
     }
 
+    @Test
+    fun testValidateCustomClaimsForValidClaims() {
+        val testObject = None()
+        assertTrue(testObject.validateCustomClaims(customClaims = mapOf("name" to "demo", "email_verified" to true)))
+    }
+
+    @Test
+    fun testValidateCustomClaimsForInvalidClaims() {
+        val testObject = None()
+
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.SUBJECT to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.EXPIRATION_TIME to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUED_AT to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.NOT_BEFORE to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf("challenge" to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo", JWTClaimNames.EXPIRATION_TIME to Date())))
+    }
+
+    @Test
+    fun testValidateCustomClaimsForEmptyClaims() {
+        val testObject = None()
+        assertTrue(testObject.validateCustomClaims(emptyMap()))
+    }
 
 }

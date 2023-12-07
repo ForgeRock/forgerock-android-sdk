@@ -25,7 +25,6 @@ import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.forgerock.android.auth.devicebind.UserKey;
 import org.forgerock.android.auth.exception.ApiException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
