@@ -21,13 +21,12 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
         classpath 'com.google.gms:google-services:4.3.15'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.8.20"
-
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -36,9 +35,8 @@ buildscript {
 plugins {
     id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
     id('org.sonatype.gradle.plugins.scan') version '2.4.0'
+    id 'org.jetbrains.dokka' version '1.9.10'
 }
-
-apply plugin: "org.jetbrains.dokka"
 
 allprojects {
     repositories {

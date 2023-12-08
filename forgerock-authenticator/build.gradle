@@ -92,6 +92,9 @@ configurations.all {
         //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
         //to be reviewed
         force 'com.squareup.okio:okio:3.4.0'
+        force 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5'
+        force 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.5'
+        force 'com.fasterxml.jackson.core:jackson-databind:2.13.5'
     }
 }
 dependencies {

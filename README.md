@@ -75,10 +75,12 @@ You can build the API reference documentation, which uses Dokka to generate eith
 
 HTML
 : `./gradlew clean dokkaHtmlMultiModule` 
+: `./gradlew clean dokkaHtml`
 : View the output at [`build/api-reference/html/`](build/api-reference/html/index.html).
 
 JavaDoc
 : `./gradlew clean dokkaJavadocCollector`
+: `./gradlew clean dokkaJavadoc`
 : View the output at [`build/api-reference/javadoc/`](build/api-reference/javadoc/index.html).
 
 > **TIP**: Use the following command to build both HTML and JavaDoc: 
