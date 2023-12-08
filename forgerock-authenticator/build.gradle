@@ -99,7 +99,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // JWT
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.25'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
 
     // Common
     implementation 'androidx.annotation:annotation:1.3.0'
