@@ -6,6 +6,7 @@
  */
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import org.jetbrains.dokka.gradle.DokkaTask
 
 buildscript {
     ext {
@@ -37,6 +38,24 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.10"
 }
 
+// Note: To configure multi-project builds, you need
+//       to configure Partial tasks of the subprojects.
+//       See "Configuration example" section of documentation.
+//tasks.withType(DokkaTask.class) {
+//    dokkaSourceSets {
+//        configureEach {
+//            documentedVisibilities.set(
+//                    setOf(
+//                            org.jetbrains.dokka.DokkaConfiguration.Visibility.PUBLIC, // Same for both Kotlin and Java
+//                            org.jetbrains.dokka.DokkaConfiguration.Visibility.PRIVATE, // Same for both Kotlin and Java
+//                            org.jetbrains.dokka.DokkaConfiguration.Visibility.PROTECTED, // Same for both Kotlin and Java
+//                            org.jetbrains.dokka.DokkaConfiguration.Visibility.INTERNAL, // Kotlin-specific internal modifier
+//                            org.jetbrains.dokka.DokkaConfiguration.Visibility.PACKAGE, // Java-specific package-private visibility
+//                    )
+//            )
+//        }
+//    }
+//}
 
 allprojects {
     configurations.all {

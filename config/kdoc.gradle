@@ -23,6 +23,10 @@ task delombok {
                 classname: 'lombok.delombok.ant.Tasks$Delombok',
                 classpath: configurations.delombok.asPath)
         ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
+        copy {
+            from "$buildDir/src-delomboked"
+            into "src/main/java"
+        }
     }
 }
 
@@ -41,8 +45,8 @@ dokkaJavadoc {
         named("main") {
             displayName.set(name)
             outputDirectory = file("build/javadoc/$project.name-dokka")
-            sourceDirs = files("$buildDir/src-delomboked")
-            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+//            sourceDirs = files("$buildDir/src-delomboked")
+//            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
             reportUndocumented.set(false)
             skipEmptyPackages.set(true)
             skipDeprecated.set(false)
@@ -51,6 +55,12 @@ dokkaJavadoc {
             noJdkLink.set(false)
             noAndroidSdkLink.set(false)
             suppress.set(false)
+        }
+    }
+    doLast {
+        exec {
+            workingDir project.rootDir
+            commandLine 'git', 'checkout', '.'
         }
     }
 }
@@ -66,14 +76,19 @@ dokkaHtml {
     dokkaSourceSets {
         named("main") {
             outputDirectory = file("build/html/$project.name-dokka")
-            sourceDirs = files("$buildDir/src-delomboked")
-            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+            // sourceDirs = files("$buildDir/src-delomboked")
+            // sourceRoots.setFrom(file("$buildDir/src-delomboked"))
             noAndroidSdkLink.set(false)
             includeNonPublic.set(true)
             skipEmptyPackages.set(true)
             reportUndocumented.set(true)
             skipDeprecated.set(false)
-
+        }
+    }
+    doLast {
+        exec {
+            workingDir project.rootDir
+            commandLine 'git', 'checkout', '.'
         }
     }
 }
