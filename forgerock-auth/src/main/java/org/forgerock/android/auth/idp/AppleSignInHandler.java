@@ -64,10 +64,11 @@ public class AppleSignInHandler extends Fragment implements IdPHandler {
                 idPClient.getClientId(),
                 CODE,
                 Uri.parse(idPClient.getRedirectUri()))
-                .setAdditionalParameters(Collections.singletonMap("nonce", idPClient.getNonce()))
                 .setScopes(idPClient.getScopes())
                 .setState(null)
                 .setResponseMode(FORM_POST);
+
+        authRequestBuilder.setNonce(idPClient.getNonce());
 
         AuthorizationRequest authorizationRequest = authRequestBuilder
                 .build();

@@ -19,6 +19,15 @@ jobs:
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
+  # Run Mend CLI Scan
+  mend-cli-scan:
+    name: Mend CLI Scan
+    uses: ./.github/workflows/mend-cli-scan.yaml
+    secrets:
+      MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
+      MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }} 
+
   # Run Sonatype OSS Index Scan
   sonatype-ossindex:
     name: Scan for open source vulnerabilities (Sonatype OSS Index)
@@ -72,7 +81,7 @@ jobs:
     name: Publish SNAPSHOT release
     uses: ./.github/workflows/publish-snapshot.yaml
     if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
-    needs: [bitbar-results, sonatype-ossindex]
+    needs: [bitbar-results, sonatype-ossindex, mend-cli-scan]
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}

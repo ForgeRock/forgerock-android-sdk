@@ -7,6 +7,7 @@
 package org.forgerock.android.auth.devicebind
 
 import java.security.PrivateKey
+import java.security.Signature
 
 /**
  * State of the Device Binding errors
@@ -53,9 +54,20 @@ abstract class DeviceBindingErrorStatus(var message: String,
                        private val errorType: String = ABORT,
                        private val code: Int? = null) :
         DeviceBindingErrorStatus(errorMessage, errorType, code)
+
+    data class InvalidCustomClaims(private val errorMessage: String = "Invalid Custom Claims",
+                       private val errorType: String = ABORT,
+                       private val code: Int? = null) :
+        DeviceBindingErrorStatus(errorMessage, errorType, code)
 }
 
-data class Success(val privateKey: PrivateKey) : DeviceBindingStatus
+/**
+ * Represent the success status after [DeviceAuthenticator.authenticate]
+ *
+ * @property privateKey The unlocked private key
+ * @property signature The unlocked signature
+ */
+data class Success(val privateKey: PrivateKey, val signature: Signature? = null) : DeviceBindingStatus
 
 /**
  * Exceptions for device binding

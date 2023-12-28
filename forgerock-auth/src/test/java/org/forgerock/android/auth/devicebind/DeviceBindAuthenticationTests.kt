@@ -8,13 +8,15 @@ package org.forgerock.android.auth.devicebind
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.AuthenticationResult
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nimbusds.jose.JWSObject
+import com.nimbusds.jwt.JWTClaimNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -25,26 +27,33 @@ import kotlinx.coroutines.test.setMain
 import org.assertj.core.api.Assertions
 import org.assertj.core.data.Offset
 import org.forgerock.android.auth.CryptoKey
+import org.forgerock.android.auth.FRLogger
+import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.Logger.Companion.set
 import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.*
+import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.robolectric.shadows.ShadowLog
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Instant
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 class DeviceBindAuthenticationTests {
 
@@ -56,6 +65,28 @@ class DeviceBindAuthenticationTests {
 
     @Before
     fun setUp() {
+        Logger.setCustomLogger(object : FRLogger {
+            override fun error(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
+            }
+
+            override fun error(tag: String?, message: String?, vararg values: Any?) {
+            }
+
+            override fun warn(tag: String?, message: String?, vararg values: Any?) {
+            }
+
+            override fun warn(tag: String?, t: Throwable?, message: String?, vararg values: Any?) {
+            }
+
+            override fun debug(tag: String?, message: String?, vararg values: Any?) {
+            }
+
+            override fun info(tag: String?, message: String?, vararg values: Any?) {
+            }
+
+            override fun network(tag: String?, message: String?, vararg values: Any?) {
+            }
+        })
         val publicKey = mock<RSAPublicKey>()
         val privateKey = mock<PrivateKey>()
         whenever(keyPair.public).thenReturn(publicKey)
@@ -73,7 +104,38 @@ class DeviceBindAuthenticationTests {
         kpg.initialize(2048)
         val keys = kpg.generateKeyPair()
         val keyPair = KeyPair(keys.public as RSAPublicKey, keys.private, "jeyAlias")
-        val output = testObject.sign(context, keyPair, "1234", "3123123123", "77888", getExpiration())
+        val output =
+            testObject.sign(context, keyPair, null, "1234", "3123123123", "77888", getExpiration())
+        assertNotNull(output)
+        val jws = JWSObject.parse(output);
+        assertEquals("1234", jws.header.keyID)
+        assertEquals("3123123123", jws.payload.toJSONObject()["sub"])
+        Assertions.assertThat(jws.payload.toJSONObject()["nbf"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+        Assertions.assertThat(jws.payload.toJSONObject()["iat"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+
+        assertNotNull(jws.payload.toJSONObject()["exp"])
+    }
+
+    @Test
+    fun testSigningDataWithSignature() {
+        val testObject = BiometricOnly()
+        testObject.setBiometricHandler(mockBiometricInterface)
+        testObject.setKey(cryptoKey)
+        testObject.isApi30OrAbove = false
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(2048)
+        val keys = kpg.generateKeyPair()
+        val keyPair = KeyPair(keys.public as RSAPublicKey, keys.private, "jeyAlias")
+        val output =
+            testObject.sign(context,
+                keyPair,
+                testObject.getSignature(keyPair.privateKey),
+                "1234",
+                "3123123123",
+                "77888",
+                getExpiration())
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         assertEquals("1234", jws.header.keyID)
@@ -97,7 +159,36 @@ class DeviceBindAuthenticationTests {
         val keys = kpg.generateKeyPair()
         val userKey = UserKey("id", "3123123123", "username", "1234",
             DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
-        val output = testObject.sign(context, userKey, keys.private, "77888", getExpiration() )
+        val output = testObject.sign(context, userKey, keys.private, null, "77888", getExpiration())
+        assertNotNull(output)
+        val jws = JWSObject.parse(output);
+        assertEquals("1234", jws.header.keyID)
+        assertEquals("3123123123", jws.payload.toJSONObject()["sub"])
+        Assertions.assertThat(jws.payload.toJSONObject()["nbf"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+        Assertions.assertThat(jws.payload.toJSONObject()["iat"] as Long)
+            .isCloseTo(Date().time / 1000L, Offset.offset(10))
+
+        assertNotNull(jws.payload.toJSONObject()["exp"])
+    }
+
+    @Test
+    fun testSigningDataVerifierWithSignature() {
+        val testObject = BiometricOnly()
+        testObject.setBiometricHandler(mockBiometricInterface)
+        testObject.setKey(cryptoKey)
+        testObject.isApi30OrAbove = false
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        kpg.initialize(2048)
+        val keys = kpg.generateKeyPair()
+        val userKey = UserKey("id", "3123123123", "username", "1234",
+            DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK)
+        val output = testObject.sign(context,
+            userKey,
+            keys.private,
+            testObject.getSignature(keys.private),
+            "77888",
+            getExpiration())
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         assertEquals("1234", jws.header.keyID)
@@ -123,7 +214,7 @@ class DeviceBindAuthenticationTests {
         val expectedExp = Calendar.getInstance();
         expectedExp.add(Calendar.SECOND, 10);
         val exp = Date.from(Instant.ofEpochSecond(expectedExp.time.time / 1000));
-        val output = testObject.sign(context, keyPair, "1234", "3123123123", "77888", exp)
+        val output = testObject.sign(context, keyPair, null, "1234", "3123123123", "77888", exp)
         assertNotNull(output)
         val jws = JWSObject.parse(output);
         val actualExp = Calendar.getInstance();
@@ -148,7 +239,6 @@ class DeviceBindAuthenticationTests {
 
         testObject.generateKeys(context, Attestation.None)
 
-        verify(keyBuilder).setUserAuthenticationValidityDurationSeconds(30)
         verify(keyBuilder).setUserAuthenticationRequired(true)
         verify(cryptoKey).createKeyPair(keyBuilder.build())
 
@@ -159,8 +249,6 @@ class DeviceBindAuthenticationTests {
 
         testObjectBiometric.generateKeys(context, Attestation.None)
 
-        verify(keyBuilder, times(2)).setUserAuthenticationValidityDurationSeconds(30)
-        verify(keyBuilder, times(2)).setUserAuthenticationRequired(true)
         verify(cryptoKey, times(2)).createKeyPair(keyBuilder.build())
     }
 
@@ -179,8 +267,6 @@ class DeviceBindAuthenticationTests {
         testObject.isApi30OrAbove = true
         testObject.generateKeys(context, Attestation.None)
 
-        verify(keyBuilder).setUserAuthenticationParameters(30,
-            KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         verify(keyBuilder).setUserAuthenticationRequired(true)
         verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
@@ -200,7 +286,6 @@ class DeviceBindAuthenticationTests {
         testObject.isApi30OrAbove = true
         testObject.generateKeys(context, Attestation.None)
 
-        verify(keyBuilder).setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
         verify(keyBuilder).setUserAuthenticationRequired(true)
         verify(cryptoKey).createKeyPair(keyBuilder.build())
     }
@@ -265,17 +350,32 @@ class DeviceBindAuthenticationTests {
         try {
             val privateKey = mock<PrivateKey>()
             val authenticationResult = mock<AuthenticationResult>()
-            whenever(mockBiometricInterface.authenticate(any())).thenAnswer {
-                (it.arguments[0] as AuthenticationCallback).onAuthenticationSucceeded(
-                    authenticationResult)
+            whenever(authenticationResult.cryptoObject).thenReturn(null)
+            var result = false
+            val biometricHandler = object : BiometricHandler {
+                override fun isSupported(strongAuthenticators: Int,
+                                         weakAuthenticators: Int): Boolean {
+                    return true
+                }
+
+                override fun isSupportedBiometricStrong(): Boolean {
+                    return true
+                }
+
+                override fun authenticate(authenticationCallback: AuthenticationCallback,
+                                          cryptoObject: BiometricPrompt.CryptoObject?) {
+                    result = true
+                    authenticationCallback.onAuthenticationSucceeded(authenticationResult)
+                }
             }
+
             whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
             val testObject = BiometricOnly()
-            testObject.setBiometricHandler(mockBiometricInterface)
+            testObject.setBiometricHandler(biometricHandler)
             testObject.setKey(cryptoKey)
             testObject.isApi30OrAbove = false
             testObject.authenticate(context)
-            verify(mockBiometricInterface).authenticate(any())
+            assertTrue(result)
         } finally {
             Dispatchers.resetMain()
         }
@@ -289,17 +389,31 @@ class DeviceBindAuthenticationTests {
         try {
             val privateKey = mock<PrivateKey>()
             val authenticationResult = mock<AuthenticationResult>()
-            whenever(mockBiometricInterface.authenticate(any())).thenAnswer {
-                (it.arguments[0] as AuthenticationCallback).onAuthenticationSucceeded(
-                    authenticationResult)
+            whenever(authenticationResult.cryptoObject).thenReturn(null)
+            var result = false
+            val biometricHandler = object : BiometricHandler {
+                override fun isSupported(strongAuthenticators: Int,
+                                         weakAuthenticators: Int): Boolean {
+                    return true
+                }
+
+                override fun isSupportedBiometricStrong(): Boolean {
+                    return true
+                }
+
+                override fun authenticate(authenticationCallback: AuthenticationCallback,
+                                          cryptoObject: BiometricPrompt.CryptoObject?) {
+                    result = true
+                    authenticationCallback.onAuthenticationSucceeded(authenticationResult)
+                }
             }
             whenever(cryptoKey.getPrivateKey()).thenReturn(privateKey)
             val testObject = BiometricAndDeviceCredential()
-            testObject.setBiometricHandler(mockBiometricInterface)
+            testObject.setBiometricHandler(biometricHandler)
             testObject.setKey(cryptoKey)
             testObject.isApi30OrAbove = false
             testObject.authenticate(context)
-            verify(mockBiometricInterface).authenticate(any())
+            assertTrue(result)
         } finally {
             Dispatchers.resetMain()
         }
@@ -326,7 +440,7 @@ class DeviceBindAuthenticationTests {
             testObject.setKey(cryptoKey)
             testObject.isApi30OrAbove = false
             assertEquals(ClientNotRegistered(), testObject.authenticate(context))
-            verify(mockBiometricInterface, never()).authenticate(any())
+            verify(mockBiometricInterface, never()).authenticate(any(), any())
         } finally {
             Dispatchers.resetMain()
         }
@@ -338,5 +452,29 @@ class DeviceBindAuthenticationTests {
         return date.time;
     }
 
+    @Test
+    fun testValidateCustomClaimsForValidClaims() {
+        val testObject = None()
+        assertTrue(testObject.validateCustomClaims(customClaims = mapOf("name" to "demo", "email_verified" to true)))
+    }
+
+    @Test
+    fun testValidateCustomClaimsForInvalidClaims() {
+        val testObject = None()
+
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.SUBJECT to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.EXPIRATION_TIME to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUED_AT to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.NOT_BEFORE to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf("challenge" to "demo")))
+        assertFalse(testObject.validateCustomClaims(mapOf(JWTClaimNames.ISSUER to "demo", JWTClaimNames.EXPIRATION_TIME to Date())))
+    }
+
+    @Test
+    fun testValidateCustomClaimsForEmptyClaims() {
+        val testObject = None()
+        assertTrue(testObject.validateCustomClaims(emptyMap()))
+    }
 
 }

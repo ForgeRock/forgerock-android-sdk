@@ -17,6 +17,6 @@ class DummyNodeListener : NodeListener<Any> {
     override fun onException(e: Exception) {
     }
 
-    override fun onCallbackReceived(node: Node?) {
+    override fun onCallbackReceived(node: Node) {
     }
 }

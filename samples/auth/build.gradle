@@ -61,16 +61,6 @@ repositories {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'com.google.android.gms:play-services-basement:18.1.0'
-        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
-        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
-        //to be reviewed
-        force 'com.squareup.okio:okio:3.4.0'
-    }
-}
-
 dependencies {
 
     implementation project(':forgerock-auth')
@@ -92,12 +82,15 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'net.openid:appauth:0.7.1'
+    implementation 'net.openid:appauth:0.11.1'
     implementation 'com.google.android.gms:play-services-fido:20.0.1'
 
     //SocialLogin
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
     implementation 'com.facebook.android:facebook-login:16.0.0'
+
+    //For App integrity
+    implementation 'com.google.android.play:integrity:1.3.0'
 
     //Device Binding + JWT
     implementation 'com.nimbusds:nimbus-jose-jwt:9.25'

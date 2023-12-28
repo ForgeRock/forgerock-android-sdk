@@ -6,19 +6,20 @@
  */
 package org.forgerock.android.auth.devicebind
 
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.AuthenticationResult
 import androidx.biometric.BiometricPrompt.ERROR_TIMEOUT
 import androidx.fragment.app.FragmentActivity
-import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.concurrent.CountDownLatch
@@ -30,90 +31,83 @@ class BiometricBindingHandlerTests {
 
     @Test
     fun testStrongTypeWithBiometricOnly() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG)).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
         assertTrue(testObject.isSupported())
-        verify(biometricAuth).authenticatorType = AuthenticatorType.STRONG
     }
 
     @Test
     fun testWeakTypeWithBiometricOnly() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK)).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
         assertTrue(testObject.isSupported())
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
     @Test
     fun testWeakTypeWithFingerPrint() {
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
         assertTrue(testObject.isSupported())
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
     @Test
     fun testFalseCaseForBiometricOnly() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK)).thenReturn(false)
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
         assertFalse(testObject.isSupported())
-        verify(biometricAuth, never()).authenticatorType = AuthenticatorType.WEAK
-        verify(biometricAuth, never()).authenticatorType = AuthenticatorType.STRONG
     }
 
     @Test
     fun testSuccessCaseForBiometricOnlyWhenAnyOneisTrue() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK)).thenReturn(true)
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ONLY, fragmentActivity = activity, biometricAuth = biometricAuth)
         assertTrue(testObject.isSupported())
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
     }
 
     @Test
     fun testStrongTypeWithBiometricAndDeviceCredential() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL, BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL))
-        verify(biometricAuth).authenticatorType = AuthenticatorType.STRONG
+        assertTrue(testObject.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL))
     }
 
     @Test
     fun testWeakTypeWithBiometricAndDeviceCredential() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL, BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL))
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
+        assertTrue(testObject.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL))
     }
 
     @Test
     fun testWeakTypeFingerPrintWithBiometricAndDeviceCredential() {
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)).thenReturn(false)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL, BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL))
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
+        assertTrue(testObject.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL))
     }
 
     @Test
     fun testSuccessCaseForBiometricAndDeviceCredentialWhenAnyOneisTrue() {
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(true)
-        whenever(biometricAuth.hasBiometricCapability(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)).thenReturn(false)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)).thenReturn(true)
+        whenever(biometricAuth.hasBiometricCapability(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)).thenReturn(false)
         whenever(biometricAuth.hasEnrolledWithFingerPrint()).thenReturn(false)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL, BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL))
-        verify(biometricAuth).authenticatorType = AuthenticatorType.WEAK
+        assertTrue(testObject.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL))
     }
 
     @Test
     fun testKeyGuardManager() {
         whenever(biometricAuth.hasDeviceCredential()).thenReturn(true)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        assertTrue(testObject.isSupported(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL, BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL))
-        verify(biometricAuth, never()).authenticatorType = AuthenticatorType.WEAK
-        verify(biometricAuth, never()).authenticatorType = AuthenticatorType.STRONG
+        assertTrue(testObject.isSupported(BIOMETRIC_STRONG or DEVICE_CREDENTIAL, BIOMETRIC_WEAK or DEVICE_CREDENTIAL))
     }
 
     @Test

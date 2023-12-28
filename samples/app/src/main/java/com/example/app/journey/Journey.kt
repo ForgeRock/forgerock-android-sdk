@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.app.Error
+import com.example.app.callback.AppIntegrityCallback
 import com.example.app.callback.ChoiceCallback
 import com.example.app.callback.ConfirmationCallback
 import com.example.app.callback.DeviceBindingCallback
@@ -35,6 +36,7 @@ import com.example.app.callback.SelectIdPCallback
 import com.example.app.callback.TextOutputCallback
 import com.example.app.callback.WebAuthnAuthenticationCallback
 import com.example.app.callback.WebAuthnRegistrationCallback
+import org.forgerock.android.auth.callback.AppIntegrityCallback
 import org.forgerock.android.auth.callback.ChoiceCallback
 import org.forgerock.android.auth.callback.ConfirmationCallback
 import org.forgerock.android.auth.callback.DeviceBindingCallback
@@ -44,6 +46,8 @@ import org.forgerock.android.auth.callback.IdPCallback
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
 import org.forgerock.android.auth.callback.PollingWaitCallback
+import org.forgerock.android.auth.callback.ReCaptchaCallback
+import com.example.app.callback.ReCaptchaCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
@@ -129,12 +133,14 @@ fun Journey(state: JourneyState,
                     is SelectIdPCallback -> {
                         SelectIdPCallback(callback = it, onSelected = onNext)
                     }
-                    /*
+                    is ReCaptchaCallback -> {
+                        ReCaptchaCallback(it, state.node, onCompleted = onNext)
+                        showNext = false
+                    }
                     is AppIntegrityCallback -> {
                         AppIntegrityCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
-                     */
                     is DeviceProfileCallback -> {
                         DeviceProfileCallback(callback = it, onCompleted = onNext)
                         showNext = false

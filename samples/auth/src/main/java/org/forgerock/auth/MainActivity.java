@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         /*
         RequestInterceptorRegistry.getInstance().register(
                 new ForceAuthRequestInterceptor(),
+                new CustomCookieInterceptor(),
                 new NoSessionRequestInterceptor()
         );
          */

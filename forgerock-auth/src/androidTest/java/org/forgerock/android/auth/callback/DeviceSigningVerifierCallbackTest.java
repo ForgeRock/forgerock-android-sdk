@@ -17,6 +17,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ClassAssert;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
@@ -27,17 +28,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
-@Ignore
 public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-verifier";
 
@@ -243,6 +244,10 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                         public void onSuccess(Void result) {
                             // Verify the JWT attributes
                             try {
+                                Calendar nowMinus5 = Calendar.getInstance();
+                                Calendar nowPlus5 = Calendar.getInstance();
+                                nowMinus5.add(Calendar.SECOND, -5);
+                                nowPlus5.add(Calendar.SECOND, 5);
                                 Calendar expMin = Calendar.getInstance();
                                 Calendar expMax = Calendar.getInstance();
                                 expMin.add(Calendar.SECOND, 55);
@@ -251,11 +256,15 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                                 JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
                                 String jwtKid = jwt.getHeader().toJSONObject().get("kid").toString();
                                 Date jwtExp = jwt.getJWTClaimsSet().getExpirationTime();
+                                Date jwtIat = jwt.getJWTClaimsSet().getIssueTime();
+                                Date jwtNbf = jwt.getJWTClaimsSet().getNotBeforeTime();
                                 String jwtChallenge = jwt.getJWTClaimsSet().getStringClaim("challenge");
                                 String jwtSub = jwt.getJWTClaimsSet().getSubject();
 
                                 assertThat(jwtKid).isEqualTo(KID);
                                 assertThat(jwtExp).isBetween(expMin.getTime(), expMax.getTime());
+                                assertThat(jwtIat).isBetween(nowMinus5.getTime(), nowPlus5.getTime());
+                                assertThat(jwtNbf).isBetween(nowMinus5.getTime(), nowPlus5.getTime());
                                 assertThat(jwtChallenge).isEqualTo(callback.getChallenge());
                                 assertThat(jwtSub).isEqualTo(callback.getUserId());
 
@@ -770,6 +779,138 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         assertThat(signSuccess[0]).isEqualTo(1);
         assertThat(executionExceptionOccurred).isTrue();
+    }
+
+    @Test
+    public void testDeviceVerificationCustomClaims() throws ExecutionException, InterruptedException {
+        final int[] signSuccess = {0};
+        final int[] claimsPresentInAM = {0};
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "custom-claims")
+        {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    Map<String, Object> customClaims = new HashMap<String, Object>();
+                    customClaims.put("foo", "bar");
+                    customClaims.put("num", 5);
+                    customClaims.put("isGood", true);
+
+                    callback.sign(context, customClaims, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            // Verify the JWT contains the  custom claims
+                            try {
+                                JWT jwt = JWTParser.parse((String) callback.getInputValue(0));
+                                String jwtFooClaim = jwt.getJWTClaimsSet().getStringClaim("foo");
+                                assertThat(jwtFooClaim).isEqualTo("bar");
+
+                                Integer jwtNumClaim = jwt.getJWTClaimsSet().getIntegerClaim ("num");
+                                assertThat(jwtNumClaim).isEqualTo(5);
+
+                                Boolean jwtIsGoodlaim = jwt.getJWTClaimsSet().getBooleanClaim("isGood");
+                                assertThat(jwtIsGoodlaim).isEqualTo(true);
+                            } catch (ParseException e) {
+                                Assertions.fail("Invalid JWT: " + e.getMessage());
+                            }
+                                signSuccess[0]++;
+                                node.next(context, nodeListener);
+                        }
+                        @Override
+                        public void onException(Exception e) {
+                            // Signing of the challenge has failed unexpectedly...
+                            Assertions.fail(e.getMessage());
+                        }
+                    });
+
+                    return;
+                }
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    // Check the DeviceSigningVerifierNode.JWT variable in AM...
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Custom claims exist");
+                    claimsPresentInAM[0]++;
+
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+        assertThat(signSuccess[0]).isEqualTo(1);
+        assertThat(claimsPresentInAM[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+    }
+
+    @Test
+    public void testDeviceVerificationInvalidCustomClaims() throws ExecutionException, InterruptedException {
+        final int[] signSuccess = {0};
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "custom-claims")
+        {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    Map<String, Object> customClaims = new HashMap<String, Object>();
+                    // This "iss" claim should trigger exception upon signing
+                    customClaims.put("iss", "foo");
+
+                    callback.sign(context, customClaims, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            signSuccess[0]++;
+                            node.next(context, nodeListener);
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            assertThat(e.getClass().getName()).isEqualTo("org.forgerock.android.auth.devicebind.DeviceBindingException");;
+                            assertThat(e.getMessage()).isEqualTo("Invalid Custom Claims");
+
+                            node.next(context, nodeListener);
+                        }
+
+                    });
+
+                    return;
+                }
+                // Make sure that by default upon
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Abort");
+
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+        assertThat(signSuccess[0]).isEqualTo(0);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
     }
 
 }

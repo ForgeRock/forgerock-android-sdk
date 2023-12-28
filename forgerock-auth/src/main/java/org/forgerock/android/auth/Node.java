@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,8 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+
+import androidx.annotation.VisibleForTesting;
 
 import org.forgerock.android.auth.callback.Callback;
 import org.json.JSONArray;
@@ -18,11 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
-@Getter
 public class Node implements Serializable {
 
     public static final String AUTH_ID = "authId";
@@ -37,6 +34,16 @@ public class Node implements Serializable {
     private final String description;
     private final String authServiceId;
     private final List<Callback> callbacks;
+
+    @VisibleForTesting
+    public Node(String authId, String stage, String header, String description, String authServiceId, List<Callback> callbacks) {
+        this.authId = authId;
+        this.stage = stage;
+        this.header = header;
+        this.description = description;
+        this.authServiceId = authServiceId;
+        this.callbacks = callbacks;
+    }
 
     /**
      * Returns {@link JSONObject} mapping of the object
@@ -76,6 +83,11 @@ public class Node implements Serializable {
         return null;
     }
 
+    /**
+     * Retrieve all the {@link Callback}.
+     *
+     * @return All the {@link Callback} associate with this {@link Node}
+     */
     public List<Callback> getCallbacks() {
         return callbacks;
     }
@@ -85,20 +97,19 @@ public class Node implements Serializable {
      *
      * @param context  The Application Context
      * @param listener Listener for receiving {@link AuthService} related changes
-     *                    <b> {@link NodeListener#onSuccess(Object)} on success login.
-     *                    <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
-     *                    <b> throws {@link IllegalStateException} when the tree is invalid, e.g the authentication tree has been completed.
-     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException} when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
-     *                    <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
-     *                    <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
-     *                    When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
-     *                    <b> throws {@link org.forgerock.android.auth.exception.SuspendedAuthSessionException} When Suspended ID timeout
-     *                    <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
-     *                    <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
-     *                    <b> throws {@link IOException } When there is any network error.
-     *                    <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
-     *                    <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
-
+     *                 <b> {@link NodeListener#onSuccess(Object)} on success login.
+     *                 <b> {@link NodeListener#onCallbackReceived(Node)} step to the next node, {@link Node} is returned.
+     *                 <b> throws {@link IllegalStateException} when the tree is invalid, e.g the authentication tree has been completed.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationException} when server returns {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED}
+     *                 <b> throws {@link org.forgerock.android.auth.exception.ApiException} When server return errors.
+     *                 <b> throws {@link javax.security.auth.callback.UnsupportedCallbackException}
+     *                 When {@link org.forgerock.android.auth.callback.Callback} returned from Server is not supported by the SDK.
+     *                 <b> throws {@link org.forgerock.android.auth.exception.SuspendedAuthSessionException} When Suspended ID timeout
+     *                 <b> throws {@link org.forgerock.android.auth.exception.AuthenticationTimeoutException} When Authentication tree timeout
+     *                 <b> throws {@link org.json.JSONException} when failed to parse server response as JSON String.
+     *                 <b> throws {@link IOException } When there is any network error.
+     *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
+     *                 <b> throws {@link NoSuchMethodException} or {@link SecurityException} When failed to initialize the Callback class.
      */
     public void next(Context context, NodeListener<?> listener) {
         AuthService.goToNext(context, this, listener);
@@ -123,4 +134,43 @@ public class Node implements Serializable {
         }
     }
 
+    /**
+     * Retrieve the AuthId.
+     *
+     * @return The AuthId attribute associate with this {@link Node}
+     */
+    public String getAuthId() {
+        return this.authId;
+    }
+
+    /**
+     * Retrieve the Stage.
+     *
+     * @return The Stage attribute associate with this {@link Node}
+     */
+    public String getStage() {
+        return this.stage;
+    }
+
+    /**
+     * Retrieve the Header.
+     *
+     * @return The Header attribute associate with this {@link Node}
+     */
+    public String getHeader() {
+        return this.header;
+    }
+
+    /**
+     * Retrieve the Description.
+     *
+     * @return The Description attribute associate with this {@link Node}
+     */
+    public String getDescription() {
+        return this.description;
+    }
+
+    String getAuthServiceId() {
+        return this.authServiceId;
+    }
 }

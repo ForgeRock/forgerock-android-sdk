@@ -212,7 +212,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (EncryptionException e) {
             //Failed to decrypt the data, reset the encryptor
-            Logger.warn(TAG, "Failed to decrypt the data.");
+            Logger.warn(TAG, "Failed to decrypt the data.", e);
             edit().clear().commit();
             return null;
         }
@@ -222,14 +222,17 @@ public class SecuredSharedPreferences implements SharedPreferences {
         try {
             return Base64.encodeToString(encryptor.encrypt(value), Base64.DEFAULT);
         } catch (Exception e) {
+            Logger.warn(TAG, "Failed to encrypt data. retrying...", e);
             try {
                 encryptor.reset();
                 if (retry) {
                     return encrypt(value, false);
                 } else {
+                    Logger.error(TAG, "Failed to encrypt data after retry.", e);
                     throw new RuntimeException(e);
                 }
             } catch (Exception ex) {
+                Logger.error(TAG, "Failed to encrypt data.", e);
                 throw new RuntimeException(ex);
             }
         }

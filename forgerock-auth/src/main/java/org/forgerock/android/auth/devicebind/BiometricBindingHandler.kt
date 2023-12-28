@@ -8,6 +8,7 @@ package org.forgerock.android.auth.devicebind
 
 import androidx.biometric.BiometricManager.Authenticators.*
 import androidx.biometric.BiometricPrompt.AuthenticationCallback
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.biometric.AuthenticatorType
@@ -30,11 +31,13 @@ interface BiometricHandler {
     fun isSupported(strongAuthenticators: Int = BIOMETRIC_STRONG,
                     weakAuthenticators: Int = BIOMETRIC_WEAK): Boolean
 
+    fun isSupportedBiometricStrong(): Boolean
+
     /**
      * display biometric prompt  for Biometric and device credential
      * @param authenticationCallback Result of biometric action in callback
      */
-    fun authenticate(authenticationCallback: AuthenticationCallback)
+    fun authenticate(authenticationCallback: AuthenticationCallback, cryptoObject: CryptoObject? = null)
 
 }
 
@@ -69,11 +72,11 @@ internal class BiometricBindingHandler(titleValue: String,
      * display biometric prompt  for Biometric and device credential
      * @param authenticationCallback Result of biometric action in callback
      */
-    override fun authenticate(authenticationCallback: AuthenticationCallback) {
+    override fun authenticate(authenticationCallback: AuthenticationCallback, cryptoObject: CryptoObject?) {
 
         biometricListener = authenticationCallback
         biometricAuth?.biometricAuthListener = authenticationCallback
-        biometricAuth?.authenticate()
+        biometricAuth?.authenticate(cryptoObject)
     }
 
     /**
@@ -86,17 +89,14 @@ internal class BiometricBindingHandler(titleValue: String,
             when {
                 // API 29 and above, check the support for STRONG type
                 this.hasBiometricCapability(strongAuthenticators) -> {
-                    this.authenticatorType = AuthenticatorType.STRONG
                     return true
                 }
                 // API 29 and above, use BiometricPrompt for WEAK type
                 this.hasBiometricCapability(weakAuthenticators) -> {
-                    this.authenticatorType = AuthenticatorType.WEAK
                     return true
                 }
                 // API 23 - 28, check enrollment with FingerprintManager once BiometricPrompt might not work
                 this.hasEnrolledWithFingerPrint() -> {
-                    this.authenticatorType = AuthenticatorType.WEAK
                     return true
                 }
                 // API 23 - 28, using keyguard manager to verify and Display Device credential screen to enter pin
@@ -107,4 +107,7 @@ internal class BiometricBindingHandler(titleValue: String,
         }
         return false
     }
+
+    override fun isSupportedBiometricStrong() =
+        biometricAuth?.hasBiometricCapability(BIOMETRIC_STRONG) ?: false
 }

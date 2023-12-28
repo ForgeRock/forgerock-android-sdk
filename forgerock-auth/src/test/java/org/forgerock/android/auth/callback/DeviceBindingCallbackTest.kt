@@ -93,7 +93,7 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.sign(context, keyPair,
+        whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
             challenge,
@@ -116,7 +116,7 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.sign(context, keyPair,
+        whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
             challenge,
@@ -144,7 +144,7 @@ class DeviceBindingCallbackTest {
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
-        whenever(deviceAuthenticator.sign(context, keyPair,
+        whenever(deviceAuthenticator.sign(context, keyPair, null,
             kid,
             userid,
             challenge,
@@ -184,7 +184,13 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).delete(any()) //The key reference has not been created
         //Delete before and delete after when failed
         verify(deviceAuthenticator, times(2)).deleteKeys(any())
-        verify(deviceAuthenticator, times(0)).sign(context, keyPair, kid, userid, challenge, getExpiration())
+        verify(deviceAuthenticator, times(0)).sign(context,
+            keyPair,
+            null,
+            kid,
+            userid,
+            challenge,
+            getExpiration())
         verify(encryptedPref, times(0)).persist(any())
     }
 
@@ -212,7 +218,13 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).delete(any())
         //Delete before and delete after when failed
         verify(deviceAuthenticator, times(2)).deleteKeys(any())
-        verify(deviceAuthenticator, times(0)).sign(context, keyPair, kid, userid, challenge, getExpiration())
+        verify(deviceAuthenticator, times(0)).sign(context,
+            keyPair,
+            null,
+            kid,
+            userid,
+            challenge,
+            getExpiration())
         verify(encryptedPref, times(0)).persist(any())
     }
 
@@ -242,7 +254,13 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).delete(any())
         verify(deviceAuthenticator, times(0)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
-        verify(deviceAuthenticator, times(0)).sign(context, keyPair, kid, userid, challenge, getExpiration())
+        verify(deviceAuthenticator, times(0)).sign(context,
+            keyPair,
+            null,
+            kid,
+            userid,
+            challenge,
+            getExpiration())
         verify(encryptedPref, times(0)).persist(any())
 
     }
@@ -252,7 +270,8 @@ class DeviceBindingCallbackTest {
         val rawContent =
             "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
-        whenever(deviceAuthenticator.generateKeys(any(), any())).thenThrow(NullPointerException::class.java)
+        whenever(deviceAuthenticator.generateKeys(any(),
+            any())).thenThrow(NullPointerException::class.java)
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
             testObject.testExecute(context,
@@ -268,7 +287,13 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).delete(any())
         verify(deviceAuthenticator, times(2)).deleteKeys(any())
         verify(deviceAuthenticator, times(0)).authenticate(any())
-        verify(deviceAuthenticator, times(0)).sign(context, keyPair, kid, userid, challenge, getExpiration())
+        verify(deviceAuthenticator, times(0)).sign(context,
+            keyPair,
+            null,
+            kid,
+            userid,
+            challenge,
+            getExpiration())
         verify(encryptedPref, times(0)).persist(any())
     }
 
@@ -298,7 +323,6 @@ class DeviceBindingCallbackTest {
 }
 
 
-
 class DeviceBindingCallbackMockTest constructor(rawContent: String,
                                                 jsonObject: JSONObject = JSONObject(rawContent),
                                                 value: Int = 0) :
@@ -326,35 +350,36 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
     override fun getDeviceAuthenticator(type: DeviceBindingAuthenticationType): DeviceAuthenticator {
 
         if (type == DeviceBindingAuthenticationType.APPLICATION_PIN) {
-            val deviceAuthenticator = object : ApplicationPinDeviceAuthenticator(object : PinCollector {
-                override suspend fun collectPin(prompt: Prompt,
-                                                fragmentActivity: FragmentActivity): CharArray {
-                    return "1234".toCharArray()
-                }
-            }) {
-                var byteArrayOutputStream = ByteArrayOutputStream(1024)
+            val deviceAuthenticator =
+                object : ApplicationPinDeviceAuthenticator(object : PinCollector {
+                    override suspend fun collectPin(prompt: Prompt,
+                                                    fragmentActivity: FragmentActivity): CharArray {
+                        return "1234".toCharArray()
+                    }
+                }) {
+                    var byteArrayOutputStream = ByteArrayOutputStream(1024)
 
-                override fun getInputStream(context: Context): InputStream {
-                    return byteArrayOutputStream.toByteArray().inputStream();
-                }
+                    override fun getInputStream(context: Context): InputStream {
+                        return byteArrayOutputStream.toByteArray().inputStream();
+                    }
 
-                override fun getOutputStream(context: Context): OutputStream {
-                    return byteArrayOutputStream
-                }
+                    override fun getOutputStream(context: Context): OutputStream {
+                        return byteArrayOutputStream
+                    }
 
-                override fun getKeystoreType(): String {
-                    return "PKCS12"
-                }
+                    override fun getKeystoreType(): String {
+                        return "PKCS12"
+                    }
 
-                override fun delete(context: Context) {
-                    byteArrayOutputStream = ByteArrayOutputStream(1024)
-                }
+                    override fun delete(context: Context) {
+                        byteArrayOutputStream = ByteArrayOutputStream(1024)
+                    }
 
-                override fun exist(context: Context): Boolean {
-                    return byteArrayOutputStream.toByteArray().isNotEmpty()
-                }
+                    override fun exist(context: Context): Boolean {
+                        return byteArrayOutputStream.toByteArray().isNotEmpty()
+                    }
 
-            }
+                }
 
             return deviceAuthenticator
         }

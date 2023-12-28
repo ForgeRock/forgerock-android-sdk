@@ -129,7 +129,7 @@ suspend fun sign(context: Context, callback: DeviceSigningVerifierCallback) {
         repeat(3) { //
             try {
                 //Show how to use custom App Pin Dialog with Compose
-                callback.sign(context) { type ->
+                callback.sign(context, mapOf("os" to "android")) { type ->
                     if (type == DeviceBindingAuthenticationType.APPLICATION_PIN) {
                         CustomAppPinDeviceAuthenticator()
                     } else {

@@ -68,12 +68,6 @@ android {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'com.google.android.gms:play-services-basement:18.1.0'
-    }
-}
-
 dependencies {
     implementation project(':forgerock-auth')
     implementation 'net.openid:appauth:0.11.1'

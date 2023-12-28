@@ -63,15 +63,6 @@ repositories {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'com.google.android.gms:play-services-basement:18.1.0'
-        //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
-        //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
-        //to be reviewed
-        force 'com.squareup.okio:okio:3.4.0'
-    }
-}
 dependencies {
 
     def composeBom = platform('androidx.compose:compose-bom:2022.10.00')
@@ -80,7 +71,7 @@ dependencies {
 
     //SDK
     implementation project(':forgerock-auth')
-    //implementation 'org.forgerock:forgerock-auth:4.2.0-SNAPSHOT'
+    //implementation 'org.forgerock:forgerock-auth:4.2.0'
     //Device Binding + JWT + Application Pin
     implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0' //Application PIN
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
@@ -92,6 +83,8 @@ dependencies {
 
     //Centralize Login
     implementation 'net.openid:appauth:0.11.1'
+    //Captcha
+    implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
 
     //Device Profile to retrieve Location
     implementation "com.google.accompanist:accompanist-permissions:0.30.1"
@@ -101,7 +94,7 @@ dependencies {
     implementation 'com.facebook.android:facebook-login:16.0.0'
 
     //For App integrity
-    implementation 'com.google.android.play:integrity:1.2.0'
+    implementation 'com.google.android.play:integrity:1.3.0'
 
     //Capture Location for Device Profile
     implementation 'com.google.android.gms:play-services-location:21.0.1'

@@ -47,6 +47,8 @@ public class FRAuth {
         if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
             FROptions currentOptions = ConfigHelper.load(context, options);
+            //Validate (AM URL, Realm, CookieName) is not Empty. If its empty will throw IllegalArgumentException.
+            currentOptions.validateConfig();
             if (ConfigHelper.isConfigDifferentFromPersistedValue(context, currentOptions)) {
                SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
                sessionManager.close();

@@ -43,11 +43,6 @@ android {
 apply from: '../config/kdoc.gradle'
 apply from: '../config/publish.gradle'
 
-configurations.all {
-    resolutionStrategy {
-        force 'com.google.android.gms:play-services-basement:18.1.0'
-    }
-}
 
 dependencies {
 

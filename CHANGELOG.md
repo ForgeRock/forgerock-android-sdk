@@ -1,3 +1,16 @@
+## [4.3.0]
+#### Added
+- Added the ability to customize cookie headers in outgoing requests from the SDK [SDKS-2780]
+- Added the ability to insert custom claims when performing device signing verification [SDKS-2787]
+- Added client-side support for the `AppIntegrity` callback [SDKS-2631]
+
+
+#### Fixed
+- The SDK now uses `auth-per-use` keys for Device Binding [SDKS-2797]
+- Improved handling of WebAuthn cancellations [SDKS-2819]
+- Made `forgerock_url`, `forgerock_realm`, and `forgerock_cookie_name` params mandatory when dynamically configuring the SDK [SDKS-2782]
+- Addressed `woodstox-core:6.2.4` library security vulnerability (CVE-2022-40152) [SDKS-2751]
+
 ## [4.2.0]
 #### Added
 - Gradle 8 and JDK 17 support  [SDKS-2451]
