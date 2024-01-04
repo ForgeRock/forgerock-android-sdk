@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023-2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -38,7 +38,7 @@ import kotlin.time.toDuration
 private val TAG = AppIntegrityCallback::class.java.simpleName
 
 /**
- * Callback to collect the device binding information
+ * Callback to collect integrity token.
  */
 open class AppIntegrityCallback : NodeAware, AbstractCallback {
 
@@ -55,8 +55,14 @@ open class AppIntegrityCallback : NodeAware, AbstractCallback {
         val cache = ConcurrentHashMap<String, StandardIntegrityTokenProvider>()
     }
 
+    /**
+     * The [Node] that associate with this Callback
+     */
     private lateinit var node: Node
 
+    /**
+     * The request type
+     */
     lateinit var requestType: RequestType
         private set
 
@@ -93,7 +99,7 @@ open class AppIntegrityCallback : NodeAware, AbstractCallback {
 
     /**
      * Input the Client Error to the server
-     * @param value DeviceBind ErrorType .
+     * @param value Error String.
      */
     fun setClientError(value: String) {
         super.setValue(value, 1)
@@ -128,7 +134,7 @@ open class AppIntegrityCallback : NodeAware, AbstractCallback {
     }
 
     /**
-     * Bind the device.
+     * Request the integrity token
      *
      * @param context  The Application Context
      */
@@ -222,6 +228,10 @@ open class AppIntegrityCallback : NodeAware, AbstractCallback {
 
 }
 
+/**
+ * The Request Type, please see https://developer.android.com/google/play/integrity/overview for
+ * detail.
+ */
 enum class RequestType {
     CLASSIC,
     STANDARD;
