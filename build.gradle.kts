@@ -6,6 +6,7 @@
  */
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -101,7 +102,7 @@ subprojects {
 //        outputDirectory.set(buildDir.resolve("docs/partial"))
 //    }
 
-    tasks.dokkaHtml {
+    tasks.dokkaJavadoc {
         val map = mutableMapOf<String, String>()
         map["org.jetbrains.dokka.base.DokkaBase"] = """{
                     "customStyleSheets": ["$customCSSFile"],
@@ -126,21 +127,56 @@ subprojects {
         }
 
         doLast {
+            exec {
+                workingDir(project.rootDir)
+                commandLine = "git checkout .".split(" ")
+            }
+        }
+    }
+
+    tasks.dokkaHtml {
+        val map = mutableMapOf<String, String>()
+        map["org.jetbrains.dokka.base.DokkaBase"] = """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "templatesDir": "$customTemplatesFolder"
+                }"""
+        pluginsMapConfiguration.set(map)
+        moduleVersion.set(project.property("VERSION") as? String)
+        outputDirectory.set(file("build/html/${project.name}-dokka"))
+
+        dokkaSourceSets.configureEach {
+            documentedVisibilities.set(
+                setOf(
+                    Visibility.PUBLIC,
+                    Visibility.PROTECTED,
+                    Visibility.PRIVATE,
+                    Visibility.INTERNAL,
+                    Visibility.PACKAGE
+                )
+            )
+            perPackageOption {
+                matchingRegex.set(".*internal.*")
+                suppress.set(true)
+            }
+        }
+
+        doLast {
         exec {
             workingDir(project.rootDir)
-            commandLine("git", "checkout", """".""")
+            commandLine = "git checkout .".split(" ")
         }
      }
     }
 
-//    tasks.dokkaHtmlPartial {
-//        val map = mutableMapOf<String, String>()
-//        map["org.jetbrains.dokka.base.DokkaBase"] = """{
-//                    "customStyleSheets": ["$customCSSFile"],
-//                    "templatesDir": "$customTemplatesFolder"
-//                }"""
-//        pluginsMapConfiguration.set(map)
-//    }
+    tasks.withType<DokkaTaskPartial>().configureEach {
+        val map = mutableMapOf<String, String>()
+        map["org.jetbrains.dokka.base.DokkaBase"] = """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "templatesDir": "$customTemplatesFolder"
+                }"""
+        pluginsMapConfiguration.set(map)
+    }
+
 
     //Powermock compatibility with jdk 17
 //    tasks.withType(Test).configureEach{
@@ -153,31 +189,24 @@ subprojects {
 
 afterEvaluate {
 
-//    tasks.dokkaHtmlMultiModule {
-//        moduleName.set("ForgeRock SDK for Android")
-//        moduleVersion.set(project.property("VERSION") ?: "")
-//        outputDirectory.set(file("build/api-reference/html"))
-//    }
-//
-//    tasks.named("dokkaHtmlMultiModule") {
-//        moduleName.set("ForgeRock SDK for Android")
-//        moduleVersion.set(project.property("VERSION"))
-//        outputDirectory.set(file("build/api-reference/html"))
-//        pluginsMapConfiguration.set(
-//            [
-//                "org.jetbrains.dokka.base.DokkaBase": """{
-//                    "customStyleSheets": ["$customCSSFile"],
-//                    "customAssets": ["$customLogoFile"],
-//                    "templatesDir": "$customTemplatesFolder"
-//                }"""
-//            ]
-//        )
-//    }
-//    tasks.named("dokkaJavadocCollector") {
-//        moduleName.set("ForgeRock SDK for Android Javadoc")
-//        moduleVersion.set(project.property('VERSION'))
-//        outputDirectory.set(file("build/api-reference/javadoc"))
-//    }
+    tasks.dokkaHtmlMultiModule {
+        moduleName.set("ForgeRock SDK for Android")
+        moduleVersion.set(project.property("VERSION") as? String)
+        outputDirectory.set(file("build/api-reference/html"))
+        val map = mutableMapOf<String, String>()
+        map["org.jetbrains.dokka.base.DokkaBase"] = """{
+                    "customStyleSheets": ["$customCSSFile"],
+                    "templatesDir": "$customTemplatesFolder"
+                }"""
+        pluginsMapConfiguration.set(map)
+    }
+
+
+    tasks.dokkaJavadocCollector {
+        moduleName.set("ForgeRock SDK for Android Javadoc")
+        moduleVersion.set(project.property("VERSION") as? String)
+        outputDirectory.set(file("build/api-reference/javadoc"))
+    }
 
 }
 
