@@ -72,26 +72,26 @@ tasks.named("dokkaHtml").configure {
     dependsOn("bundleLibCompileToJarRelease")
 }
 
-dokkaHtml {
-    dokkaSourceSets {
-        named("main") {
-            outputDirectory = file("build/html/$project.name-dokka")
-            // sourceDirs = files("$buildDir/src-delomboked")
-            // sourceRoots.setFrom(file("$buildDir/src-delomboked"))
-            noAndroidSdkLink.set(false)
-            includeNonPublic.set(true)
-            skipEmptyPackages.set(true)
-            reportUndocumented.set(true)
-            skipDeprecated.set(false)
-        }
-    }
-    doLast {
-        exec {
-            workingDir project.rootDir
-            commandLine 'git', 'checkout', '.'
-        }
-    }
-}
+//dokkaHtml {
+//    dokkaSourceSets {
+//        named("main") {
+//            outputDirectory = file("build/html/$project.name-dokka")
+//            // sourceDirs = files("$buildDir/src-delomboked")
+//            // sourceRoots.setFrom(file("$buildDir/src-delomboked"))
+//            noAndroidSdkLink.set(false)
+//            includeNonPublic.set(true)
+//            skipEmptyPackages.set(true)
+//            reportUndocumented.set(true)
+//            skipDeprecated.set(false)
+//        }
+//    }
+//    doLast {
+//        exec {
+//            workingDir project.rootDir
+//            commandLine 'git', 'checkout', '.'
+//        }
+//    }
+//}
 
 task sourcesJar(type: Jar) {
     archiveClassifier.set("sources")
