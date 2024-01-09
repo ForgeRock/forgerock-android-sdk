@@ -33,8 +33,8 @@ class JourneyViewModel<T>(context: Context, private var journeyName: T) : ViewMo
     var state = MutableStateFlow(JourneyState())
         private set
 
-    private val nodeListener = object : NodeListener<FRSession> {
-        override fun onSuccess(result: FRSession) {
+    private val nodeListener = object : NodeListener<FRSession?> {
+        override fun onSuccess(result: FRSession?) {
             processing = false
             state.update {
                 it.copy(null, null, result)

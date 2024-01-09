@@ -49,6 +49,7 @@ public class CallbackFactory {
         register(DeviceBindingCallback.class);
         register(DeviceSigningVerifierCallback.class);
         register(AppIntegrityCallback.class);
+        register(PingOneProtectEvaluationCallback.class);
     }
 
     /**

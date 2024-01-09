@@ -119,6 +119,9 @@ dependencies {
     //For App integrity
     compileOnly 'com.google.android.play:integrity:1.3.0'
 
+    //For Ping Protect Integration
+    compileOnly 'com.pingidentity.signals:android-sdk:5.1.2'
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'com.squareup.okhttp:mockwebserver:2.7.5'

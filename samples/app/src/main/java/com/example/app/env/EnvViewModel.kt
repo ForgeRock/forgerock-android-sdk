@@ -12,9 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.pingidentity.signalssdk.sdk.InitCallback
+import com.pingidentity.signalssdk.sdk.POInitParams
+import com.pingidentity.signalssdk.sdk.PingOneSignals
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
+import org.forgerock.android.auth.Logger
 
 class EnvViewModel : ViewModel() {
 
@@ -146,6 +150,21 @@ class EnvViewModel : ViewModel() {
     fun select(context: Context, options: FROptions) {
         FRAuth.start(context, options)
         current = options
+
+        val params = POInitParams()
+        params.envId = "94e3268d-847d-47aa-a45e-1ef8dd8f4df0"
+        params.isBehavioralDataCollection = true
+        params.isConsoleLogEnabled = true
+        PingOneSignals.setInitCallback(object: InitCallback {
+            override fun onInitialized() {
+                Logger.info("PingOneSignals", "PingOneSignals Initialized")
+            }
+
+            override fun onError(p0: String, p1: String, p2: String) {
+                Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
+            }
+        })
+        PingOneSignals.init(context, params)
     }
 
     fun select(context: Context, host: String) {
