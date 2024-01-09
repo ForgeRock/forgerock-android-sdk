@@ -39,6 +39,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     signingConfigs {
         debug {
             storeFile file('../debug.jks')

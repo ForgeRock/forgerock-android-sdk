@@ -28,6 +28,10 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -58,6 +62,7 @@ android {
     kotlinOptions {
         freeCompilerArgs = ['-Xjvm-default=all']
     }
+
 }
 
 apply from: '../config/logger.gradle'

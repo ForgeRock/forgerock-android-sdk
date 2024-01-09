@@ -49,7 +49,9 @@ android {
 
     buildFeatures {
         compose true
+        buildConfig true
     }
+
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.1"
@@ -70,6 +72,7 @@ dependencies {
     androidTestImplementation composeBom
 
     //SDK
+    implementation project(':ping-protect')
     implementation project(':forgerock-auth')
     //implementation 'org.forgerock:forgerock-auth:4.2.0'
     //Device Binding + JWT + Application Pin
@@ -102,7 +105,6 @@ dependencies {
     //For IG, invoke endpoint using okHttp
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
-
 
     //End of SDK
 

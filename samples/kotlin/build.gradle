@@ -41,6 +41,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     flavorDimensions "environment"
     productFlavors {
         central {

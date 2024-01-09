@@ -67,6 +67,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     kotlinOptions {
@@ -93,7 +94,6 @@ dependencies {
 
     def coroutine_version = '1.7.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutine_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'

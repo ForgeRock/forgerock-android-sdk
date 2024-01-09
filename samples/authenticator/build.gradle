@@ -38,7 +38,8 @@ android {
         abortOnError false
     }
     buildFeatures {
-        viewBinding true
+        compose true
+        buildConfig true
     }
 
 }
