@@ -7,6 +7,7 @@ import com.pingidentity.signalssdk.sdk.POInitParams
 import com.pingidentity.signalssdk.sdk.PingOneSignals
 import com.pingidentity.signalssdk.sdk.TokenReadyListener
 
+// Proxy class
 class SignalWrapper {
     /**
      * Initialize PingOneSignals SDK by passing in a context and init parameters.

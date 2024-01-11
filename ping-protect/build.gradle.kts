@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    api(project(":forgerock-core"))
+    api(project(":forgerock-auth"))
     implementation ("com.pingidentity.signals:android-sdk:5.1.2")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

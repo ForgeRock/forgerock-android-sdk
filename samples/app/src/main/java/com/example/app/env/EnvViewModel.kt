@@ -19,6 +19,7 @@ import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.PingOneProtect
 
 class EnvViewModel : ViewModel() {
 
@@ -150,21 +151,14 @@ class EnvViewModel : ViewModel() {
     fun select(context: Context, options: FROptions) {
         FRAuth.start(context, options)
         current = options
+         val params = POInitParams()
+         params.apply {
+             envId = "02fb4743-189a-4bc7-9d6c-a919edfe6447"
+             isBehavioralDataCollection = true
+             isConsoleLogEnabled = true
+         }
+        PingOneProtect().start(context, params)
 
-//        val params = POInitParams()
-//        params.envId = "94e3268d-847d-47aa-a45e-1ef8dd8f4df0"
-//        params.isBehavioralDataCollection = true
-//        params.isConsoleLogEnabled = true
-//        PingOneSignals.setInitCallback(object: InitCallback {
-//            override fun onInitialized() {
-//                Logger.info("PingOneSignals", "PingOneSignals Initialized")
-//            }
-//
-//            override fun onError(p0: String, p1: String, p2: String) {
-//                Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
-//            }
-//        })
-//        PingOneSignals.init(context, params)
     }
 
     fun select(context: Context, host: String) {

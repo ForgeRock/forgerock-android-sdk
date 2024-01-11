@@ -8,9 +8,13 @@ package org.forgerock.android.auth.callback
 
 import android.content.Context
 import androidx.annotation.Keep
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.forgerock.android.auth.FRListener
+import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.PingOneProtect
-import org.forgerock.android.auth.RootAbstractCallback
 import org.json.JSONObject
 
 private val TAG = PingOneProtectInitCallback::class.java.simpleName
@@ -18,7 +22,7 @@ private val TAG = PingOneProtectInitCallback::class.java.simpleName
 /**
  * Callback to collect the device binding information
  */
-open class PingOneProtectInitCallback : RootAbstractCallback {
+open class PingOneProtectInitCallback : AbstractCallback {
     @Keep
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
@@ -39,7 +43,7 @@ open class PingOneProtectInitCallback : RootAbstractCallback {
         value: Any,
     ) = when (name) {
         "envId" -> envId = value as String
-        "pauseBehavioralData" -> pauseBehavioralData = value as? Boolean
+        "behavioralDataCollection" -> pauseBehavioralData = value as? Boolean
         "consoleLogEnabled" -> consoleLogEnabled = value as? Boolean
         else -> {}
     }
@@ -56,30 +60,30 @@ open class PingOneProtectInitCallback : RootAbstractCallback {
         super.setValue(value, 1)
     }
 
-//    /**
-//     * Request for Integrity Token from Google SDK
-//     *
-//     * @param context  The Application Context
-//     * @param listener The Listener to listen for the result
-//     */
-//    open fun init(
-//        context: Context,
-//        listener: FRListener<Void>,
-//    ) {
-//        val scope = CoroutineScope(Dispatchers.Default)
-//        scope.launch {
-//            try {
-//                init(context)
-//                Listener.onSuccess(listener, null)
-//            } catch (e: Exception) {
-//                Listener.onException(listener, e)
-//            }
-//        }
-//    }
+    /**
+     * Request for Integrity Token from Google SDK
+     *
+     * @param context  The Application Context
+     * @param listener The Listener to listen for the result
+     */
+    open fun init(
+        context: Context,
+        listener: FRListener<Void>,
+    ) {
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
+            try {
+                init(context)
+                Listener.onSuccess(listener, null)
+            } catch (e: Exception) {
+                Listener.onException(listener, e)
+            }
+        }
+    }
 
     open suspend fun init(context: Context) {
         try {
-            PingOneProtect().setInitCallback(context, this)
+            PingOneProtect().setInitCallback(pauseBehavioralData ?: false)
         } catch (e: Exception) {
             Logger.error(TAG, t = e, message = e.message)
             setClientError("ClientErrors")

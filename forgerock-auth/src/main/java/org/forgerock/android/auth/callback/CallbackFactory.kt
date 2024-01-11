@@ -6,11 +6,7 @@
  */
 package org.forgerock.android.auth.callback
 
-import org.forgerock.android.auth.Callback
 import org.forgerock.android.auth.Logger.Companion.error
-import org.forgerock.android.auth.callback.AppIntegrityCallback
-import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
-import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 
 /**
  * Factory to manage supported [Callback]
@@ -46,10 +42,11 @@ class CallbackFactory private constructor() {
         register(DeviceBindingCallback::class.java)
         register(DeviceSigningVerifierCallback::class.java)
         register(AppIntegrityCallback::class.java)
-        registerAnonymous()
+        // need to think do we want user to control this or automatic ?
+        registerPingProtect()
     }
 
-    private fun registerAnonymous() {
+     fun registerPingProtect() {
         val packageName = javaClass.getPackage()?.name
         try {
             listOf("PingOneProtectEvaluationCallback", "PingOneProtectInitCallback").forEach {

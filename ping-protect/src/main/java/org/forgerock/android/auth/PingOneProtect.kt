@@ -13,43 +13,51 @@ import org.forgerock.android.auth.callback.PingOneProtectInitCallback
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class PingOneProtect
-@JvmOverloads
-constructor(private val signalWrapper: SignalWrapper = SignalWrapper()) {
+class PingOneProtect @JvmOverloads constructor( val signalWrapper: SignalWrapper = SignalWrapper()) {
+    fun start(context: Context, params: POInitParams) {
+        signalWrapper.setInitCallback(
+            object : InitCallback {
+                override fun onInitialized() {
+                    Logger.info("PingOneSignals", "PingOneSignals Initialized")
+                    PingOneParamState.params = params
+                }
 
-    internal suspend fun setInitCallback(
-        context: Context,
-        callback: PingOneProtectInitCallback,
-    ) {
+                override fun onError(
+                    p0: String,
+                    p1: String,
+                    p2: String,
+                ) {
+                    Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
+                    PingOneParamState.params = null
+                }
+            },
+        )
+        PingOneSignals.init(context, params)
+    }
+
+    /**
+     * Pause behavioral data collection
+     */
+     fun pauseBehavioralData() {
+        signalWrapper.pauseBehavioralData()
+    }
+
+    /**
+     * Resume behavioral data collection
+     */
+     fun resumeBehavioralData() {
+        signalWrapper.resumeBehavioralData()
+    }
+
+    internal suspend fun setInitCallback(pauseBehaviourData: Boolean) {
         return suspendCancellableCoroutine { init ->
             PingOneParamState.params?.let {
+                // need to confirm this ?
+                if(pauseBehaviourData) {
+                    resumeBehavioralData()
+                }
                 init.resume(Unit)
-            } ?: run {
-                val params = POInitParams()
-                params.envId = callback.envId
-                params.isBehavioralDataCollection = callback.pauseBehavioralData ?: false
-                params.isConsoleLogEnabled = callback.consoleLogEnabled ?: false
-
-                signalWrapper.setInitCallback(
-                    object : InitCallback {
-                        override fun onInitialized() {
-                            Logger.info("PingOneSignals", "PingOneSignals Initialized")
-                            PingOneParamState.params = params
-                            init.resume(Unit)
-                        }
-
-                        override fun onError(
-                            p0: String,
-                            p1: String,
-                            p2: String,
-                        ) {
-                            Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
-                            init.resumeWithException(PingOneInitException("Failed to initialize"))
-                        }
-                    },
-                )
-                PingOneSignals.init(context, params)
-            }
+            } ?: init.resumeWithException(PingOneInitException("Failed to initialize"))
         }
     }
 
@@ -59,7 +67,7 @@ constructor(private val signalWrapper: SignalWrapper = SignalWrapper()) {
                 object : GetDataCallback {
                     override fun onSuccess(result: String) {
                         if (callback.pauseBehavioralData == true) {
-                            signalWrapper.pauseBehavioralData()
+                            pauseBehavioralData()
                         }
                         it.resume(result)
                     }
@@ -72,21 +80,9 @@ constructor(private val signalWrapper: SignalWrapper = SignalWrapper()) {
         }
     }
 
-    /**
-     * Pause behavioral data collection
-     */
-    fun pauseBehavioralData() {
-        signalWrapper.pauseBehavioralData()
-    }
-
-    /**
-     * Resume behavioral data collection
-     */
-    fun resumeBehavioralData() {
-        signalWrapper.resumeBehavioralData()
-    }
 }
 
+// State Pattern
 internal object PingOneParamState {
     internal var params: POInitParams? = null
 }

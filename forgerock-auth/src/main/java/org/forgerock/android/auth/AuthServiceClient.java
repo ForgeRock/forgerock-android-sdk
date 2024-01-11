@@ -116,7 +116,7 @@ class AuthServiceClient {
             Uri.Builder builder = Uri.parse(getUrl().toString())
                     .buildUpon();
 
-            for (org.forgerock.android.auth.Callback callback: node.getCallbacks()) {
+            for (org.forgerock.android.auth.callback.Callback callback: node.getCallbacks()) {
                 if (callback instanceof AdditionalParameterCallback) {
                     Map<String, String> additionalParameters = ((AdditionalParameterCallback) callback).getAdditionalParameters();
                     for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {

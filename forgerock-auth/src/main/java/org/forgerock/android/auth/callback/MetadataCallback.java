@@ -9,7 +9,6 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
 
-import org.forgerock.android.auth.Callback;
 import org.json.JSONException;
 import org.json.JSONObject;
 

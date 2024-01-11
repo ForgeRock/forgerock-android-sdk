@@ -6,8 +6,8 @@
  */
 package org.forgerock.android.auth
 
-import org.forgerock.android.auth.Callback
 import org.forgerock.android.auth.Logger.Companion.debug
+import org.forgerock.android.auth.callback.Callback
 import org.forgerock.android.auth.callback.CallbackFactory
 import org.forgerock.android.auth.callback.DerivableCallback
 import org.forgerock.android.auth.callback.MetadataCallback
