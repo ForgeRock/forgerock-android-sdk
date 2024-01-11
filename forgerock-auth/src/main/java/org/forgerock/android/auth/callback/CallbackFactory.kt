@@ -43,20 +43,20 @@ class CallbackFactory private constructor() {
         register(DeviceSigningVerifierCallback::class.java)
         register(AppIntegrityCallback::class.java)
         // need to think do we want user to control this or automatic ?
-        registerPingProtect()
+       // registerPingProtect()
     }
 
-     fun registerPingProtect() {
-        val packageName = javaClass.getPackage()?.name
-        try {
-            listOf("PingOneProtectEvaluationCallback", "PingOneProtectInitCallback").forEach {
-                val clazz = Class.forName("$packageName.$it")
-                register(clazz.asSubclass(Callback::class.java))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+//     fun registerPingProtect() {
+//        val packageName = javaClass.getPackage()?.name
+//        try {
+//            listOf("PingOneProtectEvaluationCallback", "PingOneProtectInitCallback").forEach {
+//                val clazz = Class.forName("$packageName.$it")
+//                register(clazz.asSubclass(Callback::class.java))
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
 
     /**
      * Register new Callback Class
