@@ -26,7 +26,7 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.248:8080/openam"
+            url = "http://192.168.1.93:8080/openam"
             realm = "root"
             cookieName = "iPlanetDirectoryPro"
             timeout = 50
@@ -151,20 +151,20 @@ class EnvViewModel : ViewModel() {
         FRAuth.start(context, options)
         current = options
 
-        val params = POInitParams()
-        params.envId = "94e3268d-847d-47aa-a45e-1ef8dd8f4df0"
-        params.isBehavioralDataCollection = true
-        params.isConsoleLogEnabled = true
-        PingOneSignals.setInitCallback(object: InitCallback {
-            override fun onInitialized() {
-                Logger.info("PingOneSignals", "PingOneSignals Initialized")
-            }
-
-            override fun onError(p0: String, p1: String, p2: String) {
-                Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
-            }
-        })
-        PingOneSignals.init(context, params)
+//        val params = POInitParams()
+//        params.envId = "94e3268d-847d-47aa-a45e-1ef8dd8f4df0"
+//        params.isBehavioralDataCollection = true
+//        params.isConsoleLogEnabled = true
+//        PingOneSignals.setInitCallback(object: InitCallback {
+//            override fun onInitialized() {
+//                Logger.info("PingOneSignals", "PingOneSignals Initialized")
+//            }
+//
+//            override fun onError(p0: String, p1: String, p2: String) {
+//                Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2 ")
+//            }
+//        })
+//        PingOneSignals.init(context, params)
     }
 
     fun select(context: Context, host: String) {

@@ -9,6 +9,8 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Nullable;
 
+import org.forgerock.android.auth.Callback;
+
 /**
  * Interface for {@link Callback} that can be derived.
  */

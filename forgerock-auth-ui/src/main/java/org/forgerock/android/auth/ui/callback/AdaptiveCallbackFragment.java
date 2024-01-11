@@ -21,7 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import org.forgerock.android.auth.Node;
-import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.exception.AuthenticationException;
 import org.forgerock.android.auth.ui.AuthHandler;
 import org.forgerock.android.auth.ui.AuthenticationExceptionListener;

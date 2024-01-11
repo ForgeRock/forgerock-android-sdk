@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation composeBom
 
     //SDK
+    implementation project(':ping-protect')
     implementation project(':forgerock-auth')
     //implementation project(':signalssdk')
     //implementation 'org.forgerock:forgerock-auth:4.2.0'

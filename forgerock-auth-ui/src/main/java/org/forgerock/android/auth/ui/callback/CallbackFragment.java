@@ -13,7 +13,6 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import org.forgerock.android.auth.Node;
-import org.forgerock.android.auth.callback.Callback;
 
 import static org.forgerock.android.auth.ui.CallbackFragmentFactory.CALLBACK;
 import static org.forgerock.android.auth.ui.CallbackFragmentFactory.NODE;

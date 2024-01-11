@@ -5,7 +5,7 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-package org.forgerock.android.auth.callback;
+package org.forgerock.android.auth;
 
 import java.io.Serializable;
 

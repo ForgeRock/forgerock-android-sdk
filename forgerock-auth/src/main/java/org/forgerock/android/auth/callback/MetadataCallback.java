@@ -9,6 +9,7 @@ package org.forgerock.android.auth.callback;
 
 import androidx.annotation.Keep;
 
+import org.forgerock.android.auth.Callback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -81,10 +82,10 @@ public class MetadataCallback extends AbstractCallback implements DerivableCallb
     public Class<? extends Callback> getDerivedCallback() {
         JSONObject value = getValue();
         if (WebAuthnRegistrationCallback.instanceOf(value)) {
-            return CallbackFactory.getInstance().getCallbacks().get("WebAuthnRegistrationCallback");
+            return CallbackFactory.instance.getCallbacks().get("WebAuthnRegistrationCallback");
         }
         if (WebAuthnAuthenticationCallback.instanceOf(value)) {
-            return CallbackFactory.getInstance().getCallbacks().get("WebAuthnAuthenticationCallback");
+            return CallbackFactory.instance.getCallbacks().get("WebAuthnAuthenticationCallback");
         }
         return null;
     }

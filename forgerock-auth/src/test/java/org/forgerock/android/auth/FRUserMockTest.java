@@ -30,7 +30,6 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.android.auth.callback.Callback;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.callback.StringAttributeInputCallback;

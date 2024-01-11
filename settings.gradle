@@ -5,7 +5,7 @@
  * of the MIT license. See the LICENSE file for details.
  */
 
-include ':forgerock-auth', ':forgerock-auth-ui', ':forgerock-core', ':forgerock-authenticator'
+include ':forgerock-auth', ':forgerock-auth-ui', ':forgerock-core', ':forgerock-authenticator', ':ping-protect'
 
 include ':auth'
 project(':auth').projectDir = new File('samples/auth')
@@ -26,3 +26,4 @@ project(':kotlin').projectDir = new File('samples/kotlin')
 
 include ':app'
 project(':app').projectDir = new File('samples/app')
+

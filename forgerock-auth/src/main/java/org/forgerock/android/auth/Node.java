@@ -11,7 +11,6 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
-import org.forgerock.android.auth.callback.Callback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
