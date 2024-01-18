@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Listener
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.PIProtectInitParams
 import org.forgerock.android.auth.PingOneProtect
 import org.json.JSONObject
 
@@ -49,7 +50,7 @@ open class PingOneProtectInitCallback : AbstractCallback {
     }
 
     override fun getType(): String {
-        return "PingOneProtectInitCallback"
+        return "PingOneProtectInitializeCallback"
     }
 
     /**
@@ -83,7 +84,13 @@ open class PingOneProtectInitCallback : AbstractCallback {
 
     open suspend fun init(context: Context) {
         try {
-            PingOneProtect().setInitCallback(pauseBehavioralData ?: false)
+            val init =
+                PIProtectInitParams(
+                    envId = envId,
+                    isBehavioralDataCollection = pauseBehavioralData ?: false,
+                    isConsoleLogEnabled = consoleLogEnabled ?: false,
+                )
+            PingOneProtect().initSDK(context, init)
         } catch (e: Exception) {
             Logger.error(TAG, t = e, message = e.message)
             setClientError("ClientErrors")

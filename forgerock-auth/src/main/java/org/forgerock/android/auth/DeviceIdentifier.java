@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.provider.Settings;
 
@@ -31,6 +32,7 @@ public class DeviceIdentifier {
      * @param context
      * @param keyStoreManager
      */
+    @SuppressLint("HardwareIds")
     public DeviceIdentifier(@NotNull Context context, KeyStoreManager keyStoreManager) {
 
         this.keyAlias = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);

@@ -13,9 +13,6 @@ import org.forgerock.android.auth.callback.CallbackFactory
 import org.forgerock.android.auth.callback.PingOneProtectEvaluationCallback
 import org.forgerock.android.auth.callback.PingOneProtectInitCallback
 
-fun main() {
-    println()
-}
 /**
  * Content Provider to register Activity Lifecycle Callbacks and keep track of the last active activity.
  */
