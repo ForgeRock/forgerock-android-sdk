@@ -6,15 +6,15 @@
  */
 package org.forgerock.android.auth.devicebind
 
-import androidx.biometric.BiometricManager.Authenticators.*
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.InitProvider
-import org.forgerock.android.auth.biometric.AuthenticatorType
 import org.forgerock.android.auth.biometric.BiometricAuth
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
-import java.util.*
 
 
 /**
@@ -35,9 +35,10 @@ interface BiometricHandler {
 
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param authenticationCallback Result of biometric action in callback
+     * @param biometricAuthenticationCallback Result of biometric action in callback
      */
-    fun authenticate(authenticationCallback: AuthenticationCallback, cryptoObject: CryptoObject? = null)
+    fun authenticate(biometricAuthenticationCallback: BiometricAuthCallback,
+                     cryptoObject: CryptoObject? = null)
 
 }
 
@@ -55,7 +56,7 @@ internal class BiometricBindingHandler(titleValue: String,
                                        descriptionValue: String,
                                        fragmentActivity: FragmentActivity = InitProvider.getCurrentActivityAsFragmentActivity(),
                                        deviceBindAuthenticationType: DeviceBindingAuthenticationType,
-                                       var biometricListener: AuthenticationCallback? = null,
+                                       var biometricListener: BiometricAuthCallback? = null,
                                        private var biometricAuth: BiometricAuth? = null) :
     BiometricHandler {
 
@@ -70,12 +71,12 @@ internal class BiometricBindingHandler(titleValue: String,
 
     /**
      * display biometric prompt  for Biometric and device credential
-     * @param authenticationCallback Result of biometric action in callback
+     * @param biometricAuthenticationCallback Result of biometric action in callback
      */
-    override fun authenticate(authenticationCallback: AuthenticationCallback, cryptoObject: CryptoObject?) {
+    override fun authenticate(biometricAuthenticationCallback: BiometricAuthCallback, cryptoObject: CryptoObject?) {
 
-        biometricListener = authenticationCallback
-        biometricAuth?.biometricAuthListener = authenticationCallback
+        biometricListener = biometricAuthenticationCallback
+        biometricAuth?.biometricAuthenticationCallback = biometricAuthenticationCallback
         biometricAuth?.authenticate(cryptoObject)
     }
 

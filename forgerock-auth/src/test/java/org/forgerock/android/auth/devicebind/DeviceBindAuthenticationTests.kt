@@ -12,9 +12,7 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.AuthenticationResult
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jwt.JWTClaimNames
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +27,7 @@ import org.assertj.core.data.Offset
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.FRLogger
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.Logger.Companion.set
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.ClientNotRegistered
@@ -39,15 +37,12 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.shadows.ShadowLog
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -362,7 +357,7 @@ class DeviceBindAuthenticationTests {
                     return true
                 }
 
-                override fun authenticate(authenticationCallback: AuthenticationCallback,
+                override fun authenticate(authenticationCallback: BiometricAuthCallback,
                                           cryptoObject: BiometricPrompt.CryptoObject?) {
                     result = true
                     authenticationCallback.onAuthenticationSucceeded(authenticationResult)
@@ -401,7 +396,7 @@ class DeviceBindAuthenticationTests {
                     return true
                 }
 
-                override fun authenticate(authenticationCallback: AuthenticationCallback,
+                override fun authenticate(authenticationCallback: BiometricAuthCallback,
                                           cryptoObject: BiometricPrompt.CryptoObject?) {
                     result = true
                     authenticationCallback.onAuthenticationSucceeded(authenticationResult)

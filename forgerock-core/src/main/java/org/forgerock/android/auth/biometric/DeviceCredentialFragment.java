@@ -74,11 +74,12 @@ public class DeviceCredentialFragment extends Fragment {
         }
         if (requestCode == LOCK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                this.biometricAuth.getBiometricAuthListener().onAuthenticationSucceeded(null);
+                // Eventually we need to uncouple this logic in future
+                this.biometricAuth.getBiometricAuthenticationCallback().onAuthenticationSucceeded(null);
             } else {
                 Logger.debug(TAG, "Fail to approve using device Credentials. requestCode " +
                         "is %s", resultCode);
-                this.biometricAuth.getBiometricAuthListener().onAuthenticationError(
+                this.biometricAuth.getBiometricAuthenticationCallback().onAuthenticationError(
                         BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                         "Fail to approve using device Credentials.");
             }

@@ -19,7 +19,6 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -62,7 +61,7 @@ class BiometricAuth @JvmOverloads constructor(
      * Return the Biometric Authentication listener used to return authentication result.
      * @return the Biometric Authentication listener.
      */
-    var biometricAuthListener: AuthenticationCallback? = null,
+    var biometricAuthenticationCallback: BiometricAuthCallback? = null,
 
     /**
      * The description to be displayed on the prompt.
@@ -70,7 +69,7 @@ class BiometricAuth @JvmOverloads constructor(
      */
     private val description: String? = null,
 
-) {
+    ) {
 
     private var biometricManager: BiometricManager? = null
 
@@ -87,7 +86,7 @@ class BiometricAuth @JvmOverloads constructor(
 
     private fun handleError(logMessage: String, biometricErrorMessage: String, errorType: Int) {
         debug(TAG, logMessage)
-        biometricAuthListener?.onAuthenticationError(
+        biometricAuthenticationCallback?.onAuthenticationError(
             errorType, biometricErrorMessage)
     }
 
@@ -162,14 +161,25 @@ class BiometricAuth @JvmOverloads constructor(
         keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             fingerprintManager =
-                context.getSystemService(Context.FINGERPRINT_SERVICE) as FingerprintManager
+                context.getSystemService(Context.FINGERPRINT_SERVICE) as? FingerprintManager
         }
     }
 
     private fun initBiometricPrompt(): BiometricPrompt {
         val executor = ContextCompat.getMainExecutor(activity)
-        val biometricPrompt = biometricAuthListener?.let {
-            BiometricPrompt(activity, executor, it)
+        val biometricPrompt = biometricAuthenticationCallback?.let {
+            val callback = object: BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(@BiometricPrompt.AuthenticationError errorCode: Int, errString: CharSequence) {
+                    it.onAuthenticationError(errorCode, errString)
+                }
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    it.onAuthenticationSucceeded(result)
+                }
+                override fun onAuthenticationFailed() {
+                    it.onAuthenticationFailed()
+                }
+            }
+            BiometricPrompt(activity, executor, callback)
         } ?: kotlin.run {
             throw IllegalStateException("AuthenticationCallback is not set.")
         }
@@ -264,9 +274,4 @@ class BiometricAuth @JvmOverloads constructor(
     init {
         setServicesFromActivity(activity)
     }
-}
-
-enum class AuthenticatorType {
-    STRONG,
-    WEAK
 }

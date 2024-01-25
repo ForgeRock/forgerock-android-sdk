@@ -12,7 +12,7 @@ import android.content.Context
 import android.os.Build
 import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
@@ -22,9 +22,9 @@ import java.security.interfaces.RSAPublicKey
  * Settings for all the biometric authentication and device credential is configured
  */
 open class BiometricAndDeviceCredential : BiometricAuthenticator() {
-    override fun authenticate(authenticationCallback: BiometricPrompt.AuthenticationCallback,
+    override fun authenticate(biometricAuthenticationCallback: BiometricAuthCallback,
                               privateKey: PrivateKey) {
-        biometricInterface.authenticate(authenticationCallback)
+        biometricInterface.authenticate(biometricAuthenticationCallback)
     }
 
     /**

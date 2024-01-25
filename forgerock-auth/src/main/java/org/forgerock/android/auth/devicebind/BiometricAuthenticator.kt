@@ -14,6 +14,7 @@ import androidx.biometric.BiometricPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.forgerock.android.auth.CryptoKey
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import java.security.PrivateKey
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -50,7 +51,7 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                 if (privateKey == null) {
                     continuation.resume(DeviceBindingErrorStatus.ClientNotRegistered())
                 } else {
-                    val listener = object : BiometricPrompt.AuthenticationCallback() {
+                    val listener = object : BiometricAuthCallback() {
 
                         override fun onAuthenticationError(errorCode: Int,
                                                            errString: CharSequence) {
@@ -84,8 +85,8 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
                             }
                         }
 
-                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                            result.cryptoObject?.signature?.let {
+                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
+                            result?.cryptoObject?.signature?.let {
                                 continuation.resume(Success(privateKey, it))
                                 return
                             }
@@ -104,9 +105,9 @@ abstract class BiometricAuthenticator : CryptoAware, DeviceAuthenticator {
 
     /**
      * Launch the Biometric Prompt.
-     * @param authenticationCallback [BiometricPrompt.AuthenticationCallback] to handle the result.
+     * @param biometricAuthenticationCallback [BiometricPrompt.AuthenticationCallback] to handle the result.
      * @param privateKey The private key to unlock
      */
-    abstract fun authenticate(authenticationCallback: BiometricPrompt.AuthenticationCallback,
+    abstract fun authenticate(biometricAuthenticationCallback: BiometricAuthCallback,
                               privateKey: PrivateKey)
 }

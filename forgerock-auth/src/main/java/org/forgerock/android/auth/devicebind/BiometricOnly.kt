@@ -17,6 +17,7 @@ import androidx.biometric.BiometricPrompt
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.crypto.impl.RSASSAProvider
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
@@ -36,16 +37,16 @@ open class BiometricOnly : BiometricAuthenticator() {
         }.signature(JWSAlgorithm.parse(getAlgorithm()), privateKey)
     }
 
-    override fun authenticate(authenticationCallback: BiometricPrompt.AuthenticationCallback,
+    override fun authenticate(biometricAuthenticationCallback: BiometricAuthCallback,
                               privateKey: PrivateKey) {
         try {
-            biometricInterface.authenticate(authenticationCallback,
+            biometricInterface.authenticate(biometricAuthenticationCallback,
                 BiometricPrompt.CryptoObject(getSignature(privateKey)))
         } catch (e: Exception) {
             //Failed because the key was generated with
             //KeyGenParameterSpec.Builder.setUserAuthenticationParameters
             Logger.warn(TAG, "Fallback to time-based key", e)
-            biometricInterface.authenticate(authenticationCallback)
+            biometricInterface.authenticate(biometricAuthenticationCallback)
         }
     }
 

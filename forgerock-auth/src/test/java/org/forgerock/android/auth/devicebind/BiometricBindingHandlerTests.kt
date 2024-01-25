@@ -9,11 +9,11 @@ package org.forgerock.android.auth.devicebind
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.AuthenticationResult
 import androidx.biometric.BiometricPrompt.ERROR_TIMEOUT
 import androidx.fragment.app.FragmentActivity
 import org.forgerock.android.auth.biometric.BiometricAuth
+import org.forgerock.android.auth.biometric.BiometricAuthCallback
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -113,9 +113,9 @@ class BiometricBindingHandlerTests {
     @Test
     fun testListener() {
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        val result = object : AuthenticationCallback() {}
+        val result = object : BiometricAuthCallback() {}
         testObject.authenticate(result)
-        verify(biometricAuth).biometricAuthListener = testObject.biometricListener
+        verify(biometricAuth).biometricAuthenticationCallback = testObject.biometricListener
         verify(biometricAuth).authenticate()
     }
 
@@ -125,8 +125,8 @@ class BiometricBindingHandlerTests {
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
 
-        val result = object : AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: AuthenticationResult) {
+        val result = object : BiometricAuthCallback() {
+            override fun onAuthenticationSucceeded(result: AuthenticationResult?) {
                 latch.countDown()
             }
         }
@@ -140,7 +140,7 @@ class BiometricBindingHandlerTests {
     fun testBiometricListenerForTimeoutFailure() {
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
-        val result = object : AuthenticationCallback() {
+        val result = object : BiometricAuthCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 assertEquals(ERROR_TIMEOUT, errorCode)
                 latch.countDown()
@@ -156,7 +156,7 @@ class BiometricBindingHandlerTests {
         val latch = CountDownLatch(1)
         val testObject = BiometricBindingHandler("title", "subtitle", "description", deviceBindAuthenticationType = DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK, fragmentActivity = activity, biometricAuth = biometricAuth)
 
-        val result = object : AuthenticationCallback() {
+        val result = object : BiometricAuthCallback() {
             override fun onAuthenticationFailed() {
                 latch.countDown()
             }
