@@ -17,7 +17,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ClassAssert;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
@@ -92,9 +91,13 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         }
     }
 
+    /*
+     * When user does NOT exist in AM, the node should trigger the "Failure" outcome (SDKS-2935)
+     */
     @Test
     public void testDeviceSigningVerifierUnknownUserError() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
+        final int[] failureOutcome = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
             @Override
@@ -112,6 +115,15 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     node.next(context, this);
                     return;
                 }
+                // Make sure that the "Failure" outcome has been triggered
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
+                    failureOutcome[0]++;
+
+                    node.next(context, this);
+                    return;
+                }
 
                 super.onCallbackReceived(node);
             }
@@ -119,15 +131,11 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         FRSession.authenticate(context, TREE, nodeListenerFuture);
 
-        // Ensure that the journey finishes with failure
-        thrown.expect(java.util.concurrent.ExecutionException.class);
-        thrown.expectMessage("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
-
-        Assert.assertNull(nodeListenerFuture.get());
-        Assert.assertNull(FRSession.getCurrentSession());
-        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
-
+        Assert.assertNotNull(nodeListenerFuture.get());
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
         assertThat(hit[0]).isEqualTo(1);
+        assertThat(failureOutcome[0]).isEqualTo(1);
     }
 
     @Test
@@ -891,7 +899,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
                     return;
                 }
-                // Make sure that by default upon
+                // Make sure that the "Abort" outcome has been triggered
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Abort");
@@ -913,4 +921,64 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
     }
 
+    /*
+     * Make sure that when user's account is not active,
+     * the Inactive User outcome is triggered (when enabled...) (SDKS-2935)
+     */
+    @Test
+    public void testDeviceVerificationInactiveUser() throws ExecutionException, InterruptedException {
+        final int[] signCallback = {0};
+        final int[] inactiveUserOutcome = {0};
+
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "inactive-user")
+        {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    signCallback[0]++;
+                    callback.sign(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+
+                            node.next(context, nodeListener);
+                        }
+                        @Override
+                        public void onException(Exception e) {
+                            node.next(context, nodeListener);
+                        }
+                    });
+
+                    return;
+                }
+                // Make sure that the "Inactive User" outcome has been triggered
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Inactive User");
+                    inactiveUserOutcome[0]++;
+
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+
+        // Make sure that the node didn't return a callback, and the "inactive user" outcome was triggered.
+        assertThat(signCallback[0]).isEqualTo(0);
+        assertThat(inactiveUserOutcome[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+
+    }
 }
