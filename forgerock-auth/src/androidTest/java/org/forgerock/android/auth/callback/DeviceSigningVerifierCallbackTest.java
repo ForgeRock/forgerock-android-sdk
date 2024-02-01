@@ -17,7 +17,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ClassAssert;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
@@ -92,9 +91,14 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         }
     }
 
+    /*
+     * When user does NOT exist in AM, the node triggers the "Failure" outcome with reason "INVALID_USER" (SDKS-2935)
+     */
     @Test
     public void testDeviceSigningVerifierUnknownUserError() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
+        final int[] failureOutcome = {0};
+        final int [] failureValueReceived = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
             @Override
@@ -112,6 +116,26 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     node.next(context, this);
                     return;
                 }
+                // Make sure that the "Failure" outcome has been triggered
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
+                    failureOutcome[0]++;
+
+                    node.next(context, this);
+                    return;
+                }
+
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_USER\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
+                    return;
+                }
 
                 super.onCallbackReceived(node);
             }
@@ -120,14 +144,17 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         FRSession.authenticate(context, TREE, nodeListenerFuture);
 
         // Ensure that the journey finishes with failure
-        thrown.expect(java.util.concurrent.ExecutionException.class);
-        thrown.expectMessage("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
-
-        Assert.assertNull(nodeListenerFuture.get());
+        try {
+            Assert.assertNull(nodeListenerFuture.get());
+        } catch (ExecutionException e) {
+            assertThat(e.getMessage()).isEqualTo("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
+        } catch (InterruptedException e) {
+        }
         Assert.assertNull(FRSession.getCurrentSession());
-        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
 
         assertThat(hit[0]).isEqualTo(1);
+        assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
     }
 
     @Test
@@ -466,6 +493,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     public void testDeviceVerificationFailureExpiredJwt() throws ExecutionException, InterruptedException {
         final int[] signSuccess = {0};
         final int[] failureOutcome = {0};
+        final int [] failureValueReceived = {0};
 
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
 
@@ -503,6 +531,17 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     return;
                 }
 
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_CLAIM\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
+                    return;
+                }
+
                 super.onCallbackReceived(node);
             }
         };
@@ -511,6 +550,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(nodeListenerFuture.get());
         assertThat(signSuccess[0]).isEqualTo(1);
         assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
 
         // Ensure that the journey finishes with success
         Assert.assertNotNull(FRSession.getCurrentSession());
@@ -520,6 +560,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     @Test
     public void testDeviceVerificationFailureInvalidChallenge() throws ExecutionException, InterruptedException {
         final int[] failureOutcome = {0};
+        final int[] failureValueReceived = {0};
 
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
@@ -548,6 +589,17 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     return;
                 }
 
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_CLAIM\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
+                    return;
+                }
+
                 super.onCallbackReceived(node);
             }
         };
@@ -556,6 +608,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(nodeListenerFuture.get());
 
         assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
 
         // Ensure that the journey finishes with success
         Assert.assertNotNull(FRSession.getCurrentSession());
@@ -609,7 +662,8 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
     @Test
     public void testDeviceVerificationFailureInvalidSignKey() throws ExecutionException, InterruptedException {
-        final int[] authSuccess = {0};
+        final int[] failureOutcome = {0};
+        final int[] failureValueReceived = {0};
 
         CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
@@ -633,9 +687,20 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
-                    authSuccess[0]++;
+                    failureOutcome[0]++;
 
                     node.next(context, nodeListener);
+                    return;
+                }
+
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_SIGNATURE\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
                     return;
                 }
 
@@ -645,7 +710,8 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
         FRSession.authenticate(context, TREE, nodeListenerFuture);
         Assert.assertNotNull(nodeListenerFuture.get());
-        assertThat(authSuccess[0]).isEqualTo(1);
+        assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
 
         // Ensure that the journey finishes with success
         Assert.assertNotNull(FRSession.getCurrentSession());
@@ -656,6 +722,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
     public void testDeviceVerificationFailureTemperedJwt() throws ExecutionException, InterruptedException {
         final int[] signSuccess = {0};
         final int[] failureOutcome = {0};
+        final int[] failureValueReceived = {0};
 
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default")
         {
@@ -675,7 +742,8 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                             signSuccess[0]++;
                             // Prepare prepare exp value for 10 days ahead of now...
                             Calendar expTempered = Calendar.getInstance();
-                            expTempered.add(Calendar.SECOND, 864000);
+                            expTempered.add(Calendar.SECOND, 10);
+
 
                             try {
                                 String jwtHeader = JWTParser.parse((String) callback.getInputValue(0)).getParsedParts()[0].toString();
@@ -685,12 +753,12 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                                 // Temper the exp value in the original JWT...
                                 // The Device Signing Verifier node should detect that the payload has been tempered and therefore should fail!
                                 JSONObject temperedPayloadJson = new JSONObject(jwtPayload);
-                                temperedPayloadJson.put("exp", expTempered.getTime().getTime());
+                                temperedPayloadJson.put("exp", expTempered.getTime().getTime() / 1000);
                                 String temperedPayload = Base64.encodeToString(temperedPayloadJson.toString().getBytes(), Base64.DEFAULT);
                                 String temperedJwt = new StringBuilder().
                                         append(jwtHeader).append(".").
                                         append(temperedPayload).append(".").
-                                        append(jwtSignature).toString();
+                                        append(jwtSignature).toString().replace("\n", "").replace("\r", "");;
 
                                 Logger.debug(TAG, "Original JWT: " + callback.getInputValue(0));
                                 Logger.debug(TAG, "Tempered JWT: " + temperedJwt);
@@ -701,6 +769,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                                 Logger.debug(TAG, e.getMessage());
                             }
                             node.next(context, nodeListener);
+
                         }
                         @Override
                         public void onException(Exception e) {
@@ -718,6 +787,17 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     return;
                 }
 
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_SIGNATURE\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
+                    return;
+                }
+
                 super.onCallbackReceived(node);
             }
         };
@@ -726,6 +806,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(nodeListenerFuture.get());
         assertThat(signSuccess[0]).isEqualTo(1);
         assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
 
         // Ensure that the journey finishes with success
         Assert.assertNotNull(FRSession.getCurrentSession());
@@ -891,7 +972,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
 
                     return;
                 }
-                // Make sure that by default upon
+                // Make sure that the "Abort" outcome has been triggered
                 if (node.getCallback(TextOutputCallback.class) != null) {
                     TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
                     assertThat(textOutputCallback.getMessage()).isEqualTo("Abort");
@@ -913,4 +994,135 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
         Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
     }
 
+    /*
+     * Make sure that when user's account is not active the failure outcome is triggered with NOT_ACTIVE_USER reason (SDKS-2935)
+     */
+    @Test
+    public void testDeviceVerificationInactiveUser() throws ExecutionException, InterruptedException {
+        final int[] signCallback = {0};
+        final int[] failureOutcome = {0};
+        final int[] failureValueReceived = {0};
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "inactive-user")
+        {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    signCallback[0]++;
+                    callback.sign(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+
+                            node.next(context, nodeListener);
+                        }
+                        @Override
+                        public void onException(Exception e) {
+                            node.next(context, nodeListener);
+                        }
+                    });
+
+                    return;
+                }
+                // Make sure that the "failure" outcome has been triggered
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
+                    failureOutcome[0]++;
+
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"NOT_ACTIVE_USER\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this );
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+
+        // Make sure that the node didn't return a callback, and the "failure" outcome was triggered.
+        assertThat(signCallback[0]).isEqualTo(0);
+        assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+
+    }
+
+    /*
+     * Make sure that when the `sub` claim is invalid the failure outcome is triggered with INVALID_SUBJECT reason (SDKS-2935)
+     */
+    @Test
+    public void testDeviceVerificationInvalidSubject() throws ExecutionException, InterruptedException {
+        final int[] failureOutcome = {0};
+        final int[] failureValueReceived = {0};
+
+        CallbackFactory.getInstance().register(CustomDeviceSigningVerifierCallback.class);
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceSigningVerifierNodeListener(context, "default") {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(CustomDeviceSigningVerifierCallback.class) != null) {
+                    CustomDeviceSigningVerifierCallback callback = node.getCallback(CustomDeviceSigningVerifierCallback.class);
+                    String customJwt = callback.getSignedJwt(
+                            KID,
+                            "random-user-id",
+                            callback.getChallenge());
+
+                    callback.setJws(customJwt);
+                    node.next(context, nodeListener);
+                    return;
+                }
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Failure");
+                    failureOutcome[0]++;
+
+                    node.next(context, nodeListener);
+                    return;
+                }
+
+                // The test tree is configured to send the `DeviceSigningVerifierNode.FAILURE` value in a HiddenValue callback
+                if (node.getCallback(HiddenValueCallback.class) != null) {
+                    HiddenValueCallback callback = node.getCallback(HiddenValueCallback.class);
+                    assertThat(callback.getId()).isEqualTo("DeviceSigningVerifierFailure");
+                    assertThat(callback.getValue()).isEqualTo("\"INVALID_SUBJECT\"");
+                    failureValueReceived[0]++;
+
+                    node.next(context, this);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+
+        assertThat(failureOutcome[0]).isEqualTo(1);
+        assertThat(failureValueReceived[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+    }
 }
