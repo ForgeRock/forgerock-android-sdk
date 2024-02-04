@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
+ *
+ *  This software may be modified and distributed under the terms
+ *  of the MIT license. See the LICENSE file for details.
+ */
 package org.forgerock.android.auth
 
 
@@ -58,7 +64,7 @@ class PIProtectTest {
         }
         every { PingOneSignals.init(context, capture(mockParamSlot)) }.returns(Unit)
         assertNull(PIProtect.protectParamState)
-        PIProtect.initSDK(context)
+        PIProtect.start(context)
         assertNotNull(PIProtect.protectParamState)
         assertEquals(null, mockParamSlot.captured.envId)
         assertEquals(false, mockParamSlot.captured.isConsoleLogEnabled)
@@ -67,7 +73,7 @@ class PIProtectTest {
         assertEquals(null, mockParamSlot.captured.deviceAttributesToIgnore)
         assertEquals(null, mockParamSlot.captured.customHost)
         verify(exactly = 1) { PingOneSignals.setInitCallback(any()) }
-        PIProtect.initSDK(context)
+        PIProtect.start(context)
         verify(exactly = 1) { PingOneSignals.setInitCallback(any()) }
     }
 
@@ -82,7 +88,7 @@ class PIProtectTest {
         every { PingOneSignals.init(context, capture(mockParamSlot)) }.returns(Unit)
         assertNull(PIProtect.protectParamState)
         val init = PIInitParams(envId = "jey", isConsoleLogEnabled = true, deviceAttributesToIgnore = listOf("value"))
-        PIProtect.initSDK(context, init)
+        PIProtect.start(context, init)
         assertNotNull(PIProtect.protectParamState)
         assertEquals("jey", mockParamSlot.captured.envId)
         assertEquals(true, mockParamSlot.captured.isConsoleLogEnabled)
@@ -91,7 +97,7 @@ class PIProtectTest {
         assertEquals(listOf("value"), mockParamSlot.captured.deviceAttributesToIgnore)
         assertEquals(null, mockParamSlot.captured.customHost)
         verify(exactly = 1) { PingOneSignals.setInitCallback(any()) }
-        PIProtect.initSDK(context)
+        PIProtect.start(context)
         verify(exactly = 1) { PingOneSignals.setInitCallback(any()) }
     }
 
@@ -106,7 +112,7 @@ class PIProtectTest {
         every { PingOneSignals.init(context, capture(mockParamSlot)) }.returns(Unit)
         assertNull(PIProtect.protectParamState)
         try{
-            PIProtect.initSDK(context)
+            PIProtect.start(context)
             fail()
         }
         catch (e: Exception) {

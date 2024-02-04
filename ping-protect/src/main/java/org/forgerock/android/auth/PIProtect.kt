@@ -15,12 +15,25 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/**
+ * PIProtect is for initializing and interacting with Ping Protect SDK
+ */
 class PIProtect {
     companion object {
 
+        const val TAG: String = "PIProtect"
+
+        // Save the init state of the protect.
         internal var protectParamState: POInitParams? = null
+
+        /**
+         * Initialize Ping Protect SDK
+         *
+         * @param context The Application Context
+         * @param parameter The `PIInitParams` containing parameters for the init
+         */
         @JvmStatic
-        suspend fun initSDK(
+        suspend fun start(
             context: Context,
             parameter: PIInitParams? = null,
         ) {
@@ -28,11 +41,11 @@ class PIProtect {
                 protectParamState?.let {
                     init.resume(Unit)
                 } ?: run {
-                   val outputParam = getInitParam(parameter)
+                    val outputParam = getInitParam(parameter)
                     PingOneSignals.setInitCallback(
                         object : InitCallback {
                             override fun onInitialized() {
-                                Logger.info("PingOneSignals", "PingOneSignals Initialized")
+                                Logger.info(TAG, "PingOneSignals Initialized")
                                 protectParamState = outputParam
                                 init.resume(Unit)
                             }
@@ -41,7 +54,7 @@ class PIProtect {
                                 p1: String,
                                 p2: String,
                             ) {
-                                Logger.error("PingOneSignals", "PingOneSignals failed $p0 $p1 $p2")
+                                Logger.error(TAG, "PingOneSignals failed $p0 $p1 $p2")
                                 protectParamState = null
                                 init.resumeWithException(PingOneProtectInitException("PingOneSignals failed $p0 $p1 $p2"))
                             }
@@ -66,6 +79,11 @@ class PIProtect {
             } ?: POInitParams()
             return init
         }
+
+        /**
+         * Get the signal data from PingSDK
+         *
+         */
         internal suspend fun getData(): String {
             return suspendCancellableCoroutine {
                 PingOneSignals.getData(
@@ -97,6 +115,10 @@ class PIProtect {
         }
     }
 }
+
+/**
+ * Parameters for starting PIProtect SDK
+ */
 data class PIInitParams(
     val envId: String? = null,
     val deviceAttributesToIgnore: List<String>? = null,

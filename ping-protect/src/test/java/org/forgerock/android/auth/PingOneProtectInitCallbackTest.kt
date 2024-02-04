@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -63,7 +63,7 @@ class PingOneProtectInitCallbackTest {
         mockkObject(PIProtect)
         val mockSlot = slot<PIInitParams>()
         coEvery {
-            PIProtect.initSDK(context, capture(mockSlot))
+            PIProtect.start(context, capture(mockSlot))
         } returns(Unit)
         coEvery {
             PIProtect.resumeBehavioralData()
@@ -77,7 +77,7 @@ class PingOneProtectInitCallbackTest {
             val raw = JSONObject(json)
             val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
             pingOneInitCallback.start(context)
-            coVerify { PIProtect.initSDK(context, any()) }
+            coVerify { PIProtect.start(context, any()) }
             assertEquals(mockSlot.captured.envId, "02fb4743-189a-4bc7-9d6c-a919edfe6447")
             assertEquals(mockSlot.captured.isBehavioralDataCollection, true)
             assertEquals(mockSlot.captured.isConsoleLogEnabled, false)
@@ -96,7 +96,7 @@ class PingOneProtectInitCallbackTest {
         mockkObject(PIProtect)
         val mockSlot = slot<PIInitParams>()
         coEvery {
-            PIProtect.initSDK(context, capture(mockSlot))
+            PIProtect.start(context, capture(mockSlot))
         } returns(Unit)
         coEvery {
             PIProtect.resumeBehavioralData()
@@ -110,7 +110,7 @@ class PingOneProtectInitCallbackTest {
             val raw = JSONObject(json)
             val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
             pingOneInitCallback.start(context)
-            coVerify { PIProtect.initSDK(context, any()) }
+            coVerify { PIProtect.start(context, any()) }
             assertEquals(mockSlot.captured.envId, "02fb4743-189a-4bc7-9d6c-a919edfe6447")
             assertEquals(mockSlot.captured.isBehavioralDataCollection, false)
             assertEquals(mockSlot.captured.isConsoleLogEnabled, false)
@@ -129,7 +129,7 @@ class PingOneProtectInitCallbackTest {
         mockkObject(PIProtect)
         val mockSlot = slot<PIInitParams>()
         coEvery {
-            PIProtect.initSDK(context, capture(mockSlot))
+            PIProtect.start(context, capture(mockSlot))
         } throws(PingOneProtectInitException("init failed"))
         coEvery {
             PIProtect.resumeBehavioralData()
@@ -145,7 +145,7 @@ class PingOneProtectInitCallbackTest {
             pingOneInitCallback.start(context)
             fail()
         } catch (e: Exception) {
-            coVerify(exactly = 1) { PIProtect.initSDK(context, any()) }
+            coVerify(exactly = 1) { PIProtect.start(context, any()) }
             coVerify(exactly = 0) { PIProtect.resumeBehavioralData() }
             coVerify(exactly = 0) { PIProtect.pauseBehavioralData() }
             assertTrue(e is PingOneProtectInitException)

@@ -1,6 +1,13 @@
+/*
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
+ *
+ *  This software may be modified and distributed under the terms
+ *  of the MIT license. See the LICENSE file for details.
+ */
+
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
@@ -37,18 +44,19 @@ android {
 
 dependencies {
     api(project(":forgerock-auth"))
-    implementation("com.pingidentity.signals:android-sdk:5.1.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
+    implementation(libs.com.pingidentity.signals)
+    implementation(libs.org.jetbrains.kotlinx)
 
-    testImplementation("org.robolectric:robolectric:4.9.2")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.test.ext:junit:1.1.5")
-    testImplementation("androidx.test:runner:1.5.2")
+    testImplementation(libs.org.robolectric.robolectric)
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.runner)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.espresso.core)
 
     //Mockk
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation(libs.io.mockk)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

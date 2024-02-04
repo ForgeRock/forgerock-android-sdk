@@ -79,7 +79,7 @@ open class PingOneProtectInitCallback : AbstractCallback {
 
     /**
      * Input the Client Error to the server
-     * @param value DeviceBind ErrorType .
+     * @param value Protect ErrorType .
      */
     fun setClientError(value: String) {
         super.setValue(value, 0)
@@ -101,7 +101,7 @@ open class PingOneProtectInitCallback : AbstractCallback {
                     deviceAttributesToIgnore = deviceAttributesToIgnore,
                     customHost = customHost,
                 )
-            PIProtect.initSDK(context, init)
+            PIProtect.start(context, init)
             if(behavioralDataCollection == true) {
                 PIProtect.resumeBehavioralData()
             } else {
@@ -114,4 +114,10 @@ open class PingOneProtectInitCallback : AbstractCallback {
         }
     }
 }
+
+/**
+ * Exception to Init PingOneProtect.
+ *
+ * @param message The Message
+ */
 class PingOneProtectInitException(message: String?) : Exception(message)

@@ -14,10 +14,11 @@ import androidx.annotation.MainThread
 import org.forgerock.android.auth.callback.CallbackFactory
 
 /**
- * Content Provider to register Activity Lifecycle Callbacks and keep track of the last active activity.
+ * Content Provider to register Activity Lifecycle Callbacks .
  */
-class PingOneProvider : ContentProvider() {
+internal class PingOneProvider : ContentProvider() {
 
+    internal var factory: CallbackFactory = CallbackFactory.getInstance()
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         throw UnsupportedOperationException("Not yet implemented")
     }
@@ -32,8 +33,8 @@ class PingOneProvider : ContentProvider() {
 
     @MainThread
     override fun onCreate(): Boolean {
-        CallbackFactory.getInstance().register(PingOneProtectInitCallback::class.java)
-        CallbackFactory.getInstance().register(PingOneProtectEvaluationCallback::class.java)
+        factory.register(PingOneProtectInitCallback::class.java)
+        factory.register(PingOneProtectEvaluationCallback::class.java)
         return false
     }
 

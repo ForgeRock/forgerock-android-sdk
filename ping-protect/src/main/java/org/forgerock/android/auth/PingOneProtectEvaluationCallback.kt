@@ -9,13 +9,12 @@ package org.forgerock.android.auth
 import android.content.Context
 import androidx.annotation.Keep
 import org.forgerock.android.auth.callback.AbstractCallback
-import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.json.JSONObject
 
 private val TAG = PingOneProtectEvaluationCallback::class.java.simpleName
 
 /**
- * Callback to collect the behavior using protect
+ * Callback to evaluate Ping One Protect
  */
 open class PingOneProtectEvaluationCallback : AbstractCallback {
 
@@ -24,6 +23,9 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
 
     @Keep
     constructor() : super()
+    /**
+     * The pauseBehavioralData received from server
+     */
     var pauseBehavioralData: Boolean? = null
         private set
 
@@ -53,9 +55,9 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
     }
 
     /**
-     * Get the signal. Calling the [getData] function.
+     * Get the signal by Calling the [getData] function.
      *
-     * @param context  The Application Context
+     * @param context The Application Context
      */
     open suspend fun getData(context: Context) {
         try {
@@ -72,4 +74,10 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
         }
     }
 }
+
+/**
+ * Exception to capture PingOneProtect Signal.
+ *
+ * @param message The Message
+ */
 class PingOneProtectEvaluationException(message: String?) : Exception(message)
