@@ -31,7 +31,7 @@ public abstract class BaseDeviceBindingTest {
     protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final static String AM_URL = "https://openam-spetrov.forgeblocks.com/am";
+    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
     protected final static String REALM = "alpha";
     protected final static String OAUTH_CLIENT = "AndroidTest";
     protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
