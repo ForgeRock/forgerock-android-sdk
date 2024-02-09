@@ -1,6 +1,6 @@
 ## [4.3.1]
 #### Fixed
-- Fixed and issue where the SDK was crashing during device binding on Android 9 devices [SDKS-2948]
+- Fixed an issue where the SDK was crashing during device binding on Android 9 devices [SDKS-2948]
 
 ## [4.3.0]
 #### Added
