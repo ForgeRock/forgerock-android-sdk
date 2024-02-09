@@ -1,9 +1,12 @@
+## [4.3.1]
+#### Fixed
+- Fixed and issue where the SDK was crashing during device binding on Android 9 devices [SDKS-2948]
+
 ## [4.3.0]
 #### Added
 - Added the ability to customize cookie headers in outgoing requests from the SDK [SDKS-2780]
 - Added the ability to insert custom claims when performing device signing verification [SDKS-2787]
 - Added client-side support for the `AppIntegrity` callback [SDKS-2631]
-
 
 #### Fixed
 - The SDK now uses `auth-per-use` keys for Device Binding [SDKS-2797]
