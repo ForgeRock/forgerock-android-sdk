@@ -32,11 +32,11 @@ public class TextInputCallbackFragment extends CallbackFragment<TextInputCallbac
         final View view = inflater.inflate(R.layout.fragment_text_input_callback, container, false);
 
         EditText text = view.findViewById(R.id.text);
-        if (callback.getInputValue() != null) {
-            text.setText(callback.getInputValue().toString());
+        if (callback.getDefaultText() != null) {
+            text.setText(callback.getDefaultText().toString());
         }
         TextInputLayout textInputLayout = view.findViewById(R.id.textInputLayout);
-        textInputLayout.setHint(callback.getDefaultText());
+        textInputLayout.setHint(callback.getPrompt());
         text.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
