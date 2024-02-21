@@ -35,6 +35,7 @@ import com.example.app.callback.PingOneProtectEvaluationCallback
 import com.example.app.callback.PingOneProtectInitCallback
 import com.example.app.callback.PollingWaitCallback
 import com.example.app.callback.SelectIdPCallback
+import com.example.app.callback.TextInputCallback
 import com.example.app.callback.TextOutputCallback
 import com.example.app.callback.WebAuthnAuthenticationCallback
 import com.example.app.callback.WebAuthnRegistrationCallback
@@ -53,6 +54,7 @@ import com.example.app.callback.ReCaptchaCallback
 import org.forgerock.android.auth.PingOneProtectEvaluationCallback
 import org.forgerock.android.auth.PingOneProtectInitCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
+import org.forgerock.android.auth.callback.TextInputCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
@@ -164,6 +166,9 @@ fun Journey(state: JourneyState,
                         PingOneProtectInitCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
+
+                    is TextInputCallback -> TextInputCallback(it)
+
 
                     else -> {
                         //Unsupported

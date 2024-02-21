@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth.callback
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -16,7 +18,8 @@ import com.nimbusds.jwt.SignedJWT
 import org.json.JSONObject
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 class CustomDeviceSigningVerifierCallback : DeviceSigningVerifierCallback {
     constructor() : super()
@@ -41,6 +44,9 @@ class CustomDeviceSigningVerifierCallback : DeviceSigningVerifierCallback {
         val header =
             JWSHeader.Builder(JWSAlgorithm.RS512).type(JOSEObjectType.JWT).keyID(kid).build()
         val payload = JWTClaimsSet.Builder().subject(sub).claim("challenge", challenge)
+            .issuer(ApplicationProvider.getApplicationContext<Context>().packageName)
+            .issueTime(Calendar.getInstance().time)
+            .notBeforeTime(Calendar.getInstance().time)
             .expirationTime(getExpiration(null)).build()
         val signedJWT = SignedJWT(header, payload)
         signedJWT.sign(RSASSASigner(rsaKey.private as RSAPrivateKey))

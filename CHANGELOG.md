@@ -1,29 +1,18 @@
-## [4.X.X]
-#### Added
-- Allow developer to customize the cookie header to the outgoing request from the SDK [SDKS-2780]
-```kotlin
-RequestInterceptorRegistry.getInstance()
-            .register(object : CustomCookieInterceptor {
-                override fun intercept(cookies: List<Cookie>): List<Cookie> {
-                    val updated = mutableListOf<Cookie>()
-                    updated.add(Cookie.Builder().domain("localhost").name("test").value("testValue")
-                        .build())
-                    updated.addAll(cookies)
-                    return updated
-                }
-            })
-
-private interface CustomCookieInterceptor : FRRequestInterceptor<Action>,
-    CookieInterceptor {
-    override fun intercept(request: Request, tag: Action): Request {
-        return request
-    }
-} 
-```
+## [4.3.1]
 #### Fixed
-- Use auth-per-use Key for Device Binding [SDKS-2792]
-- Handle WebAuthn cancellation inconsistency [SDKS-2819]
-- Making `forgerock_url`, `forgerock_realm`, and `forgerock_cookie_name` params mandatory for dynamically configuring the SDK [SDKS-2782]
+- Fixed an issue where the SDK was crashing during device binding on Android 9 devices [SDKS-2948]
+
+## [4.3.0]
+#### Added
+- Added the ability to customize cookie headers in outgoing requests from the SDK [SDKS-2780]
+- Added the ability to insert custom claims when performing device signing verification [SDKS-2787]
+- Added client-side support for the `AppIntegrity` callback [SDKS-2631]
+
+#### Fixed
+- The SDK now uses `auth-per-use` keys for Device Binding [SDKS-2797]
+- Improved handling of WebAuthn cancellations [SDKS-2819]
+- Made `forgerock_url`, `forgerock_realm`, and `forgerock_cookie_name` params mandatory when dynamically configuring the SDK [SDKS-2782]
+- Addressed `woodstox-core:6.2.4` library security vulnerability (CVE-2022-40152) [SDKS-2751]
 
 ## [4.2.0]
 #### Added

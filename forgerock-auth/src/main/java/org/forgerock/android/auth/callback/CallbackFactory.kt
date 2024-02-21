@@ -41,6 +41,7 @@ class CallbackFactory private constructor() {
         register(DeviceBindingCallback::class.java)
         register(DeviceSigningVerifierCallback::class.java)
         register(AppIntegrityCallback::class.java)
+        register(TextInputCallback::class.java)
     }
 
     /**
