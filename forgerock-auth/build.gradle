@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -67,6 +67,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     kotlinOptions {
@@ -93,7 +94,6 @@ dependencies {
 
     def coroutine_version = '1.7.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutine_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
@@ -177,7 +177,4 @@ dependencies {
     delombok "org.projectlombok:lombok:1.18.28"
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-}
-repositories {
-    mavenCentral()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -7,11 +7,14 @@
 
 package com.example.app.setting
 
+import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.forgerock.android.auth.Action
 import org.forgerock.android.auth.FRRequestInterceptor
 import org.forgerock.android.auth.PolicyAdvice
@@ -35,10 +41,17 @@ private const val BINDING = "enableBiometric"
 fun SettingRoute(viewModel: SettingViewModel) {
 
     val checked by viewModel.settingState.collectAsState()
+    val context = LocalContext.current
 
     when (checked.transitionState) {
+
         SettingTransitionState.Disabled -> {
-            BiometricSetting(isChecked = false, viewModel = viewModel)
+            Column(modifier = Modifier
+                .fillMaxWidth()
+            ) {
+                BiometricSetting(isChecked = false, viewModel = viewModel)
+                PingProtectSetting(viewModel = viewModel, context)
+            }
         }
 
         SettingTransitionState.EnableBinding -> {
@@ -70,7 +83,12 @@ fun SettingRoute(viewModel: SettingViewModel) {
         }
 
         SettingTransitionState.Enabled -> {
-            BiometricSetting(isChecked = true, viewModel = viewModel)
+            Column(modifier = Modifier
+                .fillMaxWidth()
+            ) {
+                BiometricSetting(isChecked = true, viewModel = viewModel)
+                PingProtectSetting(viewModel = viewModel, context)
+            }
         }
 
         else -> {}
@@ -95,5 +113,29 @@ fun BiometricSetting(isChecked: Boolean, viewModel: SettingViewModel) {
                 }
             }
         )
+    }
+}
+
+@Composable
+fun PingProtectSetting(viewModel: SettingViewModel, context: Context) {
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()) {
+
+        Text(text = "PingProtect Init")
+
+        Spacer(modifier = Modifier.weight(1f, true))
+
+        Button(
+            onClick = {
+                val scope = CoroutineScope(Dispatchers.Main)
+                scope.launch {
+                    viewModel.initViewModel(context)
+                }
+
+            }) {
+            Text(text = "Enable")
+        }
     }
 }

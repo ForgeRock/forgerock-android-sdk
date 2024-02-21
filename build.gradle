@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,23 +9,14 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.8.0'
+        kotlin_version = '1.9.10'
         customCSSFile = projectDir.toString() + "/dokka/fr-backstage-styles.css"
         customLogoFile = projectDir.toString() + "/dokka/logo-icon.svg"
         customTemplatesFolder = file(projectDir.toString() + "/dokka/templates")
     }
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
         classpath 'com.google.gms:google-services:4.3.15'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -35,12 +26,14 @@ plugins {
     id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
     id('org.sonatype.gradle.plugins.scan') version '2.4.0'
     id("org.jetbrains.dokka") version "1.9.10"
+    id 'com.android.application' version '8.2.2' apply false
+    id 'com.android.library' version '8.2.2' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
 }
 
 
 allprojects {
     configurations.all {
-
         resolutionStrategy {
             // Due to vulnerability [CVE-2022-40152] from dokka project.
             force 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5'
@@ -64,11 +57,6 @@ allprojects {
             force 'org.bouncycastle:bcprov-jdk15on:1.68'
         }
     }
-    repositories {
-        google()
-        mavenCentral()
-    }
-
 }
 
 subprojects {

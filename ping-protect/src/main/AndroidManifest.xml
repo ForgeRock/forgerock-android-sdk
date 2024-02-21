@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2024 ForgeRock. All rights reserved.
+  ~
+  ~  This software may be modified and distributed under the terms
+  ~  of the MIT license. See the LICENSE file for details.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider
+            android:name="org.forgerock.android.auth.PingOneProvider"
+            android:enabled="true"
+            android:exported="false"
+            android:authorities="${applicationId}.PingOneProvider" />
+    </application>
+</manifest>
