@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    api(project(":forgerock-authenticator"))
     api(project(":forgerock-auth"))
     api(project(":ping-protect"))
     implementation(libs.appcompat)
