@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -29,7 +29,6 @@ import org.forgerock.android.auth.PolicyAdvice;
 import kotlin.Result;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
-import lombok.Setter;
 
 /**
  * Reference implementation of handing Advice with {@link DialogFragment}
@@ -41,7 +40,10 @@ public class AdviceDialogFragment extends DialogFragment implements AuthHandler 
     private FRViewModel<FRSession> viewModel;
     private boolean isCancel = true;
 
-    @Setter
+    public void setListener(Continuation<? super Unit> listener) {
+        this.listener = listener;
+    }
+
     private Continuation<? super Unit> listener;
     private PolicyAdvice advice;
 
