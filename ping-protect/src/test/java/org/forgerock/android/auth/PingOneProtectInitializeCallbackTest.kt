@@ -24,7 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class PingOneProtectInitCallbackTest {
+class PingOneProtectInitializeCallbackTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -36,7 +36,7 @@ class PingOneProtectInitCallbackTest {
     fun basicTest() {
         val json = "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":true},{\"name\":\"deviceAttributesToIgnore\",\"value\":[]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":true},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val raw = JSONObject(json)
-        val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
+        val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
         assertEquals("02fb4743-189a-4bc7-9d6c-a919edfe6447",
             pingOneInitCallback.envId)
         assertEquals(true,
@@ -49,7 +49,7 @@ class PingOneProtectInitCallbackTest {
     fun basicTestDifferentParam() {
         val json = "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":false},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val raw = JSONObject(json)
-        val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
+        val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
         assertEquals("02fb4743-189a-4bc7-9d6c-a919edfe6447",
             pingOneInitCallback.envId)
         assertEquals(false,
@@ -75,7 +75,7 @@ class PingOneProtectInitCallbackTest {
             val json =
                 "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[\"value1\", \"value2\"]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":true},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
             val raw = JSONObject(json)
-            val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
+            val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
             pingOneInitCallback.start(context)
             coVerify { PIProtect.start(context, any()) }
             assertEquals(mockSlot.captured.envId, "02fb4743-189a-4bc7-9d6c-a919edfe6447")
@@ -108,7 +108,7 @@ class PingOneProtectInitCallbackTest {
             val json =
                 "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[\"value1\", \"value2\"]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":false},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
             val raw = JSONObject(json)
-            val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
+            val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
             pingOneInitCallback.start(context)
             coVerify { PIProtect.start(context, any()) }
             assertEquals(mockSlot.captured.envId, "02fb4743-189a-4bc7-9d6c-a919edfe6447")
@@ -141,7 +141,7 @@ class PingOneProtectInitCallbackTest {
             val json =
                 "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[\"value1\", \"value2\"]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":false},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
             val raw = JSONObject(json)
-            val pingOneInitCallback = PingOneProtectInitCallback(raw, 0)
+            val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
             pingOneInitCallback.start(context)
             fail()
         } catch (e: Exception) {

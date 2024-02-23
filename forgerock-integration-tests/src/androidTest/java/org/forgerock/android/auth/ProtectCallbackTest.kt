@@ -42,8 +42,8 @@ class ProtectCallbackTest {
         ) {
             val nodeListener: NodeListener<FRSession?> = this
             override fun onCallbackReceived(node: Node) {
-                if (node.getCallback<PingOneProtectInitCallback>(PingOneProtectInitCallback::class.java) != null) {
-                    val callback: PingOneProtectInitCallback = node.getCallback<PingOneProtectInitCallback>(PingOneProtectInitCallback::class.java)
+                if (node.getCallback<PingOneProtectInitializeCallback>(PingOneProtectInitializeCallback::class.java) != null) {
+                    val callback: PingOneProtectInitializeCallback = node.getCallback<PingOneProtectInitializeCallback>(PingOneProtectInitializeCallback::class.java)
                     val scope = CoroutineScope(Dispatchers.Default)
                     scope.launch {
                         try {

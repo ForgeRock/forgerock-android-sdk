@@ -33,7 +33,7 @@ internal class PingOneProvider : ContentProvider() {
 
     @MainThread
     override fun onCreate(): Boolean {
-        factory.register(PingOneProtectInitCallback::class.java)
+        factory.register(PingOneProtectInitializeCallback::class.java)
         factory.register(PingOneProtectEvaluationCallback::class.java)
         return false
     }

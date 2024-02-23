@@ -52,7 +52,7 @@ import org.forgerock.android.auth.callback.PollingWaitCallback
 import org.forgerock.android.auth.callback.ReCaptchaCallback
 import com.example.app.callback.ReCaptchaCallback
 import org.forgerock.android.auth.PingOneProtectEvaluationCallback
-import org.forgerock.android.auth.PingOneProtectInitCallback
+import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.TextInputCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
@@ -162,7 +162,7 @@ fun Journey(state: JourneyState,
                         showNext = false
                     }
 
-                    is PingOneProtectInitCallback -> {
+                    is PingOneProtectInitializeCallback -> {
                         PingOneProtectInitCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }

@@ -24,12 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.PingOneProtectInitCallback
+import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.forgerock.android.auth.PingOneProtectInitException
 
 @Composable
 fun PingOneProtectInitCallback(
-    callback: PingOneProtectInitCallback,
+    callback: PingOneProtectInitializeCallback,
     onCompleted: () -> Unit,
 ) {
     val currentOnCompleted by rememberUpdatedState(onCompleted)
