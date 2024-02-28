@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,13 +11,12 @@ import androidx.test.core.app.ApplicationProvider
 import org.forgerock.android.auth.Logger.Companion.set
 import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.rules.Timeout
 import java.util.concurrent.TimeUnit
 
 abstract class BasePingOneProtectTest {
-    var context: Context = ApplicationProvider.getApplicationContext()
+    val context: Context = ApplicationProvider.getApplicationContext()
     private val AM_URL = "https://openam-protect2.forgeblocks.com/am"
     private val REALM = "alpha"
     private val COOKIE_NAME = "c1c805de4c9b333"
@@ -52,8 +51,8 @@ abstract class BasePingOneProtectTest {
 
     @After
     fun logoutSession() {
-        if (FRSession.getCurrentSession() != null) {
-            FRSession.getCurrentSession().logout()
+        FRSession.getCurrentSession()?.let {
+            it.logout()
         }
     }
 }
