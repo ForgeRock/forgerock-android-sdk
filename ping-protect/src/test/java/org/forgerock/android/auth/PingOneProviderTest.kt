@@ -26,7 +26,7 @@ class PingOneProviderTest {
         val testObject = PingOneProvider()
         testObject.factory = factory
         testObject.onCreate()
-        verify { factory.register(PingOneProtectInitCallback::class.java) }
+        verify { factory.register(PingOneProtectInitializeCallback::class.java) }
         verify { factory.register(PingOneProtectEvaluationCallback::class.java) }
     }
 }
