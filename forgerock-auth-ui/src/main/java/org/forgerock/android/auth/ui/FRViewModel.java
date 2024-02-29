@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,18 +18,26 @@ import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.PolicyAdvice;
 
-import lombok.Getter;
-
 /**
  * {@link ViewModel} Wrapper for {@link FRUser}
  */
 public abstract class FRViewModel<T> extends ViewModel {
 
-    @Getter
     private MutableLiveData<SingleLiveEvent<Node>> nodeLiveData = new MutableLiveData<>();
-    @Getter
     private MutableLiveData<T> resultLiveData = new MutableLiveData<>();
-    @Getter
+
+    public MutableLiveData<SingleLiveEvent<Node>> getNodeLiveData() {
+        return nodeLiveData;
+    }
+
+    public MutableLiveData<T> getResultLiveData() {
+        return resultLiveData;
+    }
+
+    public MutableLiveData<SingleLiveEvent<Exception>> getExceptionLiveData() {
+        return exceptionLiveData;
+    }
+
     private MutableLiveData<SingleLiveEvent<Exception>> exceptionLiveData = new MutableLiveData<>();
 
     private NodeListener nodeListener;

@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    api(project(":forgerock-auth"))
+    implementation(project(":forgerock-auth"))
     implementation(libs.com.pingidentity.signals)
     implementation(libs.org.jetbrains.kotlinx)
 
