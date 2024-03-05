@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -118,18 +118,20 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * Sign the challenge with bounded device keys.
      *
      * @param context  The Application Context
-     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
      * @param customClaims A map of custom claims to be added to the jws payload
+     * @param prompt The Prompt to modify the title, subtitle, description
+     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
     open suspend fun sign(context: Context,
                           customClaims: Map<String, Any> = emptyMap(),
+                          prompt: Prompt? = null,
                           userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                           deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
         execute(context,
             userKeySelector = userKeySelector,
             deviceAuthenticator = deviceAuthenticator,
-            customClaims = customClaims)
+            customClaims = customClaims, prompt = prompt)
     }
 
 
@@ -137,21 +139,23 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * Sign the challenge with bounded device keys.
      *
      * @param context  The Application Context
-     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
      * @param customClaims A map of custom claims to be added to the jws payload
+     * @param userKeySelector Collect user key, if not provided [DefaultUserKeySelector] will be used
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
+     * @param prompt The Prompt to modify the title, subtitle, description
      */
     @JvmOverloads
     open fun sign(context: Context,
                   customClaims: Map<String, Any> = emptyMap(),
                   userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                   deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
-                  listener: FRListener<Void>) {
+                  listener: FRListener<Void?>,
+                  prompt: Prompt? = null) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                sign(context, customClaims, userKeySelector, deviceAuthenticator)
+                sign(context, customClaims, prompt, userKeySelector, deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -166,13 +170,15 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
      * @param userKey User Information
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [getDeviceAuthenticator] will be used if not provided
      * @param customClaims A map of custom claims to be added to the jws payload
+     * @param prompt The Prompt to modify the title, subtitle, description
      */
     protected open suspend fun authenticate(context: Context,
                                             userKey: UserKey,
                                             deviceAuthenticator: DeviceAuthenticator,
-                                            customClaims: Map<String, Any> = emptyMap()) {
+                                            customClaims: Map<String, Any> = emptyMap(),
+                                            prompt: Prompt? = null) {
 
-        deviceAuthenticator.initialize(userKey.userId, Prompt(title, subtitle, description))
+        deviceAuthenticator.initialize(userKey.userId, prompt?: Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
             handleException(DeviceBindingException(Unsupported()))
@@ -206,7 +212,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                                  userKeyService: UserKeyService = UserDeviceKeyService(context),
                                  userKeySelector: UserKeySelector = DefaultUserKeySelector(),
                                  deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator,
-                                 customClaims: Map<String, Any> = emptyMap()) {
+                                 customClaims: Map<String, Any> = emptyMap(),
+                                 prompt: Prompt? = null) {
 
         try {
             withTimeout(getDuration(timeout)) {
@@ -215,7 +222,8 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                     is SingleKeyFound -> authenticate(context,
                         status.key,
                         deviceAuthenticator(status.key.authType),
-                        customClaims)
+                        customClaims,
+                        prompt)
                     else -> {
                         val userKey =
                             userKeySelector.selectUserKey(UserKeys(userKeyService.getAll()))

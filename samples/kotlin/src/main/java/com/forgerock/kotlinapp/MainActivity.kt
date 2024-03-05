@@ -187,8 +187,8 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                         runOnUiThread {
                             val deviceBindingCallback =
                                 node.getCallback(DeviceBindingCallback::class.java)
-                            deviceBindingCallback.bind(activity, listener =  object : FRListener<Void> {
-                                override fun onSuccess(result: Void) {
+                            deviceBindingCallback.bind(activity, listener =  object : FRListener<Void?> {
+                                override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
                                 }
 
@@ -202,8 +202,8 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                         runOnUiThread {
                             val deviceBindingCallback =
                                 node.getCallback(DeviceSigningVerifierCallback::class.java)
-                            deviceBindingCallback.sign(activity, listener = object : FRListener<Void> {
-                                override fun onSuccess(result: Void) {
+                            deviceBindingCallback.sign(activity, listener = object : FRListener<Void?> {
+                                override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
                                 }
 
