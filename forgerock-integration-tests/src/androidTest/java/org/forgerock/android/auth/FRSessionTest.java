@@ -7,9 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.android.auth.Action.AUTHENTICATE;
-
 import android.net.Uri;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -20,6 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.android.auth.Action.AUTHENTICATE;
 
 @RunWith(AndroidJUnit4.class)
 public class FRSessionTest extends AndroidBaseTest {

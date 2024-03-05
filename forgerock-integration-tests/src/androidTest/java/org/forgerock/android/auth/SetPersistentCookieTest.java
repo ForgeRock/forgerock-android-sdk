@@ -7,12 +7,12 @@
 
 package org.forgerock.android.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.Cookie;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SetPersistentCookieTest extends TreeTest {
 

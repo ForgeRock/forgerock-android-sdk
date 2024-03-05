@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -69,7 +69,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                                 assertThat(x5c).isNull(); // When Android Key Attestation property is set to NONE in AM
 
                                 /// Assert some other properties
-                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.auth.test");
+                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.integration.test");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("platform")).isEqualTo("android");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("android-version")).isEqualTo(Long.valueOf(Build.VERSION.SDK_INT));
 
@@ -128,7 +128,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                                 assertThat(x5c).isNotNull(); // When Android Key Attestation is set to DEFAULT in AM
 
                                 /// Assert some other properties
-                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.auth.test");
+                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.integration.test");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("platform")).isEqualTo("android");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("android-version")).isEqualTo(Long.valueOf(Build.VERSION.SDK_INT));
                             } catch (ParseException e) {
@@ -189,7 +189,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                                 assertThat(x5c).isNotNull(); // When Android Key Attestation is set to CUSTOM in AM
 
                                 /// Assert some other properties
-                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.auth.test");
+                                assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.integration.test");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("platform")).isEqualTo("android");
                                 assertThat(jwt.getJWTClaimsSet().getClaim("android-version")).isEqualTo(Long.valueOf(Build.VERSION.SDK_INT));
                             } catch (ParseException e) {
@@ -325,7 +325,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
                                         assertThat(x5c).isNull(); // When Android Key Attestation is set to NONE in AM
 
                                         /// Assert some other properties
-                                        assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.auth.test");
+                                        assertThat(jwt.getJWTClaimsSet().getClaim("iss")).isEqualTo("org.forgerock.android.integration.test");
                                         assertThat(jwt.getJWTClaimsSet().getClaim("platform")).isEqualTo("android");
                                         assertThat(jwt.getJWTClaimsSet().getClaim("android-version")).isEqualTo(Long.valueOf(Build.VERSION.SDK_INT));
 

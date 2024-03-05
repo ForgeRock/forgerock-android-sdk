@@ -32,7 +32,7 @@ import com.example.app.callback.IdPCallback
 import com.example.app.callback.NameCallback
 import com.example.app.callback.PasswordCallback
 import com.example.app.callback.PingOneProtectEvaluationCallback
-import com.example.app.callback.PingOneProtectInitCallback
+import com.example.app.callback.PingOneProtectInitializeCallback
 import com.example.app.callback.PollingWaitCallback
 import com.example.app.callback.SelectIdPCallback
 import com.example.app.callback.TextInputCallback
@@ -163,7 +163,7 @@ fun Journey(state: JourneyState,
                     }
 
                     is PingOneProtectInitializeCallback -> {
-                        PingOneProtectInitCallback(callback = it, onCompleted = onNext)
+                        PingOneProtectInitializeCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
 

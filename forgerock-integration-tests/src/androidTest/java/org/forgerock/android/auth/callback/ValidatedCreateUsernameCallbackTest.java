@@ -7,14 +7,14 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.TreeTest;
 
 import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValidatedCreateUsernameCallbackTest extends TreeTest {
 

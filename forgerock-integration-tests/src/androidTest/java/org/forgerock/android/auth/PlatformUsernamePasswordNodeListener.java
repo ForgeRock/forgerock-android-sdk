@@ -7,13 +7,13 @@
 
 package org.forgerock.android.auth;
 
-import static org.forgerock.android.auth.AndroidBaseTest.PASSWORD;
-import static org.forgerock.android.auth.AndroidBaseTest.USERNAME;
-
 import android.content.Context;
 
 import org.forgerock.android.auth.callback.ValidatedPasswordCallback;
 import org.forgerock.android.auth.callback.ValidatedUsernameCallback;
+
+import static org.forgerock.android.auth.AndroidBaseTest.PASSWORD;
+import static org.forgerock.android.auth.AndroidBaseTest.USERNAME;
 
 public class PlatformUsernamePasswordNodeListener extends NodeListenerFuture<FRSession> {
 

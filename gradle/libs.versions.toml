@@ -41,6 +41,7 @@ powermock-module-junit4 = "2.0.9"
 powermock-api-mockito2 = "2.0.9"
 rules = "1.5.0"
 security-crypto = "1.1.0-alpha06"
+firebase-crashlytics-buildtools = "2.9.9"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
@@ -87,6 +88,7 @@ powermock-api-mockito2 = { module = "org.powermock:powermock-api-mockito2", vers
 powermock-module-junit4 = { module = "org.powermock:powermock-module-junit4", version.ref = "powermock-module-junit4" }
 projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "lombok-version" }
 rules = { module = "androidx.test:rules", version.ref = "rules" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

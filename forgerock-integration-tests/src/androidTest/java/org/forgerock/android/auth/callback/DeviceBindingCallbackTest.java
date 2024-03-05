@@ -297,6 +297,107 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
         assertThat(bindSuccess[0]).isEqualTo(1);
         assertThat(executionExceptionOccurred).isTrue();
     }
+
+    @Test
+    public void testDeviceBindingDeviceDataVariable() throws ExecutionException, InterruptedException {
+        // This test is to ensure that the Device Binding node sets DeviceBinding.DEVICE variable in shared state
+        final int[] bindSuccess = {0};
+        final int[] deviceDataVarPresentInAM = {0};
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "device-data-var") {
+            final NodeListener<FRSession> nodeListener = this;
+
+            @Override
+            public void onCallbackReceived(Node node) {
+                if (node.getCallback(DeviceBindingCallback.class) != null) {
+                    DeviceBindingCallback callback = node.getCallback(DeviceBindingCallback.class);
+
+                    callback.bind(context, new FRListener<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            node.next(context, nodeListener);
+                            bindSuccess[0]++;
+                        }
+
+                        @Override
+                        public void onException(Exception e) {
+                            Assertions.fail(e.getMessage());
+                        }
+                    });
+                    return;
+                }
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback callback = node.getCallback(TextOutputCallback.class);
+                    // Check the DeviceBinding.DEVICE variable in AM...
+                    assertThat(callback.getMessage()).isEqualTo("Device data variable exists");
+                    deviceDataVarPresentInAM[0]++;
+                    node.next(context, nodeListener);
+                    return;
+                }
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+        Assert.assertNotNull(nodeListenerFuture.get());
+        assertThat(bindSuccess[0]).isEqualTo(1);
+        assertThat(deviceDataVarPresentInAM[0]).isEqualTo(1);
+
+        // Ensure that the journey finishes with success
+        Assert.assertNotNull(FRSession.getCurrentSession());
+        Assert.assertNotNull(FRSession.getCurrentSession().getSessionToken());
+    }
+
+    /*
+     * Make sure that when user does NOT exist, the Device Binding node triggers the failure outcome (SDKS-2935)
+     */
+    @Test
+    public void testDeviceBindingUnknownUser() throws ExecutionException, InterruptedException {
+        final int[] hit = {0};
+        final int[] failureOutcome = {0};
+        NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "default")
+        {
+            @Override
+            public void onCallbackReceived(Node node)
+            {
+                if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
+                    DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
+
+                    Assertions.fail("Test failed: Received unexpected DeviceSigningVerifierCallback! (see SDKS-2169)" );
+                    return;
+                }
+                if (node.getCallback(NameCallback.class) != null) {
+                    hit[0]++;
+                    node.getCallback(NameCallback.class).setName("UNKNOWN-USER");
+                    node.next(context, this);
+                    return;
+                }
+                // Make sure that the "Failure" outcome has been triggered
+                if (node.getCallback(TextOutputCallback.class) != null) {
+                    TextOutputCallback textOutputCallback = node.getCallback(TextOutputCallback.class);
+                    assertThat(textOutputCallback.getMessage()).isEqualTo("Device Binding Failed");
+                    failureOutcome[0]++;
+
+                    node.next(context, this);
+                    return;
+                }
+
+                super.onCallbackReceived(node);
+            }
+        };
+
+        FRSession.authenticate(context, TREE, nodeListenerFuture);
+
+        // Ensure that the journey finishes with failure
+        thrown.expect(java.util.concurrent.ExecutionException.class);
+        thrown.expectMessage("ApiException{statusCode=401, error='', description='{\"code\":401,\"reason\":\"Unauthorized\",\"message\":\"Login failure\"}'}");
+
+        Assert.assertNull(nodeListenerFuture.get());
+        Assert.assertNull(FRSession.getCurrentSession());
+        Assert.assertNull(FRSession.getCurrentSession().getSessionToken());
+
+        assertThat(hit[0]).isEqualTo(1);
+        assertThat(failureOutcome[0]).isEqualTo(1);
+    }
 }
 
 

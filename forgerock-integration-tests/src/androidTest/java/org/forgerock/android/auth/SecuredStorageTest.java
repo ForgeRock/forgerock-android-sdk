@@ -7,11 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -25,6 +20,11 @@ import org.junit.runner.RunWith;
 
 import java.util.Calendar;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class SecuredStorageTest {

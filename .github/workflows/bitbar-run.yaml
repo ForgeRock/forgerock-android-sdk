@@ -40,28 +40,28 @@ jobs:
 
     steps:
       # Get the test artifacts prepared in previous step
-      - name: Get the auth-debug-androidTest.apk BitBar artifact
+      - name: Get the app-debug-androidTest.apk BitBar artifact
         uses: actions/download-artifact@v3
         with:
-          name: auth-debug-androidTest-signed.apk
+          name: app-debug-androidTest-signed.apk
 
-      - name: Get the forgerock-auth-debug-androidTest.apk BitBar artifact
+      - name: Get the forgerock-integration-tests-debug-androidTest.apk BitBar artifact
         uses: actions/download-artifact@v3
         with:
-          name: forgerock-auth-debug-androidTest-signed.apk
+          name: forgerock-integration-tests-debug-androidTest-signed.apk
 
-      - name: Unzip auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk
+      - name: Unzip app-debug-androidTest-signed.apk and forgerock-integration-tests-debug-androidTest-signed.apk
         run: |
-          unzip -o auth-debug-androidTest-signed.apk
-          unzip -o forgerock-auth-debug-androidTest-signed.apk
+          unzip -o app-debug-androidTest-signed.apk
+          unzip -o forgerock-integration-tests-debug-androidTest-signed.apk
 
-      - name: Upload auth-debug-androidTest-signed.apk to BitBar
+      - name: Upload app-debug-androidTest-signed.apk to BitBar
         run: |
-          echo "BITBAR_APP_FILE_ID=$(curl -X POST -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/files -F "file=@auth-debug-androidTest-signed.apk" | jq '.id')" >> $GITHUB_ENV
+          echo "BITBAR_APP_FILE_ID=$(curl -X POST -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/files -F "file=@app-debug-androidTest-signed.apk" | jq '.id')" >> $GITHUB_ENV
 
-      - name: Upload forgerock-auth-debug-androidTest-signed.apk to BitBar
+      - name: Upload forgerock-integration-tests-debug-androidTest-signed.apk to BitBar
         run: |
-          echo "BITBAR_TEST_FILE_ID=$(curl -X POST -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/files -F "file=@forgerock-auth-debug-androidTest-signed.apk" | jq '.id')"  >> $GITHUB_ENV
+          echo "BITBAR_TEST_FILE_ID=$(curl -X POST -u ${{ secrets.BITBAR_API_KEY }}: https://cloud.bitbar.com/api/me/files -F "file=@forgerock-integration-tests-debug-androidTest-signed.apk" | jq '.id')"  >> $GITHUB_ENV
 
       - name: Prepare BitBar run configuration file
         run: |

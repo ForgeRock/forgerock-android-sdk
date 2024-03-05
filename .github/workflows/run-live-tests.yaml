@@ -6,7 +6,7 @@ on:
         description: The AM url to run live test cases against
         type: string
         required: true
-        default: https://openam-forgerrock-sdksteanant.forgeblocks.com/am
+        default: https://openam-sdks.forgeblocks.com/am
       realm:
         description: The AM realm to use
         type: string
@@ -16,7 +16,7 @@ on:
         description: The AM session cookie name
         type: string
         required: true
-        default: iPlanetDirectoryPro
+        default: 5421aeddf91aa20
   
 jobs:
   run-tests:

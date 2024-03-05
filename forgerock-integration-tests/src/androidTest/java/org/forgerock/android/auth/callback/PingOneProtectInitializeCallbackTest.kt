@@ -4,13 +4,16 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-package org.forgerock.android.auth
+package org.forgerock.android.auth.callback
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.forgerock.android.auth.callback.TextOutputCallback
+import org.forgerock.android.auth.FRSession
+import org.forgerock.android.auth.Node
+import org.forgerock.android.auth.NodeListener
+import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert
 import org.junit.Test

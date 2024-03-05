@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,11 +7,19 @@
 
 package org.forgerock.android.auth.callback;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
+import android.os.Process;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -20,13 +28,17 @@ import androidx.test.rule.GrantPermissionRule;
 
 import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.FRListenerFuture;
+import org.forgerock.android.auth.Logger;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 @RunWith(AndroidJUnit4.class)
 public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
+    private static final String TAG = DeviceProfileCollectorCallbackAndroidTest.class.getSimpleName();
 
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
@@ -76,6 +88,7 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
     @Test
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testLocation() throws Exception {
+        Logger.set(Logger.Level.DEBUG);
 
         JSONObject raw = new JSONObject("{\n" +
                 "            \"type\": \"DeviceProfileCallback\",\n" +
@@ -109,11 +122,32 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
 
         assertTrue(content.contains("identifier"));
 
-        int backgroundLocationPermissionApproved =
-                ActivityCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        boolean locationPermissionGranted = false;
 
-        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
+
+        // If the location services are NOT enabled skip the rest of the test...
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            Logger.debug(TAG, "Location service is disabled. Skipping the rest of the test...");
+            return;
+        }
+
+        // If there are no providers enabled skip the rest of the test. Providers can be "network", "gps" or "passive"...
+        List<String> providers = locationManager.getProviders(true);
+        if(providers.isEmpty()) {
+            Logger.debug(TAG, "No location providers are available. Skipping the rest of the test...");
+            return;
+        }
+
+        // If none of the location permissions are granted then location info is omitted...
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+            locationPermissionGranted = true;
+        }
+
+        if (!isEmulator() && locationPermissionGranted) {
+            Logger.debug(TAG, "Location data should exist!");
             assertTrue(content.contains("location"));
         }
     }
@@ -121,5 +155,4 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
     private boolean isEmulator() {
         return Build.PRODUCT.matches(".*_?sdk_?.*");
     }
-
 }

@@ -40,8 +40,8 @@ public class AppIntegrityCallbackTest  {
 
     protected static Context context = ApplicationProvider.getApplicationContext();
 
-    protected final static String AM_URL = "https://localam.petrov.ca/openam";
-    protected final static String REALM = "root";
+    protected final static String AM_URL = "https://openam-integrity1.forgeblocks.com/am";
+    protected final static String REALM = "alpha";
     protected final static String OAUTH_CLIENT = "AndroidTest";
     protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
     protected final static String SCOPE = "openid profile email address phone";

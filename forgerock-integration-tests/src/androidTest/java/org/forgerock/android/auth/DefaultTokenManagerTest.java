@@ -7,14 +7,9 @@
 
 package org.forgerock.android.auth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import android.content.Context;
-
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -24,6 +19,8 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.security.KeyStore;
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class DefaultTokenManagerTest extends AndroidBaseTest {

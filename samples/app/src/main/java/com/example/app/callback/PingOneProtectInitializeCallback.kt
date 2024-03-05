@@ -28,7 +28,7 @@ import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.forgerock.android.auth.PingOneProtectInitException
 
 @Composable
-fun PingOneProtectInitCallback(
+fun PingOneProtectInitializeCallback(
     callback: PingOneProtectInitializeCallback,
     onCompleted: () -> Unit,
 ) {

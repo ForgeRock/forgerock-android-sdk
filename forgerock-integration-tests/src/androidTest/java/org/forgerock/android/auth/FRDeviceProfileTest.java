@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,6 +13,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
@@ -20,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
+import org.forgerock.android.auth.callback.DeviceProfileCollectorCallbackAndroidTest;
 import org.forgerock.android.auth.collector.BluetoothCollector;
 import org.forgerock.android.auth.collector.DeviceCollector;
 import org.forgerock.android.auth.collector.FRDeviceCollector;
@@ -31,10 +34,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
 public class FRDeviceProfileTest extends AndroidBaseTest {
+    private static final String TAG = FRDeviceProfileTest.class.getSimpleName();
 
     @Rule
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
@@ -51,6 +56,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
     @Test
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.R)
     public void testDeviceProfile() throws JSONException, ExecutionException, InterruptedException {
+        Logger.set(Logger.Level.DEBUG);
 
         FRListenerFuture<JSONObject> future = new FRListenerFuture<>();
         FRDevice.getInstance().getProfile(future);
@@ -98,13 +104,34 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
 
         // Location may not be captured using emulator
         // or if ACCESS_BACKGROUND_LOCATION permission is not granted
-        int backgroundLocationPermissionApproved =
-                ActivityCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        boolean locationPermissionGranted = false;
 
-        if (!isEmulator() && backgroundLocationPermissionApproved >= 0) {
-            result.getJSONObject("location").getDouble("latitude");
-            result.getJSONObject("location").getDouble("longitude");
+        // If the location services are NOT enabled skip the rest of the test...
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            Logger.debug(TAG, "Location service is disabled. Skipping the rest of the test...");
+            return;
+        }
+
+        // If there are no providers enabled skip the rest of the test. Providers can be "network", "gps" or "passive"...
+        List<String> providers = locationManager.getProviders(true);
+        if(providers.isEmpty()) {
+            Logger.debug(TAG, "No location providers are available. Skipping the rest of the test...");
+            return;
+        }
+
+        // If none of the location permissions are granted then location info is omitted...
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+            Logger.debug(TAG, "Location permissions are granted!...");
+            locationPermissionGranted = true;
+        }
+
+        if (!isEmulator() && locationPermissionGranted) {
+            Logger.debug(TAG, "Location data should exist!");
+            assertTrue(result.getJSONObject("location").has("latitude"));
+            assertTrue(result.getJSONObject("location").has("longitude"));
         }
 
     }

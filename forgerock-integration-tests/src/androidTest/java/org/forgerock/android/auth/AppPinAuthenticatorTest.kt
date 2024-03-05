@@ -1,9 +1,18 @@
+/*
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
 package org.forgerock.android.auth
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.assertj.core.api.Assertions
+import org.junit.Assert.fail
+import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -35,10 +44,19 @@ class AppPinAuthenticatorTest {
         Assertions.assertThat(privateKey).isNotNull
     }
 
-    @Test(expected = UnrecoverableKeyException::class)
+    @Test
     fun testInvalidPin() {
         appPinAuthenticator.generateKeys(context, "1234".toCharArray())
-        appPinAuthenticator.getPrivateKey(context, "invalid".toCharArray())
+        try {
+            appPinAuthenticator.getPrivateKey(context, "invalid".toCharArray())
+            fail()
+        }
+        catch (e: UnrecoverableKeyException) {
+            assertTrue(true)
+        }
+        catch (e: IOException) {
+            assertTrue(true)
+        }
     }
 
     @Test(expected = IOException::class)

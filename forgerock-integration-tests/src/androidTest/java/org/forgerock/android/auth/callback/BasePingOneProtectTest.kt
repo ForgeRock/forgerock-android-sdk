@@ -4,10 +4,14 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-package org.forgerock.android.auth
+package org.forgerock.android.auth.callback
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import org.forgerock.android.auth.FRAuth
+import org.forgerock.android.auth.FROptionsBuilder
+import org.forgerock.android.auth.FRSession
+import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Logger.Companion.set
 import org.junit.After
 import org.junit.Before

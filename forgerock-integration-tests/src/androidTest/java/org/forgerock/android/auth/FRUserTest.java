@@ -7,10 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.forgerock.android.auth.callback.NameCallback;
@@ -20,6 +16,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
 public class FRUserTest extends AndroidBaseTest {

@@ -7,8 +7,6 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListenerFuture;
@@ -17,6 +15,8 @@ import org.forgerock.android.auth.UsernamePasswordNodeListener;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StringAttributeInputCallbackTest extends TreeTest {
 

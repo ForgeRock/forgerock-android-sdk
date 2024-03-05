@@ -7,17 +7,17 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
+import org.forgerock.android.auth.TreeTest;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListenerFuture;
-import org.forgerock.android.auth.TreeTest;
 import org.forgerock.android.auth.UsernamePasswordNodeListener;
 import org.forgerock.android.auth.exception.AuthenticationException;
 
 import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ReCaptchaCallbackTest extends TreeTest {
 
