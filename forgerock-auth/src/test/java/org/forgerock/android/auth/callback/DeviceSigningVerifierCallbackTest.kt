@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,6 +18,7 @@ import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.KeyPair
 import org.forgerock.android.auth.devicebind.MultipleKeysFound
 import org.forgerock.android.auth.devicebind.NoKeysFound
+import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.devicebind.SingleKeyFound
 import org.forgerock.android.auth.devicebind.Success
 import org.forgerock.android.auth.devicebind.UserKey
@@ -29,8 +30,11 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -95,9 +99,11 @@ class DeviceSigningVerifierCallbackTest {
             "zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=",
             getExpiration())).thenReturn("jws")
 
+        val prompt = Prompt("test1", "test2", "test3")
         val testObject =
             DeviceSigningVerifierCallbackMock(rawContent)
-        testObject.executeAuthenticate(context, userKey, deviceAuthenticator)
+        testObject.executeAuthenticate(context, userKey, deviceAuthenticator, prompt = prompt)
+        verify(deviceAuthenticator).prompt(prompt)
     }
 
     @Test
@@ -129,6 +135,12 @@ class DeviceSigningVerifierCallbackTest {
             getExpiration())).thenReturn("jws")
         val key = UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
         testObject.executeAuthenticate(context, key, deviceAuthenticator)
+
+        val captor: KArgumentCaptor<Prompt> = argumentCaptor()
+        verify(deviceAuthenticator).prompt(captor.capture())
+        Assert.assertTrue(captor.firstValue.title == "Authentication required")
+        Assert.assertTrue(captor.firstValue.subtitle == "Cryptography device binding")
+        Assert.assertTrue(captor.firstValue.description == "Please complete with biometric to proceed")
 
     }
 
@@ -219,17 +231,18 @@ class DeviceSigningVerifierCallbackMock constructor(rawContent: String,
 
     suspend fun executeAuthenticate(context: Context,
                                     userKey: UserKey,
-                                    authInterface: DeviceAuthenticator) {
-        authenticate(context, userKey, authInterface)
+                                    authInterface: DeviceAuthenticator,
+                                    prompt: Prompt? = null) {
+        authenticate(context, userKey, authInterface, prompt = prompt)
     }
 
     suspend fun executeAllKey(context: Context,
-                              userKeyService: UserKeyService, authenticator: (DeviceBindingAuthenticationType) -> DeviceAuthenticator) {
+                              userKeyService: UserKeyService, prompt: Prompt? = null, authenticator: (DeviceBindingAuthenticationType) -> DeviceAuthenticator) {
         super.execute(context, userKeyService, userKeySelector = object : UserKeySelector {
             override suspend fun selectUserKey(userKeys: UserKeys,
                                                fragmentActivity: FragmentActivity): UserKey {
                 return UserKey("id1" , "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
             }
-        }, deviceAuthenticator = authenticator, customClaims = emptyMap())
+        }, deviceAuthenticator = authenticator, customClaims = emptyMap(), prompt = prompt)
     }
 }
