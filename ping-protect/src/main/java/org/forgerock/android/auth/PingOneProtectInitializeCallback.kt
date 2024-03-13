@@ -14,12 +14,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.Collections
 
-private val TAG = PingOneProtectInitCallback::class.java.simpleName
+private val TAG = PingOneProtectInitializeCallback::class.java.simpleName
 
 /**
  * Callback to initialize the ping one protect
  */
-open class PingOneProtectInitCallback : AbstractCallback {
+open class PingOneProtectInitializeCallback : AbstractCallback {
     @Keep
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
@@ -92,17 +92,18 @@ open class PingOneProtectInitCallback : AbstractCallback {
      */
     open suspend fun start(context: Context) {
         try {
+            val isBehavioralEnabled = behavioralDataCollection ?: true
             val init =
                 PIInitParams(
                     envId = envId,
-                    isBehavioralDataCollection = behavioralDataCollection ?: true,
+                    isBehavioralDataCollection = isBehavioralEnabled,
                     isLazyMetadata = lazyMetadata ?: false,
                     isConsoleLogEnabled = consoleLogEnabled ?: false,
                     deviceAttributesToIgnore = deviceAttributesToIgnore,
                     customHost = customHost,
                 )
             PIProtect.start(context, init)
-            if(behavioralDataCollection == true) {
+            if(isBehavioralEnabled) {
                 PIProtect.resumeBehavioralData()
             } else {
                 PIProtect.pauseBehavioralData()

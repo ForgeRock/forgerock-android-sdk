@@ -43,13 +43,17 @@ jobs:
       - name: Run forgerock-authenticator debug unit tests
         run: ./gradlew :forgerock-authenticator:testDebugUnitTest --stacktrace --no-daemon
 
+      # Execute forgerock-authenticator debug unit tests
+      - name: Run ping-protect debug unit tests
+        run: ./gradlew :ping-protect:testDebugUnitTest --stacktrace --no-daemon
+
       # Publish test reports for the unit tests
       - name: Publish test results
         if: success() || failure()
         uses: dorny/test-reporter@v1
         with:
           name: Unit tests results
-          path: 'forgerock-core/build/test-results/**/TEST-*.xml,forgerock-auth/build/test-results/**/TEST-*.xml,forgerock-authenticator/build/test-results/**/TEST-*.xml'
+          path: 'forgerock-core/build/test-results/**/TEST-*.xml,forgerock-auth/build/test-results/**/TEST-*.xml,forgerock-authenticator/build/test-results/**/TEST-*.xml,ping-protect/build/test-results/**/TEST-*.xml'
           list-suites: 'all'
           list-tests: 'all'
           fail-on-error: 'true'

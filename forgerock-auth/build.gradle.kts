@@ -6,11 +6,14 @@
  */
 
 plugins {
-    id("com.android.library")
+
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
+
+
     id("com.adarshr.test-logger")
     id("maven-publish")
     id("signing")
-    id("kotlin-android")
     id("kotlin-parcelize")
 }
 

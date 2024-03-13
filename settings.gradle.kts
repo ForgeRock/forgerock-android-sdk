@@ -46,3 +46,4 @@ project(":kotlin").projectDir = File("samples/kotlin")
 include(":app")
 project(":app").projectDir = File("samples/app")
 
+include(":forgerock-integration-tests")

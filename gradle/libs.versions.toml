@@ -31,6 +31,8 @@ espresso-core = "3.5.1"
 io-mockk = "1.13.9"
 org-jetbrains-kotlinx = "1.7.2"
 com-pingidentity-signals = "5.1.2"
+core-ktx = "1.12.0"
+material = "1.11.0"
 play-services-auth = "20.6.0"
 play-services-fido = "20.0.1"
 play-services-location = "21.0.1"
@@ -39,6 +41,7 @@ powermock-module-junit4 = "2.0.9"
 powermock-api-mockito2 = "2.0.9"
 rules = "1.5.0"
 security-crypto = "1.1.0-alpha06"
+firebase-crashlytics-buildtools = "2.9.9"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
@@ -74,7 +77,9 @@ org-robolectric-robolectric = { group = "org.robolectric", name = "robolectric",
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 io-mockk = { group = "io.mockk", name = "mockk", version.ref = "io-mockk" }
 org-jetbrains-kotlinx = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "org-jetbrains-kotlinx" }
-com-pingidentity-signals = { group = "com.pingidentity.signals", name = "android-sdk", version.ref = "com-pingidentity-signals" }
+com-pingidentity-signals  = { group = "com.pingidentity.signals", name = "android-sdk", version.ref = "com-pingidentity-signals" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "play-services-auth" }
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "play-services-fido" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-services-location" }
@@ -83,9 +88,9 @@ powermock-api-mockito2 = { module = "org.powermock:powermock-api-mockito2", vers
 powermock-module-junit4 = { module = "org.powermock:powermock-module-junit4", version.ref = "powermock-module-junit4" }
 projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "lombok-version" }
 rules = { module = "androidx.test:rules", version.ref = "rules" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

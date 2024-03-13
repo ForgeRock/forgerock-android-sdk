@@ -22,9 +22,9 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.248:8080/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
+            url = "https://openam-protect2.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "c1c805de4c9b333"
             timeout = 50
         }
         oauth {
@@ -34,7 +34,11 @@ class EnvViewModel : ViewModel() {
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
         }
+        service {
+            authServiceName = "protect"
+        }
     }
+
 
     val dbind = FROptionsBuilder.build {
         server {
