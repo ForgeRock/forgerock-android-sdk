@@ -9,14 +9,16 @@ package org.forgerock.android.auth
 
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.*
+import org.lighthousegames.logging.logging
 
 internal class InterceptorProvider {
+
+    val log = logging()
     @JvmOverloads
     fun getInterceptor(frLogger: FRLogger = Logger.frLogger): HttpLoggingInterceptor? {
-        val httpLogger = object : HttpLoggingInterceptor.Logger {
-            override fun log(message: String) {
-                frLogger.network("OKHttpClient..", message, "")
-            }
+        val httpLogger = Logger { message ->
+            log.debug("OKHttpClient..") { message }
+           // MFLogger.network("OKHttpClient..", message)
         }
         if (frLogger.isNetworkEnabled()) {
             val logger = when(frLogger) {

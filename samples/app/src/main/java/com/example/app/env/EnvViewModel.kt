@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModel
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
+import org.forgerock.android.auth.Logger
+import org.lighthousegames.logging.LogLevel
 
 class EnvViewModel : ViewModel() {
 
@@ -144,6 +146,7 @@ class EnvViewModel : ViewModel() {
     }
 
     fun select(context: Context, options: FROptions) {
+        Logger.set(Logger.Level.DEBUG)
         FRAuth.start(context, options)
         current = options
     }

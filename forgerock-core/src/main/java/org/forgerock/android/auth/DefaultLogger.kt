@@ -6,8 +6,8 @@
  */
 
 package org.forgerock.android.auth
-import android.util.Log
 import org.forgerock.android.core.BuildConfig
+import org.lighthousegames.logging.logging
 import java.lang.String.format
 
 /**
@@ -83,6 +83,8 @@ interface FRLogger {
 }
 
 internal class DefaultLogger: FRLogger {
+
+    val log = logging()
     private fun log(
         level: Logger.Level,
         tag: String,
@@ -102,18 +104,18 @@ internal class DefaultLogger: FRLogger {
 
             when (level) {
                 Logger.Level.DEBUG -> {
-                    Log.d(Logger.FORGE_ROCK, value)
+                    log.d(tag) { value }
                     return
                 }
                 Logger.Level.INFO -> {
-                    Log.i(Logger.FORGE_ROCK, value)
+                    log.i(tag) { value }
                     return
                 }
                 Logger.Level.WARN -> {
-                    Log.w(Logger.FORGE_ROCK, value, t)
+                    log.warn { value }
                     return
                 }
-                Logger.Level.ERROR -> Log.e(Logger.FORGE_ROCK, value, t)
+                Logger.Level.ERROR -> log.error { value }
                 else -> {
 
                 }

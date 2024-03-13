@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements NodeListener<FRUs
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Logger.set(Logger.Level.DEBUG);
         FRAuth.start(this);
         status = findViewById(R.id.status);
         loginButton = findViewById(R.id.login);

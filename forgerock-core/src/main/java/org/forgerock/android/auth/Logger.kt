@@ -7,6 +7,8 @@
 package org.forgerock.android.auth
 
 import androidx.annotation.VisibleForTesting
+import org.lighthousegames.logging.KmLogging
+import org.lighthousegames.logging.LogLevel
 
 /**
  * Logger for ForgeRock SDK
@@ -38,6 +40,7 @@ class Logger {
         fun set(level: Level) {
             CoreEventDispatcher.CLEAR_OKHTTP.notifyObservers()
             Logger.level = level
+            KmLogging.setLogLevel(LogLevel.Debug)
         }
 
         /**

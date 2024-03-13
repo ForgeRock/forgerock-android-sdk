@@ -32,6 +32,7 @@ import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.Prompt
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 
 
@@ -187,7 +188,7 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                         runOnUiThread {
                             val deviceBindingCallback =
                                 node.getCallback(DeviceBindingCallback::class.java)
-                            deviceBindingCallback.bind(activity, listener =  object : FRListener<Void?> {
+                            deviceBindingCallback.bind(activity, prompt = Prompt("Custom Title", "Custom Subtitle", "Custom Description"), listener =  object : FRListener<Void?> {
                                 override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
                                 }
@@ -202,7 +203,7 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
                         runOnUiThread {
                             val deviceBindingCallback =
                                 node.getCallback(DeviceSigningVerifierCallback::class.java)
-                            deviceBindingCallback.sign(activity, listener = object : FRListener<Void?> {
+                            deviceBindingCallback.sign(activity, prompt = Prompt("Custom Title", "Custom Subtitle", "Custom Description"), listener = object : FRListener<Void?> {
                                 override fun onSuccess(result: Void?) {
                                     node.next(activity, activity)
                                 }

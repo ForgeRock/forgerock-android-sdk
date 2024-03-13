@@ -22,6 +22,7 @@ import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
+import org.forgerock.android.auth.devicebind.Prompt;
 import org.forgerock.android.auth.devicebind.UserKey;
 import org.forgerock.android.auth.exception.ApiException;
 import org.junit.Assert;
@@ -68,7 +69,7 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
                                 public void onException(Exception e) {
                                     Assertions.fail(e.getMessage());
                                 }
-                            });
+                            }, new Prompt("", "", ""));
                     }
                     else {
                         callback.bind(context,
@@ -119,7 +120,6 @@ public class DeviceBindingListAndUnbind extends BaseDeviceBindingTest {
             {
                 if (node.getCallback(DeviceSigningVerifierCallback.class) != null) {
                     DeviceSigningVerifierCallback callback = node.getCallback(DeviceSigningVerifierCallback.class);
-
                     callback.sign(context, new FRListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {

@@ -61,7 +61,7 @@ public class NodeDialogFragment extends DialogFragment {
         next.setOnClickListener(v -> {
             dismiss();
             node.getCallback(NameCallback.class).setName(username.getText().toString());
-            node.getCallback(PasswordCallback.class).setPassword(password.getText().toString().toCharArray());
+          //  node.getCallback(PasswordCallback.class).setPassword(password.getText().toString().toCharArray());
             node.next(getContext(), listener);
 
         });

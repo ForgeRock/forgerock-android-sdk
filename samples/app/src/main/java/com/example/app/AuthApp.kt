@@ -39,8 +39,6 @@ import org.forgerock.android.auth.Logger
 @Composable
 fun AuthApp() {
 
-    Logger.set(Logger.Level.DEBUG)
-
     AppTheme {
         val navController = rememberNavController()
         val drawerState = rememberDrawerState(DrawerValue.Closed)

@@ -58,6 +58,8 @@ val delombok by configurations.creating {
  */
 dependencies {
 
+   // api(project(":kotlinmultiplatformsharedmodule"))
+    api(project(":logging"))
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.annotation)

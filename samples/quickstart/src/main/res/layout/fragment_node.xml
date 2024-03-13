@@ -27,7 +27,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/username"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="74dp"
             android:hint="Username" />
     </com.google.android.material.textfield.TextInputLayout>
 

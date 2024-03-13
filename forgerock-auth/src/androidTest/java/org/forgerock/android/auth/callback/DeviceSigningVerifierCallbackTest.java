@@ -8,21 +8,28 @@
 package org.forgerock.android.auth.callback;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.android.auth.callback.DeviceBindingListAndUnbind.APPLICATION_PIN;
 
 import android.util.Base64;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import org.assertj.core.api.Assertions;
+import org.forgerock.android.auth.DummyActivity;
 import org.forgerock.android.auth.FRListener;
 import org.forgerock.android.auth.FRSession;
+import org.forgerock.android.auth.InitProvider;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
+import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
+import org.forgerock.android.auth.devicebind.DefaultUserKeySelector;
+import org.forgerock.android.auth.devicebind.Prompt;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -953,7 +960,11 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                     // This "iss" claim should trigger exception upon signing
                     customClaims.put("iss", "foo");
 
-                    callback.sign(context, customClaims, new FRListener<Void>() {
+                    ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
+                    scenario.onActivity(InitProvider::setCurrentActivity);
+
+                    callback.sign(context, customClaims, new DefaultUserKeySelector(), deviceBindingAuthenticationType ->
+                            new ApplicationPinDeviceAuthenticator((prompt, fragmentActivity, $completion) -> APPLICATION_PIN.toCharArray()), new FRListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             signSuccess[0]++;
@@ -968,7 +979,7 @@ public class DeviceSigningVerifierCallbackTest extends BaseDeviceBindingTest {
                             node.next(context, nodeListener);
                         }
 
-                    });
+                    }, new Prompt("","", ""));
 
                     return;
                 }
