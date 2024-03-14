@@ -7,19 +7,14 @@
 
 package org.forgerock.android.auth.callback;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Process;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -29,6 +24,7 @@ import androidx.test.rule.GrantPermissionRule;
 import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.FRListenerFuture;
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.auth.SkipTestOnPermissionFailureRule;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +42,9 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH
     );
+
+    @Rule
+    public SkipTestOnPermissionFailureRule skipRule = new SkipTestOnPermissionFailureRule();
 
     @Test
     public void testMetadata() throws Exception {

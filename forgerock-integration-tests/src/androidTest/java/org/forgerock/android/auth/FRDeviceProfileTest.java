@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
-import org.forgerock.android.auth.callback.DeviceProfileCollectorCallbackAndroidTest;
 import org.forgerock.android.auth.collector.BluetoothCollector;
 import org.forgerock.android.auth.collector.DeviceCollector;
 import org.forgerock.android.auth.collector.FRDeviceCollector;
@@ -47,6 +46,9 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH
     );
+
+    @Rule
+    public SkipTestOnPermissionFailureRule skipRule = new SkipTestOnPermissionFailureRule();
 
     @Before
     public void setUp() throws Exception {
@@ -175,9 +177,6 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
         result.get().getJSONObject("telephony").getString("networkCountryIso");
 
     }
-
-
-
 
     private boolean isEmulator() {
         return Build.PRODUCT.matches(".*_?sdk_?.*");
