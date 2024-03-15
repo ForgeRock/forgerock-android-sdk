@@ -132,6 +132,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
 
         if (!isEmulator() && locationPermissionGranted) {
             Logger.debug(TAG, "Location data should exist!");
+            Logger.debug(TAG, result.toString());
             assertTrue(result.getJSONObject("location").has("latitude"));
             assertTrue(result.getJSONObject("location").has("longitude"));
         }
@@ -175,7 +176,6 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
         collector.collect(context, result);
         result.get().getJSONObject("bluetooth").getBoolean("supported");
         result.get().getJSONObject("telephony").getString("networkCountryIso");
-
     }
 
     private boolean isEmulator() {

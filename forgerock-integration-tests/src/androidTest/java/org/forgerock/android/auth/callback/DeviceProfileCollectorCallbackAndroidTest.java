@@ -23,7 +23,9 @@ import androidx.test.rule.GrantPermissionRule;
 
 import org.forgerock.android.auth.AndroidBaseTest;
 import org.forgerock.android.auth.FRListenerFuture;
+import org.forgerock.android.auth.Log;
 import org.forgerock.android.auth.Logger;
+import org.forgerock.android.auth.RetryTestRule;
 import org.forgerock.android.auth.SkipTestOnPermissionFailureRule;
 import org.json.JSONObject;
 import org.junit.Rule;
@@ -147,6 +149,7 @@ public class DeviceProfileCollectorCallbackAndroidTest extends AndroidBaseTest {
 
         if (!isEmulator() && locationPermissionGranted) {
             Logger.debug(TAG, "Location data should exist!");
+            Logger.debug(TAG, content);
             assertTrue(content.contains("location"));
         }
     }
