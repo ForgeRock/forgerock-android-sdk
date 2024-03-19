@@ -1,3 +1,13 @@
+## [4.4.0]
+#### Added
+- Added `TextInput` callback support [SDKS-545]
+- Added a new module for integration with `PingOne Protect` [SDKS-2900]
+- Added interface allowing developers to customize the biometric prompt for device binding\signing [SDKS-2991]
+- Added immutable HTTP headers on each request `x-requested-with: forgerock-sdk` and `x-requested-platform: android` [SDKS-3033]
+
+#### Fixed
+- Addressed `nimbus-jose-jwt:9.25` library security vulnerability (CVE-2023-52428) [SDKS-2988]
+
 ## [4.3.1]
 #### Fixed
 - Fixed an issue where the SDK was crashing during device binding on Android 9 devices [SDKS-2948]
