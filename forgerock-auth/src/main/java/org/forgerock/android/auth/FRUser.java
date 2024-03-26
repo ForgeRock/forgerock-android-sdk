@@ -259,7 +259,7 @@ public class FRUser {
     @Getter(AccessLevel.PACKAGE)
     public static class Browser {
 
-        private FRListener<AuthorizationResponse> listener;
+        public FRListener<AuthorizationResponse> listener;
         private AppAuthConfigurer appAuthConfigurer = new AppAuthConfigurer(this);
         private boolean failedOnNoBrowserFound = true;
 
