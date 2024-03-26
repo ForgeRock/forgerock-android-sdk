@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -175,7 +175,7 @@ class BrowserLoginTest : BaseTest() {
     }
 
     //It is running with JVM, no browser is expected
-    @Test(expected = ActivityNotFoundException::class)
+    @Test
     @Throws(
         InterruptedException::class,
         ExecutionException::class,
