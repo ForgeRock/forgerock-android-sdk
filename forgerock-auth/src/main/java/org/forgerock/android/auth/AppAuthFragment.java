@@ -92,7 +92,7 @@ public class AppAuthFragment extends Fragment {
             startActivityForResult(intent, AUTH_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             if (browser.isFailedOnNoBrowserFound()) {
-                Listener.onException(browser.listener, e);
+                Listener.onException(browser.getListener(), e);
             }
         }
     }
