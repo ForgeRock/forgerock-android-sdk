@@ -7,7 +7,7 @@
 
 package org.forgerock.android.auth.callback;
 
-import static org.forgerock.android.auth.AndroidBaseTest.USERNAME;
+import static org.forgerock.android.auth.callback.BaseDeviceBindingTest.USERNAME;
 
 import android.content.Context;
 

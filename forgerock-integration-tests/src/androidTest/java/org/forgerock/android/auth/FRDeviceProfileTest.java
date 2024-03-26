@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SdkSuppress;
 import androidx.test.rule.GrantPermissionRule;
 
-import org.forgerock.android.auth.callback.DeviceProfileCollectorCallbackAndroidTest;
 import org.forgerock.android.auth.collector.BluetoothCollector;
 import org.forgerock.android.auth.collector.DeviceCollector;
 import org.forgerock.android.auth.collector.FRDeviceCollector;
@@ -47,6 +46,9 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH
     );
+
+    @Rule
+    public SkipTestOnPermissionFailureRule skipRule = new SkipTestOnPermissionFailureRule();
 
     @Before
     public void setUp() throws Exception {
@@ -130,6 +132,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
 
         if (!isEmulator() && locationPermissionGranted) {
             Logger.debug(TAG, "Location data should exist!");
+            Logger.debug(TAG, result.toString());
             assertTrue(result.getJSONObject("location").has("latitude"));
             assertTrue(result.getJSONObject("location").has("longitude"));
         }
@@ -173,11 +176,7 @@ public class FRDeviceProfileTest extends AndroidBaseTest {
         collector.collect(context, result);
         result.get().getJSONObject("bluetooth").getBoolean("supported");
         result.get().getJSONObject("telephony").getString("networkCountryIso");
-
     }
-
-
-
 
     private boolean isEmulator() {
         return Build.PRODUCT.matches(".*_?sdk_?.*");

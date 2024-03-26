@@ -13,6 +13,7 @@ import android.os.Build;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SdkSuppress;
 
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWT;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
+@SdkSuppress(minSdkVersion = Build.VERSION_CODES.N)  // Key Attestation is only supported on Android 7.0 (API level 24) and above...
 public class KeyAttestationTest extends BaseDeviceBindingTest {
     protected final static String TREE = "key-attestation";
 
@@ -417,7 +419,6 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
         assertThat(unsupportedOutcome[0]).isEqualTo(1);
         assertThat(executionExceptionOccurred).isTrue();
     }
-
 }
 
 
