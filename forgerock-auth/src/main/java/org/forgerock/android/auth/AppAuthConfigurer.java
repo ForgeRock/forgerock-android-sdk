@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020-2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,8 +20,6 @@ import net.openid.appauth.browser.CustomTabManager;
 
 import java.net.MalformedURLException;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -33,16 +31,12 @@ public class AppAuthConfigurer {
 
     private final FRUser.Browser parent;
 
-    @Getter(AccessLevel.PACKAGE)
     private Consumer<AuthorizationRequest.Builder> authorizationRequestBuilder = builder -> {
     };
-    @Getter(AccessLevel.PACKAGE)
     private androidx.core.util.Consumer<AppAuthConfiguration.Builder> appAuthConfigurationBuilder = builder -> {
     };
-    @Getter(AccessLevel.PACKAGE)
     private Consumer<CustomTabsIntent.Builder> customTabsIntentBuilder = builder -> {
     };
-    @Getter(AccessLevel.PACKAGE)
     private Supplier<AuthorizationServiceConfiguration> authorizationServiceConfigurationSupplier = () -> {
         OAuth2Client oAuth2Client = Config.getInstance().getOAuth2Client();
         try {
@@ -112,4 +106,19 @@ public class AppAuthConfigurer {
         return parent;
     }
 
+    Consumer<AuthorizationRequest.Builder> getAuthorizationRequestBuilder() {
+        return this.authorizationRequestBuilder;
+    }
+
+    Consumer<AppAuthConfiguration.Builder> getAppAuthConfigurationBuilder() {
+        return this.appAuthConfigurationBuilder;
+    }
+
+    Consumer<CustomTabsIntent.Builder> getCustomTabsIntentBuilder() {
+        return this.customTabsIntentBuilder;
+    }
+
+    Supplier<AuthorizationServiceConfiguration> getAuthorizationServiceConfigurationSupplier() {
+        return this.authorizationServiceConfigurationSupplier;
+    }
 }
