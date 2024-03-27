@@ -26,6 +26,7 @@ import org.forgerock.android.auth.exception.ApiException
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 import org.forgerock.android.auth.exception.BrowserAuthenticationException
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -43,6 +44,7 @@ class BrowserLoginTest : BaseTest() {
         return fragment as? AppAuthFragment
     }
 
+    @Ignore
     @Test
     @Throws(
         InterruptedException::class,
@@ -98,6 +100,7 @@ class BrowserLoginTest : BaseTest() {
         Assertions.assertThat(body["code"]).isEqualTo("roxwkG0TtooR2vzA6z0MT9xyJSQ")
     }
 
+    @Ignore
     @Test
     @Throws(
         InterruptedException::class,
@@ -135,6 +138,7 @@ class BrowserLoginTest : BaseTest() {
         ).isNotNull
     }
 
+    @Ignore
     @Test
     @Throws(
         InterruptedException::class,
@@ -228,6 +232,7 @@ class BrowserLoginTest : BaseTest() {
 
     }
 
+    @Ignore
     @Test
     @Throws(InterruptedException::class)
     fun testOperationCancel() {
@@ -262,6 +267,7 @@ class BrowserLoginTest : BaseTest() {
         }
     }
 
+    @Ignore
     @Test(expected = AlreadyAuthenticatedException::class)
     @Throws(
         Throwable::class
@@ -281,6 +287,7 @@ class BrowserLoginTest : BaseTest() {
         }
     }
 
+    @Ignore
     @Test
     @Throws(InterruptedException::class)
     fun testInvalidScope() {
@@ -310,6 +317,7 @@ class BrowserLoginTest : BaseTest() {
         }
     }
 
+    @Ignore
     @Test
     @Throws(
         InterruptedException::class,

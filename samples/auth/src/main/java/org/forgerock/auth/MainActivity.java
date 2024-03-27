@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -82,10 +83,13 @@ public class MainActivity extends AppCompatActivity {
     public static final int AUTH_REQUEST_CODE = 100;
     public static final int REQUEST_CODE = 100;
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static final String LAUNCH_BROWSER = "LAUNCH_BROWSER";
 
     private ImageView success;
     private TextView content;
     private ProgressBar progressBar;
+
+    private boolean launchBrowser = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +120,20 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(resume, AUTH_REQUEST_CODE);
             }
         }
+
+        if (savedInstanceState != null) {
+            launchBrowser = savedInstanceState.getBoolean(LAUNCH_BROWSER, launchBrowser);
+            if (launchBrowser) {
+                launchBrowser();
+            }
+        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(LAUNCH_BROWSER, launchBrowser);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -475,6 +493,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchBrowser() {
+        launchBrowser = true;
 
         FRUser.browser().appAuthConfigurer()
                 .authorizationRequest(r -> {
@@ -492,11 +511,13 @@ public class MainActivity extends AppCompatActivity {
                 .login(this, new FRListener<FRUser>() {
                     @Override
                     public void onSuccess(FRUser result) {
+                        launchBrowser = false;
                         userinfo();
                     }
 
                     @Override
                     public void onException(Exception e) {
+                        launchBrowser = false;
                         runOnUiThread(() -> {
                             progressBar.setVisibility(INVISIBLE);
                             content.setText(e.getMessage());
