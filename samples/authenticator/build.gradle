@@ -13,7 +13,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.forgerock.authenticator.sample"
+        applicationId "com.acme.authenticator"
         minSdkVersion 23
         targetSdkVersion 34
         versionCode 1

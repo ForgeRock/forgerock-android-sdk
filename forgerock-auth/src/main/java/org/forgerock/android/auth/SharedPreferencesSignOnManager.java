@@ -40,7 +40,7 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
     @Builder
     public SharedPreferencesSignOnManager(@NonNull Context context, SharedPreferences sharedPreferences) {
         this.sharedPreferences = sharedPreferences == null ?
-                new SecuredSharedPreferences(context, ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
+                EncryptedPreferences.getInstance(context, ORG_FORGEROCK_V_1_SSO_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
     }
 
     @Override

@@ -28,6 +28,7 @@ class EncryptedPreferences {
          */
 
         @JvmOverloads
+        @JvmStatic
         fun getInstance(
             context: Context,
             fileName: String = "secret_shared_prefs" + context.packageName,
@@ -115,6 +116,7 @@ class EncryptedPreferences {
             try {
                 val encryptedSharedPreferences =
                     createPreferencesFile(context, fileName)
+
                 encryptedSharedPreferences.all.entries.map { it.key }.forEach { key ->
                     encryptedSharedPreferences.getStringSet(key, emptySet())?.let {
                         val result = mutableSetOf<String>()

@@ -80,7 +80,7 @@ class DefaultTokenManager implements TokenManager {
                                Long cacheIntervalMillis,
                                Long threshold) {
 
-        this.sharedPreferences = sharedPreferences == null ? new SecuredSharedPreferences(context,
+        this.sharedPreferences = sharedPreferences == null ? EncryptedPreferences.getInstance(context,
                 ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
 
         Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());

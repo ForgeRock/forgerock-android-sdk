@@ -43,6 +43,10 @@ class AndroidMEncryptor extends AbstractSymmetricEncryptor {
 
     @Override
     protected SecretKey getSecretKey() throws GeneralSecurityException, IOException {
+
+        // cache this secret key ?
+
+
         KeyStore keyStore = getKeyStore();
         if (!keyStore.containsAlias(keyAlias)) {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(

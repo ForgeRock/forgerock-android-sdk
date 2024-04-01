@@ -39,11 +39,11 @@ class DefaultStorageClient implements StorageClient {
     private static final String TAG = DefaultStorageClient.class.getSimpleName();
 
     public DefaultStorageClient(Context context) {
-        this.accountData = new SecuredSharedPreferences(context,
+        this.accountData = EncryptedPreferences.getInstance(context,
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
-        this.mechanismData = new SecuredSharedPreferences(context,
+        this.mechanismData =  EncryptedPreferences.getInstance(context,
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
-        this.notificationData = new SecuredSharedPreferences(context,
+        this.notificationData =  EncryptedPreferences.getInstance(context,
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
     }
 
