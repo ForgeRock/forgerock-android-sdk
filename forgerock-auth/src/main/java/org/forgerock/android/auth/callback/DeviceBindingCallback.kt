@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -170,15 +170,17 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      * @param listener The Listener to listen for the result
+     * @param prompt The Prompt to modify the title, subtitle, description
      */
     @JvmOverloads
     open fun bind(context: Context,
                   deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier,
-                  listener: FRListener<Void>) {
+                  listener: FRListener<Void?>,
+                  prompt: Prompt? = null) {
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                bind(context, deviceAuthenticator)
+                bind(context,  prompt = prompt, deviceAuthenticator = deviceAuthenticator)
                 Listener.onSuccess(listener, null)
             } catch (e: Exception) {
                 Listener.onException(listener, e)
@@ -192,11 +194,13 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * keys before calling this method
      *
      * @param context  The Application Context
+     * @param prompt The Prompt to modify the title, subtitle, description
      * @param deviceAuthenticator A function to return a [DeviceAuthenticator], [deviceAuthenticatorIdentifier] will be used if not provided
      */
     open suspend fun bind(context: Context,
+                          prompt: Prompt? = null,
                           deviceAuthenticator: (type: DeviceBindingAuthenticationType) -> DeviceAuthenticator = deviceAuthenticatorIdentifier) {
-        execute(context, deviceAuthenticator(deviceBindingAuthenticationType))
+        execute(context, deviceAuthenticator(deviceBindingAuthenticationType), prompt = prompt)
     }
 
 
@@ -206,6 +210,8 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
      * @param context  The Application Context
      * @param deviceAuthenticator Interface to find the Authentication Type
      * @param deviceBindingRepository Persist the values in encrypted shared preference
+     * @param deviceId Generated Device Identifier
+     * @param prompt The Prompt to modify the title, subtitle, description
      */
     internal suspend fun execute(context: Context,
                                  deviceAuthenticator: DeviceAuthenticator = getDeviceAuthenticator(
@@ -213,9 +219,10 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                                  deviceBindingRepository: DeviceBindingRepository = LocalDeviceBindingRepository(
                                      context),
                                  deviceId: String = DeviceIdentifier.builder().context(context)
-                                     .build().identifier) {
+                                     .build().identifier,
+                                 prompt: Prompt? = null) {
 
-        deviceAuthenticator.initialize(userId, Prompt(title, subtitle, description))
+        deviceAuthenticator.initialize(userId, prompt ?: Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context, attestation).not()) {
             handleException(DeviceBindingException(Unsupported()))

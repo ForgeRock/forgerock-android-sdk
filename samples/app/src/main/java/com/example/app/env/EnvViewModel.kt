@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023-2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -22,9 +22,9 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.248:8080/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
+            url = "https://openam-protect2.forgeblocks.com/am"
+            realm = "alpha"
+            cookieName = "c1c805de4c9b333"
             timeout = 50
         }
         oauth {
@@ -34,7 +34,11 @@ class EnvViewModel : ViewModel() {
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
         }
+        service {
+            authServiceName = "protect"
+        }
     }
+
 
     val dbind = FROptionsBuilder.build {
         server {
@@ -149,13 +153,13 @@ class EnvViewModel : ViewModel() {
     }
 
     fun select(context: Context, host: String) {
-       servers.find {
+        servers.find {
             it.server.url == host
         }?.let {
             select(context, it)
-       } ?: run {
-           select(context, dbind)
-       }
+        } ?: run {
+            select(context, dbind)
+        }
     }
 
     fun getAll(): List<FROptions> {

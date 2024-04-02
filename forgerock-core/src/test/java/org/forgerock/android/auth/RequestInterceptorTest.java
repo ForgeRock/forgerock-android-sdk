@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -62,14 +62,14 @@ public class RequestInterceptorTest {
         data = new JSONObject();
         data.put("test", "test");
         OkHttpClientProvider.getInstance().clear();
-        RequestInterceptorRegistry.getInstance().register(null);
+        RequestInterceptorRegistry.getInstance().register((RequestInterceptor) null);
     }
 
     @After
     public void tearDown() throws Exception {
         server.shutdown();
         OkHttpClientProvider.getInstance().clear();
-        RequestInterceptorRegistry.getInstance().register(null);
+        RequestInterceptorRegistry.getInstance().register((RequestInterceptor) null);
     }
 
     private String getUrl() {
@@ -128,6 +128,8 @@ public class RequestInterceptorTest {
         RecordedRequest recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getHeader("HeaderName")).isEqualTo("HeaderValue");
         assertThat(recordedRequest.getHeader("HeaderName2")).isEqualTo("HeaderValue2");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     @Test
@@ -144,7 +146,10 @@ public class RequestInterceptorTest {
                 .get()
                 .build();
         send(networkConfig, request);
-        assertThat(server.takeRequest().getHeader("HeaderName")).isEqualTo("HeaderValue");
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getHeader("HeaderName")).isEqualTo("HeaderValue");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     @Test
@@ -161,7 +166,10 @@ public class RequestInterceptorTest {
                 .get()
                 .build();
         send(networkConfig, request);
-        assertThat(server.takeRequest().getHeader("HeaderName")).isNull();
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getHeader("HeaderName")).isNull();
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     @Test
@@ -178,7 +186,12 @@ public class RequestInterceptorTest {
                 .get()
                 .build();
         send(networkConfig, request);
-        assertThat(server.takeRequest().getHeader("HeaderName")).isEqualTo("HeaderValue2");
+
+        RecordedRequest recordedRequest = server.takeRequest();
+
+        assertThat(recordedRequest.getHeader("HeaderName")).isEqualTo("HeaderValue2");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     @Test
@@ -194,7 +207,10 @@ public class RequestInterceptorTest {
                 .get()
                 .build();
         send(networkConfig, request);
-        assertThat(server.takeRequest().getPath()).isEqualTo("/somewhere");
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath()).isEqualTo("/somewhere");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
 
     }
 
@@ -229,9 +245,12 @@ public class RequestInterceptorTest {
 
     @Test
     public void testCustomizeParam() throws InterruptedException, JSONException {
-
         RequestInterceptorRegistry.getInstance().register(
-                request -> request.newBuilder().url(getUrl() + "?forceAuth=true").build());
+                request -> request.newBuilder().url(getUrl() + "?forceAuth=true")
+                        .header("custom_param", "custom-value")
+                        .header("x-requested-with", "jey")
+                        .header("x-requested-platform", "andy")
+                        .build());
 
         NetworkConfig networkConfig = NetworkConfig.networkBuilder()
                 .host(server.getHostName())
@@ -241,8 +260,11 @@ public class RequestInterceptorTest {
                 .get()
                 .build();
         send(networkConfig, request);
-        Uri uri = Uri.parse(server.takeRequest().getPath());
+        RecordedRequest recordedRequest = server.takeRequest();
+        Uri uri = Uri.parse(recordedRequest.getPath());
         assertThat(uri.getQueryParameter("forceAuth")).isEqualTo("true");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
 
     }
 
@@ -315,6 +337,8 @@ public class RequestInterceptorTest {
         JSONObject result = new JSONObject(recordedRequest.getBody().readUtf8());
         assertThat(result.getString("sampleName")).isEqualTo("sampleValue");
         assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
 
     }
 
@@ -340,6 +364,8 @@ public class RequestInterceptorTest {
         JSONObject result = new JSONObject(recordedRequest.getBody().readUtf8());
         assertThat(result.getString("sampleName")).isEqualTo("sampleValue");
         assertThat(recordedRequest.getMethod()).isEqualTo("PATCH");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
 
     }
 
@@ -363,6 +389,8 @@ public class RequestInterceptorTest {
         RecordedRequest recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getBody().size()).isEqualTo(0);
         assertThat(recordedRequest.getMethod()).isEqualTo("DELETE");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     @Test
@@ -387,6 +415,8 @@ public class RequestInterceptorTest {
         JSONObject result = new JSONObject(recordedRequest.getBody().readUtf8());
         assertThat(result.getString("sampleName")).isEqualTo("sampleValue");
         assertThat(recordedRequest.getMethod()).isEqualTo("DELETE");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
 
     }
 
@@ -463,6 +493,8 @@ public class RequestInterceptorTest {
         send(networkConfig, request);
         RecordedRequest recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getHeader("Cookie")).isEqualTo("test=testValue");
+        assertThat(recordedRequest.getHeader("x-requested-with")).isEqualTo("forgerock-sdk");
+        assertThat(recordedRequest.getHeader("x-requested-platform")).isEqualTo("android");
     }
 
     private interface CustomCookieJar extends CookieJar, OkHttpCookieInterceptor {

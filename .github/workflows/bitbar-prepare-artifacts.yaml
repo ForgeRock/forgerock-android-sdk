@@ -46,11 +46,11 @@ jobs:
       - name: List build tools versions
         run: ls /Users/runner/Library/Android/sdk/build-tools/
 
-      # Sign auth-debug-androidTest.apk
-      - name: Sign auth-debug-androidTest.apk
+      # Sign app-debug-androidTest.apk
+      - name: Sign app-debug-androidTest.apk
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: samples/auth/build/outputs/apk/androidTest/debug
+          releaseDirectory: samples/app/build/outputs/apk/androidTest/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
           alias: ${{ secrets.SIGNING_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
@@ -58,11 +58,11 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      # Sign forgerock-auth-debug-androidTest.apk
-      - name: Sign forgerock-auth-debug-androidTest.apk
+      # Sign forgerock-integration-tests-debug-androidTest.apk
+      - name: Sign forgerock-integration-tests-debug-androidTest.apk
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: forgerock-auth/build/outputs/apk/androidTest/debug
+          releaseDirectory: forgerock-integration-tests/build/outputs/apk/androidTest/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
           alias: ${{ secrets.SIGNING_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
@@ -71,19 +71,19 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
 
       # Publish the signed APKs as build artifacts
-      - name: Publish auth-debug-androidTest.apk
+      - name: Publish app-debug-androidTest.apk
         uses: actions/upload-artifact@v3
         if: success()
         with:
-          name: auth-debug-androidTest-signed.apk
-          path: samples/auth/build/outputs/apk/androidTest/debug/auth-debug-androidTest-signed.apk
+          name: app-debug-androidTest-signed.apk
+          path: samples/app/build/outputs/apk/androidTest/debug/app-debug-androidTest-signed.apk
 
-      - name: Publish forgerock-auth-debug-androidTest.apk
+      - name: Publish forgerock-integration-tests-debug-androidTest-signed.apk
         uses: actions/upload-artifact@v3
         if: success()
         with:
-          name: forgerock-auth-debug-androidTest-signed.apk
-          path: forgerock-auth/build/outputs/apk/androidTest/debug/forgerock-auth-debug-androidTest-signed.apk
+          name: forgerock-integration-tests-debug-androidTest-signed.apk
+          path: forgerock-integration-tests/build/outputs/apk/androidTest/debug/forgerock-integration-tests-debug-androidTest-signed.apk
 
       # Send slack notification ONLY if any of the steps above fail
       - name: Send slack notification

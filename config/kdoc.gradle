@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023-2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,9 +11,6 @@ apply plugin: 'org.jetbrains.dokka'
 /**
  * Generate Kdoc, delombok then generate Javadoc
  */
-configurations {
-    delombok
-}
 
 task delombok {
     def srcJava = 'src/main/java'
@@ -23,6 +20,10 @@ task delombok {
                 classname: 'lombok.delombok.ant.Tasks$Delombok',
                 classpath: configurations.delombok.asPath)
         ant.delombok(verbose: 'true', from: srcJava, to: "$buildDir/src-delomboked")
+//        copy {
+//            from "$buildDir/src-delomboked"
+//            into "src/main/java"
+//        }
     }
 }
 
@@ -36,46 +37,11 @@ tasks.named("dokkaJavadoc").configure {
     dependsOn("bundleLibCompileToJarRelease")
 }
 
-dokkaJavadoc {
-    dokkaSourceSets {
-        named("main") {
-            displayName.set(name)
-            outputDirectory = file("build/javadoc/$project.name-dokka")
-            sourceDirs = files("$buildDir/src-delomboked")
-            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
-            reportUndocumented.set(false)
-            skipEmptyPackages.set(true)
-            skipDeprecated.set(false)
-            suppressGeneratedFiles.set(true)
-            noStdlibLink.set(false)
-            noJdkLink.set(false)
-            noAndroidSdkLink.set(false)
-            suppress.set(false)
-        }
-    }
-}
-
 tasks.named("dokkaHtml").configure {
     dependsOn("generateDebugRFile")
     dependsOn("bundleLibCompileToJarDebug")
     dependsOn("generateReleaseRFile")
     dependsOn("bundleLibCompileToJarRelease")
-}
-
-dokkaHtml {
-    dokkaSourceSets {
-        named("main") {
-            outputDirectory = file("build/html/$project.name-dokka")
-            sourceDirs = files("$buildDir/src-delomboked")
-            sourceRoots.setFrom(file("$buildDir/src-delomboked"))
-            noAndroidSdkLink.set(false)
-            includeNonPublic.set(true)
-            skipEmptyPackages.set(true)
-            reportUndocumented.set(true)
-            skipDeprecated.set(false)
-
-        }
-    }
 }
 
 task sourcesJar(type: Jar) {

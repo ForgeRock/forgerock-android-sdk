@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -31,8 +31,11 @@ import com.example.app.callback.DeviceSigningVerifierCallback
 import com.example.app.callback.IdPCallback
 import com.example.app.callback.NameCallback
 import com.example.app.callback.PasswordCallback
+import com.example.app.callback.PingOneProtectEvaluationCallback
+import com.example.app.callback.PingOneProtectInitializeCallback
 import com.example.app.callback.PollingWaitCallback
 import com.example.app.callback.SelectIdPCallback
+import com.example.app.callback.TextInputCallback
 import com.example.app.callback.TextOutputCallback
 import com.example.app.callback.WebAuthnAuthenticationCallback
 import com.example.app.callback.WebAuthnRegistrationCallback
@@ -48,7 +51,10 @@ import org.forgerock.android.auth.callback.PasswordCallback
 import org.forgerock.android.auth.callback.PollingWaitCallback
 import org.forgerock.android.auth.callback.ReCaptchaCallback
 import com.example.app.callback.ReCaptchaCallback
+import org.forgerock.android.auth.PingOneProtectEvaluationCallback
+import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
+import org.forgerock.android.auth.callback.TextInputCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
 import org.forgerock.android.auth.callback.WebAuthnRegistrationCallback
@@ -150,6 +156,19 @@ fun Journey(state: JourneyState,
                         IdPCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
+
+                    is PingOneProtectEvaluationCallback -> {
+                        PingOneProtectEvaluationCallback(callback = it, onCompleted = onNext)
+                        showNext = false
+                    }
+
+                    is PingOneProtectInitializeCallback -> {
+                        PingOneProtectInitializeCallback(callback = it, onCompleted = onNext)
+                        showNext = false
+                    }
+
+                    is TextInputCallback -> TextInputCallback(it)
+
 
                     else -> {
                         //Unsupported

@@ -32,6 +32,7 @@ import org.forgerock.android.auth.exception.BrowserAuthenticationException;
 /**
  * Headless Fragment to receive callback result from AppAuth library
  */
+@Deprecated
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class AppAuthFragment extends Fragment {
 
@@ -92,7 +93,7 @@ public class AppAuthFragment extends Fragment {
             startActivityForResult(intent, AUTH_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             if (browser.isFailedOnNoBrowserFound()) {
-                throw e;
+                Listener.onException(browser.getListener(), e);
             }
         }
     }
