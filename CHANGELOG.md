@@ -7,6 +7,7 @@
 
 #### Fixed
 - Addressed `nimbus-jose-jwt:9.25` library security vulnerability (CVE-2023-52428) [SDKS-2988]
+- NullPointerException for Centralize Login, Replace deprecated onActivityResult with ActivityResultContract [SDKS-3079]
 
 ## [4.3.1]
 #### Fixed

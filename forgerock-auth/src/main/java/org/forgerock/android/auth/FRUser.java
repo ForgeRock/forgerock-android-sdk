@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,15 +14,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.RedirectUriReceiverActivity;
 
+import org.forgerock.android.auth.centralize.BrowserLauncher;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidRedirectUriException;
@@ -31,8 +32,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 public class FRUser {
@@ -99,7 +98,7 @@ public class FRUser {
      * Refresh the {@link AccessToken} asynchronously, force token refresh, no matter the stored {@link AccessToken} is expired or not
      * refresh the token and persist it.
      *
-     * @param listener    Listener to listen for refresh event.
+     * @param listener Listener to listen for refresh event.
      */
     @WorkerThread
     public void refresh(FRListener<AccessToken> listener) {
@@ -256,10 +255,10 @@ public class FRUser {
         return new Browser();
     }
 
-    @Getter(AccessLevel.PACKAGE)
     public static class Browser {
 
-        public FRListener<AuthorizationResponse> listener;
+        private static final String TAG = Browser.class.getName();
+        private FRListener<AuthorizationResponse> listener;
         private AppAuthConfigurer appAuthConfigurer = new AppAuthConfigurer(this);
         private boolean failedOnNoBrowserFound = true;
 
@@ -281,7 +280,7 @@ public class FRUser {
          *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
          */
         public void login(Fragment fragment, FRListener<FRUser> listener) {
-            login(fragment.getContext(), fragment.getFragmentManager(), listener);
+            login(fragment.getActivity(), listener);
         }
 
         /**
@@ -298,17 +297,6 @@ public class FRUser {
          *                 <b> throws {@link java.net.MalformedURLException} When failed to parse the URL for API request.
          */
         public void login(FragmentActivity activity, FRListener<FRUser> listener) {
-            login(activity.getApplicationContext(), activity.getSupportFragmentManager(), listener);
-        }
-
-        @VisibleForTesting
-        Browser failedOnNoBrowserFound(boolean failedOnNoBrowserFound) {
-            this.failedOnNoBrowserFound = failedOnNoBrowserFound;
-            return this;
-        }
-
-        private void login(Context context, FragmentManager manager, FRListener<FRUser> listener) {
-
             SessionManager sessionManager = Config.getInstance().getSessionManager();
 
             if (sessionManager.hasSession()) {
@@ -317,17 +305,17 @@ public class FRUser {
             }
 
             try {
-                validateRedirectUri(context);
+                validateRedirectUri(activity);
             } catch (InvalidRedirectUriException e) {
                 Listener.onException(listener, e);
                 return;
             }
 
-            this.listener = new FRListener<AuthorizationResponse>() {
+            this.listener = new FRListener<>() {
                 @Override
                 public void onSuccess(AuthorizationResponse result) {
                     InterceptorHandler interceptorHandler = InterceptorHandler.builder()
-                            .context(context)
+                            .context(activity)
                             .listener(listener)
                             .interceptor(new ExchangeAccessTokenInterceptor(sessionManager.getTokenManager()))
                             .interceptor(new AccessTokenStoreInterceptor(sessionManager.getTokenManager()))
@@ -335,17 +323,15 @@ public class FRUser {
                             .build();
 
                     interceptorHandler.proceed(result);
-
                 }
 
                 @Override
-                public void onException(Exception e) {
+                public void onException(@NonNull Exception e) {
                     Listener.onException(listener, e);
                 }
             };
 
-            AppAuthFragment.launch(manager, this);
-
+            AppAuthFragment2.launch(activity, this);
         }
 
         private void validateRedirectUri(Context context) throws InvalidRedirectUriException {
@@ -359,7 +345,7 @@ public class FRUser {
                 intent.setData(uri);
                 resolveInfos = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
             }
-            if (resolveInfos != null && resolveInfos.size() > 0) {
+            if (resolveInfos != null && !resolveInfos.isEmpty()) {
                 for (ResolveInfo info : resolveInfos) {
                     ActivityInfo activityInfo = info.activityInfo;
                     if (!(activityInfo.name.equals(RedirectUriReceiverActivity.class.getCanonicalName()) &&
@@ -370,6 +356,24 @@ public class FRUser {
                 return;
             }
             throw new InvalidRedirectUriException("No App is registered to capture the authorization code");
+        }
+
+        @VisibleForTesting
+        Browser failedOnNoBrowserFound(boolean failedOnNoBrowserFound) {
+            this.failedOnNoBrowserFound = failedOnNoBrowserFound;
+            return this;
+        }
+
+        FRListener<AuthorizationResponse> getListener() {
+            return this.listener;
+        }
+
+        AppAuthConfigurer getAppAuthConfigurer() {
+            return this.appAuthConfigurer;
+        }
+
+        boolean isFailedOnNoBrowserFound() {
+            return this.failedOnNoBrowserFound;
         }
     }
 }

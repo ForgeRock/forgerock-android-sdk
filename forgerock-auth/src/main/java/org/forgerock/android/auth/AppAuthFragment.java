@@ -32,6 +32,7 @@ import org.forgerock.android.auth.exception.BrowserAuthenticationException;
 /**
  * Headless Fragment to receive callback result from AppAuth library
  */
+@Deprecated
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class AppAuthFragment extends Fragment {
 
