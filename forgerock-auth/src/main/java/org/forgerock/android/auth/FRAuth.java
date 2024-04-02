@@ -46,6 +46,7 @@ public class FRAuth {
     public static synchronized void start(Context context, @Nullable FROptions options) {
         if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
+            SharedPreferenceRepository.migrateToEncryptedSharedPref(context);
             FROptions currentOptions = ConfigHelper.load(context, options);
             //Validate (AM URL, Realm, CookieName) is not Empty. If its empty will throw IllegalArgumentException.
             currentOptions.validateConfig();

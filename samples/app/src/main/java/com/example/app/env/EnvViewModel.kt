@@ -120,7 +120,7 @@ class EnvViewModel : ViewModel() {
         server {
             url = "https://openam-sdks.forgeblocks.com/am"
             realm = "alpha"
-            cookieName = "iPlanetDirectoryPro"
+            cookieName = "5421aeddf91aa20"
             timeout = 50
         }
         oauth {

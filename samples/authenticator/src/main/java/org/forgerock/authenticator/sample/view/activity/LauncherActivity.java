@@ -12,6 +12,8 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.forgerock.android.auth.SharedPreferenceRepository;
+
 /**
  * An example full-screen launcher activity
  */
@@ -20,6 +22,8 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferenceRepository.migrateAuthenticatorToEncryptedSharedPref(this);
 
         // Use this activity to display animations, initialize some stuff and then proceed to
         // the Accounts activity

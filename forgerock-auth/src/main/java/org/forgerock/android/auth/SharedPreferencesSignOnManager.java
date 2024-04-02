@@ -29,7 +29,7 @@ class SharedPreferencesSignOnManager implements SingleSignOnManager {
     private static final String ORG_FORGEROCK_V_1_KEYS = "org.forgerock.v1.KEYS";
 
     //File name to store tokens
-    private static final String ORG_FORGEROCK_V_1_SSO_TOKENS = "org.forgerock.v1.SSO_TOKENS";
+    private static final String ORG_FORGEROCK_V_1_SSO_TOKENS = "org.forgerock.v1.SSO_TOKENS.latest";
 
     private static final String SSO_TOKEN = "org.forgerock.v1.SSO_TOKEN";
     private static final String COOKIES = "org.forgerock.v1.COOKIES";

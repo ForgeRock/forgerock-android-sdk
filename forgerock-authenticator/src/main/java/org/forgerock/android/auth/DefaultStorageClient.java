@@ -40,11 +40,11 @@ class DefaultStorageClient implements StorageClient {
 
     public DefaultStorageClient(Context context) {
         this.accountData = EncryptedPreferences.getInstance(context,
-                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
+                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT + ".latest", ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.mechanismData =  EncryptedPreferences.getInstance(context,
-                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
+                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM + ".latest", ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.notificationData =  EncryptedPreferences.getInstance(context,
-                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
+                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS + ".latest", ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
     }
 
     @Override

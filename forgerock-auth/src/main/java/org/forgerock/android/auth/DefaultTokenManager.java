@@ -50,7 +50,7 @@ class DefaultTokenManager implements TokenManager {
     static final String ORG_FORGEROCK_V_1_KEYS = "org.forgerock.v1.KEYS";
 
     //File name to store tokens
-    static final String ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS";
+    static final String ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS.latest";
 
     /**
      * The {@link SharedPreferences} to store the tokens
