@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "8735485843",
-    "firebase_url": "https://test-authenticator.firebaseio.com",
-    "project_id": "test-authenticator",
-    "storage_bucket": "test-authenticator.appspot.com"
+    "project_number": "1046670690139",
+    "firebase_url": "https://acme-authenticator.firebaseio.com",
+    "project_id": "acme-authenticator",
+    "storage_bucket": "acme-authenticator.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:8735485843:android:653e06dcc76ae2c3a03c7e",
+        "mobilesdk_app_id": "1:1046670690139:android:653e06dcc76ae2c3a03c7e",
         "android_client_info": {
-          "package_name": "org.forgerock.authenticator.sample"
+          "package_name": "com.acme.authenticator"
         }
       },
       "oauth_client": [
         {
-          "client_id": "8735485843-243sdfsfsdfsdfsdfdsf.apps.googleusercontent.com",
+          "client_id": "1046670690139-s87h4d3rsn316qd70ma0cvp0uve0a8ku.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "afsdtwewwrt5dgdfgdfgfdgfd"
+          "current_key": "AIzaSyAdxDrGFHi13rD0XgAMPtO4GUqZ9aDGarA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "8735485843-243sdfsfsdfsdfsdfdsf.apps.googleusercontent.com",
+              "client_id": "1046670690139-s87h4d3rsn316qd70ma0cvp0uve0a8ku.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
