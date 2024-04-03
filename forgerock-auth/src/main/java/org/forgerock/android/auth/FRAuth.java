@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Builder;
@@ -46,7 +47,10 @@ public class FRAuth {
     public static synchronized void start(Context context, @Nullable FROptions options) {
         if(!started || !FROptions.equals(cachedOptions, options)) {
             started = true;
-            SharedPreferenceRepository.migrateToEncryptedSharedPref(context);
+
+            MigrationManager.orchestrate(context,
+                    Arrays.asList(new AuthMigrationStore(), new SSOMigrationStore()));
+
             FROptions currentOptions = ConfigHelper.load(context, options);
             //Validate (AM URL, Realm, CookieName) is not Empty. If its empty will throw IllegalArgumentException.
             currentOptions.validateConfig();

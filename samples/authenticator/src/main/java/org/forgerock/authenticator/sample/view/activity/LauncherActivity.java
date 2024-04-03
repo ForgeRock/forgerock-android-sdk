@@ -12,7 +12,15 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.forgerock.android.auth.SharedPreferenceRepository;
+import org.forgerock.android.auth.AccountMigrationStore;
+import org.forgerock.android.auth.AuthMigrationStore;
+import org.forgerock.android.auth.MechanismMigrationStore;
+import org.forgerock.android.auth.MigrationKeys;
+import org.forgerock.android.auth.MigrationManager;
+import org.forgerock.android.auth.NotificationMigrationStore;
+import org.forgerock.android.auth.SSOMigrationStore;
+
+import java.util.Arrays;
 
 /**
  * An example full-screen launcher activity
@@ -23,7 +31,10 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferenceRepository.migrateAuthenticatorToEncryptedSharedPref(this);
+        MigrationManager.orchestrate(this,
+                Arrays.asList(new AccountMigrationStore(),
+                        new MechanismMigrationStore(),
+                        new NotificationMigrationStore()));
 
         // Use this activity to display animations, initialize some stuff and then proceed to
         // the Accounts activity

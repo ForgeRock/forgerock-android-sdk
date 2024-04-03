@@ -18,6 +18,7 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Provide data encryption and decryption for Android M device.
@@ -25,6 +26,10 @@ import java.security.KeyStore;
 class AndroidMEncryptor extends AbstractSymmetricEncryptor {
 
     final KeyGenParameterSpec.Builder specBuilder;
+
+    //Hold the current user session.
+    private static final AtomicReference<SecretKey> secretCache = new AtomicReference<>();
+
 
     /**
      * @param keyAlias The key alias to store the key
@@ -45,6 +50,10 @@ class AndroidMEncryptor extends AbstractSymmetricEncryptor {
     protected SecretKey getSecretKey() throws GeneralSecurityException, IOException {
 
         // cache this secret key ?
+        SecretKey key = secretCache.get();
+        if (key != null) {
+            return key;
+        }
 
 
         KeyStore keyStore = getKeyStore();
@@ -52,9 +61,15 @@ class AndroidMEncryptor extends AbstractSymmetricEncryptor {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(
                     KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE);
             keyGenerator.init(specBuilder.build());
-            return keyGenerator.generateKey();
+            SecretKey secretKey = keyGenerator.generateKey();
+            secretCache.set(secretKey);
+            return secretKey;
+
         } else {
-            return ((KeyStore.SecretKeyEntry) keyStore.getEntry(keyAlias, null)).getSecretKey();
+            SecretKey secretKey = ((KeyStore.SecretKeyEntry) keyStore.getEntry(keyAlias, null)).getSecretKey();
+            secretCache.set(secretKey);
+            return secretKey;
+
         }
     }
 

@@ -50,7 +50,7 @@ class DefaultTokenManager implements TokenManager {
     static final String ORG_FORGEROCK_V_1_KEYS = "org.forgerock.v1.KEYS";
 
     //File name to store tokens
-    static final String ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS.latest";
+    static final String ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS";
 
     /**
      * The {@link SharedPreferences} to store the tokens
@@ -81,7 +81,7 @@ class DefaultTokenManager implements TokenManager {
                                Long threshold) {
 
         this.sharedPreferences = sharedPreferences == null ? EncryptedPreferences.getInstance(context,
-                ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
+                MigrationKeys.NEW_ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
 
         Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());
 
