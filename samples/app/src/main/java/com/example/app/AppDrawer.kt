@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.OnDeviceTraining
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -142,6 +143,16 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.Settings, null) },
             onClick = {
                 navigateTo(SETTING);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            label = { Text("Verify") },
+            selected = false,
+            icon = { Icon(Icons.Filled.Verified, null) },
+            onClick = {
+                navigateTo(Destinations.PING_VERIFY);
                 closeDrawer()
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

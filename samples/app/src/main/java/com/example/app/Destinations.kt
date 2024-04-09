@@ -19,5 +19,6 @@ object Destinations {
     const val SETTING = "Setting"
     const val CENTRALIZE_ROUTE = "Centralize Login"
     const val USER_SESSION = "User Session"
+    const val PING_VERIFY = "Ping Verify"
 }
 

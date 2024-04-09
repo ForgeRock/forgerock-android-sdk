@@ -27,6 +27,8 @@ import com.example.app.ig.IGViewModel
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyRoute
 import com.example.app.journey.JourneyViewModel
+import com.example.app.setting.PingVerifyRoute
+import com.example.app.setting.PingVerifyViewModel
 import com.example.app.setting.SettingRoute
 import com.example.app.setting.SettingViewModel
 import com.example.app.token.Token
@@ -119,6 +121,12 @@ fun AppNavHost(navController: NavHostController,
             val settingViewModel = viewModel<SettingViewModel>(
                 factory = SettingViewModel.factory(LocalContext.current))
             SettingRoute(settingViewModel)
+        }
+
+        composable(Destinations.PING_VERIFY) {
+            val vm = viewModel<PingVerifyViewModel>(
+                factory = PingVerifyViewModel.factory(LocalContext.current))
+            PingVerifyRoute(vm)
         }
     }
 }

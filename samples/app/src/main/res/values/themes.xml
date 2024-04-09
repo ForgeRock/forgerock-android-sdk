@@ -32,9 +32,8 @@
         <item name="windowSplashScreenBackground">@color/black</item>
         <item name="postSplashScreenTheme">@style/Theme.SplashScreenAndroid12</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
+
     </style>
-
-
 
 
 </resources>
