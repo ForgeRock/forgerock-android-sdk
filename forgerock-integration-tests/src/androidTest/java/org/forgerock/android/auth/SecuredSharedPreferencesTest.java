@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,10 +7,16 @@
 
 package org.forgerock.android.auth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +27,6 @@ import java.security.KeyStore;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.*;
 
 /**
  *
@@ -55,24 +59,37 @@ public class SecuredSharedPreferencesTest {
         String filePath = context.getFilesDir().getParent() + "/shared_prefs/test.xml";
         File deletePrefFile = new File(filePath);
         deletePrefFile.delete();
+        AndroidMEncryptor.Companion.getKeyReferenceCache().set(null);
     }
+
+    @Test
+    public void testCache() {
+        AndroidMEncryptor.Companion.getKeyReferenceCache().set(null);
+        sharedPreferences.edit().putString("Test", "Value").commit();
+        assertEquals("Value", sharedPreferences.getString("Test", null));
+        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
+    }
+
 
     @Test
     public void testPutString() {
         sharedPreferences.edit().putString("Test", "Value").commit();
         assertEquals("Value", sharedPreferences.getString("Test", null));
+        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
     public void testPutInt() {
         sharedPreferences.edit().putInt("Test", 100).commit();
         assertEquals(100, sharedPreferences.getInt("Test", 0));
+        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
     public void testPutFloat() {
         sharedPreferences.edit().putFloat("Test", 1.5f).commit();
         assertEquals(1.5f, sharedPreferences.getFloat("Test", 1.5f), 0);
+        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
