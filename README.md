@@ -1,5 +1,6 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ForgeRock/forgerock-android-sdk?color=%23f46200&label=Version&style=flat-square)](CHANGELOG.md)
 [![Build Status](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml/badge.svg)](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml)
+[![Coverage](https://codecov.io/gh/ForgeRock/forgerock-android-sdk/graph/badge.svg?token=PGfmkaLyIC)](https://codecov.io/gh/ForgeRock/forgerock-android-sdk)
 
 <p align="center">
   <a href="https://github.com/ForgeRock">

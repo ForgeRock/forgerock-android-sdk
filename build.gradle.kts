@@ -103,9 +103,9 @@ subprojects {
 
 
     tasks.withType<Test>().configureEach {
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security=ALL-UNNAMED")
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security.cert=ALL-UNNAMED")
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.lang=ALL-UNNAMED") as MutableList<String>
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security=ALL-UNNAMED") as MutableList<String>
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security.cert=ALL-UNNAMED") as MutableList<String>
     }
 
 }

@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2024 ForgeRock. All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
+ */
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.withType(Test) {
+    // see related issue https://github.com/gradle/gradle/issues/5184#issuecomment-457865951
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+task testDebugUnitTestCoverage(type: JacocoReport, dependsOn: 'testDebugUnitTest') {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+
+        html.destination file("${buildDir}/coverage-report")
+        xml.destination file("${buildDir}/coverage-report/test-coverage.xml")
+    }
+
+    // Setup the .class, source, and execution directories
+    final fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', 'android/**/*.*']
+    final kotlinTree = fileTree(dir: "${project.buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+    final javacTree = fileTree(dir: "${project.buildDir}/intermediates/javac/debug", excludes: fileFilter)
+    final mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom files([mainSrc])
+    classDirectories.setFrom files([kotlinTree, javacTree])
+    executionData.setFrom fileTree(dir: project.buildDir, includes: [
+            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
+    ])
+}
