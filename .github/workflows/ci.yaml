@@ -18,6 +18,7 @@ jobs:
     uses: ./.github/workflows/build-and-test.yaml
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # Run Mend CLI Scan
   mend-cli-scan:
