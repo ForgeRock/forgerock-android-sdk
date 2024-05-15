@@ -42,10 +42,9 @@ fun SettingRoute(viewModel: SettingViewModel) {
 
     val checked by viewModel.settingState.collectAsState()
     val context = LocalContext.current
-    Row(modifier = Modifier
-            .padding(8.dp)
+    Column(modifier = Modifier
+        .padding(8.dp)
         .fillMaxWidth()) {
-
 
         when (checked.transitionState) {
 
@@ -86,14 +85,9 @@ fun SettingRoute(viewModel: SettingViewModel) {
             }
 
             SettingTransitionState.Enabled -> {
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                ) {
-                    BiometricSetting(isChecked = true, viewModel = viewModel)
-                }
+                BiometricSetting(isChecked = true, viewModel = viewModel)
             }
 
-            else -> {}
         }
         PingProtectSetting(viewModel = viewModel, context)
         SecuredSharedPreferencesTest(viewModel, context)
