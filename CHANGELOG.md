@@ -1,3 +1,7 @@
+## [4.4.1]
+#### Fixed
+- Synchronize the encryption and decryption block to avoid keystore crash [SDKS-3199]
+
 ## [4.4.0]
 #### Added
 - Added `TextInput` callback support [SDKS-545]
