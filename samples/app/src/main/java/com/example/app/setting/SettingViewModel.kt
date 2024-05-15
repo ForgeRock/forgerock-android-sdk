@@ -95,25 +95,25 @@ class SettingViewModel(context: Context) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             for (i in 0..100) {
                 save(ssp, "key$i", "value$i")
-                Logger.debug("1STORAGE", "key$1 -" + get(ssp, "key$i"))
+                Logger.debug("1STORAGE", "key$i -" + get(ssp, "key$i"))
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
             for (i in 0..100) {
                 save(ssp, "key$i", "value$i")
-                Logger.debug("2STORAGE", "key$1 -" + get(ssp, "key$i"))
+                Logger.debug("2STORAGE", "key$i -" + get(ssp, "key$i"))
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
             for (i in 0..100) {
                 save(ssp, "key$i", "value$i")
-                Logger.debug("3STORAGE", "key$1 -" + get(ssp, "key$i"))
+                Logger.debug("3STORAGE", "key$i -" + get(ssp, "key$i"))
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
             for (i in 0..100) {
                 save(ssp, "key$i", "value$i")
-                Logger.debug("4STORAGE", "key$1 -" + get(ssp, "key$i"))
+                Logger.debug("4STORAGE", "key$i -" + get(ssp, "key$i"))
             }
         }
     }
