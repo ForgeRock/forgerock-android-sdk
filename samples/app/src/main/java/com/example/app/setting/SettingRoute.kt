@@ -42,56 +42,61 @@ fun SettingRoute(viewModel: SettingViewModel) {
 
     val checked by viewModel.settingState.collectAsState()
     val context = LocalContext.current
+    Row(modifier = Modifier
+            .padding(8.dp)
+        .fillMaxWidth()) {
 
-    when (checked.transitionState) {
 
-        SettingTransitionState.Disabled -> {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-            ) {
-                BiometricSetting(isChecked = false, viewModel = viewModel)
-                PingProtectSetting(viewModel = viewModel, context)
-            }
-        }
+        when (checked.transitionState) {
 
-        SettingTransitionState.EnableBinding -> {
-
-            RequestInterceptorRegistry.getInstance()
-                .register(object : FRRequestInterceptor<Action> {
-                    override fun intercept(request: Request, tag: Action?): Request {
-                        return if (tag?.payload?.getString("tree").equals(BINDING) ) {
-                            request.newBuilder()
-                                .url(Uri.parse(request.url().toString())
-                                    .buildUpon()
-                                    .appendQueryParameter("ForceAuth", "true").toString())
-                                .build()
-                        } else request
-                    }
-                })
-            val journeyViewModel = viewModel<JourneyViewModel<PolicyAdvice>>(
-                factory = JourneyViewModel.factory(LocalContext.current, BINDING))
-            journeyViewModel.clear()
-            journeyViewModel.start(LocalContext.current)
-            Journey(journeyViewModel = journeyViewModel,
-                onSuccess = {
-                    viewModel.updateStateToEnable()
-                },
-                onFailure = {
-                    viewModel.disable()
+            SettingTransitionState.Disabled -> {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                ) {
+                    BiometricSetting(isChecked = false, viewModel = viewModel)
                 }
-            )
-        }
-
-        SettingTransitionState.Enabled -> {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-            ) {
-                BiometricSetting(isChecked = true, viewModel = viewModel)
-                PingProtectSetting(viewModel = viewModel, context)
             }
-        }
 
-        else -> {}
+            SettingTransitionState.EnableBinding -> {
+
+                RequestInterceptorRegistry.getInstance()
+                    .register(object : FRRequestInterceptor<Action> {
+                        override fun intercept(request: Request, tag: Action?): Request {
+                            return if (tag?.payload?.getString("tree").equals(BINDING)) {
+                                request.newBuilder()
+                                    .url(Uri.parse(request.url().toString())
+                                        .buildUpon()
+                                        .appendQueryParameter("ForceAuth", "true").toString())
+                                    .build()
+                            } else request
+                        }
+                    })
+                val journeyViewModel = viewModel<JourneyViewModel<PolicyAdvice>>(
+                    factory = JourneyViewModel.factory(LocalContext.current, BINDING))
+                journeyViewModel.clear()
+                journeyViewModel.start(LocalContext.current)
+                Journey(journeyViewModel = journeyViewModel,
+                    onSuccess = {
+                        viewModel.updateStateToEnable()
+                    },
+                    onFailure = {
+                        viewModel.disable()
+                    }
+                )
+            }
+
+            SettingTransitionState.Enabled -> {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                ) {
+                    BiometricSetting(isChecked = true, viewModel = viewModel)
+                }
+            }
+
+            else -> {}
+        }
+        PingProtectSetting(viewModel = viewModel, context)
+        SecuredSharedPreferencesTest(viewModel, context)
     }
 }
 
@@ -136,6 +141,26 @@ fun PingProtectSetting(viewModel: SettingViewModel, context: Context) {
 
             }) {
             Text(text = "Enable")
+        }
+    }
+}
+
+@Composable
+fun SecuredSharedPreferencesTest(viewModel: SettingViewModel, context: Context) {
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()) {
+
+        Text(text = "SecuredSharedPreferences Test")
+
+        Spacer(modifier = Modifier.weight(1f, true))
+
+        Button(
+            onClick = {
+                viewModel.sspTest(context)
+            }) {
+            Text(text = "Run")
         }
     }
 }
