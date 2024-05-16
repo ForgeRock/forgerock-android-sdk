@@ -8,10 +8,15 @@
 package org.forgerock.android.auth.webauthn
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.forgerock.android.auth.RemoteWebAuthnRepository
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.forgerock.android.auth.exception.ApiException
 import java.io.IOException
+import kotlin.math.truncate
 
 interface WebAuthnRepository {
 
@@ -45,7 +50,9 @@ class FRWebAuthn @JvmOverloads constructor(private val context: Context,
      * @param publicKeyCredentialSource The [PublicKeyCredentialSource] to be deleted
      */
     fun deleteCredentials(publicKeyCredentialSource: PublicKeyCredentialSource) {
-        webAuthnDataRepository.delete(publicKeyCredentialSource)
+        CoroutineScope(Dispatchers.IO).launch {
+            deleteCredentials(publicKeyCredentialSource, true)
+        }
     }
 
     /**
