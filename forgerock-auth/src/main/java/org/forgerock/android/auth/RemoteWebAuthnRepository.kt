@@ -8,6 +8,7 @@
 package org.forgerock.android.auth
 
 import android.net.Uri
+import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -31,7 +32,8 @@ internal class RemoteWebAuthnRepository(val serverConfig: ServerConfig = Config.
     WebAuthnRepository {
 
     override suspend fun delete(publicKeyCredentialSource: PublicKeyCredentialSource) {
-        val credentialId = String(publicKeyCredentialSource.id)
+        val credentialId = Base64.encodeToString(publicKeyCredentialSource.id,
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
         val userId = String(publicKeyCredentialSource.userHandle)
 
         val findResponse = find(userId, credentialId)
