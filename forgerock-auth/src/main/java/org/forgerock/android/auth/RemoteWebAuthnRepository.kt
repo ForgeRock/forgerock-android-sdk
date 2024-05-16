@@ -35,7 +35,7 @@ internal class RemoteWebAuthnRepository(val serverConfig: ServerConfig = Config.
         val userId = String(publicKeyCredentialSource.userHandle)
 
         val findResponse = find(userId, credentialId)
-        val resourceId = findResponse.getString("uuid")
+        val resourceId = findResponse.optString("uuid", "")
         if (resourceId.isNotEmpty()) {
             val deleteResponse = invokeDelete(userId, resourceId)
             if (deleteResponse.code != HttpURLConnection.HTTP_OK) {
