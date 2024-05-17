@@ -11,12 +11,10 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.forgerock.android.auth.RemoteWebAuthnRepository
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.forgerock.android.auth.exception.ApiException
 import java.io.IOException
-import kotlin.math.truncate
 
 interface WebAuthnRepository {
 
@@ -37,7 +35,8 @@ class FRWebAuthn @JvmOverloads constructor(private val context: Context,
                  private val remoteWebAuthnRepository: WebAuthnRepository? = RemoteWebAuthnRepository()) {
 
     /**
-     * Delete the [PublicKeyCredentialSource] by Relying Party Id
+     * Delete the [PublicKeyCredentialSource] by Relying Party Id.
+     * This method does not delete the keys from the server.
      * @param rpId The relying party id to lookup from the internal storage
      */
     fun deleteCredentials(rpId: String) {
@@ -65,6 +64,7 @@ class FRWebAuthn @JvmOverloads constructor(private val context: Context,
     suspend fun deleteCredentials(publicKeyCredentialSource: PublicKeyCredentialSource, forceDelete: Boolean = false) {
         try {
             remoteWebAuthnRepository?.delete(publicKeyCredentialSource)
+            webAuthnDataRepository.delete(publicKeyCredentialSource)
         } catch (e: Exception) {
             if (forceDelete) {
                 webAuthnDataRepository.delete(publicKeyCredentialSource)

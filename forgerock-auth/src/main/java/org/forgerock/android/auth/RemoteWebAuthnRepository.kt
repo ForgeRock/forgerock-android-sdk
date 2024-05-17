@@ -52,7 +52,7 @@ internal class RemoteWebAuthnRepository(val serverConfig: ServerConfig = Config.
         if (response.code != HttpURLConnection.HTTP_OK) {
             throw ApiException(response.code, response.message, "Failed to find resource")
         } else {
-            return JSONObject(response.body.toString())
+            return response.body?.use { JSONObject(it.string()) } ?: JSONObject()
         }
     }
 

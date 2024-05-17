@@ -13,7 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.RemoteWebAuthnRepository
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.forgerock.android.auth.exception.ApiException
@@ -25,7 +25,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 /**
  * This test is only focus on the wrapper [FRWebAuthn], refer to WebAuthnDataRepositoryTest for
