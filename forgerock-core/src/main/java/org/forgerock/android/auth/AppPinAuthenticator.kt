@@ -7,11 +7,6 @@
 package org.forgerock.android.auth
 
 import android.content.Context
-import java.math.BigInteger
-import java.security.KeyPair
-import java.security.PrivateKey
-import java.security.cert.X509Certificate
-import java.util.*
 import org.spongycastle.asn1.x500.X500Name
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
@@ -23,9 +18,16 @@ import org.spongycastle.operator.DefaultDigestAlgorithmIdentifierFinder
 import org.spongycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
 import org.spongycastle.operator.bc.BcRSAContentSignerBuilder
 import java.io.IOException
+import java.math.BigInteger
+import java.security.KeyPair
 import java.security.KeyStore
+import java.security.PrivateKey
 import java.security.UnrecoverableKeyException
+import java.security.cert.X509Certificate
 import java.security.spec.RSAKeyGenParameterSpec
+import java.util.Calendar
+import java.util.Locale
+
 
 private val TAG = AppPinAuthenticator::class.java.simpleName
 /**
@@ -98,21 +100,30 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
         }
     }
 
+
     private fun generateCertificate(keyPair: KeyPair, subject: String): X509Certificate {
-        val validityBeginDate = Date()
-        val owner = X500Name("cn=$subject")
-        val sigAlgId: AlgorithmIdentifier =
-            DefaultSignatureAlgorithmIdentifierFinder().find("SHA256WithRSA")
-        val digAlgId: AlgorithmIdentifier = DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId)
-        val privateKeyAsymKeyParam: AsymmetricKeyParameter =
-            PrivateKeyFactory.createKey(keyPair.private.encoded)
-        val sigGen = BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam)
-        val builder = X509v1CertificateBuilder(owner,
-            BigInteger.valueOf(System.currentTimeMillis()),
-            validityBeginDate,
-            validityBeginDate,
-            owner,
-            SubjectPublicKeyInfo.getInstance(keyPair.public.encoded))
-        return JcaX509CertificateConverter().getCertificate(builder.build(sigGen))
+        val initialLocale = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.ENGLISH)
+            val start = Calendar.getInstance().time
+            val owner = X500Name("cn=$subject")
+            val sigAlgId: AlgorithmIdentifier =
+                DefaultSignatureAlgorithmIdentifierFinder().find("SHA256WithRSA")
+            val digAlgId: AlgorithmIdentifier = DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId)
+            val privateKeyAsymKeyParam: AsymmetricKeyParameter =
+                PrivateKeyFactory.createKey(keyPair.private.encoded)
+            val sigGen = BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(privateKeyAsymKeyParam)
+            val builder = X509v1CertificateBuilder(owner,
+                BigInteger.valueOf(System.currentTimeMillis()),
+                start,
+                start,
+                owner,
+                SubjectPublicKeyInfo.getInstance(keyPair.public.encoded))
+            return JcaX509CertificateConverter().getCertificate(builder.build(sigGen))
+        } finally {
+            Locale.setDefault(initialLocale)
+        }
+
+
     }
 }
