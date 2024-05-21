@@ -8,9 +8,6 @@
 package org.forgerock.android.auth.webauthn
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.forgerock.android.auth.RemoteWebAuthnRepository
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.forgerock.android.auth.exception.ApiException
@@ -45,13 +42,13 @@ class FRWebAuthn @JvmOverloads constructor(private val context: Context,
 
     /**
      * Delete the provide [PublicKeyCredentialSource], the [PublicKeyCredentialSource.id] will
-     * be used as the key to lookup from internal storage
+     * be used as the key to lookup from internal storage.
+     * This method does not delete the keys from the server.
      * @param publicKeyCredentialSource The [PublicKeyCredentialSource] to be deleted
      */
+    @Deprecated("Use deleteCredentials(publicKeyCredentialSource: PublicKeyCredentialSource, forceDelete: Boolean = false)")
     fun deleteCredentials(publicKeyCredentialSource: PublicKeyCredentialSource) {
-        CoroutineScope(Dispatchers.IO).launch {
-            deleteCredentials(publicKeyCredentialSource, true)
-        }
+        webAuthnDataRepository.delete(publicKeyCredentialSource)
     }
 
     /**
