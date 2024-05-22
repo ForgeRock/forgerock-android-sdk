@@ -64,8 +64,6 @@ allprojects {
             //Due to this https://github.com/powermock/powermock/issues/1125, we have to keep using an
             //older version of mockito until mockito release a fix
             force("org.mockito:mockito-core:3.12.4")
-            // this is for the mockwebserver
-            force("org.bouncycastle:bcprov-jdk15on:1.68")
         }
     }
 }

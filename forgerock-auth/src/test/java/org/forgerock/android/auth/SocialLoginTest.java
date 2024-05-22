@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -28,7 +28,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelWriter;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.forgerock.android.auth.callback.CallbackFactory;
 import org.forgerock.android.auth.callback.IdPCallback;
@@ -45,6 +44,8 @@ import org.robolectric.Robolectric;
 import java.net.HttpURLConnection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+
+import okhttp3.mockwebserver.RecordedRequest;
 
 @RunWith(AndroidJUnit4.class)
 public class SocialLoginTest extends BaseTest {
