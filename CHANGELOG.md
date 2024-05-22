@@ -1,6 +1,7 @@
 ## [4.4.2]
 #### Fixed
-- SDKS-3073 Resolve commons-io-2.6.jar and bcprov-jdk15on-1.68.jar vulnerability warning [SDKS-3073]
+- Resolve commons-io-2.6.jar and bcprov-jdk15on-1.68.jar vulnerability warning [SDKS-3073]
+- Use English locale when generating certificate for Application Pin [SDKS-3221]
 
 ## [4.4.1]
 #### Fixed
