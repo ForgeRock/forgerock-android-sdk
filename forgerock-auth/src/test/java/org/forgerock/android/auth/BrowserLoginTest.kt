@@ -17,9 +17,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import com.squareup.okhttp.mockwebserver.MockResponse
-import com.squareup.okhttp.mockwebserver.RecordedRequest
 import net.openid.appauth.*
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException
 import org.forgerock.android.auth.exception.ApiException
@@ -406,7 +406,7 @@ class BrowserLoginTest : BaseTest() {
         vararg recordedRequests: RecordedRequest
     ): RecordedRequest {
         for (r in recordedRequests) {
-            if (r.path.startsWith(path)) {
+            if (r.path!!.startsWith(path)) {
                 return r
             }
         }

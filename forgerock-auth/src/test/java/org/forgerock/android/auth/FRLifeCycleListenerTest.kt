@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 -2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -9,7 +9,7 @@ package org.forgerock.android.auth
 import android.content.Context
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.squareup.okhttp.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockResponse
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback

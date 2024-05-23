@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -12,8 +12,6 @@ import android.net.Uri;
 import android.os.OperationCanceledException;
 import android.util.Pair;
 
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.callback.SuspendedTextOutputCallback;
@@ -22,7 +20,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -33,6 +30,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.android.auth.Action.AUTHENTICATE;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import okhttp3.mockwebserver.RecordedRequest;
 
 @RunWith(AndroidJUnit4.class)
 public class FRSessionMockTest extends BaseTest {

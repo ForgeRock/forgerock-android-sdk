@@ -1,3 +1,7 @@
+## [4.4.2]
+#### Fixed
+- SDKS-3073 Resolve commons-io-2.6.jar and bcprov-jdk15on-1.68.jar vulnerability warning [SDKS-3073]
+
 ## [4.4.1]
 #### Fixed
 - Synchronize the encryption and decryption block to avoid keystore crash [SDKS-3199]
