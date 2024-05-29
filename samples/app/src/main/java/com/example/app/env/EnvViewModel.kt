@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
@@ -148,9 +150,9 @@ class EnvViewModel : ViewModel() {
     }
 
     fun select(context: Context, options: FROptions) {
-        FRAuth.start(context, options)
-        current = options
-    }
+            FRAuth.start(context, options)
+            current = options
+   }
 
     fun select(context: Context, host: String) {
         servers.find {

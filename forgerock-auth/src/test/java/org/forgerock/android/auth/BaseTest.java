@@ -67,7 +67,7 @@ public class BaseTest {
             Config.getInstance().getSingleSignOnManager().clear();
             Config.reset();
         }
-   }
+    }
 
     protected String getUrl() {
         return "http://" + server.getHostName() + ":" + server.getPort();

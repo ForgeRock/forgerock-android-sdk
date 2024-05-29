@@ -188,14 +188,11 @@ internal class ConfigHelper {
          * @param context  The Application Context
          * @param options  The FrOptions to be passed
          */
-        @JvmOverloads
-        @JvmStatic
-        fun getPersistedConfig(context: Context,
+        suspend fun getPersistedConfig(context: Context,
                                options: FROptions? = null): Config {
 
-            val config = Config()
-            config.init(context, options ?: loadFromPreference(context))
-            return config
+            Config.init(context, options ?: loadFromPreference(context))
+            return Config
         }
     }
 }

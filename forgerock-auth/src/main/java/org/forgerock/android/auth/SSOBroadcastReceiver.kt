@@ -10,6 +10,7 @@ package org.forgerock.android.auth
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.runBlocking
 import org.forgerock.android.auth.BroadcastConst.broadcastPackageKey
 
 /**
@@ -21,13 +22,15 @@ class SSOBroadcastReceiver(private var config: Config? = null): BroadcastReceive
         if(intent?.getStringExtra(broadcastPackageKey) != context?.packageName
             && context != null
             && intent?.action == context.resources?.getString(R.string.forgerock_sso_logout)) {
-            try {
-                (config ?: ConfigHelper.getPersistedConfig(context, null))
-                    .tokenManager.revoke(null)
+            runBlocking {
+                try {
+                    (config ?: ConfigHelper.getPersistedConfig(context, null))
+                        .tokenManager.revoke(null)
+                }
+                catch (e: Exception) {
+                    Logger.warn(SSOBroadcastReceiver::class.java.simpleName, e.message)
+                }
             }
-            catch (e: Exception) {
-                Logger.warn(SSOBroadcastReceiver::class.java.simpleName, e.message)
-            }
-        }
+       }
     }
 }
