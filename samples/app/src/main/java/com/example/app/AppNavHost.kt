@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -46,7 +46,8 @@ fun AppNavHost(navController: NavHostController,
         startDestination = startDestination) {
 
         composable(Destinations.ENV_ROUTE) {
-            val envViewModel = viewModel<EnvViewModel>()
+
+            val envViewModel: EnvViewModel = viewModel<EnvViewModel>()
             val preferenceViewModel = viewModel<PreferenceViewModel>(
                 factory = PreferenceViewModel.factory(LocalContext.current)
             )

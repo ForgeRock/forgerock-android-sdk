@@ -12,6 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
@@ -142,6 +146,17 @@ class EnvViewModel : ViewModel() {
         }
     }
 
+    val pingOidc = FROptionsBuilder.build {
+        server {
+            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
+        }
+        oauth {
+            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthScope = "openid email address phone profile revoke"
+        }
+    }
+
     var current by mutableStateOf(dbind)
         private set
 
@@ -152,10 +167,20 @@ class EnvViewModel : ViewModel() {
         servers.add(local)
         servers.add(ops)
         servers.add(forgeblock)
+        servers.add(pingOidc)
     }
 
     fun select(context: Context, options: FROptions) {
-        FRAuth.start(context, options)
+        if(options.server.url.contains("pingone")) {
+            viewModelScope.launch {
+                val option =
+                    options.discover(options.server.url + "/.well-known/openid-configuration")
+                FRAuth.start(context, option)
+            }
+        }
+        else {
+            FRAuth.start(context, options)
+        }
         current = options
     }
 
