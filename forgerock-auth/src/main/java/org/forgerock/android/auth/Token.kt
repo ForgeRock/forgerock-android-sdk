@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,7 +11,7 @@ import java.io.Serializable
 /**
  * Domain object to hold generic Token
  */
-open class Token(val value: String) : Serializable {
+open class Token(open val value: String) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Token) return false

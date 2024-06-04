@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -142,8 +142,8 @@ class MainActivity : AppCompatActivity(), NodeListener<FRUser>, ActivityListener
 
     private fun launchUserInfoFragment(token: AccessToken, result: FRUser?) {
         val userInfoFragment = UserInfoFragment.newInstance(result?.accessToken?.value,
-            token.refreshToken,
-            token.idToken,
+            token.refreshToken!!,
+            token.idToken!!,
             this@MainActivity)
         userInfoFragment.let {
             supportFragmentManager.beginTransaction().add(R.id.container, it, UserInfoFragment.TAG).commit()

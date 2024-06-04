@@ -22,23 +22,30 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "https://openam-protect2.forgeblocks.com/am"
+            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447"
             realm = "alpha"
             cookieName = "c1c805de4c9b333"
             timeout = 50
         }
         oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
             oauthCacheSeconds = 0
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
+            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
+        }
+        urlPath {
+            authorizeEndpoint = "/as/authorize"
+            tokenEndpoint = "/as/token"
+            endSessionEndpoint = "/as/signoff"
+            revokeEndpoint = "/as/revoke"
+            userinfoEndpoint = "/as/userinfo"
         }
         service {
             authServiceName = "protect"
         }
     }
-
 
     val dbind = FROptionsBuilder.build {
         server {

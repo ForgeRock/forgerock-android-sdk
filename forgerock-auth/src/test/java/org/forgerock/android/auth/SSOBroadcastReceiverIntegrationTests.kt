@@ -135,7 +135,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val body = refreshTokenRevoke.body.readUtf8()
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
-        assertTrue(body.contains(accessToken.refreshToken))
+        assertTrue(body.contains(accessToken.refreshToken!!))
     }
 }
 
