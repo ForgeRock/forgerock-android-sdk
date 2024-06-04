@@ -52,7 +52,8 @@ class FRWebAuthn @JvmOverloads constructor(private val context: Context,
     }
 
     /**
-     * Delete the provide [PublicKeyCredentialSource] from local storage and also remotely from Server.
+     * Delete the provide [PublicKeyCredentialSource] from local storage and also remotely from
+     * Server if the key is discoverable.
      * By default, if failed to delete from server, local storage will not be deleted,
      * by providing [forceDelete] to true, it will also delete local keys if server call is failed.
      * @param publicKeyCredentialSource The [PublicKeyCredentialSource] to be deleted

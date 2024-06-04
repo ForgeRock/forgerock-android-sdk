@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -156,13 +156,16 @@ open class WebAuthnRegistration() : WebAuthn() {
                 publicKeyCredential.rawId,
                 Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING))
 
-        val source = PublicKeyCredentialSource.builder()
-            .id(publicKeyCredential.rawId)
-            .rpid(options.rp.id)
-            .userHandle(Base64.decode(options.user.id, Base64.URL_SAFE or Base64.NO_WRAP))
-            .otherUI(options.user.displayName).build()
-        persist(context, source)
-
+        //Extension to support username-less
+        if (options.authenticatorSelection?.requireResidentKey == true &&
+            options.authenticatorSelection?.residentKeyRequirement == ResidentKeyRequirement.RESIDENT_KEY_DISCOURAGED) {
+            val source = PublicKeyCredentialSource.builder()
+                .id(publicKeyCredential.rawId)
+                .rpid(options.rp.id)
+                .userHandle(Base64.decode(options.user.id, Base64.URL_SAFE or Base64.NO_WRAP))
+                .otherUI(options.user.displayName).build()
+            persist(context, source)
+        }
         return (sb.toString())
     }
 
