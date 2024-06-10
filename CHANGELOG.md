@@ -1,4 +1,7 @@
-## [4.4.2]
+## [4.5.0]
+#### Added
+- Support Centralize Oidc Signoff with PingOne [SDKS-3020]
+
 #### Fixed
 - Resolve commons-io-2.6.jar and bcprov-jdk15on-1.68.jar vulnerability warning [SDKS-3073]
 - Use English locale when generating certificate for Application Pin [SDKS-3221]

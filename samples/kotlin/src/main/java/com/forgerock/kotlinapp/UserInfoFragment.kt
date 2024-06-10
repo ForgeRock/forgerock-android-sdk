@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -83,7 +83,7 @@ class UserInfoFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String?, param2: String,param3: String, listener: ActivityListener?) =
+        fun newInstance(param1: String?, param2: String?,param3: String?, listener: ActivityListener?) =
             UserInfoFragment().apply {
                 this.listener = listener
                 arguments = Bundle().apply {

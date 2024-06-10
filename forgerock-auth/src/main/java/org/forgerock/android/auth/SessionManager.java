@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
+import org.forgerock.android.auth.centralize.AppAuthFragment2;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
 import java.util.Arrays;
@@ -117,9 +118,27 @@ public class SessionManager {
      * Close the session, all tokens will be removed.
      */
     public void close() {
+        browserLogout();
         tokenManager.revoke(null);
         singleSignOnManager.revoke(null);
     }
+
+    private void browserLogout() {
+        try {
+            OAuth2Client oAuth2Client = Config.getInstance().getOAuth2Client();
+            if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
+                AccessToken accessToken = getTokenManager().getAccessToken();
+                String idToken = "";
+                if (accessToken != null && accessToken.getIdToken() != null) {
+                    idToken = accessToken.getIdToken();
+                }
+                AppAuthFragment2.endSession(oAuth2Client, idToken, new DoNothingListener<>());
+            }
+        } catch (Exception e) {
+            //ignore
+        }
+    }
+
 
     /**
      * Calling TokenManager to revoke OAuth2.0 tokens

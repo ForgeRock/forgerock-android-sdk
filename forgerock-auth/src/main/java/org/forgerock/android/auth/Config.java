@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -35,6 +35,7 @@ public class Config {
     //OAuth2
     private String clientId;
     private String redirectUri;
+    private String signOutRedirectUri;
     private String scope;
     private Long oauthCacheMillis;
     private Long oauthThreshold;
@@ -127,6 +128,7 @@ public class Config {
         FROptions options = (frOptions == null) ? ConfigHelper.load(context, null) : frOptions;
         clientId = options.getOauth().getOauthClientId();
         redirectUri = options.getOauth().getOauthRedirectUri();
+        signOutRedirectUri = options.getOauth().getOauthSignOutRedirectUri();
         scope = options.getOauth().getOauthScope();
         oauthCacheMillis = options.getOauth().getOauthCacheSeconds() * 1000;
         oauthThreshold = options.getOauth().getOauthThresholdSeconds();
@@ -186,11 +188,12 @@ public class Config {
                 .build();
     }
 
-    OAuth2Client getOAuth2Client() {
+    public OAuth2Client getOAuth2Client() {
         return OAuth2Client.builder()
                 .clientId(clientId)
                 .scope(scope)
                 .redirectUri(redirectUri)
+                .signOutRedirectUri(signOutRedirectUri)
                 .serverConfig(getServerConfig())
                 .build();
     }

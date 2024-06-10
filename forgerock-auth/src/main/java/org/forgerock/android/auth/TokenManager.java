@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -62,6 +62,12 @@ public interface TokenManager {
      * @param tokenListener       Listener to listen for get access token event.
      */
     void getAccessToken(AccessTokenVerifier accessTokenVerifier, FRListener<AccessToken> tokenListener);
+
+    /**
+     * Get the persisted {@link AccessToken}, no validation and no auto refresh, just return the stored {@link AccessToken}
+     * @return The AccessToken if exists, otherwise null
+     */
+    AccessToken getAccessToken();
 
     /**
      * Check if token exists in the storage.

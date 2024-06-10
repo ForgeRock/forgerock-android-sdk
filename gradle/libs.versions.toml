@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.2"
+agp = "8.3.2"
 annotation = "1.6.0"
 appauth = "0.11.1"
 appcompat = "1.6.1"
@@ -12,6 +12,7 @@ easy-random-core = "4.0.0"
 facebook-login = "16.0.0"
 firebase-messaging = "23.1.2"
 fragment-ktx = "1.6.1"
+activity-ktx = "1.6.1"
 integrity = "1.3.0"
 kotlin = "1.9.22"
 junit = "4.13.2"
@@ -49,6 +50,7 @@ androidx-biometric-ktx = { module = "androidx.biometric:biometric-ktx", version.
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espresso-core" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment-ktx" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment-ktx" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
 appauth = { module = "net.openid:appauth", version.ref = "appauth" }
@@ -89,6 +91,7 @@ rules = { module = "androidx.test:rules", version.ref = "rules" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 
 [plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

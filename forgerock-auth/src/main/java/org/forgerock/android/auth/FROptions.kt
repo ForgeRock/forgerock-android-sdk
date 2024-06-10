@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -148,6 +148,7 @@ class ServerBuilder {
  */
 data class OAuth(val oauthClientId: String = "",
                  val oauthRedirectUri: String = "",
+                 val oauthSignOutRedirectUri: String = "",
                  val oauthScope: String = "",
                  val oauthThresholdSeconds: Long = 0,
                  val oauthCacheSeconds: Long = 0)
@@ -158,11 +159,13 @@ data class OAuth(val oauthClientId: String = "",
 class OAuthBuilder {
     var oauthClientId: String = ""
     var oauthRedirectUri: String = ""
+    var oauthSignOutRedirectUri: String = ""
     var oauthScope: String = ""
     var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
 
-    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
+    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthSignOutRedirectUri,
+        oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
 
 }
 

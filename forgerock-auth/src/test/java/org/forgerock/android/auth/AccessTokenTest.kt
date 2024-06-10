@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -30,7 +30,7 @@ class AccessTokenTest {
         Assert.assertEquals("{\"value\":\"MyAccessToken\",\"expiresIn\":30,\"refreshToken\":\"myRefreshToken\",\"idToken\":\"myIdToken\",\"tokenType\":\"myTokenType\",\"scope\":[\"test2\",\"test1\"],\"expiration\":1565825948754}",
             json)
         val newAccessToken = AccessToken.fromJson(json)
-        Assert.assertEquals(accessToken.value, newAccessToken.value)
+        Assert.assertEquals(accessToken.value, newAccessToken!!.value)
         Assert.assertEquals(accessToken.expiration, newAccessToken.expiration)
         Assert.assertEquals(accessToken.expiresIn, newAccessToken.expiresIn)
         Assert.assertEquals(accessToken.idToken, newAccessToken.idToken)
@@ -42,7 +42,7 @@ class AccessTokenTest {
     @Test
     fun parseTest() {
         val scope = AccessToken.Scope.parse("openid email profile")
-        Assert.assertEquals(3, scope.size.toLong())
+        Assert.assertEquals(3, scope!!.size.toLong())
         Assert.assertTrue(scope.contains("openid"))
         Assert.assertTrue(scope.contains("email"))
         Assert.assertTrue(scope.contains("profile"))

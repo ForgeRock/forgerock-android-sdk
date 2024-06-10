@@ -56,8 +56,8 @@ class DefaultTokenManagerTest : BaseTest() {
         val storedAccessToken = getAccessToken(tokenManager)
         assertEquals("access token", storedAccessToken.value)
         assertEquals("id token", storedAccessToken.idToken)
-        assertTrue(storedAccessToken.scope.contains("openid"))
-        assertTrue(storedAccessToken.scope.contains("test"))
+        assertTrue(storedAccessToken.scope!!.contains("openid"))
+        assertTrue(storedAccessToken.scope!!.contains("test"))
         assertEquals("Bearer", storedAccessToken.tokenType)
         assertEquals("refresh token", storedAccessToken.refreshToken)
     }
