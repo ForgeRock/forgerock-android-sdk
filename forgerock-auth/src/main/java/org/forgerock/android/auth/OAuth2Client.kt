@@ -316,9 +316,13 @@ class OAuth2Client(
     @get:Throws(MalformedURLException::class)
     val authorizeUrl: URL
         get() {
+            val authorizeEndpoint = serverConfig.authorizeEndpoint
+            if (authorizeEndpoint.isAbsoluteUrl()) {
+                return URL(authorizeEndpoint)
+            }
             val builder = Uri.parse(serverConfig.url).buildUpon()
-            if (StringUtils.isNotEmpty(serverConfig.authorizeEndpoint)) {
-                builder.appendEncodedPath(serverConfig.authorizeEndpoint)
+            if (StringUtils.isNotEmpty(authorizeEndpoint)) {
+                builder.appendEncodedPath(authorizeEndpoint)
             } else {
                 builder.appendPath("oauth2")
                     .appendPath("realms")
@@ -331,9 +335,13 @@ class OAuth2Client(
     @get:Throws(MalformedURLException::class)
     val tokenUrl: URL
         get() {
+            val tokenEndpoint = serverConfig.tokenEndpoint
+            if (tokenEndpoint.isAbsoluteUrl()) {
+                return URL(tokenEndpoint)
+            }
             val builder = Uri.parse(serverConfig.url).buildUpon()
-            if (StringUtils.isNotEmpty(serverConfig.tokenEndpoint)) {
-                builder.appendEncodedPath(serverConfig.tokenEndpoint)
+            if (StringUtils.isNotEmpty(tokenEndpoint)) {
+                builder.appendEncodedPath(tokenEndpoint)
             } else {
                 builder.appendPath("oauth2")
                     .appendPath("realms")
@@ -346,9 +354,14 @@ class OAuth2Client(
     @get:Throws(MalformedURLException::class)
     val revokeUrl: URL
         get() {
+            val revokeEndpoint = serverConfig.revokeEndpoint
+
+            if (revokeEndpoint.isAbsoluteUrl()) {
+                return URL(revokeEndpoint)
+            }
             val builder = Uri.parse(serverConfig.url).buildUpon()
-            if (StringUtils.isNotEmpty(serverConfig.revokeEndpoint)) {
-                builder.appendEncodedPath(serverConfig.revokeEndpoint)
+            if (StringUtils.isNotEmpty(revokeEndpoint)) {
+                builder.appendEncodedPath(revokeEndpoint)
             } else {
                 builder.appendPath("oauth2")
                     .appendPath("realms")
@@ -362,9 +375,13 @@ class OAuth2Client(
     @get:Throws(MalformedURLException::class)
     val endSessionUrl: URL
         get() {
+            val sessionEndpoint = serverConfig.endSessionEndpoint
+            if (sessionEndpoint.isAbsoluteUrl()) {
+                return URL(sessionEndpoint)
+            }
             val builder = Uri.parse(serverConfig.url).buildUpon()
-            if (StringUtils.isNotEmpty(serverConfig.endSessionEndpoint)) {
-                builder.appendEncodedPath(serverConfig.endSessionEndpoint)
+            if (StringUtils.isNotEmpty(sessionEndpoint)) {
+                builder.appendEncodedPath(sessionEndpoint)
             } else {
                 builder.appendPath("oauth2")
                     .appendPath("realms")

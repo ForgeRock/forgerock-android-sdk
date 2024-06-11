@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,7 +7,9 @@
 
 package org.forgerock.android.auth;
 
+
 import android.net.Uri;
+
 import lombok.Builder;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import static org.forgerock.android.auth.KotlinExtensionsKt.isAbsoluteUrl;
 
 /**
  * Service Client
@@ -84,9 +87,15 @@ class UserService implements ResponseHandler {
 
     private URL getUserInfoUrl() throws MalformedURLException {
 
+        String userInfoEndpoint = serverConfig.getUserInfoEndpoint();
+
+        if(isAbsoluteUrl(userInfoEndpoint)) {
+            return new URL(userInfoEndpoint);
+        }
+
         Uri.Builder builder = Uri.parse(serverConfig.getUrl()).buildUpon();
-        if (StringUtils.isNotEmpty(serverConfig.getUserInfoEndpoint())) {
-            builder.appendEncodedPath(serverConfig.getUserInfoEndpoint());
+        if (StringUtils.isNotEmpty(userInfoEndpoint)) {
+            builder.appendEncodedPath(userInfoEndpoint);
         } else {
             builder.appendPath("oauth2")
                     .appendPath("realms")
