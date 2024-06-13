@@ -26,7 +26,7 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447"
+            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
             realm = "alpha"
             cookieName = "c1c805de4c9b333"
             timeout = 50
@@ -38,13 +38,6 @@ class EnvViewModel : ViewModel() {
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
             oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
-        }
-        urlPath {
-            authorizeEndpoint = "/as/authorize"
-            tokenEndpoint = "/as/token"
-            endSessionEndpoint = "/as/signoff"
-            revokeEndpoint = "/as/revoke"
-            userinfoEndpoint = "/as/userinfo"
         }
         service {
             authServiceName = "protect"
@@ -131,7 +124,7 @@ class EnvViewModel : ViewModel() {
         server {
             url = "https://openam-sdks.forgeblocks.com/am"
             realm = "alpha"
-            cookieName = "iPlanetDirectoryPro"
+            cookieName = "5421aeddf91aa20"
             timeout = 50
         }
         oauth {

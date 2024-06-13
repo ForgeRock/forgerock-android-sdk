@@ -40,6 +40,9 @@ internal class AppAuthFragment2 : Fragment() {
 
         val delegate =
             registerForActivityResult(AuthorizeContract()) {
+                parentFragmentManager.beginTransaction().remove(this).commit()
+                BrowserLauncher.reset()
+
                 when (it) {
                     is Result.Failure -> state.value = Result.Failure(it.value)
                     is Result.Success -> {
@@ -57,6 +60,9 @@ internal class AppAuthFragment2 : Fragment() {
             MutableStateFlow(null)
         val endSession =
             registerForActivityResult(EndSessionContract()) {
+                parentFragmentManager.beginTransaction().remove(this).commit()
+                BrowserLauncher.reset()
+
                 when (it) {
                     is Result.Failure -> endSessionState.value = Result.Failure(it.value)
                     is Result.Success -> {
@@ -112,10 +118,8 @@ internal class AppAuthFragment2 : Fragment() {
             CoroutineScope(Dispatchers.Default).launch {
                 try {
                     listener.onSuccess(BrowserLauncher.authorize(browser, current.pending))
-                    reset(activity, fragmentManager, current)
                 } catch (e: Exception) {
                     listener.onException(e)
-                    reset(activity, fragmentManager, current)
                 }
             }
         }
@@ -123,17 +127,17 @@ internal class AppAuthFragment2 : Fragment() {
         @Synchronized
         @JvmStatic
         fun endSession(
-            oAuth2Client: OAuth2Client,
-            idToken: String,
+            input: EndSessionInput,
             listener: FRListener<EndSessionResponse>) {
-            endSession(InitProvider.getCurrentActivityAsFragmentActivity(), oAuth2Client, idToken, listener)
+            endSession(InitProvider.getCurrentActivityAsFragmentActivity(),
+                input,
+                listener)
         }
 
         @Synchronized
         @JvmStatic
         fun endSession(activity: FragmentActivity,
-                       oAuth2Client: OAuth2Client,
-                       idToken: String,
+                       input: EndSessionInput,
                        listener: FRListener<EndSessionResponse>) {
             val fragmentManager: FragmentManager = activity.supportFragmentManager
             var current = fragmentManager.findFragmentByTag(TAG) as? AppAuthFragment2
@@ -144,29 +148,10 @@ internal class AppAuthFragment2 : Fragment() {
 
             CoroutineScope(Dispatchers.Default).launch {
                 try {
-                    listener.onSuccess(BrowserLauncher.endSession(oAuth2Client,
-                        idToken,
+                    listener.onSuccess(BrowserLauncher.endSession(input,
                         current.pending))
-                    reset(activity, fragmentManager, current)
                 } catch (e: Exception) {
                     listener.onException(e)
-                    reset(activity, fragmentManager, current)
-                }
-            }
-        }
-
-        /**
-         * Once receive the result, reset state.
-         */
-        private fun reset(activity: FragmentActivity,
-                          fragmentManager: FragmentManager,
-                          fragment: Fragment?) {
-            activity.runOnUiThread {
-                BrowserLauncher.reset()
-            }
-            fragment?.let {
-                activity.runOnUiThread {
-                    fragmentManager.beginTransaction().remove(it).commitNow()
                 }
             }
         }
