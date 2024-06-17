@@ -64,6 +64,7 @@ dependencies {
 
     //Make it optional for developer
     compileOnly(libs.play.services.location)
+    compileOnly(libs.recaptcha)
     compileOnly(libs.play.services.safetynet)
     // Keeping this version for now, its breaking Apple SignIn for the later versions.
     compileOnly(libs.appauth)

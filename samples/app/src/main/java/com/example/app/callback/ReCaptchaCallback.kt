@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.app.LocalAppContext
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
@@ -32,7 +33,7 @@ fun ReCaptchaCallback(callback: ReCaptchaCallback, node: Node,
 
     val currentOnCompleted by rememberUpdatedState(onCompleted)
     val context = LocalContext.current
-
+    val application = LocalAppContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -49,9 +50,8 @@ fun ReCaptchaCallback(callback: ReCaptchaCallback, node: Node,
             Text(text = "Launching Recaptcha...")
             Spacer(Modifier.height(8.dp))
             CircularProgressIndicator()
-
             LaunchedEffect(true) {
-                callback.proceed(context, object : FRListener<Void?> {
+                callback.proceed(context, application = application, listener = object : FRListener<Void?> {
                     override fun onSuccess(result: Void?) {
                         currentOnCompleted()
                     }
