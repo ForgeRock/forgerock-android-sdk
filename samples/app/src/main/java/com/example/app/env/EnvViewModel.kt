@@ -91,7 +91,7 @@ class EnvViewModel : ViewModel() {
 
     val local = FROptionsBuilder.build {
         server {
-            url = "https://andy.petrov.ca/openam"
+            url = "http://192.168.1.233:8080/openam"
             realm = "root"
             cookieName = "iPlanetDirectoryPro"
             timeout = 50
@@ -104,7 +104,7 @@ class EnvViewModel : ViewModel() {
             oauthThresholdSeconds = 0
         }
         service {
-            authServiceName = "WebAuthn"
+            authServiceName = "captcha"
         }
     }
 
