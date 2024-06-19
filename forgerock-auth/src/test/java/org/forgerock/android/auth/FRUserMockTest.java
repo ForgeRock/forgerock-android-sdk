@@ -940,6 +940,7 @@ public class FRUserMockTest extends BaseTest {
         when(mockContext.getString(R.string.forgerock_endsession_endpoint)).thenReturn("dummy/endSession");
         when(mockContext.getString(R.string.forgerock_cookie_name)).thenReturn("testCookieName");
         when(mockContext.getString(R.string.forgerock_auth_service)).thenReturn("UsernamePassword");
+        when(mockContext.getString(R.string.forgerock_oauth_sign_out_redirect_uri)).thenReturn(context.getString(R.string.forgerock_oauth_sign_out_redirect_uri));
 
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK);
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK);

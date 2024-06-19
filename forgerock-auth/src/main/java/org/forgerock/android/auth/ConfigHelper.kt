@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -156,6 +156,8 @@ internal class ConfigHelper {
                     oauthCacheSeconds =
                         context.resources.getInteger(R.integer.forgerock_oauth_cache)
                             .toLong()
+                    oauthSignOutRedirectUri =
+                        context.getString(R.string.forgerock_oauth_sign_out_redirect_uri)
                }
                 sslPinning {
                     pins = context.resources
