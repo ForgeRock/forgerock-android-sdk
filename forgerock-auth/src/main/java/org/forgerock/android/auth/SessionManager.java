@@ -12,8 +12,6 @@ import androidx.annotation.WorkerThread;
 
 import net.openid.appauth.AppAuthConfiguration;
 
-import org.forgerock.android.auth.centralize.AppAuthFragment2;
-import org.forgerock.android.auth.centralize.EndSessionInput;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
 import java.util.Arrays;
@@ -141,30 +139,9 @@ public class SessionManager {
      *                             using supplier to provide AppAuthConfiguration.
      */
     private void close(Supplier<AppAuthConfiguration> appAuthConfiguration) {
-        browserLogout(appAuthConfiguration);
-        tokenManager.revoke(null);
+        tokenManager.revokeAndEndSession(appAuthConfiguration, null);
         singleSignOnManager.revoke(null);
     }
-
-    private void browserLogout(Supplier<AppAuthConfiguration> appAuthConfiguration) {
-        try {
-            OAuth2Client oAuth2Client = Config.getInstance().getOAuth2Client();
-            if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
-                AccessToken accessToken = getTokenManager().getAccessToken();
-                String idToken = "";
-                if (accessToken != null && accessToken.getIdToken() != null) {
-                    idToken = accessToken.getIdToken();
-                }
-                AppAuthFragment2.endSession(
-                        new EndSessionInput(idToken, oAuth2Client, appAuthConfiguration.get()),
-                        new DoNothingListener<>()
-                );
-            }
-        } catch (Exception e) {
-            //ignore
-        }
-    }
-
 
     /**
      * Calling TokenManager to revoke OAuth2.0 tokens

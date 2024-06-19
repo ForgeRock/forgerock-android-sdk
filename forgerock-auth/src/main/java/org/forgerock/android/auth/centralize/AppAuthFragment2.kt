@@ -112,7 +112,9 @@ internal class AppAuthFragment2 : Fragment() {
             var current = fragmentManager.findFragmentByTag(TAG) as? AppAuthFragment2
             if (current == null) {
                 current = AppAuthFragment2()
-                fragmentManager.beginTransaction().add(current, TAG).commitNow()
+                activity.runOnUiThread {
+                    fragmentManager.beginTransaction().add(current, TAG).commitNow()
+                }
             }
 
             CoroutineScope(Dispatchers.Default).launch {
@@ -143,7 +145,9 @@ internal class AppAuthFragment2 : Fragment() {
             var current = fragmentManager.findFragmentByTag(TAG) as? AppAuthFragment2
             if (current == null) {
                 current = AppAuthFragment2()
-                fragmentManager.beginTransaction().add(current, TAG).commitNow()
+                activity.runOnUiThread {
+                    fragmentManager.beginTransaction().add(current, TAG).commitNow()
+                }
             }
 
             CoroutineScope(Dispatchers.Default).launch {
