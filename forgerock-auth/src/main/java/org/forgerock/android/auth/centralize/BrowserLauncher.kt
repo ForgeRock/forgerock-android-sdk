@@ -9,10 +9,10 @@ package org.forgerock.android.auth.centralize
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.EndSessionResponse
 import org.forgerock.android.auth.FRUser.Browser
-import org.forgerock.android.auth.OAuth2Client
 
 /**
  * This object is responsible for launching the browser for OpenID Connect operations.
@@ -27,6 +27,7 @@ object BrowserLauncher {
      * Initializes the launcher.
      * @param launcher The launcher to initialize.
      */
+    @Synchronized
     internal fun init(launcher: Launcher) {
         this.launcher = launcher
         isInitialized.value = true
@@ -35,6 +36,7 @@ object BrowserLauncher {
     /**
      * Resets the launcher.
      */
+    @Synchronized
     internal fun reset() {
         launcher?.authorize?.first?.unregister()
         launcher?.endSession?.first?.unregister()
@@ -50,7 +52,7 @@ object BrowserLauncher {
      * @return The authorization code.
      * @throws IllegalStateException If the BrowserLauncherActivity is not initialized.
      */
-    suspend fun authorize(
+    internal suspend fun authorize(
         browser: Browser,
         pending: Boolean = false,
     ): AuthorizationResponse {
@@ -71,15 +73,15 @@ object BrowserLauncher {
      * @return A boolean indicating whether the session was ended successfully.
      * @throws IllegalStateException If the BrowserLauncherActivity is not initialized.
      */
-    suspend fun endSession(
-        oauth2Client: OAuth2Client,
-        idToken: String,
+    internal suspend fun endSession(
+        input: EndSessionInput,
         pending: Boolean = false,
     ): EndSessionResponse {
         // Wait until the launcher is initialized
         // The launcher is initialized in the AppAuthFragment2 onCreate method
         return isInitialized.first { it }.let {
-            launcher?.endSession(Pair(idToken, oauth2Client), pending)
+            launcher?.endSession(input,
+                pending)
                 ?: throw IllegalStateException("BrowserLauncherActivity not initialized")
         }
     }

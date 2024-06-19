@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,10 +8,12 @@
 package org.forgerock.android.auth;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
+import net.openid.appauth.AppAuthConfiguration;
+
 import org.forgerock.android.auth.centralize.AppAuthFragment2;
+import org.forgerock.android.auth.centralize.EndSessionInput;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 
 import java.util.Arrays;
@@ -52,7 +54,7 @@ public class SessionManager {
      */
     @WorkerThread
     public void refresh(FRListener<AccessToken> listener) {
-        getAccessToken(new FRListener<AccessToken>() {
+        getAccessToken(new FRListener<>() {
             @Override
             public void onSuccess(AccessToken result) {
                 tokenManager.refresh(result, listener);
@@ -118,12 +120,33 @@ public class SessionManager {
      * Close the session, all tokens will be removed.
      */
     public void close() {
-        browserLogout();
+        close(() -> AppAuthConfiguration.DEFAULT);
+    }
+
+    /**
+     * Close the user with specific {@link AppAuthConfiguration}, the {@link AppAuthConfiguration}
+     * should match the configuration used for {@link FRUser.Browser}.
+     * This method should only be used for centralized login.
+     *
+     * @param appAuthConfiguration The AppAuthConfiguration object
+     */
+    public void close(AppAuthConfiguration appAuthConfiguration) {
+        close(() -> appAuthConfiguration);
+    }
+
+    /**
+     * Close the session
+     * @param appAuthConfiguration Supplier of AppAuthConfiguration, in case of not using centralize login
+     *                             AppAuth library may not be included in the project, to avoid runtime exception
+     *                             using supplier to provide AppAuthConfiguration.
+     */
+    private void close(Supplier<AppAuthConfiguration> appAuthConfiguration) {
+        browserLogout(appAuthConfiguration);
         tokenManager.revoke(null);
         singleSignOnManager.revoke(null);
     }
 
-    private void browserLogout() {
+    private void browserLogout(Supplier<AppAuthConfiguration> appAuthConfiguration) {
         try {
             OAuth2Client oAuth2Client = Config.getInstance().getOAuth2Client();
             if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
@@ -132,7 +155,10 @@ public class SessionManager {
                 if (accessToken != null && accessToken.getIdToken() != null) {
                     idToken = accessToken.getIdToken();
                 }
-                AppAuthFragment2.endSession(oAuth2Client, idToken, new DoNothingListener<>());
+                AppAuthFragment2.endSession(
+                        new EndSessionInput(idToken, oAuth2Client, appAuthConfiguration.get()),
+                        new DoNothingListener<>()
+                );
             }
         } catch (Exception e) {
             //ignore
@@ -147,25 +173,6 @@ public class SessionManager {
      */
     void revokeAccessToken(FRListener<Void> listener) {
         tokenManager.revoke(listener);
-    }
-
-    @VisibleForTesting
-    public void close(FRListener<Void> listener) {
-        tokenManager.revoke(new FRListener<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                closeSession(listener);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                closeSession(listener);
-            }
-        });
-    }
-
-    private void closeSession(FRListener<Void> listener) {
-        singleSignOnManager.revoke(listener);
     }
 
 }

@@ -23,7 +23,7 @@ import org.forgerock.android.auth.exception.BrowserAuthenticationException
  */
 internal class Launcher(
     val authorize: Pair<ActivityResultLauncher<Browser>, MutableStateFlow<Result<AuthorizationResponse, Throwable>?>>,
-    val endSession: Pair<ActivityResultLauncher<Pair<String, OAuth2Client>>, MutableStateFlow<Result<EndSessionResponse, Throwable>?>>,
+    val endSession: Pair<ActivityResultLauncher<EndSessionInput>, MutableStateFlow<Result<EndSessionResponse, Throwable>?>>,
 ) {
     /**
      * Starts the authorization process.
@@ -52,7 +52,7 @@ internal class Launcher(
      * @param pending A boolean indicating whether the session end process is pending.
      */
     suspend fun endSession(
-        request: Pair<String, OAuth2Client>,
+        request: EndSessionInput,
         pending: Boolean = false,
     ): EndSessionResponse {
         if (!pending) {

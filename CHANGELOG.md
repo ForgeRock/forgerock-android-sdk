@@ -1,6 +1,7 @@
 ## [4.5.0]
 #### Added
 - Support Centralize Oidc Signoff with PingOne [SDKS-3020]
+- The AppAuthConfiguration settings are being ignored during centralized login, causing unexpected behavior in the authentication flow. [SDKS-3277]
 
 #### Fixed
 - Resolve commons-io-2.6.jar and bcprov-jdk15on-1.68.jar vulnerability warning [SDKS-3073]

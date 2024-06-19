@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContract
+import net.openid.appauth.AppAuthConfiguration
 import org.forgerock.android.auth.Result
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationService
@@ -24,7 +25,7 @@ import org.forgerock.android.auth.StringUtils
  * It creates an intent for the end session request and parses the result of the end session response.
  */
 internal class EndSessionContract :
-    ActivityResultContract<Pair<String, OAuth2Client>, Result<EndSessionResponse, Throwable>>() {
+    ActivityResultContract<EndSessionInput, Result<EndSessionResponse, Throwable>>() {
     /**
      * Creates an intent for the end session request.
      * @param context The context to use for creating the intent.
@@ -33,25 +34,27 @@ internal class EndSessionContract :
      */
     override fun createIntent(
         context: Context,
-        input: Pair<String, OAuth2Client>,
+        input: EndSessionInput,
     ): Intent {
         val configuration =
             AuthorizationServiceConfiguration(
-                Uri.parse(input.second.authorizeUrl.toString()),
-                Uri.parse(input.second.tokenUrl.toString()),
+                Uri.parse(input.oAuth2Client.authorizeUrl.toString()),
+                Uri.parse(input.oAuth2Client.tokenUrl.toString()),
                 null,
-                Uri.parse(input.second.endSessionUrl.toString()),
+                Uri.parse(input.oAuth2Client.endSessionUrl.toString()),
             )
 
         val builder =
             EndSessionRequest.Builder(configuration)
-                .setPostLogoutRedirectUri(Uri.parse(input.second.signOutRedirectUri))
+                .setPostLogoutRedirectUri(Uri.parse(input.oAuth2Client.signOutRedirectUri))
 
-        if (StringUtils.isNotEmpty(input.first)) {
-            builder.setIdTokenHint(input.first)
+        if (StringUtils.isNotEmpty(input.idToken)) {
+            builder.setIdTokenHint(input.idToken)
         }
 
-        val authService = AuthorizationService(context)
+        val authService =
+            AuthorizationService(context, input.appAuthConfiguration)
+
         return authService.getEndSessionRequestIntent(builder.build())
     }
 
@@ -67,10 +70,20 @@ internal class EndSessionContract :
     ): Result<EndSessionResponse, Throwable> {
         intent?.let { i ->
             val resp = EndSessionResponse.fromIntent(i)
-            resp?.let { Result.Success(it) }
+            resp?.let {
+                return Result.Success(it)
+            }
             val ex = AuthorizationException.fromIntent(i)
-            ex?.let { Result.Failure(it) }
+            ex?.let {
+                return Result.Failure(it)
+            }
         }
         return Result.Failure(IllegalStateException("End session response is null"))
     }
 }
+
+internal data class EndSessionInput(
+    val idToken: String,
+    val oAuth2Client: OAuth2Client,
+    val appAuthConfiguration: AppAuthConfiguration =  AppAuthConfiguration.DEFAULT
+)

@@ -12,6 +12,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import net.openid.appauth.browser.BrowserDenyList
+import net.openid.appauth.browser.VersionedBrowserMatcher
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.FRUser
 
@@ -23,22 +25,32 @@ class CentralizeLoginViewModel : ViewModel() {
     fun login(fragmentActivity: FragmentActivity) {
         FRUser.browser().appAuthConfigurer().customTabsIntent {
             it.setColorScheme(CustomTabsIntent.COLOR_SCHEME_DARK)
-
-        }.done()
+        }.appAuthConfiguration { appAuthConfiguration ->
+            /*
+            appAuthConfiguration.setBrowserMatcher(
+                BrowserDenyList(
+                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+                    VersionedBrowserMatcher.CHROME_BROWSER
+                )
+            )
+             */
+        }
+            .done()
             .login(fragmentActivity,
-            object : FRListener<FRUser> {
-                override fun onSuccess(result: FRUser) {
-                    state.update {
-                        it.copy(user = result, exception = null)
+                object : FRListener<FRUser> {
+                    override fun onSuccess(result: FRUser) {
+                        state.update {
+                            it.copy(user = result, exception = null)
+                        }
                     }
-                }
 
-                override fun onException(e: Exception) {
-                    state.update {
-                        it.copy(user = null, exception = e)
+                    override fun onException(e: Exception) {
+                        state.update {
+                            it.copy(user = null, exception = e)
+                        }
                     }
-                }
-            })
+                })
     }
+
 
 }

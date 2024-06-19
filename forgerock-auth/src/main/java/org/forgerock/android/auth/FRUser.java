@@ -19,6 +19,7 @@ import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.RedirectUriReceiverActivity;
 
@@ -78,6 +79,20 @@ public class FRUser {
         sessionManager.close();
         FRLifecycle.dispatchLogout();
     }
+
+    /**
+     * Logout the user with specific {@link AppAuthConfiguration}, the {@link AppAuthConfiguration}
+     * should match the configuration used for {@link FRUser.Browser}.
+     * This method should only be used for centralized login.
+     *
+     * @param appAuthConfiguration The AppAuthConfiguration object
+     */
+    public void logout(@NonNull AppAuthConfiguration appAuthConfiguration) {
+        current.set(null);
+        sessionManager.close(appAuthConfiguration);
+        FRLifecycle.dispatchLogout();
+    }
+
 
     /**
      * Revoke the {@link AccessToken} asynchronously,
