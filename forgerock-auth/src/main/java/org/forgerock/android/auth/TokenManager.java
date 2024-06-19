@@ -7,6 +7,8 @@
 
 package org.forgerock.android.auth;
 
+import net.openid.appauth.AppAuthConfiguration;
+
 import java.util.Map;
 
 /**
@@ -65,6 +67,7 @@ public interface TokenManager {
 
     /**
      * Get the persisted {@link AccessToken}, no validation and no auto refresh, just return the stored {@link AccessToken}
+     *
      * @return The AccessToken if exists, otherwise null
      */
     AccessToken getAccessToken();
@@ -87,6 +90,14 @@ public interface TokenManager {
      * @param listener Listener to listen for token revocation event.
      */
     void revoke(FRListener<Void> listener);
+
+    /**
+     * OAuth2 Token Revocation, and end the session
+     *
+     * @param appAuthConfiguration The AppAuthConfiguration
+     * @param listener             Listener to listen for token revocation event.
+     */
+    void revokeAndEndSession(Supplier<AppAuthConfiguration> appAuthConfiguration, FRListener<Void> listener);
 
 
 }

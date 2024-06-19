@@ -13,8 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
@@ -46,9 +44,9 @@ class EnvViewModel : ViewModel() {
 
     val dbind = FROptionsBuilder.build {
         server {
-            url = "https://openam-updbind.forgeblocks.com/am"
-            realm = "bravo"
-            cookieName = "ccdd0582e7262db"
+            url = "http://192.168.86.32:8080/openam"
+            realm = "root"
+            cookieName = "iPlanetDirectoryPro"
             timeout = 50
         }
         oauth {

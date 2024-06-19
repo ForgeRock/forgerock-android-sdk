@@ -8,6 +8,8 @@ package org.forgerock.android.auth
 
 import android.net.Uri
 import android.util.Base64
+import net.openid.appauth.AppAuthConfiguration
+import net.openid.appauth.EndSessionResponse
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -16,6 +18,8 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import org.forgerock.android.auth.Logger.Companion.debug
+import org.forgerock.android.auth.centralize.AppAuthFragment2.Companion.endSession
+import org.forgerock.android.auth.centralize.EndSessionInput
 import org.forgerock.android.auth.exception.AuthorizeException
 import java.io.IOException
 import java.io.UnsupportedEncodingException
@@ -154,7 +158,7 @@ class OAuth2Client(
      * @param accessToken The AccessToken to be revoked
      * @param listener    Listener to listen for revoke event
      */
-    fun revoke(accessToken: AccessToken, listener: FRListener<Void?>?) {
+    fun revoke(accessToken: AccessToken, listener: FRListener<Void?>) {
         revoke(accessToken, true, listener)
     }
 
@@ -166,7 +170,7 @@ class OAuth2Client(
      * @param useRefreshToken If true, revoke with refresh token, otherwise revoke access token
      * @param listener        Listener to listen for revoke event
      */
-    fun revoke(accessToken: AccessToken, useRefreshToken: Boolean, listener: FRListener<Void?>?) {
+    fun revoke(accessToken: AccessToken, useRefreshToken: Boolean, listener: FRListener<Void?>) {
         debug(TAG, "Revoking Access Token & Refresh Token")
         val handler = OAuth2ResponseHandler()
         try {
@@ -235,6 +239,33 @@ class OAuth2Client(
             }
         })
     }
+
+    /**
+     * End the user session with end session endpoint with browser.
+     * This method will open the browser to end the session.
+     * @param idToken              The ID_TOKEN which associated with the user session.
+     * @param oAuth2Client         The OAuth2Client
+     * @param appAuthConfiguration The AppAuthConfiguration
+     * @param listener             Listener to listen for end session event.
+     */
+    fun endSessionWithBrowser(idToken: String,
+                              oAuth2Client: OAuth2Client,
+                              appAuthConfiguration: AppAuthConfiguration,
+                              listener: FRListener<Void?>) {
+
+        endSession(
+            EndSessionInput(idToken, oAuth2Client, appAuthConfiguration),
+            object : FRListener<EndSessionResponse> {
+                override fun onSuccess(result: EndSessionResponse) {
+                    listener.onSuccess(null)
+                }
+
+                override fun onException(e: Exception) {
+                    listener.onException(e)
+                }
+            })
+    }
+
 
     /**
      * Sends an token request to the authorization service.

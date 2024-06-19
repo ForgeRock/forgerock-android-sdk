@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -7,17 +7,12 @@
 
 package com.example.app.token
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.app.userprofile.UserProfileState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.forgerock.android.auth.AccessToken
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.FRUser
-import java.lang.Exception
 
 class TokenViewModel : ViewModel() {
 
@@ -61,6 +56,25 @@ class TokenViewModel : ViewModel() {
             })
         }
     }
+
+    fun revoke(token: AccessToken? = FRUser.getCurrentUser()?.accessToken) {
+        token?.let {
+            FRUser.getCurrentUser()?.revokeAccessToken(object : FRListener<Void?> {
+                override fun onSuccess(result: Void?) {
+                    state.update {
+                        it.copy(accessToken = null, exception = null)
+                    }
+                }
+
+                override fun onException(e: Exception) {
+                    state.update {
+                        it.copy(accessToken = null, exception = e)
+                    }
+                }
+            })
+        }
+    }
+
 
     fun setNullState() {
         state.update {
