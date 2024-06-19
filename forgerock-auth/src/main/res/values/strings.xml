@@ -15,10 +15,10 @@
     <string name="forgerock_oauth_url" translatable="false">place holder</string>
     <integer name="forgerock_oauth_threshold" translatable="false">30</integer> <!-- in second -->
     <integer name="forgerock_oauth_cache" translatable="false">0</integer> <!-- in second -->
-    <string name="forgerock_oauth_sign_out_redirect_uri" translatable="false">place holder</string>
+    <string name="forgerock_oauth_sign_out_redirect_uri" translatable="false" />
 
     <!-- Server -->
-    <string name="forgerock_url" translatable="false">place holder</string>
+    <string name="forgerock_url" translatable="false" />
     <string name="forgerock_realm" translatable="false">root</string>
     <integer name="forgerock_timeout" translatable="false">30</integer>
     <integer name="forgerock_cookie_cache" translatable="false">0</integer> <!-- in second -->
