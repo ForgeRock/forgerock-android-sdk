@@ -46,7 +46,7 @@ data class FROptions(val server: Server,
     @Throws(IllegalArgumentException::class)
     @JvmName("validateConfig")
     internal fun validateConfig() {
-        require(server.url.isNotBlank()) { "AM URL cannot be blank" }
+        require(server.url.isNotBlank()) { "Server URL cannot be blank" }
         require(server.realm.isNotBlank()) { "Realm cannot be blank" }
         require(server.cookieName.isNotBlank()) { "cookieName cannot be blank" }
     }
