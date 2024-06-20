@@ -31,6 +31,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "openid email address"
                 oauthRedirectUri = "https://redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -50,6 +51,7 @@ class ConfigHelperTest {
         assertTrue(sharedPreferences.getString("session_endpoint", null) == "https://logout")
         assertTrue(sharedPreferences.getString("scope", null) == "openid email address")
         assertTrue(sharedPreferences.getString("redirect_uri", null) == "https://redirecturi")
+        assertTrue(sharedPreferences.getString("sign_out_redirect_uri", null) == "https://signout")
     }
 
     @Test
@@ -64,6 +66,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -81,6 +84,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -97,6 +101,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -113,6 +118,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id_1"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -129,6 +135,24 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi_uri"
+                oauthSignOutRedirectUri = "https://signout"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
+            }
+        }
+        val signOutRedirectUriChanged = FROptionsBuilder.build {
+            server {
+                url = "https://dummy"
+                realm = "realm123"
+                cookieName = "cookieName"
+            }
+            oauth {
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi_uri"
+                oauthSignOutRedirectUri = "https://signout_changed"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -145,6 +169,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope_test"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -161,6 +186,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -173,6 +199,7 @@ class ConfigHelperTest {
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, clientChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, expectedURL))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, redirectURIChanged))
+        assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, signOutRedirectUriChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, scopeChanged))
         assertFalse(ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions))
 
@@ -193,6 +220,7 @@ class ConfigHelperTest {
                 oauthClientId = "andy_app"
                 oauthScope = "openid email address"
                 oauthRedirectUri = "https://www.example.com:8080/callback"
+                oauthSignOutRedirectUri = "https://www.example.com:8080/signout"
             }
             urlPath {
                 revokeEndpoint = ""

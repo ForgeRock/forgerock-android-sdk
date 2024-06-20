@@ -54,19 +54,12 @@ public class Config {
     private CookieJar cookieJar;
     private String cookieName;
 
-    @Getter(value = AccessLevel.NONE)
     private String authenticateEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String authorizeEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String tokenEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String revokeEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String userinfoEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String sessionEndpoint;
-    @Getter(value = AccessLevel.NONE)
     private String endSessionEndpoint;
 
     //service

@@ -26,6 +26,7 @@ internal class ConfigHelper {
         private const val sessionEndpoint = "session_endpoint"
         private const val scope = "scope"
         private const val redirectUri = "redirect_uri"
+        private const val signOutRedirectUri = "sign_out_redirect_uri"
 
         //Alias to store Previous Configure Host
         internal const val ORG_FORGEROCK_V_1_HOSTS = "org.forgerock.v1.HOSTS"
@@ -50,6 +51,7 @@ internal class ConfigHelper {
                 .putString(sessionEndpoint, frOptions.urlPath.sessionEndpoint)
                 .putString(scope, frOptions.oauth.oauthScope)
                 .putString(redirectUri, frOptions.oauth.oauthRedirectUri)
+                .putString(signOutRedirectUri, frOptions.oauth.oauthSignOutRedirectUri)
                 .apply()
         }
 
@@ -74,6 +76,7 @@ internal class ConfigHelper {
                     oauthClientId = sharedPreferences.getString(ConfigHelper.clientId, null) ?: context.getString(R.string.forgerock_oauth_client_id)
                     oauthScope = sharedPreferences.getString(ConfigHelper.scope, null) ?: context.getString(R.string.forgerock_oauth_scope)
                     oauthRedirectUri = sharedPreferences.getString(ConfigHelper.redirectUri, null) ?: context.getString(R.string.forgerock_oauth_redirect_uri)
+                    oauthSignOutRedirectUri = sharedPreferences.getString(ConfigHelper.signOutRedirectUri, null) ?: context.getString(R.string.forgerock_oauth_sign_out_redirect_uri)
                 }
                 urlPath {
                     endSessionEndpoint =
@@ -122,6 +125,11 @@ internal class ConfigHelper {
             }
             sharedPreferences.getString(redirectUri, null)?.apply {
                 if(frOptions.oauth.oauthRedirectUri != this) {
+                    return true
+                }
+            }
+            sharedPreferences.getString(signOutRedirectUri, null)?.apply {
+                if(frOptions.oauth.oauthSignOutRedirectUri != this) {
                     return true
                 }
             }
