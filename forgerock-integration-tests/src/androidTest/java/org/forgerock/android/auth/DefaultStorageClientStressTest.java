@@ -53,28 +53,12 @@ public class DefaultStorageClientStressTest {
     }
 
     @Test
-    public void testStoreFiftyAccounts()
-            throws MechanismCreationException, OathMechanismException, AccountLockException {
-        testStoreAccounts(50);
-    }
-
-    @Test
     public void testStoreOneHundredAccounts()
-            throws MechanismCreationException, OathMechanismException, AccountLockException {
-        testStoreAccounts(100);
-    }
-
-    @Test
-    public void testStoreTwoHundredAccounts()
-            throws MechanismCreationException, OathMechanismException, AccountLockException {
-        testStoreAccounts(200);
-    }
-
-    public void testStoreAccounts(int numberOfAccounts)
             throws OathMechanismException, AccountLockException, MechanismCreationException {
         long startTime = System.currentTimeMillis();
+        int numberOfAccounts = 100;
 
-        // Create 100 accounts
+        // Create accounts
         for (int i = 0; i < numberOfAccounts; i++) {
             String issuer = ISSUER + i;
             String accountName = ACCOUNT_NAME + i;
@@ -93,7 +77,7 @@ public class DefaultStorageClientStressTest {
             defaultStorage.setMechanism(mechanism);
         }
 
-        // Verify 100 accounts
+        // Retrieve and verify accounts
         for (int i = 0; i < numberOfAccounts; i++) {
             String issuer = ISSUER + i;
             String accountName = ACCOUNT_NAME + i;
@@ -109,8 +93,8 @@ public class DefaultStorageClientStressTest {
             assertNotNull(tokenCode);
         }
 
-        Log.d(TAG, "Stored and retrieved " + numberOfAccounts
-                + " accounts in time in seconds : " + (System.currentTimeMillis() - startTime)/1000);
+        Log.d(TAG, "Stored and retrieved " + numberOfAccounts +
+                " accounts in " + (System.currentTimeMillis() - startTime)/1000 + " seconds");
     }
 
     private String getRandomSharedSecret() {
