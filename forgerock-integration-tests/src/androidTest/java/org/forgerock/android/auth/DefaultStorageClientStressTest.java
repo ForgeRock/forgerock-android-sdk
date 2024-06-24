@@ -27,6 +27,9 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RunWith(AndroidJUnit4.class)
 public class DefaultStorageClientStressTest {
@@ -53,15 +56,36 @@ public class DefaultStorageClientStressTest {
     }
 
     @Test
-    public void testStoreOneHundredAccounts()
-            throws OathMechanismException, AccountLockException, MechanismCreationException {
+    public void testStoreOneHundredAccounts() throws InterruptedException {
+        int numberOfAccounts = 50;
+        int numberOfThreads = 4;
+        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            int threadIndex = i;
+            service.execute(() -> {
+                try {
+                    storeAndRetrieveAccounts(threadIndex, numberOfAccounts);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                latch.countDown();
+            });
+        }
+
+        latch.await();
+        service.shutdown();
+    }
+
+    private void storeAndRetrieveAccounts(int threadIndex,int numberOfAccounts)
+            throws MechanismCreationException, OathMechanismException, AccountLockException {
         long startTime = System.currentTimeMillis();
-        int numberOfAccounts = 100;
 
         // Create accounts
         for (int i = 0; i < numberOfAccounts; i++) {
-            String issuer = ISSUER + i;
-            String accountName = ACCOUNT_NAME + i;
+            String issuer = ISSUER + threadIndex + "_" + i;
+            String accountName = ACCOUNT_NAME + threadIndex + "_" + i;
             OathMechanism.TokenType tokenType = getRandomTokenType();
             int period = getRandomPeriod();
             int digits = getRandomDigits();
@@ -79,8 +103,8 @@ public class DefaultStorageClientStressTest {
 
         // Retrieve and verify accounts
         for (int i = 0; i < numberOfAccounts; i++) {
-            String issuer = ISSUER + i;
-            String accountName = ACCOUNT_NAME + i;
+            String issuer = ISSUER + threadIndex + "_" + i;
+            String accountName = ACCOUNT_NAME + threadIndex + "_" + i;
             // Verify account
             Account account = defaultStorage.getAccount(issuer + "-" + accountName);
             assertNotNull(account);
