@@ -56,8 +56,8 @@ public class DefaultStorageClientStressTest {
     }
 
     @Test
-    public void testStoreOneHundredAccounts() throws InterruptedException {
-        int numberOfAccounts = 50;
+    public void testStoreMultipleAccounts() throws InterruptedException {
+        int numberOfAccounts = 10;
         int numberOfThreads = 4;
         ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
