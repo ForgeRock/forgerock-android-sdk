@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.forgerock.android.auth.OkHttpClientProvider.getInstance
+import org.forgerock.android.auth.exception.ApiException
+import org.json.JSONObject
+import java.net.URL
 
 /**
  * Manages SDK configuration information
@@ -22,7 +30,7 @@ data class FROptions(val server: Server,
         @JvmStatic
         fun equals(old: FROptions?, new: FROptions?): Boolean {
             // do the referential check first
-            if(old === new) {
+            if (old === new) {
                 return true
             }
             // if there is a change in reference then check the value
@@ -34,13 +42,75 @@ data class FROptions(val server: Server,
                     && old?.logger == new?.logger
         }
     }
+
     @Throws(IllegalArgumentException::class)
     @JvmName("validateConfig")
     internal fun validateConfig() {
-        require(server.url.isNotBlank()) { "AM URL cannot be blank" }
+        require(server.url.isNotBlank()) { "Server URL cannot be blank" }
         require(server.realm.isNotBlank()) { "Realm cannot be blank" }
         require(server.cookieName.isNotBlank()) { "cookieName cannot be blank" }
     }
+    private fun getOkHttpClient(url: URL): OkHttpClient {
+        val networkConfig = NetworkConfig.networkBuilder()
+            .host(url.authority)
+            .interceptorSupplier {
+                listOf<Interceptor>(
+                    OkHttpRequestInterceptor()
+                )
+            }
+            .build()
+        // Obtain instance of OkHttp client
+        val httpClient = getInstance().lookup(networkConfig)
+        return httpClient
+    }
+
+    /**
+     * Discover the OpenID Configuration
+     *
+     * @param discoverUrl The OpenID Configuration URL
+     * @return The SDK configuration information
+     */
+    suspend fun discover(discoverUrl: String): FROptions {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL(discoverUrl)
+                val httpClient = getOkHttpClient(url)
+                val request = Request.Builder()
+                    .url(discoverUrl)
+                    .get().build()
+
+                httpClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful.not()) {
+                        throw ApiException(
+                            response.code,
+                            response.message,
+                            response.body?.string()
+                        )
+                    }
+
+                    val openIdConfiguration = response.body?.string()?.let {
+                        JSONObject(it)
+                    }
+
+                    val issuer =  openIdConfiguration?.getString("issuer") ?: ""
+                    val server = this@FROptions.server.copy(url = (server.url.isNotEmpty() then server.url)
+                        ?: issuer)
+                    val urlPath = this@FROptions.urlPath.copy(
+                        authorizeEndpoint = openIdConfiguration?.getString("authorization_endpoint"),
+                        tokenEndpoint =  openIdConfiguration?.getString("token_endpoint"),
+                        userinfoEndpoint = openIdConfiguration?.getString("userinfo_endpoint"),
+                        revokeEndpoint = openIdConfiguration?.getString("revocation_endpoint"),
+                        endSessionEndpoint = openIdConfiguration?.getString("end_session_endpoint"))
+
+                    this@FROptions.copy(urlPath = urlPath, server = server)
+
+                }
+            } catch (e: Exception) {
+                throw  e
+            }
+        }
+    }
+
 }
 
 /**
@@ -48,7 +118,7 @@ data class FROptions(val server: Server,
  */
 class FROptionsBuilder {
 
-    private lateinit var server: Server
+    private var server: Server = Server("", "root", 30, "iPlanetDirectoryPro", 0)
     private var oauth: OAuth = OAuth()
     private var service: Service = Service()
     private var urlPath: UrlPath = UrlPath()
@@ -123,7 +193,7 @@ class FROptionsBuilder {
 /**
  * Data class for the server configurations
  */
-data class Server(val url: String,
+data class Server(val url: String = "",
                   val realm: String = "root",
                   val timeout: Int = 30,
                   val cookieName: String = "iPlanetDirectoryPro",
@@ -133,7 +203,7 @@ data class Server(val url: String,
  * Server builder to build the SDK configuration information specific to server
  */
 class ServerBuilder {
-    lateinit var url: String
+    var url: String = ""
     var realm: String = "root"
     var timeout: Int = 30
     var cookieName: String = "iPlanetDirectoryPro"
@@ -148,6 +218,7 @@ class ServerBuilder {
  */
 data class OAuth(val oauthClientId: String = "",
                  val oauthRedirectUri: String = "",
+                 val oauthSignOutRedirectUri: String = "",
                  val oauthScope: String = "",
                  val oauthThresholdSeconds: Long = 0,
                  val oauthCacheSeconds: Long = 0)
@@ -158,11 +229,13 @@ data class OAuth(val oauthClientId: String = "",
 class OAuthBuilder {
     var oauthClientId: String = ""
     var oauthRedirectUri: String = ""
+    var oauthSignOutRedirectUri: String = ""
     var oauthScope: String = ""
     var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
 
-    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
+    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthSignOutRedirectUri,
+        oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
 
 }
 

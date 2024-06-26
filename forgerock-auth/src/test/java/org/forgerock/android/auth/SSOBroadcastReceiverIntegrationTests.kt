@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ *  Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -11,10 +11,9 @@ package org.forgerock.android.auth
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.squareup.okhttp.mockwebserver.Dispatcher
-import com.squareup.okhttp.mockwebserver.MockResponse
-import com.squareup.okhttp.mockwebserver.RecordedRequest
-import org.assertj.core.api.Assertions.*
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
 import org.junit.Assert.*
@@ -22,7 +21,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
-import java.util.*
 import java.util.concurrent.CountDownLatch
 
 @RunWith(RobolectricTestRunner::class)
@@ -33,7 +31,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
     private fun findRequest(path: String, vararg recordedRequests: RecordedRequest): RecordedRequest {
         for (r: RecordedRequest in recordedRequests) {
-            if (r.path.startsWith(path)) {
+            if (r.path!!.startsWith(path)) {
                 return r
             }
         }
@@ -78,7 +76,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
         val request = server.takeRequest();
 
-        val state = Uri.parse(request.getPath()).getQueryParameter("state");
+        val state = Uri.parse(request.path).getQueryParameter("state");
         server.enqueue(MockResponse()
             .addHeader("Location", "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
                     "state=" + state + "&client_id=andy_app")
@@ -104,7 +102,7 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
         val latch = CountDownLatch(1)
         val mockHttpDispatcher = MockHttpDispatcher(latch)
-        server.setDispatcher(mockHttpDispatcher)
+        server.dispatcher = mockHttpDispatcher
 
         val accessToken = FRUser.getCurrentUser().accessToken
         assertNotNull(FRUser.getCurrentUser())
@@ -137,13 +135,13 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         val body = refreshTokenRevoke.body.readUtf8()
         assertTrue(body.contains("token"))
         assertTrue(body.contains("client_id"))
-        assertTrue(body.contains(accessToken.refreshToken))
+        assertTrue(body.contains(accessToken.refreshToken!!))
     }
 }
 
 private class MockHttpDispatcher(private val latch: CountDownLatch): Dispatcher() {
     val list = mutableListOf<RecordedRequest?>()
-    override fun dispatch(request: RecordedRequest?): MockResponse {
+    override fun dispatch(request: RecordedRequest): MockResponse {
         if(request?.path == "/oauth2/realms/root/token/revoke") {
             list.add(request)
             latch.countDown()
@@ -152,5 +150,6 @@ private class MockHttpDispatcher(private val latch: CountDownLatch): Dispatcher(
             .addHeader("Content-Type", "application/json")
             .setBody("{}")
     }
+
 }
 

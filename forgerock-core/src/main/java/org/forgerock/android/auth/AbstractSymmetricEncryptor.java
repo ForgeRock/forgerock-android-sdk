@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -35,61 +35,67 @@ abstract class AbstractSymmetricEncryptor implements Encryptor {
     static final int KEY_SIZE = 256;
     final String keyAlias;
 
+    private static final Object mutex = new Object();
+
     AbstractSymmetricEncryptor(@NonNull String keyAlias) {
         this.keyAlias = keyAlias;
     }
 
     @Override
     public byte[] encrypt(@NonNull byte[] data) {
-        byte[] encryptedData;
-        try {
-            Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        synchronized (mutex) {
+            byte[] encryptedData;
+            try {
+                Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
 
-            byte[] iv = init(cipher);
-            encryptedData = cipher.doFinal(data);
-            byte[] mac = computeMac(keyAlias, encryptedData);
-            encryptedData = concatArrays(mac, iv, encryptedData);
-        } catch (Exception e) {
-            throw new EncryptionException(e);
+                byte[] iv = init(cipher);
+                encryptedData = cipher.doFinal(data);
+                byte[] mac = computeMac(keyAlias, encryptedData);
+                encryptedData = concatArrays(mac, iv, encryptedData);
+            } catch (Exception e) {
+                throw new EncryptionException(e);
+            }
+            return encryptedData;
         }
-        return encryptedData;
     }
 
     @Override
     public byte[] decrypt(byte[] encryptedData) {
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new EncryptionException("Error while getting an cipher instance", e);
-        }
+        synchronized (mutex) {
+            Cipher cipher;
+            try {
+                cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+                throw new EncryptionException("Error while getting an cipher instance", e);
+            }
 
-        int ivLength = IV_LENGTH;
-        int macLength;
-        try {
-            macLength = Mac.getInstance(HMAC_SHA256).getMacLength();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error while instantiating MAC", e);
-        }
-        int encryptedDataLength = encryptedData.length - ivLength - macLength;
-        byte[] macFromMessage = getArraySubset(encryptedData, 0, macLength);
+            int ivLength = IV_LENGTH;
+            int macLength;
+            try {
+                macLength = Mac.getInstance(HMAC_SHA256).getMacLength();
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("Error while instantiating MAC", e);
+            }
+            int encryptedDataLength = encryptedData.length - ivLength - macLength;
+            byte[] macFromMessage = getArraySubset(encryptedData, 0, macLength);
 
-        byte[] iv = getArraySubset(encryptedData, macLength, ivLength);
-        encryptedData = getArraySubset(encryptedData, macLength + ivLength, encryptedDataLength);
-        byte[] mac = computeMac(keyAlias, encryptedData);
+            byte[] iv = getArraySubset(encryptedData, macLength, ivLength);
+            encryptedData = getArraySubset(encryptedData, macLength + ivLength, encryptedDataLength);
+            byte[] mac = computeMac(keyAlias, encryptedData);
 
-        if (!Arrays.equals(mac, macFromMessage)) {
-            throw new RuntimeException("MAC signature could not be verified");
-        }
+            if (!Arrays.equals(mac, macFromMessage)) {
+                throw new RuntimeException("MAC signature could not be verified");
+            }
 
-        AlgorithmParameterSpec ivParams;
-        ivParams = new GCMParameterSpec(128, iv);
+            AlgorithmParameterSpec ivParams;
+            ivParams = new GCMParameterSpec(128, iv);
 
-        try {
-            cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), ivParams);
-            return cipher.doFinal(encryptedData);
-        } catch (Exception e) {
-            throw new EncryptionException(e.getMessage(), e);
+            try {
+                cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), ivParams);
+                return cipher.doFinal(encryptedData);
+            } catch (Exception e) {
+                throw new EncryptionException(e.getMessage(), e);
+            }
         }
     }
 

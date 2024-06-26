@@ -15,15 +15,15 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.RedirectUriReceiverActivity;
 
-import org.forgerock.android.auth.centralize.BrowserLauncher;
+import org.forgerock.android.auth.centralize.AppAuthFragment2;
 import org.forgerock.android.auth.exception.AlreadyAuthenticatedException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidRedirectUriException;
@@ -79,6 +79,20 @@ public class FRUser {
         sessionManager.close();
         FRLifecycle.dispatchLogout();
     }
+
+    /**
+     * Logout the user with specific {@link AppAuthConfiguration}, the {@link AppAuthConfiguration}
+     * should match the configuration used for {@link FRUser.Browser}.
+     * This method should only be used for centralized login.
+     *
+     * @param appAuthConfiguration The AppAuthConfiguration object
+     */
+    public void logout(@NonNull AppAuthConfiguration appAuthConfiguration) {
+        current.set(null);
+        sessionManager.close(appAuthConfiguration);
+        FRLifecycle.dispatchLogout();
+    }
+
 
     /**
      * Revoke the {@link AccessToken} asynchronously,
@@ -258,9 +272,7 @@ public class FRUser {
     public static class Browser {
 
         private static final String TAG = Browser.class.getName();
-        private FRListener<AuthorizationResponse> listener;
-        private AppAuthConfigurer appAuthConfigurer = new AppAuthConfigurer(this);
-        private boolean failedOnNoBrowserFound = true;
+        private final AppAuthConfigurer appAuthConfigurer = new AppAuthConfigurer(this);
 
         public AppAuthConfigurer appAuthConfigurer() {
             return appAuthConfigurer;
@@ -311,7 +323,7 @@ public class FRUser {
                 return;
             }
 
-            this.listener = new FRListener<>() {
+            FRListener<AuthorizationResponse> responseFRListener = new FRListener<>() {
                 @Override
                 public void onSuccess(AuthorizationResponse result) {
                     InterceptorHandler interceptorHandler = InterceptorHandler.builder()
@@ -331,7 +343,7 @@ public class FRUser {
                 }
             };
 
-            AppAuthFragment2.launch(activity, this);
+            AppAuthFragment2.authorize(activity, this, responseFRListener);
         }
 
         private void validateRedirectUri(Context context) throws InvalidRedirectUriException {
@@ -358,22 +370,9 @@ public class FRUser {
             throw new InvalidRedirectUriException("No App is registered to capture the authorization code");
         }
 
-        @VisibleForTesting
-        Browser failedOnNoBrowserFound(boolean failedOnNoBrowserFound) {
-            this.failedOnNoBrowserFound = failedOnNoBrowserFound;
-            return this;
-        }
-
-        FRListener<AuthorizationResponse> getListener() {
-            return this.listener;
-        }
-
         AppAuthConfigurer getAppAuthConfigurer() {
             return this.appAuthConfigurer;
         }
 
-        boolean isFailedOnNoBrowserFound() {
-            return this.failedOnNoBrowserFound;
-        }
     }
 }

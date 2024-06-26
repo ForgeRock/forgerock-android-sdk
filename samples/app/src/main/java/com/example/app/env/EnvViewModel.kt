@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
@@ -22,29 +24,29 @@ class EnvViewModel : ViewModel() {
 
     val localhost = FROptionsBuilder.build {
         server {
-            url = "https://openam-protect2.forgeblocks.com/am"
+            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
             realm = "alpha"
             cookieName = "c1c805de4c9b333"
             timeout = 50
         }
         oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
             oauthCacheSeconds = 0
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
+            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
         }
         service {
             authServiceName = "protect"
         }
     }
 
-
     val dbind = FROptionsBuilder.build {
         server {
-            url = "https://openam-updbind.forgeblocks.com/am"
-            realm = "bravo"
-            cookieName = "ccdd0582e7262db"
+            url = "http://192.168.86.32:8080/openam"
+            realm = "root"
+            cookieName = "iPlanetDirectoryPro"
             timeout = 50
         }
         oauth {
@@ -120,7 +122,7 @@ class EnvViewModel : ViewModel() {
         server {
             url = "https://openam-sdks.forgeblocks.com/am"
             realm = "alpha"
-            cookieName = "iPlanetDirectoryPro"
+            cookieName = "5421aeddf91aa20"
             timeout = 50
         }
         oauth {
@@ -135,6 +137,17 @@ class EnvViewModel : ViewModel() {
         }
     }
 
+    val pingOidc = FROptionsBuilder.build {
+        server {
+            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
+        }
+        oauth {
+            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthScope = "openid email address phone profile revoke"
+        }
+    }
+
     var current by mutableStateOf(dbind)
         private set
 
@@ -145,10 +158,20 @@ class EnvViewModel : ViewModel() {
         servers.add(local)
         servers.add(ops)
         servers.add(forgeblock)
+        servers.add(pingOidc)
     }
 
     fun select(context: Context, options: FROptions) {
-        FRAuth.start(context, options)
+        if(options.server.url.contains("pingone")) {
+            viewModelScope.launch {
+                val option =
+                    options.discover(options.server.url + "/.well-known/openid-configuration")
+                FRAuth.start(context, option)
+            }
+        }
+        else {
+            FRAuth.start(context, options)
+        }
         current = options
     }
 

@@ -9,8 +9,6 @@ package org.forgerock.android.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-
 import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.junit.After;
@@ -24,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
+import okhttp3.mockwebserver.MockWebServer;
 
 @RunWith(RobolectricTestRunner.class)
 public class NetworkConfigTest {

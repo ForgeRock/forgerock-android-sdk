@@ -27,8 +27,8 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.sonatype.gradle.plugins.scan") version "2.4.0"
     id("org.jetbrains.dokka") version "1.9.10"
-    id("com.android.application") version "8.2.2" apply false
-    id("com.android.library") version "8.2.2" apply false
+    id("com.android.application") version "8.3.2" apply false
+    id("com.android.library") version "8.3.2" apply false
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
 }
 
@@ -64,8 +64,6 @@ allprojects {
             //Due to this https://github.com/powermock/powermock/issues/1125, we have to keep using an
             //older version of mockito until mockito release a fix
             force("org.mockito:mockito-core:3.12.4")
-            // this is for the mockwebserver
-            force("org.bouncycastle:bcprov-jdk15on:1.68")
         }
     }
 }
@@ -103,9 +101,9 @@ subprojects {
 
 
     tasks.withType<Test>().configureEach {
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security=ALL-UNNAMED")
-        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security.cert=ALL-UNNAMED")
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.lang=ALL-UNNAMED") as MutableList<String>
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security=ALL-UNNAMED") as MutableList<String>
+        jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.security.cert=ALL-UNNAMED") as MutableList<String>
     }
 
 }

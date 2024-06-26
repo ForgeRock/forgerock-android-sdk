@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -31,6 +31,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "openid email address"
                 oauthRedirectUri = "https://redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -50,6 +51,7 @@ class ConfigHelperTest {
         assertTrue(sharedPreferences.getString("session_endpoint", null) == "https://logout")
         assertTrue(sharedPreferences.getString("scope", null) == "openid email address")
         assertTrue(sharedPreferences.getString("redirect_uri", null) == "https://redirecturi")
+        assertTrue(sharedPreferences.getString("sign_out_redirect_uri", null) == "https://signout")
     }
 
     @Test
@@ -64,6 +66,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -81,6 +84,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -97,6 +101,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -113,6 +118,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id_1"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -129,6 +135,24 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi_uri"
+                oauthSignOutRedirectUri = "https://signout"
+            }
+            urlPath {
+                revokeEndpoint = "https://revoke"
+                endSessionEndpoint = "https://endsession"
+            }
+        }
+        val signOutRedirectUriChanged = FROptionsBuilder.build {
+            server {
+                url = "https://dummy"
+                realm = "realm123"
+                cookieName = "cookieName"
+            }
+            oauth {
+                oauthClientId = "client_id"
+                oauthScope = "scope"
+                oauthRedirectUri = "redirecturi_uri"
+                oauthSignOutRedirectUri = "https://signout_changed"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -145,6 +169,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope_test"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -161,6 +186,7 @@ class ConfigHelperTest {
                 oauthClientId = "client_id"
                 oauthScope = "scope"
                 oauthRedirectUri = "redirecturi"
+                oauthSignOutRedirectUri = "https://signout"
             }
             urlPath {
                 revokeEndpoint = "https://revoke"
@@ -173,6 +199,7 @@ class ConfigHelperTest {
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, clientChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, expectedURL))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, redirectURIChanged))
+        assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, signOutRedirectUriChanged))
         assertTrue(ConfigHelper.isConfigDifferentFromPersistedValue(context, scopeChanged))
         assertFalse(ConfigHelper.isConfigDifferentFromPersistedValue(context, frOptions))
 
@@ -193,6 +220,7 @@ class ConfigHelperTest {
                 oauthClientId = "andy_app"
                 oauthScope = "openid email address"
                 oauthRedirectUri = "https://www.example.com:8080/callback"
+                oauthSignOutRedirectUri = "https://www.example.com:8080/signout"
             }
             urlPath {
                 revokeEndpoint = ""
@@ -214,8 +242,8 @@ class ConfigHelperTest {
     @Test
     fun loadDefaultFROptionWithNull() {
        val defaultOption = ConfigHelper.load(context, null)
-       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, sessionEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
-       assertTrue(defaultOption.toString() == expectedResult)
+       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthSignOutRedirectUri=https://www.example.com:8080/signout, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, sessionEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
+        assertTrue(defaultOption.toString() == expectedResult)
     }
 
     @Test
@@ -235,7 +263,7 @@ class ConfigHelperTest {
             }
         }
         val defaultOption = ConfigHelper.load(context, frOptions)
-        val expectedResult = "FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthScope=, oauthThresholdSeconds=0, oauthCacheSeconds=0), service=Service(authServiceName=Login, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, sessionEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
+        val expectedResult = "FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthSignOutRedirectUri=, oauthScope=, oauthThresholdSeconds=0, oauthCacheSeconds=0), service=Service(authServiceName=Login, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, sessionEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
         assertTrue(defaultOption.toString() == expectedResult)
     }
 }

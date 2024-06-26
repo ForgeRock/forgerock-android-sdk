@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -43,15 +43,19 @@ fun Token(tokenViewModel: TokenViewModel) {
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(
                 onClick = { tokenViewModel.getAccessToken() }) {
-                Text(text = "Refresh")
+                Text(text = "Get")
             }
             Button(
                 onClick = { tokenViewModel.forceRefresh() }) {
-                Text(text = "ForceRefresh")
+                Text(text = "Ref")
+            }
+            Button(
+                onClick = { tokenViewModel.revoke() }) {
+                Text(text = "Rev")
             }
             Button(
                 onClick = { tokenViewModel.setNullState() }) {
-                Text(text = "Clear")
+                Text(text = "Clr")
             }
         }
         Card(

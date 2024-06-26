@@ -8,12 +8,11 @@
 package com.example.app.setting
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +20,7 @@ import org.forgerock.android.auth.FRUserKeys
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.PIInitParams
 import org.forgerock.android.auth.PIProtect
+import org.forgerock.android.auth.SecuredSharedPreferences
 import org.forgerock.android.auth.devicebind.UserKey
 
 class SettingViewModel(context: Context) : ViewModel() {
@@ -88,6 +88,49 @@ class SettingViewModel(context: Context) : ViewModel() {
         settingState.update {
             it.copy(transitionState = state)
         }
+    }
+
+    fun sspTest(context: Context) {
+        val ssp = SecuredSharedPreferences(context, "SampleTest", "SampleTestKeyAlias")
+        viewModelScope.launch(Dispatchers.IO) {
+            for (i in 0..100) {
+                save(ssp, "key$i", "value$i")
+                Logger.debug("1STORAGE", "key$i -" + get(ssp, "key$i"))
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            for (i in 0..100) {
+                save(ssp, "key$i", "value$i")
+                Logger.debug("2STORAGE", "key$i -" + get(ssp, "key$i"))
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            for (i in 0..100) {
+                save(ssp, "key$i", "value$i")
+                Logger.debug("3STORAGE", "key$i -" + get(ssp, "key$i"))
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            for (i in 0..100) {
+                save(ssp, "key$i", "value$i")
+                Logger.debug("4STORAGE", "key$i -" + get(ssp, "key$i"))
+            }
+        }
+    }
+
+    private fun save(
+        ssp: SecuredSharedPreferences,
+        key: String,
+        value: String,
+    ) {
+        ssp.edit().putString(key, value).commit()
+    }
+
+    private fun get(
+        ssp: SecuredSharedPreferences,
+        key: String,
+    ): String? {
+        return ssp.getString(key, null)
     }
 
     companion object {

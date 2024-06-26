@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,12 +10,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.squareup.okhttp.mockwebserver.MockResponse
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.mockwebserver.MockResponse
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.PolicyAdvice.Companion.parse
 import org.forgerock.android.auth.interceptor.AdviceHandler

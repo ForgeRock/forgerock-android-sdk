@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,8 +11,6 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -23,6 +21,9 @@ import org.robolectric.shadows.ShadowLog;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 public class BaseTest {
 

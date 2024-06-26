@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,7 +21,7 @@ public class StringUtils {
      * @param s string to test
      * @return test if the specified string is not null and not empty.
      */
-    static boolean isNotEmpty(final String s) {
+    public static boolean isNotEmpty(final String s) {
         return (s != null && s.length() > 0);
     }
 

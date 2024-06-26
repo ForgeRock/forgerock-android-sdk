@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -111,6 +111,7 @@ class AppPinAuthenticator(private val cryptoKey: CryptoKey,
             BigInteger.valueOf(System.currentTimeMillis()),
             validityBeginDate,
             validityBeginDate,
+            Locale.ENGLISH,
             owner,
             SubjectPublicKeyInfo.getInstance(keyPair.public.encoded))
         return JcaX509CertificateConverter().getCertificate(builder.build(sigGen))

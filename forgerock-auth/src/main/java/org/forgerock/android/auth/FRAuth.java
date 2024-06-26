@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -30,6 +30,7 @@ import lombok.Singular;
  */
 public class FRAuth {
 
+    private static final String TAG = FRAuth.class.getSimpleName();
     private AuthService authService;
     private SessionManager sessionManager;
 
@@ -50,8 +51,12 @@ public class FRAuth {
             //Validate (AM URL, Realm, CookieName) is not Empty. If its empty will throw IllegalArgumentException.
             currentOptions.validateConfig();
             if (ConfigHelper.isConfigDifferentFromPersistedValue(context, currentOptions)) {
-               SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
-               sessionManager.close();
+                try {
+                    SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
+                    sessionManager.close();
+                } catch (Exception e) {
+                    Logger.warn(TAG, "Failed to close the session manager", e);
+                }
             }
             Config.getInstance().init(context, currentOptions);
             ConfigHelper.persist(context, currentOptions);

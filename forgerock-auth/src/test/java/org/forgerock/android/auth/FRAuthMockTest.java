@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -18,8 +18,6 @@ import android.content.res.Resources;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
@@ -33,6 +31,8 @@ import org.mockito.Mockito;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
+
+import okhttp3.mockwebserver.RecordedRequest;
 
 @RunWith(AndroidJUnit4.class)
 public class FRAuthMockTest extends BaseTest {

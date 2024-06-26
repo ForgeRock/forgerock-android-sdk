@@ -10,6 +10,9 @@ on:
       SLACK_WEBHOOK:
         description: Slack Notifier Incoming Webhook
         required: true
+      CODECOV_TOKEN:
+        description: Codecov token
+        required: true
 jobs:
   build-and-test:
     runs-on: ${{ inputs.runs-on }}
@@ -31,21 +34,21 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      # Execute forgerock-core debug unit tests
+      # Execute forgerock-core debug unit tests with coverage report
       - name: Run forgerock-core debug unit tests
-        run: ./gradlew :forgerock-core:testDebugUnitTest --stacktrace --no-daemon
+        run: ./gradlew :forgerock-core:testDebugUnitTestCoverage --stacktrace --no-daemon
         
-      # Execute forgerock-auth debug unit tests
+      # Execute forgerock-auth debug unit tests with coverage report
       - name: Run forgerock-auth debug unit tests
-        run: ./gradlew :forgerock-auth:testDebugUnitTest --stacktrace --no-daemon
+        run: ./gradlew :forgerock-auth:testDebugUnitTestCoverage --stacktrace --no-daemon
 
-      # Execute forgerock-authenticator debug unit tests
+      # Execute forgerock-authenticator debug unit tests with coverage report
       - name: Run forgerock-authenticator debug unit tests
-        run: ./gradlew :forgerock-authenticator:testDebugUnitTest --stacktrace --no-daemon
+        run: ./gradlew :forgerock-authenticator:testDebugUnitTestCoverage --stacktrace --no-daemon
 
-      # Execute forgerock-authenticator debug unit tests
+      # Execute forgerock-authenticator debug unit tests with coverage report
       - name: Run ping-protect debug unit tests
-        run: ./gradlew :ping-protect:testDebugUnitTest --stacktrace --no-daemon
+        run: ./gradlew :ping-protect:testDebugUnitTestCoverage --stacktrace --no-daemon
 
       # Publish test reports for the unit tests
       - name: Publish test results
@@ -59,7 +62,14 @@ jobs:
           fail-on-error: 'true'
           reporter: java-junit
 
-      # Send slack notification with result status
+      # Upload coverage reports to Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: forgerock-core/build/coverage-report/test-coverage.xml, forgerock-auth/build/coverage-report/test-coverage.xml, forgerock-authenticator/build/coverage-report/test-coverage.xml, ping-protect/build/coverage-report/test-coverage.xml
+          flags: unit-tests
+
       - uses: 8398a7/action-slack@v3
         with:
           mention: 'stoyan.petrov,andy.witrisna,jey.periyasamy'

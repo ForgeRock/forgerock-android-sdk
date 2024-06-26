@@ -1,17 +1,25 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.MockResponse
+import org.forgerock.android.auth.exception.ApiException
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
+import org.junit.runner.RunWith
+import java.net.HttpURLConnection
 
-class FROptionTest {
+@RunWith(AndroidJUnit4::class)
+class FROptionTest: BaseTest()  {
     @Test
     fun testDefaultBuilderOption() {
         class TestCustomLogger: FRLogger {
@@ -84,6 +92,7 @@ class FROptionTest {
         }}
         option1.validateConfig()
     }
+
     @Test
     fun testReferenceAndValue() {
         val option1 = FROptionsBuilder.build { server {
@@ -100,4 +109,110 @@ class FROptionTest {
         assertFalse(FROptions.equals(option1, option2))
         assertTrue(FROptions.equals(option2, option2))
     }
+
+    @Test
+    fun testDiscoverEndpointFailure() {
+        runBlocking {
+            val option1 = FROptionsBuilder.build {
+                server {
+                    url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
+                }
+                urlPath {
+                    authenticateEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authenticate"
+                    sessionEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/session"
+                }
+                oauth {
+                    oauthClientId = "AndroidTest"
+                    oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+                    oauthScope = "openid profile email address phone"
+                }
+            }
+
+            server.enqueue(MockResponse().setResponseCode(HttpURLConnection.HTTP_FORBIDDEN))
+
+            try {
+                val copied =
+                    option1.discover(url)
+                FRAuth.start(context, copied)
+                fail()
+            }
+            catch (e: ApiException) {
+                assertTrue(e.statusCode == HttpURLConnection.HTTP_FORBIDDEN)
+            }
+        }
+    }
+    @Test
+    fun testDiscoverEndpointWithURLProvided() {
+        runBlocking {
+            server.enqueue(
+                MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .addHeader("Content-Type", "application/json")
+                .setBody(getJson("/discovery.json")))
+
+            val option1 = FROptionsBuilder.build {
+                server {
+                    url = "https://auth.pingone.us/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
+                }
+                urlPath {
+                    authenticateEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authenticate"
+                    sessionEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/session"
+                }
+                oauth {
+                    oauthClientId = "AndroidTest"
+                    oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+                    oauthScope = "openid profile email address phone"
+                }
+            }
+            val copied = option1.discover(url)
+            assertTrue(copied.urlPath.authorizeEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authorize")
+            assertTrue(copied.server.url == "https://auth.pingone.us/02fb4743-189a-4bc7-9d6c-a919edfe6447/as")
+            assertTrue(copied.urlPath.revokeEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/revoke")
+            assertTrue(copied.urlPath.tokenEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/token")
+            assertTrue(copied.urlPath.userinfoEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/userinfo")
+            assertTrue(copied.urlPath.endSessionEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/signoff")
+            assertTrue(copied.urlPath.sessionEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/session")
+            assertTrue(copied.urlPath.authenticateEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authenticate")
+            assertTrue(copied.oauth.oauthClientId == "AndroidTest")
+            assertTrue(copied.oauth.oauthRedirectUri == "org.forgerock.demo:/oauth2redirect")
+            assertTrue(copied.oauth.oauthScope == "openid profile email address phone")
+        }
+    }
+
+    @Test
+    fun testDiscoverEndpointWithURLNotProvided() {
+        runBlocking {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(HttpURLConnection.HTTP_OK)
+                    .addHeader("Content-Type", "application/json")
+                    .setBody(getJson("/discovery.json")))
+
+            val option1 = FROptionsBuilder.build {
+                urlPath {
+                    authenticateEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authenticate"
+                    sessionEndpoint = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/session"
+                }
+                oauth {
+                    oauthClientId = "AndroidTest"
+                    oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+                    oauthScope = "openid profile email address phone"
+                }
+            }
+            val copied = option1.discover(url)
+            assertTrue(copied.urlPath.authorizeEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authorize")
+            assertTrue(copied.server.url == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as")
+            assertTrue(copied.urlPath.revokeEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/revoke")
+            assertTrue(copied.urlPath.tokenEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/token")
+            assertTrue(copied.urlPath.userinfoEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/userinfo")
+            assertTrue(copied.urlPath.endSessionEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/signoff")
+            assertTrue(copied.urlPath.sessionEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/session")
+            assertTrue(copied.urlPath.authenticateEndpoint == "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as/authenticate")
+            assertTrue(copied.oauth.oauthClientId == "AndroidTest")
+            assertTrue(copied.oauth.oauthRedirectUri == "org.forgerock.demo:/oauth2redirect")
+            assertTrue(copied.oauth.oauthScope == "openid profile email address phone")
+        }
+    }
+
+
 }

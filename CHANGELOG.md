@@ -1,3 +1,20 @@
+## [4.5.0]
+#### Added
+- Added SDK support for deleting registered WebAuthn devices from the server. [SDKS-1710]
+- Added support for signing off from PingOne to the centralized login flow. [SDKS-3020]
+- Added the ability to dynamically configure the SDK by collecting values from the server's OpenID Connect `.well-known` endpoint. [SDKS-3022]
+
+#### Fixed
+- Resolved security vulnerability warnings related to the `commons-io-2.6.jar` and `bcprov-jdk15on-1.68.jar` libraries. [SDKS-3072, SDKS-3073]
+- Fixed a `NullPointerException` in the centralized login flow. [SDKS-3079]
+- Improved multi-threaded performance when caching access tokens. [SDKS-3104]
+- Synchronized the encryption and decryption block to avoid keystore crashes. [SDKS-3199]
+- Fixed an issue related to handling  `HiddenValueCallback` if `isMinifyEnabled` is set to `true`. [SDKS-3201]
+- Fixed an issue where device binding using an application PIN was failing when Arabic language was used. [SDKS-3221]
+- Fixed an issue where browser sessions were not properly signed out when a non-default browser was used in centralized login. [SDKS-3276]
+- Fixed an unexpected behavior in the authentication flow caused by `AppAuthConfiguration` settings being ignored during centralized login. [SDKS-3277]
+- Fixed the `FRUser.revokeAccessToken()` method to not end the user's session during the centralized login flow. [SDKS-3282]
+
 ## [4.4.0]
 #### Added
 - Added `TextInput` callback support [SDKS-545]

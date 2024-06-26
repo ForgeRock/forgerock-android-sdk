@@ -1,5 +1,6 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ForgeRock/forgerock-android-sdk?color=%23f46200&label=Version&style=flat-square)](CHANGELOG.md)
 [![Build Status](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml/badge.svg)](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml)
+[![Coverage](https://codecov.io/gh/ForgeRock/forgerock-android-sdk/graph/badge.svg?token=PGfmkaLyIC)](https://codecov.io/gh/ForgeRock/forgerock-android-sdk)
 
 <p align="center">
   <a href="https://github.com/ForgeRock">
@@ -29,7 +30,7 @@ Use the SDKs to leverage _[Intelligent Authentication](https://www.forgerock.com
     * Access Management (AM) 6.5.2+
 
 * Android API level 23+
-    * Android 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0, 12.0, 13.0
+    * Android 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0, 12.0, 13.0, 14.0
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- INSTALLATION - If you want to start quickly with minimal assistance. -->

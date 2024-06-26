@@ -16,9 +16,14 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Provider to Cache and provide OKHttpClient
  */
-class OkHttpClientProvider private constructor() {
+object OkHttpClientProvider {
     private val cache: MutableMap<String, OkHttpClient?> = ConcurrentHashMap()
     private val interceptorProvider = InterceptorProvider()
+
+    private const val REQUESTED_WITH_KEY = "x-requested-with"
+    private const val REQUESTED_WITH_VALUE = "forgerock-sdk"
+    private const val REQUESTED_PLATFORM_KEY = "x-requested-platform"
+    private const val REQUESTED_PLATFORM_VALUE = "android"
 
     init {
         CoreEventDispatcher.CLEAR_OKHTTP.addObserver { _, _ -> clear() }
@@ -93,16 +98,6 @@ class OkHttpClientProvider private constructor() {
         cache.clear()
     }
 
-    companion object {
-        private val providerInstance = OkHttpClientProvider()
-        private const val REQUESTED_WITH_KEY = "x-requested-with"
-        private const val REQUESTED_WITH_VALUE = "forgerock-sdk"
-        private const val REQUESTED_PLATFORM_KEY = "x-requested-platform"
-        private const val REQUESTED_PLATFORM_VALUE = "android"
-
-        @JvmStatic
-        fun getInstance(): OkHttpClientProvider {
-            return providerInstance
-        }
-    }
+    @JvmStatic
+    fun getInstance() = this
 }

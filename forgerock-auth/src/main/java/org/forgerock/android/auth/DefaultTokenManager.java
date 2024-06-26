@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,9 +7,16 @@
 
 package org.forgerock.android.auth;
 
+import static org.forgerock.android.auth.OAuth2.ACCESS_TOKEN;
+import static org.forgerock.android.auth.StringUtils.isNotEmpty;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import androidx.annotation.NonNull;
+
+import net.openid.appauth.AppAuthConfiguration;
 
 import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
@@ -25,11 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.Builder;
-
-import static org.forgerock.android.auth.OAuth2.ACCESS_TOKEN;
-import static org.forgerock.android.auth.StringUtils.isNotEmpty;
-
-import androidx.annotation.NonNull;
 
 /**
  * Default implementation for {@link TokenManager}. By default this class uses {@link SecuredSharedPreferences} to persist
@@ -151,6 +153,11 @@ class DefaultTokenManager implements TokenManager {
     }
 
     @Override
+    public AccessToken getAccessToken() {
+        return getAccessTokenLocally();
+    }
+
+    @Override
     public boolean hasToken() {
         //Consider null if Access token does not exists
         return sharedPreferences.getString(ACCESS_TOKEN, null) != null;
@@ -167,10 +174,10 @@ class DefaultTokenManager implements TokenManager {
         }
         //If the access token is not expired yet, revoke it
         if (!accessToken.isExpired()) {
-            oAuth2Client.revoke(accessToken, false, null);
+            oAuth2Client.revoke(accessToken, false, new DoNothingListener<>());
         }
         Logger.debug(TAG, "Exchange AccessToken with Refresh Token");
-        oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<AccessToken>() {
+        oAuth2Client.refresh(accessToken.getSessionToken(), refreshToken, new FRListener<>() {
             @Override
             public void onSuccess(AccessToken token) {
                 Logger.debug(TAG, "Exchange AccessToken with Refresh Token Success");
@@ -226,7 +233,7 @@ class DefaultTokenManager implements TokenManager {
         if (value == null) {
             return null;
         }
-        AccessToken accessToken =  AccessToken.fromJson(value);
+        AccessToken accessToken = AccessToken.fromJson(value);
         cache(accessToken);
         return accessToken;
     }
@@ -266,7 +273,34 @@ class DefaultTokenManager implements TokenManager {
         }
         //There are 2 steps here to revoke the token, the AccessToken and idToken
         Logger.debug(TAG, "Revoking AccessToken & Refresh Token.");
-        oAuth2Client.revoke(accessToken, new FRListener<Void>() {
+        oAuth2Client.revoke(accessToken, new FRListener<>() {
+            @Override
+            public void onSuccess(Void result) {
+                Logger.debug(TAG, "Revoking AccessToken & Refresh Token Success");
+                Listener.onSuccess(listener, result);
+            }
+
+            @Override
+            public void onException(Exception e) {
+                Logger.debug(TAG, "Revoking AccessToken & Refresh Token failed: %s", e.getMessage());
+                Listener.onException(listener, e);
+            }
+        });
+    }
+
+    @Override
+    public void revokeAndEndSession(Supplier<AppAuthConfiguration> appAuthConfiguration, FRListener<Void> listener) {
+
+        AccessToken accessToken = getAccessTokenLocally();
+        //No matter success revoke or not, clear the token locally.
+        clear();
+        if (accessToken == null) {
+            Listener.onException(listener, new IllegalStateException("Access Token Not found!"));
+            return;
+        }
+        //There are 2 steps here to revoke the token, the AccessToken and idToken
+        Logger.debug(TAG, "Revoking AccessToken & Refresh Token.");
+        oAuth2Client.revoke(accessToken, new FRListener<>() {
             @Override
             public void onSuccess(Void result) {
                 Logger.debug(TAG, "Revoking AccessToken & Refresh Token Success");
@@ -289,11 +323,16 @@ class DefaultTokenManager implements TokenManager {
              * @return True if endSession is performed.
              */
             private boolean endSession(boolean notifyListener) {
+                FRListener<Void> l = listener;
+                if (listener == null || !notifyListener) {
+                    l = new DoNothingListener<>();
+                }
+                //getSessionToken return null when using centralize login
                 if (accessToken.getSessionToken() == null && isNotEmpty(accessToken.getIdToken())) {
-                    if (notifyListener) {
-                        oAuth2Client.endSession(accessToken.getIdToken(), listener);
+                    if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
+                        oAuth2Client.endSessionWithBrowser(accessToken.getIdToken(), oAuth2Client, appAuthConfiguration.get(), l);
                     } else {
-                        oAuth2Client.endSession(accessToken.getIdToken(), null);
+                        oAuth2Client.endSession(accessToken.getIdToken(), l);
                     }
                     return true;
                 }
@@ -301,5 +340,4 @@ class DefaultTokenManager implements TokenManager {
             }
         });
     }
-
 }

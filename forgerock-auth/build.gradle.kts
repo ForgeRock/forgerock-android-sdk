@@ -38,6 +38,7 @@ android {
 
 }
 
+apply("../config/jacoco.gradle")
 apply("../config/logger.gradle")
 apply("../config/kdoc.gradle")
 apply("../config/publish.gradle")
@@ -60,7 +61,6 @@ dependencies {
     implementation(libs.org.jetbrains.kotlinx)
     implementation(libs.jetbrains.kotlinx.coroutines.play.services)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.fragment.ktx)
 
     //Make it optional for developer
     compileOnly(libs.play.services.location)
@@ -140,5 +140,6 @@ dependencies {
     compileOnly(libs.projectlombok.lombok)
     delombok(libs.projectlombok.lombok)
     annotationProcessor(libs.projectlombok.lombok)
+
 
 }

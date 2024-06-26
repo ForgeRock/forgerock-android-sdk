@@ -50,6 +50,7 @@ tasks {
     }
 }
 
+apply("../config/jacoco.gradle")
 apply("../config/logger.gradle")
 apply("../config/publish.gradle")
 
@@ -84,7 +85,7 @@ dependencies {
     testImplementation(libs.androidx.test.runner)
     testImplementation(libs.junit)
     testImplementation(libs.org.robolectric.robolectric)
-    testImplementation(libs.okhttp3.mockwebserver)
+    testImplementation(libs.mockwebserver)
     testImplementation(libs.firebase.messaging)
     testImplementation(libs.mockito.core)
 

@@ -45,6 +45,7 @@ android {
 
 }
 
+apply("../config/jacoco.gradle")
 apply("../config/logger.gradle")
 apply("../config/kdoc.gradle")
 apply("../config/publish.gradle")
@@ -88,7 +89,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.org.robolectric.robolectric)
     testImplementation(libs.mockwebserver)
-    testImplementation(libs.commons.io)
     testImplementation(libs.assertj.core)
 
     testImplementation(libs.bcpkix.jdk15on)

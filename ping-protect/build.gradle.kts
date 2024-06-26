@@ -49,6 +49,7 @@ tasks {
     }
 }
 
+apply("../config/jacoco.gradle")
 apply("../config/logger.gradle")
 apply("../config/publish.gradle")
 
