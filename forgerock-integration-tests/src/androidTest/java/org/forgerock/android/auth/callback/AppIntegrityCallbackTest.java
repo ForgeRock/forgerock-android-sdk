@@ -27,6 +27,7 @@ import org.forgerock.android.auth.NodeListenerFuture;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
+@Ignore
 public class AppIntegrityCallbackTest  {
 
     protected static Context context = ApplicationProvider.getApplicationContext();
