@@ -11,7 +11,9 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
+import org.forgerock.android.auth.callback.AdditionalParameterCallback;
 import org.forgerock.android.auth.callback.Callback;
+import org.forgerock.android.auth.callback.TextOutputCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +36,7 @@ public class Node implements Serializable {
     private final String description;
     private final String authServiceId;
     private final List<Callback> callbacks;
+    private static final String TAG = "Node";
 
     @VisibleForTesting
     public Node(String authId, String stage, String header, String description, String authServiceId, List<Callback> callbacks) {
@@ -59,7 +62,16 @@ public class Node implements Serializable {
         }
         JSONArray array = new JSONArray();
         for (Callback cb : callbacks) {
-            array.put(new JSONObject(cb.getContent()));
+            if ((cb instanceof TextOutputCallback)) {
+                TextOutputCallback callback = (TextOutputCallback) cb;
+                if (callback.getMessageType() == 4 ) {
+                    Logger.info(TAG, "TextOutputCallback of unknown type (scripted TextOutputCallback) is skipped from the response");
+                } else {
+                    array.put(new JSONObject(cb.getContent()));
+                }
+            } else {
+                array.put(new JSONObject(cb.getContent()));
+            }
         }
         jsonObject.put("callbacks", array);
         return jsonObject;

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +41,7 @@ fun TextOutputCallback(callback: TextOutputCallback) {
             INFORMATION -> Icon(Icons.Filled.Info, null)
             WARNING -> Icon(Icons.Filled.Warning, null)
             ERROR -> Icon(Icons.Filled.Error, null)
-            else -> Icon(Icons.Filled.Info, null)
+            else -> Icon(Icons.Filled.Settings, null)
         }
         Spacer(Modifier.width(8.dp))
         Text(text = callback.message,
