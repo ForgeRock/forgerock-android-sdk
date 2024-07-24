@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,7 +11,9 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
+import org.forgerock.android.auth.callback.AdditionalParameterCallback;
 import org.forgerock.android.auth.callback.Callback;
+import org.forgerock.android.auth.callback.TextOutputCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +36,7 @@ public class Node implements Serializable {
     private final String description;
     private final String authServiceId;
     private final List<Callback> callbacks;
+    private static final String TAG = "Node";
 
     @VisibleForTesting
     public Node(String authId, String stage, String header, String description, String authServiceId, List<Callback> callbacks) {
@@ -59,7 +62,10 @@ public class Node implements Serializable {
         }
         JSONArray array = new JSONArray();
         for (Callback cb : callbacks) {
-            array.put(new JSONObject(cb.getContent()));
+            String content = cb.getContent();
+            if (content != null) {
+                array.put(new JSONObject(content));
+            }
         }
         jsonObject.put("callbacks", array);
         return jsonObject;

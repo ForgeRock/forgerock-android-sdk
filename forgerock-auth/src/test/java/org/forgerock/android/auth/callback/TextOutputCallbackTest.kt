@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -35,5 +35,25 @@ class TextOutputCallbackTest {
         val callback = TextOutputCallback(raw, 0)
         assertEquals("This is a Message Node", callback.message)
         assertEquals(1, callback.messageType.toLong())
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testType4Message() {
+        val raw = JSONObject("""{
+            "type": "TextOutputCallback",
+            "output": [
+                {
+                    "name": "message",
+                    "value": "Javascript"
+                },
+                {
+                    "name": "messageType",
+                    "value": "4"
+                }
+            ]
+        }""")
+        val callback = TextOutputCallback(raw, 0)
+        assertNull(callback.getContent())
     }
 }
