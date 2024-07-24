@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -70,6 +70,15 @@ public class TextOutputCallback extends AbstractCallback {
     @Override
     public String getType() {
         return "TextOutputCallback";
+    }
+
+    @Override
+    public String getContent() {
+        if (messageType == 4) {
+            return null;
+        } else {
+            return super.getContent();
+        }
     }
 
 }

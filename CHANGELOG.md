@@ -1,3 +1,7 @@
+## [4.X.0]
+#### Added
+- Skip Type 4 TextOutputCallback [SDKS-3227]
+
 ## [4.5.0]
 #### Added
 - Added SDK support for deleting registered WebAuthn devices from the server. [SDKS-1710]
