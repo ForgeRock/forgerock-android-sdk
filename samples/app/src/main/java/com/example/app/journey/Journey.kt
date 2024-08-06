@@ -33,6 +33,7 @@ import com.example.app.callback.NameCallback
 import com.example.app.callback.PasswordCallback
 import com.example.app.callback.PingOneProtectEvaluationCallback
 import com.example.app.callback.PingOneProtectInitializeCallback
+import com.example.app.callback.CaptchaEnterpriseCallback
 import com.example.app.callback.PollingWaitCallback
 import com.example.app.callback.SelectIdPCallback
 import com.example.app.callback.TextInputCallback
@@ -53,6 +54,7 @@ import org.forgerock.android.auth.callback.ReCaptchaCallback
 import com.example.app.callback.ReCaptchaCallback
 import org.forgerock.android.auth.PingOneProtectEvaluationCallback
 import org.forgerock.android.auth.PingOneProtectInitializeCallback
+import org.forgerock.android.auth.callback.CaptchaEnterpriseCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
 import org.forgerock.android.auth.callback.TextInputCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
@@ -141,6 +143,10 @@ fun Journey(state: JourneyState,
                     }
                     is ReCaptchaCallback -> {
                         ReCaptchaCallback(it, state.node, onCompleted = onNext)
+                        showNext = false
+                    }
+                    is CaptchaEnterpriseCallback -> {
+                        CaptchaEnterpriseCallback(callback = it, onCompleted = onNext)
                         showNext = false
                     }
                     is AppIntegrityCallback -> {
