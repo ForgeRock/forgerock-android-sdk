@@ -35,10 +35,6 @@ class MainActivity : AppCompatActivity() {
                 AuthApp()
             }
         }
-
-//        setContent {
-//            AuthApp()
-//        }
     }
 }
 
@@ -46,6 +42,4 @@ val LocalAppContext = compositionLocalOf<Application> {
     error("No Application context provided")
 }
 
-class MyApplication : Application() {
-    // Application level setup if needed
-}
+class MyApplication : Application()

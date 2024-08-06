@@ -76,7 +76,7 @@ dependencies {
 
     // Captcha
     implementation(libs.play.services.safetynet)
-    implementation(libs.recaptcha)
+    implementation(libs.recaptchaEnterprise)
 
     // Social Login
     implementation(libs.play.services.auth)
