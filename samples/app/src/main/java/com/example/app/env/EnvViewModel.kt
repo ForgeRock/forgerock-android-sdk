@@ -17,158 +17,115 @@ import kotlinx.coroutines.launch
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
+import org.forgerock.android.auth.Logger
+
+private val TAG = EnvViewModel::class.java.simpleName
 
 class EnvViewModel : ViewModel() {
 
     val servers = mutableListOf<FROptions>()
 
-    val localhost = FROptionsBuilder.build {
+    // Example values for a PingAM instance
+    val PingAM = FROptionsBuilder.build {
         server {
-            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
-            realm = "alpha"
-            cookieName = "c1c805de4c9b333"
+            url = "https://openam.example.com:8443/openam"
+            realm = "root"
+            cookieName = "iPlanetDirectoryPro"
             timeout = 50
         }
         oauth {
-            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthClientId = "sdkPublicClient"
             oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
+            oauthScope = "openid profile email address"
             oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
         }
         service {
-            authServiceName = "protect"
+            authServiceName = "sdkUsernamePasswordJourney"
         }
     }
 
-    val dbind = FROptionsBuilder.build {
+    // Example values for a Ping Advanced Identity Cloud instance
+    val PingAdvancedIdentityCloud = FROptionsBuilder.build {
         server {
-            url = "http://192.168.86.32:8080/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "sign-verifier-stoyan"
-        }
-    }
-
-    val sdk = FROptionsBuilder.build {
-        server {
-            url = "https://openam-dbind.forgeblocks.com/am"
+            url = "https://openam-forgerock-sdks.forgeblocks.com/am"
             realm = "alpha"
-            cookieName = "43d72fc37bdde8c"
+            cookieName = "29cd7a346b42b42"
             timeout = 50
         }
         oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val local = FROptionsBuilder.build {
-        server {
-            url = "https://andy.petrov.ca/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val ops = FROptionsBuilder.build {
-        server {
-            url = "https://default.forgeops.petrov.ca/am"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 60
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val forgeblock = FROptionsBuilder.build {
-        server {
-            url = "https://openam-sdks.forgeblocks.com/am"
-            realm = "alpha"
-            cookieName = "5421aeddf91aa20"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val pingOidc = FROptionsBuilder.build {
-        server {
-            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
-        }
-        oauth {
-            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
+            oauthClientId = "sdkPublicClient"
             oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
-            oauthScope = "openid email address phone profile revoke"
+            oauthScope = "openid profile email address"
+            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
+        }
+        service {
+            authServiceName = "sdkUsernamePasswordJourney"
         }
     }
 
-    var current by mutableStateOf(dbind)
+    // Example values for a PingOne instance
+    val PingOne = FROptionsBuilder.build {
+        server {
+            url = "https://auth.pingone.com/3072206d-c6ce-ch15-m0nd-f87e972c7cc3/as"
+        }
+        oauth {
+            oauthClientId = "6c7eb89a-66e9-ab12-cd34-eeaf795650b2"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthScope = "openid profile email address revoke"
+        }
+    }
+
+    // Example values for a PingFederate instance
+    val PingFederate = FROptionsBuilder.build {
+        server {
+            url = "https://pingfed.example.com/.well-known/openid-configuration"
+        }
+        oauth {
+            oauthClientId = "sdkPublicClient"
+            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
+            oauthScope = "openid profile email address"
+        }
+    }
+
+    var current by mutableStateOf(PingAdvancedIdentityCloud)
         private set
 
     init {
-        servers.add(localhost)
-        servers.add(dbind)
-        servers.add(sdk)
-        servers.add(local)
-        servers.add(ops)
-        servers.add(forgeblock)
-        servers.add(pingOidc)
+        servers.add(PingAM)
+        servers.add(PingAdvancedIdentityCloud)
+        servers.add(PingOne)
+        servers.add(PingFederate)
     }
 
     fun select(context: Context, options: FROptions) {
-        if(options.server.url.contains("pingone")) {
+        // Discover settings from the specified .well-known endpoint
+        if(options.server.url.contains("well-known/openid-configuration")) {
             viewModelScope.launch {
-                val option =
-                    options.discover(options.server.url + "/.well-known/openid-configuration")
-                FRAuth.start(context, option)
+                try {
+                    val option = options.discover(options.server.url)
+                    FRAuth.start(context, option)
+                } catch (error: Exception) {
+                    Logger.error(TAG, error, "Discovery failed from .well-known endpoint: ${options.server.url}.\n" +
+                        "Message: ${error.message}")
+                }
             }
         }
+        // Discover settings from the specified PingOne server's .well-known endpoint
+        else if(options.server.url.contains("pingone")) {
+            viewModelScope.launch {
+                try {
+                    val option = options.discover(options.server.url + "/.well-known/openid-configuration")
+                    FRAuth.start(context, option)
+
+                } catch (error: Exception) {
+                    Logger.error(TAG, error, "Discovery failed from PingOne .well-known endpoint: ${options.server.url}.\n" +
+                        "Message: ${error.message}")
+                }
+            }
+        }
+        // Configure the SDKs for a PingAM or Ping Advanced Identity Cloud instance
         else {
             FRAuth.start(context, options)
         }
@@ -181,7 +138,7 @@ class EnvViewModel : ViewModel() {
         }?.let {
             select(context, it)
         } ?: run {
-            select(context, dbind)
+            select(context, PingAdvancedIdentityCloud)
         }
     }
 
