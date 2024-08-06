@@ -107,14 +107,10 @@ class ReCaptchaCallback : AbstractCallback {
         try {
             val scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
-                if(captchaType == "ReCaptchaEnterprise") {
-                    application?.let {
-                        proceedEnterprise(it)
-                    } ?: run {
-                        Listener.onException(listener, Exception("Application is null"))
-                    }
-                } else {
-                    proceed(context)
+                application?.let {
+                    proceedEnterprise(it)
+                } ?: run {
+                    Listener.onException(listener, Exception("Application is null"))
                 }
                 Listener.onSuccess(listener, null)
             }
