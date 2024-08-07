@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -56,6 +56,22 @@ class MetadataCallbackTest : BaseTest() {
             .getJSONArray("callbacks").getJSONObject(0), 0)
         Assertions.assertThat(callback.derivedCallback).isAssignableFrom(
             WebAuthnAuthenticationCallback::class.java)
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testDerivedCallbackProtectInitialize() {
+        val callback = MetadataCallback(JSONObject(getJson("/protect_initialize.json"))
+            .getJSONArray("callbacks").getJSONObject(0), 0)
+        Assertions.assertThat(AbstractProtectCallback.isPingOneProtectInitializeCallback(callback.value)).isTrue()
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun testDerivedCallbackProtectRiskEvaluation() {
+        val callback = MetadataCallback(JSONObject(getJson("/protect_risk_evaluation.json"))
+            .getJSONArray("callbacks").getJSONObject(0), 0)
+        Assertions.assertThat(AbstractProtectCallback.isPingOneProtectEvaluationCallback(callback.value)).isTrue()
     }
 
     @Test

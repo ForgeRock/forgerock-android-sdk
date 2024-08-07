@@ -8,7 +8,9 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import androidx.annotation.Keep
-import org.forgerock.android.auth.callback.AbstractCallback
+import org.forgerock.android.auth.callback.AbstractProtectCallback
+import org.forgerock.android.auth.callback.HiddenValueCallback
+import org.forgerock.android.auth.callback.PING_ONE_RISK_EVALUATION_SIGNALS
 import org.json.JSONObject
 
 private val TAG = PingOneProtectEvaluationCallback::class.java.simpleName
@@ -16,13 +18,12 @@ private val TAG = PingOneProtectEvaluationCallback::class.java.simpleName
 /**
  * Callback to evaluate Ping One Protect
  */
-open class PingOneProtectEvaluationCallback : AbstractCallback {
+open class PingOneProtectEvaluationCallback @Keep constructor(jsonObject: JSONObject, index: Int) :
+    AbstractProtectCallback(jsonObject, index) {
 
-    @Keep
-    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
+    //    @Keep
+//    constructor() : super()
 
-    @Keep
-    constructor() : super()
     /**
      * The pauseBehavioralData received from server
      */
@@ -44,6 +45,7 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
      */
     fun setSignals(value: String) {
         super.setValue(value, 0)
+        setSignalsInHiddenCallback(value)
     }
 
     /**
@@ -52,6 +54,7 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
      */
     fun setClientError(value: String) {
         super.setValue(value, 1)
+        setClientErrorInHiddenCallback(value);
     }
 
     /**
@@ -73,6 +76,7 @@ open class PingOneProtectEvaluationCallback : AbstractCallback {
             throw e
         }
     }
+
 }
 
 /**
