@@ -73,7 +73,9 @@ internal class AuthorizeContract :
 
         val request = builder.build()
         val service = AuthorizationService(context, AppAuthConfiguration.DEFAULT)
-        return service.getAuthorizationRequestIntent(request, intentBuilder.build())
+        val authIntent = service.getAuthorizationRequestIntent(request, intentBuilder.build())
+        service.dispose()
+        return authIntent
 
     }
 
