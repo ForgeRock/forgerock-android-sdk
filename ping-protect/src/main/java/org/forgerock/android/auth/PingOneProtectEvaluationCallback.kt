@@ -21,9 +21,6 @@ private val TAG = PingOneProtectEvaluationCallback::class.java.simpleName
 open class PingOneProtectEvaluationCallback @Keep constructor(jsonObject: JSONObject, index: Int) :
     AbstractProtectCallback(jsonObject, index) {
 
-    //    @Keep
-//    constructor() : super()
-
     /**
      * The pauseBehavioralData received from server
      */

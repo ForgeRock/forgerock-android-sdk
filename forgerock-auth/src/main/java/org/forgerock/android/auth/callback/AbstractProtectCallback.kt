@@ -65,7 +65,7 @@ abstract class AbstractProtectCallback(raw: JSONObject, index: Int) : NodeAware,
     fun setClientErrorInHiddenCallback(value: String) {
         for (callback in node.callbacks) {
             if (callback is HiddenValueCallback) {
-                if (callback.id == CLIENT_ERROR) {
+                if (callback.id.contains(CLIENT_ERROR)) {
                     callback.value = value
                 }
             }
@@ -80,7 +80,7 @@ abstract class AbstractProtectCallback(raw: JSONObject, index: Int) : NodeAware,
     fun setSignalsInHiddenCallback(value: String) {
         for (callback in node.callbacks) {
             if (callback is HiddenValueCallback) {
-                if (callback.id == PING_ONE_RISK_EVALUATION_SIGNALS) {
+                if (callback.id.contains(PING_ONE_RISK_EVALUATION_SIGNALS)) {
                     callback.value = value
                 }
             }
