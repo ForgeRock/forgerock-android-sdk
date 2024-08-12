@@ -72,7 +72,12 @@ internal class AuthorizeContract :
         configurer.customTabsIntentBuilder.accept(intentBuilder)
 
         val request = builder.build()
-        return authorizationService.getAuthorizationRequestIntent(request, intentBuilder.build())
+
+        val authIntent = authorizationService.getAuthorizationRequestIntent(request, intentBuilder.build())
+        // Dispose of the AuthorizationService after creating the intent
+        authorizationService.dispose()
+
+        return authIntent
 
     }
 
