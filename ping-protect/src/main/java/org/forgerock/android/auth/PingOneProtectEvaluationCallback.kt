@@ -46,8 +46,11 @@ open class PingOneProtectEvaluationCallback : AbstractProtectCallback {
      * @param value The JWS value.
      */
     fun setSignals(value: String) {
-        super.setValue(value, 0)
-        setSignalsInHiddenCallback(value)
+        if (derivedCallback) {
+            setSignalsInHiddenCallback(value)
+        } else {
+            super.setValue(value, 0)
+        }
     }
 
     /**

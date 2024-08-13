@@ -29,12 +29,18 @@ const val PING_ONE_PROTECT_EVALUATION_CALLBACK = "PingOneProtectEvaluationCallba
 abstract class AbstractProtectCallback: NodeAware, AbstractCallback {
 
     /**
+     * Indicates if this callback is derived from a [MetadataCallback]
+     */
+    protected var derivedCallback: Boolean = false
+
+    /**
      * Constructor for [AbstractProtectCallback]. Capable of parsing the [MetadataCallback] used for Protect.
      */
     @Keep
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index) {
         val type = jsonObject.optString("type")
         if (type == "MetadataCallback") {
+            derivedCallback = true
             jsonObject.optJSONArray("output")?.let { output ->
                 output.getJSONObject(0)?.let { nameValuePair ->
                     if (nameValuePair.optString("name") == "data") {
@@ -77,8 +83,11 @@ abstract class AbstractProtectCallback: NodeAware, AbstractCallback {
      * @param index The index of the error
      */
     fun setClientError(value: String, index: Int) {
-        super.setValue(value, index)
-        setClientErrorInHiddenCallback(value);
+        if (derivedCallback) {
+            setClientErrorInHiddenCallback(value);
+        } else {
+            super.setValue(value, index)
+        }
     }
 
     /**
