@@ -2,6 +2,9 @@
 #### Added
 - Skip Type 4 TextOutputCallback [SDKS-3227]
 
+#### Fixed
+- Potential CustomTabManager ServiceConnection leak. [SDKS-3346]
+
 ## [4.5.0]
 #### Added
 - Added SDK support for deleting registered WebAuthn devices from the server. [SDKS-1710]

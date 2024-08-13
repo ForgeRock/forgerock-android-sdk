@@ -26,6 +26,9 @@ import org.forgerock.android.auth.StringUtils
  */
 internal class EndSessionContract :
     ActivityResultContract<EndSessionInput, Result<EndSessionResponse, Throwable>>() {
+
+    private lateinit var authorizationService: AuthorizationService
+
     /**
      * Creates an intent for the end session request.
      * @param context The context to use for creating the intent.
@@ -52,10 +55,10 @@ internal class EndSessionContract :
             builder.setIdTokenHint(input.idToken)
         }
 
-        val authService =
+        authorizationService =
             AuthorizationService(context, input.appAuthConfiguration)
 
-        return authService.getEndSessionRequestIntent(builder.build())
+        return authorizationService.getEndSessionRequestIntent(builder.build())
     }
 
     /**
@@ -68,6 +71,7 @@ internal class EndSessionContract :
         resultCode: Int,
         intent: Intent?,
     ): Result<EndSessionResponse, Throwable> {
+        authorizationService.dispose()
         intent?.let { i ->
             val resp = EndSessionResponse.fromIntent(i)
             resp?.let {
