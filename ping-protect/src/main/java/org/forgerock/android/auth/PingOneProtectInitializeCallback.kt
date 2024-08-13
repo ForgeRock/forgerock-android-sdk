@@ -19,8 +19,13 @@ private val TAG = PingOneProtectInitializeCallback::class.java.simpleName
 /**
  * Callback to initialize the ping one protect
  */
-open class PingOneProtectInitializeCallback @Keep constructor(jsonObject: JSONObject, index: Int) :
-    AbstractProtectCallback(jsonObject, index) {
+open class PingOneProtectInitializeCallback : AbstractProtectCallback {
+
+    @Keep
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
+
+    @Keep
+    constructor() : super()
 
     var envId: String? = null
         private set
@@ -74,15 +79,6 @@ open class PingOneProtectInitializeCallback @Keep constructor(jsonObject: JSONOb
     }
 
     /**
-     * Input the Client Error to the server
-     * @param value Protect ErrorType .
-     */
-    fun setClientError(value: String) {
-        super.setValue(value, 0)
-        setClientErrorInHiddenCallback(value);
-    }
-
-    /**
      * Collect the behavior. Calling the [start] function.
      *
      * @param context The Application Context
@@ -107,7 +103,7 @@ open class PingOneProtectInitializeCallback @Keep constructor(jsonObject: JSONOb
             }
         } catch (e: Exception) {
             Logger.error(TAG, t = e, message = e.message)
-            setClientError(e.message ?: "clientError")
+            setClientError(e.message ?: "clientError", 0)
             throw e
         }
     }

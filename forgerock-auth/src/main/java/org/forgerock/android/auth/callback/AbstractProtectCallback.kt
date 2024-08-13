@@ -7,6 +7,7 @@
 
 package org.forgerock.android.auth.callback
 
+import androidx.annotation.Keep
 import org.forgerock.android.auth.Node
 import org.json.JSONException
 import org.json.JSONObject
@@ -25,27 +26,31 @@ const val PING_ONE_PROTECT_EVALUATION_CALLBACK = "PingOneProtectEvaluationCallba
  * Abstract Protect Callback that provides the raw content of the Callback, and common methods
  * for sub classes to access.
  */
-abstract class AbstractProtectCallback(raw: JSONObject, index: Int) : NodeAware, AbstractCallback(raw, index) {
+abstract class AbstractProtectCallback: NodeAware, AbstractCallback {
 
     /**
      * Constructor for [AbstractProtectCallback]. Capable of parsing the [MetadataCallback] used for Protect.
      */
-    init {
-        val type = raw.optString("type")
+    @Keep
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index) {
+        val type = jsonObject.optString("type")
         if (type == "MetadataCallback") {
-            val output = raw.optJSONArray("output")
-            if (output != null) {
-                val nameValuePair = output.getJSONObject(0)
-                val name = nameValuePair.optString("name")
-                if (nameValuePair != null && name == "data") {
-                    val value = nameValuePair.getJSONObject("value")
-                    for (attr in value.keys()) {
-                        setAttribute(attr, value.get(attr))
+            jsonObject.optJSONArray("output")?.let { output ->
+                output.getJSONObject(0)?.let { nameValuePair ->
+                    if (nameValuePair.optString("name") == "data") {
+                        nameValuePair.optJSONObject("value")?.let { value ->
+                            value.keys().forEach { attr ->
+                                setAttribute(attr, value.get(attr))
+                            }
+                        }
                     }
                 }
             }
         }
     }
+
+    @Keep
+    constructor() : super()
 
     /**
      * The [Node] that associate with this Callback
@@ -57,30 +62,35 @@ abstract class AbstractProtectCallback(raw: JSONObject, index: Int) : NodeAware,
     }
 
     /**
+     * Get the [Node] that associate with this Callback
+     *
+     * @return The [Node] that associate with this Callback
+     */
+    protected fun getNode(): Node {
+        return node
+    }
+
+    /**
+     * Input the Client Error to the server
+     *
+     * @param value Protect ErrorType
+     * @param index The index of the error
+     */
+    fun setClientError(value: String, index: Int) {
+        super.setValue(value, index)
+        setClientErrorInHiddenCallback(value);
+    }
+
+    /**
      * Set the client error to the [HiddenValueCallback] which associated with the Protect
      * Callback.
      *
      * @param value The Value to set to the [HiddenValueCallback]
      */
-    fun setClientErrorInHiddenCallback(value: String) {
+    private fun setClientErrorInHiddenCallback(value: String) {
         for (callback in node.callbacks) {
             if (callback is HiddenValueCallback) {
                 if (callback.id.contains(CLIENT_ERROR)) {
-                    callback.value = value
-                }
-            }
-        }
-    }
-
-    /**
-     * Set the signals to the [HiddenValueCallback] which associated with the callback.
-     *
-     * @param value The Value to set to the [HiddenValueCallback].
-     */
-    fun setSignalsInHiddenCallback(value: String) {
-        for (callback in node.callbacks) {
-            if (callback is HiddenValueCallback) {
-                if (callback.id.contains(PING_ONE_RISK_EVALUATION_SIGNALS)) {
                     callback.value = value
                 }
             }

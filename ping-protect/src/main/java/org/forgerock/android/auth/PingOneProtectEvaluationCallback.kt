@@ -18,8 +18,13 @@ private val TAG = PingOneProtectEvaluationCallback::class.java.simpleName
 /**
  * Callback to evaluate Ping One Protect
  */
-open class PingOneProtectEvaluationCallback @Keep constructor(jsonObject: JSONObject, index: Int) :
-    AbstractProtectCallback(jsonObject, index) {
+open class PingOneProtectEvaluationCallback : AbstractProtectCallback {
+
+    @Keep
+    constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
+
+    @Keep
+    constructor() : super()
 
     /**
      * The pauseBehavioralData received from server
@@ -46,12 +51,18 @@ open class PingOneProtectEvaluationCallback @Keep constructor(jsonObject: JSONOb
     }
 
     /**
-     * Input the Client Error to the server
-     * @param value Protect ErrorType .
+     * Set the signals to the [HiddenValueCallback] which associated with the callback.
+     *
+     * @param value The Value to set to the [HiddenValueCallback].
      */
-    fun setClientError(value: String) {
-        super.setValue(value, 1)
-        setClientErrorInHiddenCallback(value);
+    private fun setSignalsInHiddenCallback(value: String) {
+        for (callback in getNode().callbacks) {
+            if (callback is HiddenValueCallback) {
+                if (callback.id.contains(PING_ONE_RISK_EVALUATION_SIGNALS)) {
+                    callback.value = value
+                }
+            }
+        }
     }
 
     /**
@@ -69,7 +80,7 @@ open class PingOneProtectEvaluationCallback @Keep constructor(jsonObject: JSONOb
         }
         catch (e: Exception) {
             Logger.error(TAG, t = e, message = e.message)
-            setClientError(e.message ?: "clientError")
+            setClientError(e.message ?: "clientError", 1)
             throw e
         }
     }
