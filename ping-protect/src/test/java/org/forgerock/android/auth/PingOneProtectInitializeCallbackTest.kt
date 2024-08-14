@@ -46,6 +46,43 @@ class PingOneProtectInitializeCallbackTest {
     }
 
     @Test
+    fun parseMetadataCallbackTest() {
+        val raw = JSONObject("""{
+            "type": "MetadataCallback",
+            "output": [
+                {
+                    "name": "data",
+                    "value": {
+                        "_type": "PingOneProtect",  
+                        "_action": "protect_initialize",
+                        "envId" : "02fb4743-189a-4bc7-9d6c-a919edfe6447",
+                        "consoleLogEnabled" : true,
+                        "deviceAttributesToIgnore" : [],
+                        "customHost" : "",
+                        "lazyMetadata" : true,
+                        "behavioralDataCollection" : true,
+                        "disableHub" : true,
+                        "deviceKeyRsyncIntervals" : 10,
+                        "enableTrust" : true,
+                        "disableTags" : true
+                     }
+                }
+            ],
+            "_id": 0
+        }""")
+
+        val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
+        assertEquals("02fb4743-189a-4bc7-9d6c-a919edfe6447",
+            pingOneInitCallback.envId)
+        assertEquals(true,
+            pingOneInitCallback.behavioralDataCollection)
+        assertEquals(true,
+            pingOneInitCallback.consoleLogEnabled)
+        assertEquals(true,
+            pingOneInitCallback.lazyMetadata)
+    }
+
+    @Test
     fun basicTestDifferentParam() {
         val json = "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":false},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val raw = JSONObject(json)
@@ -128,6 +165,8 @@ class PingOneProtectInitializeCallbackTest {
     fun `test exception`() = runBlocking {
         mockkObject(PIProtect)
         val mockSlot = slot<PIInitParams>()
+        val node = Node("dummy-auth-id", "", "",
+            "", "", mutableListOf())
         coEvery {
             PIProtect.start(context, capture(mockSlot))
         } throws(PingOneProtectInitException("init failed"))
@@ -142,6 +181,7 @@ class PingOneProtectInitializeCallbackTest {
                 "{\"type\":\"PingOneProtectInitializeCallback\",\"output\":[{\"name\":\"envId\",\"value\":\"02fb4743-189a-4bc7-9d6c-a919edfe6447\"},{\"name\":\"consoleLogEnabled\",\"value\":false},{\"name\":\"deviceAttributesToIgnore\",\"value\":[\"value1\", \"value2\"]},{\"name\":\"customHost\",\"value\":\"\"},{\"name\":\"lazyMetadata\",\"value\":false},{\"name\":\"behavioralDataCollection\",\"value\":false},{\"name\":\"deviceKeyRsyncIntervals\",\"value\":14},{\"name\":\"enableTrust\",\"value\":false},{\"name\":\"disableTags\",\"value\":false},{\"name\":\"disableHub\",\"value\":false}],\"input\":[{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
             val raw = JSONObject(json)
             val pingOneInitCallback = PingOneProtectInitializeCallback(raw, 0)
+            pingOneInitCallback.setNode(node)
             pingOneInitCallback.start(context)
             fail()
         } catch (e: Exception) {

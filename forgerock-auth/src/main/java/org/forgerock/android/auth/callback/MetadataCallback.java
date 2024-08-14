@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2021 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2021 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth.callback;
+
+import static org.forgerock.android.auth.callback.AbstractProtectCallbackKt.PING_ONE_PROTECT_EVALUATION_CALLBACK;
+import static org.forgerock.android.auth.callback.AbstractProtectCallbackKt.PING_ONE_PROTECT_INITIALIZE_CALLBACK;
 
 import androidx.annotation.Keep;
 
@@ -85,6 +88,12 @@ public class MetadataCallback extends AbstractCallback implements DerivableCallb
         }
         if (WebAuthnAuthenticationCallback.instanceOf(value)) {
             return CallbackFactory.getInstance().getCallbacks().get("WebAuthnAuthenticationCallback");
+        }
+        if (AbstractProtectCallback.isPingOneProtectInitializeCallback(value)) {
+            return CallbackFactory.getInstance().getCallbacks().get(PING_ONE_PROTECT_INITIALIZE_CALLBACK);
+        }
+        if (AbstractProtectCallback.isPingOneProtectEvaluationCallback(value)) {
+            return CallbackFactory.getInstance().getCallbacks().get(PING_ONE_PROTECT_EVALUATION_CALLBACK);
         }
         return null;
     }

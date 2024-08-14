@@ -1,0 +1,57 @@
+{
+  "authId": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoSW5kZXhWYWx1ZSI6IndlYmF1dGhuX3JlZyIsIm90ayI6Ijluc2E1YWVva2E3YXBuaW84bHBycXAxc242IiwiYXV0aEluZGV4VHlwZSI6InNlcnZpY2UiLCJyZWFsbSI6Ii8iLCJzZXNzaW9uSWQiOiIqQUFKVFNRQUNNREVBQkhSNWNHVUFDRXBYVkY5QlZWUklBQUpUTVFBQSpleUowZVhBaU9pSktWMVFpTENKamRIa2lPaUpLVjFRaUxDSmhiR2NpT2lKSVV6STFOaUo5LlpYbEtNR1ZZUVdsUGFVcExWakZSYVV4RFNteGliVTFwVDJsS1FrMVVTVFJSTUVwRVRGVm9WRTFxVlRKSmFYZHBXVmQ0YmtscWIybGFSMng1U1c0d0xpNWpVSHBGZG1OVFpIRk9UbHB4UVZsaExWaEhhMWhSTG1wMVVscEZkRFZ4Y2tsRlpWQTNOMDh4TUhSbk5IbGlVRTV2UW5acmIzUjBiM2RXWDA5dGFYaDVjWE5uWm1OelFXVlJTR1pWVVRrd2NsaHRiRXBFVTNkNFZVUjZibEJrZUVWWVJXSllkRUZYUlhWeVdXWjVOMnhwT0Vaa1ZHcDNaSGxDT1VjM2Nrd3ROVlJsZG1VNFlsazRUM1ZSU0VOclkweDBSbEZYT1ZkdmNtRlpNSFpvWlVWMGJWZFhTM3BaWlZsT2FXSTJPSEV0Um5SUGFVcGlVbGxFUkRCeVdEWllPRFF4ZDJaRmNGaGxXRTF5UjBORVJEaE1aMnhWV0ZkMWNIVnRaelkxU0VsM1QwMDBRMnRFWVVjM1MybEZjMWxEUlRkRlVFOTJRM1ZqWTJReFNYaGtlbWt0ZWs5d09UVlVPR1IzTTFWcVZrbE5VMUpMUzNWSGJtVkVlRjl4VWxGdlNHOVFVa1ptU1dOek9XZHNObWxtWkRKd1gwSTBPR3hDTWpKRU5XZEJhaTFJUzBKRlRuRkhOSFV0TjBoNlgyOXROWGgwWVdNNWJISTBSRnBhZUMxcVRtUm1YMVp0ZERSNU4wWkpNRXQ0Tmkwd2NsTlNVVXRIT0ZsSFExWXdWMFZMTWt0QlMzcHRaalpyWVZaaVdETTFTR3BFVHpCMUxYUlFVV1ZSU1hnMVMwaFVXRmhMTmxNelZsOXBhVTlaTmxoTlpURXllV3A0Y0VWTlJUWmlSbkozWm5wc2VYQlpjSFJhZVZreE4xcGZYMWhVY2pkWk0xcHhTVlJST0RWaWJWZHZTMFowTkRoZlgyeEVWbTFZUkVSblIydHlWR3hMZFRoTlNVazFNWGszUWxKVFFrZEdkV2N4VUhwaVVuazRVRGx3TlZKaFJtVXRORU5GVEhGdFNsOUdMV2RDZG1ob1RUWldibUZaVVdoTGJ6Y3laR05rV2s1a1pUaEllazVCYm1WTVQzTkNVRE5aTkRscVdHVkNaR2gwVmpaalNsOXBMWHBxYjFSVVowSktVVkJXVUdoSVNtTnhkamhzTFRaa05sZGhlRWgzWnpaSmJUUlNhek4zTFVNMFlVVlBNREI0U1U5Nk0zVTJRVU5HVFRGakxVaE5jMUZsZVV0c1NtOUtOVFZuT0ZSMFJubE9WVFpVVm5OemRYVmlSRzVTTlVoYWJWazVVRGhuZEZSQmJ6VlBUakk0V1c5WVgxcDRZVk5aUXpGek1UUktTV3hoYzJ4NE1uTmFOelUzVWpVMGVFNUlWM3BtVDNkTlJtazVWWHA0VjFjNVpVVnVjSGw2YUhsT1NqRnlNelJNYnk1R1UyTnNabk10YkdSalpWSmhNVjh5VmtWWGRqaEIuSElHZFprUVNwbzR4U0dUVmlabEdSN3psRExvV09uOHhNQmt3MVRVZ05qVSIsImV4cCI6MTYxMzY5NTI1MywiaWF0IjoxNjEzNjk0OTUzfQ.BOdMUcaZbRNGkYAQu-Z_sBZMMHW4hdKDrXnBCbZhrxA",
+  "callbacks": [
+    {
+      "type": "MetadataCallback",
+      "output": [
+        {
+          "name": "data",
+          "value": {
+            "_type": "PingOneProtect",
+            "_action": "protect_risk_evaluation",
+            "envId" : "some_id",
+            "pauseBehavioralData" : true
+          }
+        }
+      ]
+    },
+    {
+      "type": "HiddenValueCallback",
+      "output": [
+        {
+          "name": "value",
+          "value": ""
+        },
+        {
+          "name": "id",
+          "value": "pingone_risk_evaluation_signals"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": "pingone_risk_evaluation_signals"
+        }
+      ]
+    },
+    {
+      "type": "HiddenValueCallback",
+      "output": [
+        {
+          "name": "value",
+          "value": ""
+        },
+        {
+          "name": "id",
+          "value": "clientError"
+        }
+      ],
+      "input": [
+        {
+          "name": "IDToken1",
+          "value": "clientError"
+        }
+      ]
+    }
+  ]
+}
