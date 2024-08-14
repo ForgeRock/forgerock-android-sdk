@@ -30,6 +30,9 @@ import org.forgerock.android.auth.exception.BrowserAuthenticationException
  */
 internal class AuthorizeContract :
     ActivityResultContract<Browser, Result<AuthorizationResponse, Throwable>>() {
+
+    private lateinit var authorizationService: AuthorizationService
+
     /**
      * Creates an intent for the authorization request.
      *
@@ -63,7 +66,7 @@ internal class AuthorizeContract :
         //Allow caller to override AppAuth default setting
         val appAuthConfigurationBuilder = AppAuthConfiguration.Builder()
         configurer.appAuthConfigurationBuilder.accept(appAuthConfigurationBuilder)
-        val authorizationService =
+        authorizationService =
             AuthorizationService(context, appAuthConfigurationBuilder.build())
 
         //Allow caller to override custom tabs default setting
@@ -73,7 +76,6 @@ internal class AuthorizeContract :
 
         val request = builder.build()
         return authorizationService.getAuthorizationRequestIntent(request, intentBuilder.build())
-
     }
 
     /**
@@ -87,6 +89,7 @@ internal class AuthorizeContract :
         resultCode: Int,
         intent: Intent?,
     ): Result<AuthorizationResponse, Throwable> {
+        authorizationService.dispose()
         intent?.let { i ->
             val error = AuthorizationException.fromIntent(i)
             error?.let {
@@ -100,7 +103,8 @@ internal class AuthorizeContract :
             val result = AuthorizationResponse.fromIntent(i)
             result?.let {
                 return Result.Success(it)
-            } ?: return Result.Failure(BrowserAuthenticationException("Failed to retrieve authorization code"))
+            }
+                ?: return Result.Failure(BrowserAuthenticationException("Failed to retrieve authorization code"))
         }
         return Result.Failure(BrowserAuthenticationException("No response data"))
     }

@@ -127,7 +127,6 @@ class EnvViewModel : ViewModel() {
         }
         oauth {
             oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
             oauthCacheSeconds = 0
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
