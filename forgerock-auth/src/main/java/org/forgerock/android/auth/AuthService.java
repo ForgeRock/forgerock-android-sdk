@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -11,11 +11,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.LruCache;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
-import java.util.*;
+import lombok.Builder;
+import lombok.Singular;
 
 /**
  * Model of an authentication service.
@@ -29,11 +31,8 @@ public class AuthService {
     public static final String COMPOSITE_ADVICE = "composite_advice";
     public static final String SUSPENDED_ID = "suspendedId";
 
-    @Getter
     private String name;
-    @Getter
     private String authServiceId;
-    @Getter
     private Uri resumeURI;
 
     private PolicyAdvice advice;
@@ -145,6 +144,18 @@ public class AuthService {
     void done() {
         Logger.debug(TAG, "Auth Service %s flow completed or suspended", authServiceId);
         authServices.remove(authServiceId);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getAuthServiceId() {
+        return this.authServiceId;
+    }
+
+    public Uri getResumeURI() {
+        return this.resumeURI;
     }
 
     public static class AuthServiceBuilder {

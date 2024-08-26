@@ -10,9 +10,9 @@ package org.forgerock.android.auth;
 /**
  * Constants for OAuth
  */
-class OAuth2 {
+public class OAuth2 {
 
-    static final String ACCESS_TOKEN = "access_token";
+    public static final String ACCESS_TOKEN = "access_token";
     static final String ID_TOKEN = "id_token";
     static final String REFRESH_TOKEN = "refresh_token";
     static final String TOKEN = "token";

@@ -1,6 +1,9 @@
 ## [4.X.0]
 #### Added
 - Skip Type 4 TextOutputCallback [SDKS-3227]
+- Allow developers to customize SDK Storage [SDKS-3378]
+- Support PingOne Protect Marketplace Node [SDKS-3279]
+- Expose Realm, Success Url with SSOToken [SDKS-3351]
 
 #### Fixed
 - Potential CustomTabManager ServiceConnection leak. [SDKS-3346]

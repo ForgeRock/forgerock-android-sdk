@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.forgerock.android.auth.OkHttpClientProvider.getInstance
 import org.forgerock.android.auth.exception.ApiException
+import org.forgerock.android.auth.storage.Storage
 import org.json.JSONObject
 import java.net.URL
 
@@ -24,7 +25,8 @@ data class FROptions(val server: Server,
                      val service: Service,
                      val urlPath: UrlPath,
                      val sslPinning: SSLPinning,
-                     val logger: Log) {
+                     val logger: Log,
+                     val store: Store) {
 
     companion object {
         @JvmStatic
@@ -40,6 +42,7 @@ data class FROptions(val server: Server,
                     && old?.service == new?.service
                     && old?.urlPath == new?.urlPath
                     && old?.logger == new?.logger
+                    && old?.store == new?.store
         }
     }
 
@@ -50,6 +53,7 @@ data class FROptions(val server: Server,
         require(server.realm.isNotBlank()) { "Realm cannot be blank" }
         require(server.cookieName.isNotBlank()) { "cookieName cannot be blank" }
     }
+
     private fun getOkHttpClient(url: URL): OkHttpClient {
         val networkConfig = NetworkConfig.networkBuilder()
             .host(url.authority)
@@ -92,12 +96,13 @@ data class FROptions(val server: Server,
                         JSONObject(it)
                     }
 
-                    val issuer =  openIdConfiguration?.getString("issuer") ?: ""
-                    val server = this@FROptions.server.copy(url = (server.url.isNotEmpty() then server.url)
-                        ?: issuer)
+                    val issuer = openIdConfiguration?.getString("issuer") ?: ""
+                    val server =
+                        this@FROptions.server.copy(url = (server.url.isNotEmpty() then server.url)
+                            ?: issuer)
                     val urlPath = this@FROptions.urlPath.copy(
                         authorizeEndpoint = openIdConfiguration?.getString("authorization_endpoint"),
-                        tokenEndpoint =  openIdConfiguration?.getString("token_endpoint"),
+                        tokenEndpoint = openIdConfiguration?.getString("token_endpoint"),
                         userinfoEndpoint = openIdConfiguration?.getString("userinfo_endpoint"),
                         revokeEndpoint = openIdConfiguration?.getString("revocation_endpoint"),
                         endSessionEndpoint = openIdConfiguration?.getString("end_session_endpoint"))
@@ -106,7 +111,7 @@ data class FROptions(val server: Server,
 
                 }
             } catch (e: Exception) {
-                throw  e
+                throw e
             }
         }
     }
@@ -124,10 +129,16 @@ class FROptionsBuilder {
     private var urlPath: UrlPath = UrlPath()
     private var sslPinning: SSLPinning = SSLPinning()
     private var logger: Log = Log()
+    private var store: Store = Store()
 
     companion object {
         @JvmStatic
-        fun build(block: FROptionsBuilder.() -> Unit): FROptions = FROptionsBuilder().apply(block).build()
+        fun build(block: FROptionsBuilder.() -> Unit): FROptions =
+            FROptionsBuilder().apply(block).build()
+    }
+
+    fun store(block: Store.() -> Unit) {
+        store = Store().apply(block)
     }
 
     /**
@@ -185,10 +196,15 @@ class FROptionsBuilder {
     }
 
     private fun build(): FROptions {
-        return FROptions(server, oauth, service, urlPath, sslPinning, logger)
+        return FROptions(server, oauth, service, urlPath, sslPinning, logger, store)
     }
 
 }
+
+data class Store(var oidcStorage: Storage<AccessToken> = Options.oidcStorage,
+                 var ssoTokenStorage: Storage<SSOToken> = Options.ssoTokenStorage,
+                 var cookiesStorage: Storage<Collection<String>> = Options.cookieStorage
+)
 
 /**
  * Data class for the server configurations
@@ -234,7 +250,7 @@ class OAuthBuilder {
     var oauthThresholdSeconds: Long = 0
     var oauthCacheSeconds: Long = 0
 
-    fun build() : OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthSignOutRedirectUri,
+    fun build(): OAuth = OAuth(oauthClientId, oauthRedirectUri, oauthSignOutRedirectUri,
         oauthScope, oauthThresholdSeconds, oauthCacheSeconds)
 
 }
@@ -252,7 +268,7 @@ class ServiceBuilder {
     var authServiceName: String = "Login"
     var registrationServiceName: String = "Registration"
 
-    fun build() : Service = Service(authServiceName, registrationServiceName)
+    fun build(): Service = Service(authServiceName, registrationServiceName)
 
 }
 
@@ -269,7 +285,7 @@ class SSLPinningBuilder {
     var buildSteps: List<BuildStep<OkHttpClient.Builder>> = emptyList()
     var pins: List<String> = emptyList()
 
-    fun build() : SSLPinning = SSLPinning(buildSteps, pins)
+    fun build(): SSLPinning = SSLPinning(buildSteps, pins)
 
 }
 
@@ -296,7 +312,13 @@ class UrlPathBuilder {
     var authorizeEndpoint: String? = null
     var endSessionEndpoint: String? = null
 
-    fun build() : UrlPath = UrlPath(authenticateEndpoint, revokeEndpoint, sessionEndpoint, tokenEndpoint, userinfoEndpoint, authorizeEndpoint, endSessionEndpoint)
+    fun build(): UrlPath = UrlPath(authenticateEndpoint,
+        revokeEndpoint,
+        sessionEndpoint,
+        tokenEndpoint,
+        userinfoEndpoint,
+        authorizeEndpoint,
+        endSessionEndpoint)
 
 }
 

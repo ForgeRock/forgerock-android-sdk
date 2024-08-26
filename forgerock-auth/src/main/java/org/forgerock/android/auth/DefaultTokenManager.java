@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth;
 
-import static org.forgerock.android.auth.OAuth2.ACCESS_TOKEN;
 import static org.forgerock.android.auth.StringUtils.isNotEmpty;
 
 import android.annotation.SuppressLint;
@@ -21,6 +20,7 @@ import net.openid.appauth.AppAuthConfiguration;
 import org.forgerock.android.auth.exception.ApiException;
 import org.forgerock.android.auth.exception.AuthenticationRequiredException;
 import org.forgerock.android.auth.exception.InvalidGrantException;
+import org.forgerock.android.auth.storage.Storage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,8 +35,7 @@ import lombok.Builder;
 
 /**
  * Default implementation for {@link TokenManager}. By default this class uses {@link SecuredSharedPreferences} to persist
- * the token locally on the device. However, it can be overridden by the {@link DefaultTokenManager#builder#sharedPreferences}
- * For example, it can replaced with Android JetPack {@link androidx.security.crypto.EncryptedSharedPreferences}
+ * the token locally on the device. However, it can be overridden by the {@link DefaultTokenManager#builder#storage}
  * <p>
  * <p>
  * This {@link TokenManager} supports {@link AccessToken} in-memory caching. To control the caching interval use
@@ -48,16 +47,10 @@ class DefaultTokenManager implements TokenManager {
 
     private static final String TAG = "DefaultTokenManager";
 
-    //Alias to store keys
-    static final String ORG_FORGEROCK_V_1_KEYS = "org.forgerock.v1.KEYS";
-
-    //File name to store tokens
-    static final String ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS";
-
     /**
      * The {@link SharedPreferences} to store the tokens
      */
-    private SharedPreferences sharedPreferences;
+    private final Storage<AccessToken> storage;
 
     /**
      * The {@link OAuth2Client} to auto refresh {@link AccessToken}
@@ -78,14 +71,13 @@ class DefaultTokenManager implements TokenManager {
     @Builder
     public DefaultTokenManager(@NonNull Context context,
                                OAuth2Client oAuth2Client,
-                               SharedPreferences sharedPreferences,
+                               Storage<AccessToken> storage,
                                Long cacheIntervalMillis,
                                Long threshold) {
 
-        this.sharedPreferences = sharedPreferences == null ? new SecuredSharedPreferences(context,
-                ORG_FORGEROCK_V_1_TOKENS, ORG_FORGEROCK_V_1_KEYS) : sharedPreferences;
+        this.storage = storage == null ? Options.INSTANCE.getOidcStorage() : storage;
 
-        Logger.debug(TAG, "Using SharedPreference: %s", this.sharedPreferences.getClass().getSimpleName());
+        Logger.debug(TAG, "Using SharedPreference: %s", this.storage.getClass().getSimpleName());
 
         this.oAuth2Client = oAuth2Client;
         this.accessTokenRef = new AtomicReference<>();
@@ -99,9 +91,7 @@ class DefaultTokenManager implements TokenManager {
     @Override
     public void persist(@NonNull AccessToken accessToken) {
         cache(accessToken);
-        sharedPreferences.edit()
-                .putString(ACCESS_TOKEN, accessToken.toJson())
-                .commit();
+        storage.save(accessToken);
     }
 
     @Override
@@ -160,7 +150,7 @@ class DefaultTokenManager implements TokenManager {
     @Override
     public boolean hasToken() {
         //Consider null if Access token does not exists
-        return sharedPreferences.getString(ACCESS_TOKEN, null) != null;
+        return storage.get() != null;
     }
 
     @Override
@@ -229,11 +219,7 @@ class DefaultTokenManager implements TokenManager {
             }
         }
         //Consider null if Access token does not exists
-        String value = sharedPreferences.getString(ACCESS_TOKEN, null);
-        if (value == null) {
-            return null;
-        }
-        AccessToken accessToken = AccessToken.fromJson(value);
+        AccessToken accessToken = storage.get();
         cache(accessToken);
         return accessToken;
     }
@@ -257,7 +243,7 @@ class DefaultTokenManager implements TokenManager {
     @Override
     public void clear() {
         accessTokenRef.set(null);
-        sharedPreferences.edit().clear().commit();
+        storage.delete();
         //Broadcast Token removed event
         EventDispatcher.TOKEN_REMOVED.notifyObservers();
     }

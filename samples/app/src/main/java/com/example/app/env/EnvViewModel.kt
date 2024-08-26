@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023-2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app.env
@@ -13,7 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.app.storage.loadCookiesStorage
+import com.example.app.storage.loadSSOTokenStorage
+import com.example.app.storage.loadTokenStorage
 import kotlinx.coroutines.launch
+import org.forgerock.android.auth.ContextProvider
 import org.forgerock.android.auth.FRAuth
 import org.forgerock.android.auth.FROptions
 import org.forgerock.android.auth.FROptionsBuilder
@@ -127,12 +131,25 @@ class EnvViewModel : ViewModel() {
         }
         oauth {
             oauthClientId = "AndroidTest"
+            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
             oauthCacheSeconds = 0
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
         }
         service {
             authServiceName = "WebAuthn"
+        }
+        store {
+            //Default use SecureSharedPreferences
+            //oidcStorage = TokenStorage(ContextProvider.context)
+            //ssoTokenStorage = SSOTokenStorage(ContextProvider.context)
+
+            //cookiesStorage = CookiesStorage(ContextProvider.context)
+
+            oidcStorage = loadTokenStorage(ContextProvider.context)
+            ssoTokenStorage = loadSSOTokenStorage(ContextProvider.context)
+            cookiesStorage = loadCookiesStorage(ContextProvider.context)
+
         }
     }
 
