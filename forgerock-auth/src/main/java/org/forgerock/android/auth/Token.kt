@@ -6,22 +6,12 @@
  */
 package org.forgerock.android.auth
 
-import java.io.Serializable
+import kotlinx.serialization.Serializable
 
 /**
  * Domain object to hold generic Token
  */
-open class Token(open val value: String) : Serializable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Token) return false
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return value.hashCode()
-    }
+@Serializable
+sealed interface Token {
+    val value: String
 }

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app.userprofile
@@ -28,9 +28,13 @@ class UserProfileViewModel : ViewModel() {
 
     private fun showSession() {
         val jsonObject = JSONObject()
-        jsonObject.put("SessionToken",
-            FRSession.getCurrentSession()?.sessionToken?.value)
-        state.update {
+        val ssoToken = FRSession.getCurrentSession()?.sessionToken
+        ssoToken?.let {
+            jsonObject.put("SessionToken", it.value)
+            jsonObject.put("successUrl", it.successUrl)
+            jsonObject.put("realm", it.realm)
+        }
+       state.update {
             it.copy(user = jsonObject, exception = null)
         }
     }

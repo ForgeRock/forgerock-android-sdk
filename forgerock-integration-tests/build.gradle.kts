@@ -9,6 +9,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 apply<AndroidBuildGradlePlugin>()
@@ -27,6 +28,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)

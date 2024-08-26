@@ -54,7 +54,6 @@ public class SecuredSharedPreferences implements SharedPreferences {
     @Getter
     private final String keyAlias;
 
-    @VisibleForTesting
     public SecuredSharedPreferences(Context context, String fileName, String keyAlias) {
         this(context, fileName, keyAlias, null);
     }
@@ -199,7 +198,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             }
         } catch (Exception ex) {
             if (retry) {
-                get(key, false);
+                return get(key, false);
             }
             throw new RuntimeException(ex);
         }

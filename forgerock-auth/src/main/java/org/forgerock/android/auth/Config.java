@@ -8,11 +8,13 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import org.forgerock.android.auth.storage.Storage;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,10 +68,11 @@ public class Config {
     private String authServiceName;
     private String registrationServiceName;
 
-    private SharedPreferences ssoSharedPreferences;
+    private Storage<SSOToken> ssoTokenStorage;
+    private Storage<Collection<String>> cookiesStorage;
 
     //Token Manager
-    private SharedPreferences sharedPreferences;
+    private Storage<AccessToken> oidcStorage;
 
     //KeyStoreManager
     private KeyStoreManager keyStoreManager;
@@ -90,14 +93,20 @@ public class Config {
 
     //For testing to avoid using Android KeyStore Encryption
     @VisibleForTesting
-    public void setSsoSharedPreferences(SharedPreferences ssoSharedPreferences) {
-        this.ssoSharedPreferences = ssoSharedPreferences;
+    public void setSsoTokenStorage(Storage<SSOToken> storage) {
+        this.ssoTokenStorage = storage;
     }
+
+    @VisibleForTesting
+    public void setCookiesStorage(Storage<Collection<String>> storage) {
+        this.cookiesStorage = storage;
+    }
+
 
     //For testing to avoid using Android KeyStore Encryption
     @VisibleForTesting
-    public void setSharedPreferences(SharedPreferences sharedPreferences) {
-        this.sharedPreferences = sharedPreferences;
+    public void setOidcStorage(Storage<AccessToken> storage) {
+        this.oidcStorage = storage;
     }
 
     /**
@@ -195,7 +204,7 @@ public class Config {
     TokenManager getTokenManager() {
         return DefaultTokenManager.builder()
                 .context(context)
-                .sharedPreferences(sharedPreferences)
+                .storage(oidcStorage)
                 .oAuth2Client(getOAuth2Client())
                 .cacheIntervalMillis(oauthCacheMillis)
                 .threshold(oauthThreshold)
@@ -204,8 +213,9 @@ public class Config {
 
     SingleSignOnManager getSingleSignOnManager() {
         return DefaultSingleSignOnManager.builder()
-                .sharedPreferences(ssoSharedPreferences)
                 .serverConfig(getServerConfig())
+                .ssoTokenStorage(ssoTokenStorage)
+                .cookiesStorage(cookiesStorage)
                 .context(context)
                 .ssoBroadcastModel(getSSOBroadcastModel())
                 .build();

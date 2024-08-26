@@ -38,6 +38,7 @@ public class BaseTest {
 
     @Before
     public void startServer() throws Exception {
+        ContextProvider.INSTANCE.init(context);
 
         ShadowLog.stream = System.out;
         Logger.set(Logger.Level.DEBUG);

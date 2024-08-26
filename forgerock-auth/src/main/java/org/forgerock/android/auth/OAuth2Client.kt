@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth
 
@@ -59,7 +59,7 @@ class OAuth2Client(
      */
     fun exchangeToken(token: SSOToken,
                       additionalParameters: Map<String, String>,
-                      listener: FRListener<AccessToken?>) {
+                      listener: FRListener<AccessToken>) {
         debug(TAG, "Exchanging Access Token with SSO Token.")
         val handler = OAuth2ResponseHandler()
         try {
@@ -73,7 +73,7 @@ class OAuth2Client(
             debug(TAG, "Exchanging Authorization Code with SSO Token.")
 
             val request = Request.Builder()
-                .url(getAuthorizeUrl(token, pkce, state, additionalParameters))
+                .url(getAuthorizeUrl(pkce, state, additionalParameters))
                 .get()
                 .header(ServerConfig.ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)
                 .header(serverConfig.cookieName, token.value)
@@ -113,7 +113,7 @@ class OAuth2Client(
      * @param refreshToken The Refresh Token that use to refresh the Access Token
      * @param listener     Listen for endpoint event
      */
-    fun refresh(sessionToken: SSOToken?, refreshToken: String, listener: FRListener<AccessToken?>) {
+    fun refresh(sessionToken: SSOToken?, refreshToken: String, listener: FRListener<AccessToken>) {
         debug(TAG, "Refreshing Access Token")
 
         val handler = OAuth2ResponseHandler()
@@ -213,7 +213,7 @@ class OAuth2Client(
      * @param idToken  The ID_TOKEN which associated with the user session.
      * @param listener Listener to listen for end session event.
      */
-    fun endSession(idToken: String, listener: FRListener<Void?>?) {
+    fun endSession(idToken: String, listener: FRListener<Void?>) {
         val request: Request?
         try {
             request = Request.Builder()
@@ -282,7 +282,7 @@ class OAuth2Client(
               pkce: PKCE,
               additionalParameters: Map<String, String>,
               handler: OAuth2ResponseHandler,
-              listener: FRListener<AccessToken?>) {
+              listener: FRListener<AccessToken>) {
         debug(TAG, "Exchange Access Token with Authorization Code")
         try {
             val builder = FormBody.Builder()
@@ -325,8 +325,7 @@ class OAuth2Client(
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class)
-    private fun getAuthorizeUrl(token: Token,
-                                pkce: PKCE,
+    private fun getAuthorizeUrl(pkce: PKCE,
                                 state: String,
                                 additionalParameters: Map<String, String>): URL {
         val builder = Uri.parse(authorizeUrl.toString()).buildUpon()

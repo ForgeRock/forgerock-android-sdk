@@ -20,6 +20,8 @@ import java.io.File;
 import java.security.KeyStore;
 import java.util.concurrent.ExecutionException;
 
+import static org.forgerock.android.auth.storage.TokenStorageKt.ORG_FORGEROCK_V_1_KEYS;
+import static org.forgerock.android.auth.storage.TokenStorageKt.ORG_FORGEROCK_V_1_TOKENS;
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
@@ -39,11 +41,11 @@ public class DefaultTokenManagerTest extends AndroidBaseTest {
         //Clean up the created keys
         KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
         keyStore.load(null);
-        keyStore.deleteEntry(DefaultTokenManager.ORG_FORGEROCK_V_1_KEYS);
+        keyStore.deleteEntry(ORG_FORGEROCK_V_1_KEYS);
 
         //Clean up the created files
         Context context = ApplicationProvider.getApplicationContext();
-        String filePath = context.getFilesDir().getParent() + "/shared_prefs/" + DefaultTokenManager.ORG_FORGEROCK_V_1_TOKENS + ".xml";
+        String filePath = context.getFilesDir().getParent() + "/shared_prefs/" + ORG_FORGEROCK_V_1_TOKENS + ".xml";
         File deletePrefFile = new File(filePath);
         deletePrefFile.delete();
     }
