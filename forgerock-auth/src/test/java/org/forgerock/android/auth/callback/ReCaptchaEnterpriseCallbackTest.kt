@@ -12,7 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.recaptcha.RecaptchaAction
 import com.google.android.recaptcha.RecaptchaClient
 import junit.framework.TestCase.fail
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
@@ -55,11 +55,12 @@ class ReCaptchaEnterpriseCallbackTest {
                     "name": "IDToken1action",
                     "value": ""
                 },
-                  {
-                    "name": "IDToken1payload",
-                    "value": ""
-                },  {
+                   {
                     "name": "IDToken1clientError",
+                    "value": ""
+                },
+                 {
+                    "name": "IDToken1payload",
                     "value": ""
                 }
             ]
@@ -78,7 +79,7 @@ class ReCaptchaEnterpriseCallbackTest {
     }
 
     @Test
-    fun testCaptchaSuccess() = runBlocking {
+    fun testCaptchaSuccess() = runTest {
         // Arrange
 
             val recaptchaClient = Mockito.mock(RecaptchaClient::class.java)
@@ -101,7 +102,7 @@ class ReCaptchaEnterpriseCallbackTest {
     }
 
     @Test
-    fun testInvalidToken() = runBlocking {
+    fun testInvalidToken() = runTest {
         // Arrange
             val recaptchaClient = Mockito.mock(RecaptchaClient::class.java)
             val recaptchaClientProvider = Mockito.mock(RecaptchaClientProvider::class.java)
@@ -121,7 +122,7 @@ class ReCaptchaEnterpriseCallbackTest {
     }
 
     @Test
-    fun testCustomAction() = runBlocking {
+    fun testCustomAction() = runTest {
         // Arrange
         val recaptchaClient = Mockito.mock(RecaptchaClient::class.java)
         val recaptchaClientProvider = Mockito.mock(RecaptchaClientProvider::class.java)
@@ -143,7 +144,7 @@ class ReCaptchaEnterpriseCallbackTest {
     }
 
     @Test
-    fun testPayload() = runBlocking {
+    fun testPayloadAction() = runTest {
         // Arrange
         val recaptchaClient = Mockito.mock(RecaptchaClient::class.java)
         val recaptchaClientProvider = Mockito.mock(RecaptchaClientProvider::class.java)
@@ -155,7 +156,8 @@ class ReCaptchaEnterpriseCallbackTest {
         callback.execute(application, "login", 15000L, recaptchaClientProvider)
 
         callback.setPayload(JSONObject().put("key", "value"))
-        
+        callback.setAction("custom-action")
+
         verify(recaptchaClientProvider).fetchClient(
             application,
             "6Lf3tbYUAAAAAEm78fAOFRKb-n1M67FDtmpczIBK"
@@ -165,5 +167,6 @@ class ReCaptchaEnterpriseCallbackTest {
         assert(callback.content.contains("test-token"))
         assert(callback.content.contains("key"))
         assert(callback.content.contains("value"))
+        assert(callback.content.contains("custom-action"))
     }
 }

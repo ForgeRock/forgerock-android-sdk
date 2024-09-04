@@ -103,7 +103,6 @@ dependencies {
     //App Integrity
     androidTestImplementation(libs.integrity)
 
-
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.test.runner)

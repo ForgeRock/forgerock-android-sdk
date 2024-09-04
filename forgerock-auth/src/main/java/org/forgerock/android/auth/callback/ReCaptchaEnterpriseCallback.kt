@@ -82,7 +82,7 @@ class ReCaptchaEnterpriseCallback : AbstractCallback {
      * @param value The Payload
      */
     fun setPayload(value: JSONObject) {
-        super.setValue(value.toString(), 2)
+        super.setValue(value.toString(), 3)
     }
 
     override fun getType(): String {
