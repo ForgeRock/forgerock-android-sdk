@@ -82,7 +82,7 @@ abstract class AbstractProtectCallback: NodeAware, AbstractCallback {
      * @param value Protect ErrorType
      * @param index The index of the error
      */
-    fun setClientError(value: String, index: Int) {
+    fun setClientError(value: String, index: Int = 0) {
         if (derivedCallback) {
             setClientErrorInHiddenCallback(value);
         } else {

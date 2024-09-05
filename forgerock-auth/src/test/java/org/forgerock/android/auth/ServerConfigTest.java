@@ -38,6 +38,7 @@ public class ServerConfigTest {
 
     @Before
     public void setUp() {
+        ContextProvider.INSTANCE.init(context);
         OkHttpClientProvider.getInstance().clear();
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
     }

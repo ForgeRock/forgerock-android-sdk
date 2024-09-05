@@ -7,18 +7,24 @@
 package org.forgerock.android.auth
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import okhttp3.mockwebserver.MockResponse
 import org.forgerock.android.auth.exception.AuthenticationRequiredException
 import org.forgerock.android.auth.exception.InvalidGrantException
+import org.forgerock.android.auth.storage.Storage
+import org.forgerock.android.auth.storage.StorageDelegate
 import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -27,22 +33,29 @@ import java.util.concurrent.TimeUnit
  */
 @RunWith(AndroidJUnit4::class)
 class DefaultTokenManagerTest : BaseTest() {
+
+    private lateinit var storage: Storage<AccessToken>
+
+    @Before
+    fun setUpStorage() {
+        //Cannot use MemoryStorage as it does not support cacheable
+        storage = sharedPreferencesStorage<AccessToken>(context = context,
+            filename = DEFAULT_TOKEN_MANAGER_TEST,
+            key = "AccessToken", cacheable = false)
+        Options.init(Store(oidcStorage = storage))
+    }
+
     @After
     @Throws(Exception::class)
     fun tearDown() {
-        context.deleteSharedPreferences(DEFAULT_TOKEN_MANAGER_TEST)
+        storage.delete()
+        Options.init(Store())
     }
 
     @Test
     @Throws(Throwable::class)
     fun storeAccessToken() {
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .context(context).build()
         val accessToken = AccessToken.builder()
             .value("access token")
@@ -66,12 +79,6 @@ class DefaultTokenManagerTest : BaseTest() {
     @Throws(Throwable::class)
     fun clearAccessToken() {
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .context(context).build()
         val accessToken = AccessToken.builder()
             .value("access token")
@@ -90,14 +97,7 @@ class DefaultTokenManagerTest : BaseTest() {
     @Throws(Throwable::class)
     fun tokenManagerWithCache() {
 
-        val counDownLatch = CountDownLatch(1)
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .cacheIntervalMillis(100L)
             .context(context).build()
         val accessToken = AccessToken.builder()
@@ -115,8 +115,7 @@ class DefaultTokenManagerTest : BaseTest() {
         //If reference are equal, they come from the cache
         assertSame(storedAccessToken1, storedAccessToken2)
 
-        counDownLatch.await(200L, TimeUnit.MILLISECONDS)
-        counDownLatch.countDown()
+        Thread.sleep(200)
 
         val storedAccessToken3 = getAccessToken(tokenManager)
         //The cache is expired, should re-cache and token should not have the same references
@@ -133,12 +132,6 @@ class DefaultTokenManagerTest : BaseTest() {
     fun tokenManagerWithoutCache() {
 
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .context(context).build()
         val accessToken = AccessToken.builder()
             .value("access token")
@@ -159,14 +152,7 @@ class DefaultTokenManagerTest : BaseTest() {
     @Test
     @Throws(Throwable::class)
     fun testCacheExpired() {
-        val counDownLatch = CountDownLatch(1)
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .cacheIntervalMillis(100L)
             .context(context).build()
         val accessToken = AccessToken.builder()
@@ -181,7 +167,6 @@ class DefaultTokenManagerTest : BaseTest() {
         val storedAccessToken1 = getAccessToken(tokenManager)
 
         Thread.sleep(200L)
-        counDownLatch.countDown()
 
         val storedAccessToken2 = getAccessToken(tokenManager)
 
@@ -196,12 +181,6 @@ class DefaultTokenManagerTest : BaseTest() {
 
         enqueue("/authenticate_refreshToken.json", HttpURLConnection.HTTP_OK)
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .oAuth2Client(oAuth2Client)
             .threshold(0L)
             .context(context).build()
@@ -217,10 +196,7 @@ class DefaultTokenManagerTest : BaseTest() {
         tokenManager.persist(accessToken)
         val storedAccessToken1 = getAccessToken(tokenManager)
 
-        val countDownLatch = CountDownLatch(1)
-        countDownLatch.await(1000, TimeUnit.MILLISECONDS)
-        countDownLatch.countDown()
-
+        Thread.sleep(1000)
         val storedAccessToken2 = getAccessToken(tokenManager)
         assertNotEquals(storedAccessToken1.value, storedAccessToken2.value)
         assertEquals("Refreshed Token", storedAccessToken2.value)
@@ -231,12 +207,6 @@ class DefaultTokenManagerTest : BaseTest() {
     fun testTokenRefreshWithNotIssueNewRefreshToken() {
         enqueue("/authenticate_without_refreshToken.json", HttpURLConnection.HTTP_OK)
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .oAuth2Client(oAuth2Client)
             .threshold(0L)
             .context(context).build()
@@ -253,9 +223,7 @@ class DefaultTokenManagerTest : BaseTest() {
             .build()
         tokenManager.persist(accessToken)
         val storedAccessToken1 = getAccessToken(tokenManager)
-        val countDownLatch = CountDownLatch(1)
-        countDownLatch.await(1000, TimeUnit.MILLISECONDS)
-        countDownLatch.countDown()
+        Thread.sleep(1000)
 
         val storedAccessToken2 = getAccessToken(tokenManager)
         assertNotEquals(storedAccessToken1.value, storedAccessToken2.value)
@@ -276,12 +244,6 @@ class DefaultTokenManagerTest : BaseTest() {
             .serverConfig(serverConfig)
             .build()
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .oAuth2Client(oAuth2Client)
             .threshold(1L)
             .context(context).build()
@@ -313,12 +275,6 @@ class DefaultTokenManagerTest : BaseTest() {
                 .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
         )
         val tokenManager: TokenManager = DefaultTokenManager.builder()
-            .sharedPreferences(
-                context.getSharedPreferences(
-                    DEFAULT_TOKEN_MANAGER_TEST,
-                    Context.MODE_PRIVATE
-                )
-            )
             .oAuth2Client(oAuth2Client)
             .threshold(0L)
             .context(context).build()
@@ -334,10 +290,7 @@ class DefaultTokenManagerTest : BaseTest() {
         tokenManager.persist(accessToken)
         val storedAccessToken1 = getAccessToken(tokenManager)
         assertNotNull(storedAccessToken1)
-
-        val countDownLatch = CountDownLatch(1)
-        countDownLatch.await(1000, TimeUnit.MILLISECONDS)
-        countDownLatch.countDown()
+        Thread.sleep(1000)
         getAccessToken(tokenManager)
     }
 
@@ -355,6 +308,52 @@ class DefaultTokenManagerTest : BaseTest() {
     }
 
     companion object {
-        private const val DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest"
+        const val DEFAULT_TOKEN_MANAGER_TEST = "DefaultTokenManagerTest"
+    }
+
+}
+
+class SharedPreferencesStorage<T : @Serializable Any>(
+    context: Context,
+    filename: String,
+    private var key: String,
+    private val serializer: KSerializer<T>,
+) : Storage<T> {
+
+    private var sharedPreferences: SharedPreferences = context.getSharedPreferences(
+        filename,
+        Context.MODE_PRIVATE
+    )
+
+    override fun save(item: T) {
+        val s = json.encodeToString(serializer, item)
+        sharedPreferences.edit().putString(key, s).commit()
+    }
+
+    override fun get(): T? {
+        return sharedPreferences.getString(key, null)?.let {
+            val s = json.decodeFromString(serializer, it)
+            return s
+        }
+    }
+
+    override fun delete() {
+        sharedPreferences.edit().remove(key).commit()
     }
 }
+
+inline fun <reified T : @Serializable Any> sharedPreferencesStorage(
+    context: Context,
+    filename: String,
+    key: String,
+    cacheable: Boolean = false,
+): StorageDelegate<T> =
+    StorageDelegate {
+        SharedPreferencesStorage(
+            context = context,
+            filename = filename,
+            key = key,
+            serializer = Json.serializersModule.serializer(),
+        )
+    }
+

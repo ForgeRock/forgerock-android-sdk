@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 plugins {
 
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
-
+    alias(libs.plugins.kotlinSerialization)
 
     id("com.adarshr.test-logger")
     id("maven-publish")
@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.org.jetbrains.kotlinx)
     implementation(libs.jetbrains.kotlinx.coroutines.play.services)
     implementation(libs.androidx.appcompat)
+
+    implementation(libs.kotlinx.serialization.json)
 
     //Make it optional for developer
     compileOnly(libs.play.services.location)

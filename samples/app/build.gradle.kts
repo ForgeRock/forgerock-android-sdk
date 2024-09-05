@@ -61,6 +61,12 @@ dependencies {
     implementation(project(":forgerock-auth"))
     implementation(project(":ping-protect"))
 
+    //For Custom Storage
+    implementation(libs.kotlinx.serialization.json)
+
+    //implementation("org.forgerock:forgerock-auth:4.5.0")
+    //implementation("org.forgerock:ping-protect:4.5.0")
+
     // implementation 'org.forgerock:forgerock-auth:4.2.0'
     // Device Binding + JWT + Application Pin
     implementation(libs.bcpkix.jdk15on) // Application Pin
