@@ -64,6 +64,7 @@ dependencies {
 
     //Make it optional for developer
     compileOnly(libs.play.services.location)
+    compileOnly(libs.recaptchaEnterprise)
     compileOnly(libs.play.services.safetynet)
     // Keeping this version for now, its breaking Apple SignIn for the later versions.
     compileOnly(libs.appauth)
@@ -129,6 +130,8 @@ dependencies {
 
     //App Integrity
     testImplementation(libs.integrity)
+
+    testImplementation(libs.recaptchaEnterprise)
 
     testImplementation(libs.kotlinx.coroutines.test)
 

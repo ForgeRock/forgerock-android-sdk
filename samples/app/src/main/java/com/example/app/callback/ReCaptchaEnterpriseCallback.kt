@@ -17,19 +17,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import org.forgerock.android.auth.FRListener
-import org.forgerock.android.auth.Node
-import org.forgerock.android.auth.callback.ReCaptchaCallback
+import com.example.app.LocalAppContext
+import com.google.android.recaptcha.RecaptchaException
+import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.callback.ReCaptchaEnterpriseCallback
 
 @Composable
-fun ReCaptchaCallback(callback: ReCaptchaCallback, node: Node,
-                      onCompleted: () -> Unit) {
+fun ReCaptchaEnterpriseCallback(callback: ReCaptchaEnterpriseCallback,
+                                onCompleted: () -> Unit) {
 
 
     val currentOnCompleted by rememberUpdatedState(onCompleted)
-    val context = LocalContext.current
+    val application = LocalAppContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,15 +47,16 @@ fun ReCaptchaCallback(callback: ReCaptchaCallback, node: Node,
             Spacer(Modifier.height(8.dp))
             CircularProgressIndicator()
             LaunchedEffect(true) {
-                callback.proceed(context, object : FRListener<Void?> {
-                    override fun onSuccess(result: Void?) {
-                        currentOnCompleted()
+                try {
+                    callback.execute(application = application)
+                }
+                catch (e: Exception) {
+                    if(e is RecaptchaException) {
+                        Logger.error("RecaptchaException", "${e.errorCode}:${e.message}")
                     }
-
-                    override fun onException(e: Exception) {
-                        currentOnCompleted()
-                    }
-                })
+                    Logger.error("RecaptchaException", e.message)
+                }
+                currentOnCompleted()
             }
         }
     }

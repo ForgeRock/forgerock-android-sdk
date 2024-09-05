@@ -39,6 +39,7 @@ play-services-location = "21.0.1"
 play-services-safetynet = "18.0.1"
 powermock-module-junit4 = "2.0.9"
 powermock-api-mockito2 = "2.0.9"
+recaptchaEnterprise = "18.6.0"
 rules = "1.5.0"
 security-crypto = "1.1.0-alpha06"
 firebase-crashlytics-buildtools = "2.9.9"
@@ -87,6 +88,7 @@ play-services-safetynet = { module = "com.google.android.gms:play-services-safet
 powermock-api-mockito2 = { module = "org.powermock:powermock-api-mockito2", version.ref = "powermock-api-mockito2" }
 powermock-module-junit4 = { module = "org.powermock:powermock-module-junit4", version.ref = "powermock-module-junit4" }
 projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "lombok-version" }
+recaptchaEnterprise = { module = "com.google.android.recaptcha:recaptcha", version.ref = "recaptchaEnterprise" }
 rules = { module = "androidx.test:rules", version.ref = "rules" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 
