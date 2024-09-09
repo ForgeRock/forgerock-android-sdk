@@ -1,4 +1,4 @@
-## [4.X.0]
+## [4.6.0]
 #### Added
 - Skip Type 4 TextOutputCallback [SDKS-3227]
 - Allow developers to customize SDK Storage [SDKS-3378]
