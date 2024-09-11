@@ -14,7 +14,7 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.android().apply {
-            compileSdk = 34;
+            compileSdk = 35;
             defaultConfig {
                 minSdk = 23
             }
@@ -30,7 +30,7 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
                 }
             }
             testOptions {
-                targetSdk = 34
+                targetSdk = 35
                 unitTests {
                     isIncludeAndroidResources = true
                     isReturnDefaultValues = true
