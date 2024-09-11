@@ -12,7 +12,6 @@
     Set usesCleartextTraffic only for test purpose,
     it is highly recommend to set this attribute to false in production
     -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>

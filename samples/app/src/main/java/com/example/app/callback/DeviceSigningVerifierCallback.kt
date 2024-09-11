@@ -57,7 +57,6 @@ fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
     val currentOnCompleted by rememberUpdatedState(onCompleted)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val scroll = rememberScrollState(0)
     var showProgress by remember {
         mutableStateOf(true)
     }
@@ -85,8 +84,7 @@ fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
                     border = BorderStroke(2.dp, Color.Black),
                     shape = MaterialTheme.shapes.medium) {
                     Text(modifier = Modifier
-                        .padding(4.dp)
-                        .verticalScroll(scroll),
+                        .padding(4.dp),
                         text = callback.challenge)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -143,9 +141,11 @@ suspend fun sign(context: Context, callback: DeviceSigningVerifierCallback) {
                         //custom error example
                         //callback.setClientError("UnAuth")
                     }
+
                     is DeviceBindingErrorStatus.Abort -> {
                         return@loop
                     }
+
                     is DeviceBindingErrorStatus.ClientNotRegistered -> {
                         return@loop
                     }

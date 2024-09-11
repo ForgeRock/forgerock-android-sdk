@@ -15,5 +15,5 @@ repositories {
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle-api:8.3.2")
+    implementation("com.android.tools.build:gradle-api:8.6.0")
 }

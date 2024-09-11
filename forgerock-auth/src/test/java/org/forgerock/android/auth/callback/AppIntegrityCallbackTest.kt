@@ -133,7 +133,7 @@ class AppIntegrityCallbackTest {
                                         override fun token(): String {
                                             val token = JSONObject()
                                             token.put("value", "test-standard-integrity-token")
-                                            token.put("requestHash", request.a())
+                                            token.put("requestHash", request.requestHash())
                                             return token.toString()
                                         }
                                     }
