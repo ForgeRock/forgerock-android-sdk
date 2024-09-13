@@ -45,7 +45,7 @@ class RetrieveAccessTokenInterceptor implements Interceptor<SSOToken> {
                 }
             } else {
                 return accessToken.getSessionToken() != null &&
-                        accessToken.getSessionToken().equals(sessionToken);
+                        accessToken.getSessionToken().getValue().equals(sessionToken.getValue());
             }
         }, new FRListener<AccessToken>() {
             @Override
