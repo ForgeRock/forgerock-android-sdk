@@ -26,155 +26,36 @@ class EnvViewModel : ViewModel() {
 
     val servers = mutableListOf<FROptions>()
 
-    val localhost = FROptionsBuilder.build {
+    val server = FROptionsBuilder.build {
         server {
-            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
+            url = "https://<ServerURL>/openam"
             realm = "alpha"
-            cookieName = "c1c805de4c9b333"
+            cookieName = "<cookieName>"
             timeout = 50
         }
         oauth {
-            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
-            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-            oauthSignOutRedirectUri = "org.forgerock.demo://oauth2redirect"
-        }
-        service {
-            authServiceName = "protect"
-        }
-    }
-
-    val dbind = FROptionsBuilder.build {
-        server {
-            url = "http://192.168.86.32:8080/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
+            oauthClientId = "<ClientID>"
+            oauthRedirectUri = "<RedirectURI>"
             oauthCacheSeconds = 0
             oauthScope = "openid profile email address phone"
             oauthThresholdSeconds = 0
         }
         service {
-            authServiceName = "sign-verifier-stoyan"
-        }
-    }
-
-    val sdk = FROptionsBuilder.build {
-        server {
-            url = "https://openam-dbind.forgeblocks.com/am"
-            realm = "alpha"
-            cookieName = "43d72fc37bdde8c"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val local = FROptionsBuilder.build {
-        server {
-            url = "https://andy.petrov.ca/openam"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val ops = FROptionsBuilder.build {
-        server {
-            url = "https://default.forgeops.petrov.ca/am"
-            realm = "root"
-            cookieName = "iPlanetDirectoryPro"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 60
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
-        }
-    }
-
-    val forgeblock = FROptionsBuilder.build {
-        server {
-            url = "https://openam-sdks.forgeblocks.com/am"
-            realm = "alpha"
-            cookieName = "5421aeddf91aa20"
-            timeout = 50
-        }
-        oauth {
-            oauthClientId = "AndroidTest"
-            oauthRedirectUri = "org.forgerock.demo:/oauth2redirect"
-            oauthCacheSeconds = 0
-            oauthScope = "openid profile email address phone"
-            oauthThresholdSeconds = 0
-        }
-        service {
-            authServiceName = "WebAuthn"
+            authServiceName = "Login"
         }
         store {
-            //Default use SecureSharedPreferences
-            //oidcStorage = TokenStorage(ContextProvider.context)
-            //ssoTokenStorage = SSOTokenStorage(ContextProvider.context)
-
-            //cookiesStorage = CookiesStorage(ContextProvider.context)
-
+            // Override the default storage
             oidcStorage = loadTokenStorage(ContextProvider.context)
             ssoTokenStorage = loadSSOTokenStorage(ContextProvider.context)
             cookiesStorage = loadCookiesStorage(ContextProvider.context)
-
         }
     }
 
-    val pingOidc = FROptionsBuilder.build {
-        server {
-            url = "https://auth.pingone.ca/02fb4743-189a-4bc7-9d6c-a919edfe6447/as"
-        }
-        oauth {
-            oauthClientId = "c12743f9-08e8-4420-a624-71bbb08e9fe1"
-            oauthRedirectUri = "org.forgerock.demo://oauth2redirect"
-            oauthScope = "openid email address phone profile revoke"
-        }
-    }
-
-    var current by mutableStateOf(dbind)
+    var current by mutableStateOf(server)
         private set
 
     init {
-        servers.add(localhost)
-        servers.add(dbind)
-        servers.add(sdk)
-        servers.add(local)
-        servers.add(ops)
-        servers.add(forgeblock)
-        servers.add(pingOidc)
+        servers.add(server)
     }
 
     fun select(context: Context, options: FROptions) {
@@ -197,7 +78,7 @@ class EnvViewModel : ViewModel() {
         }?.let {
             select(context, it)
         } ?: run {
-            select(context, dbind)
+            select(context, server)
         }
     }
 
