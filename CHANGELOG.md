@@ -4,6 +4,7 @@
 - Allow developers to customize SDK Storage [SDKS-3378]
 - Support PingOne Protect Marketplace Node [SDKS-3279]
 - Expose Realm, Success Url with SSOToken [SDKS-3351]
+- Support Android 15 [SDKS-3098]
 
 #### Fixed
 - Potential CustomTabManager ServiceConnection leak. [SDKS-3346]

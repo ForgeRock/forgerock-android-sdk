@@ -87,7 +87,6 @@ dependencies {
     compileOnly(libs.integrity)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.commons.io)
     androidTestImplementation(libs.rules)
@@ -108,7 +107,6 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.test.runner)
-    testImplementation(libs.androidx.fragment.testing)
     testImplementation(libs.nimbus.jose.jwt)
 
     testImplementation(libs.junit)
@@ -116,7 +114,6 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(libs.commons.io)
     testImplementation(libs.assertj.core)
-    testImplementation(libs.androidx.espresso.intents)
     testImplementation(libs.appauth)
     testImplementation(libs.play.services.fido)
     testImplementation(libs.play.services.auth)

@@ -17,7 +17,7 @@ val customTemplatesFolder = file("$projectDir/dokka/templates")
 buildscript {
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.2.2")
+        classpath("com.android.tools.build:gradle:8.6.0")
         classpath("com.adarshr:gradle-test-logger-plugin:2.0.0")
         classpath("com.google.gms:google-services:4.3.15")
     }
@@ -27,8 +27,8 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.sonatype.gradle.plugins.scan") version "2.4.0"
     id("org.jetbrains.dokka") version "1.9.10"
-    id("com.android.application") version "8.3.2" apply false
-    id("com.android.library") version "8.3.2" apply false
+    id("com.android.application") version "8.6.0" apply false
+    id("com.android.library") version "8.6.0" apply false
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
 }
 

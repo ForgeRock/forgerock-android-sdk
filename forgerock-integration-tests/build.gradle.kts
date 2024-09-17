@@ -25,14 +25,13 @@ dependencies {
     api(project(":forgerock-auth"))
     api(project(":ping-protect"))
 
-    implementation(libs.appcompat)
+    implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.commons.io)
     androidTestImplementation(libs.rules)
