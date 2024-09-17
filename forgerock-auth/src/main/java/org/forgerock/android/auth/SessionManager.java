@@ -52,17 +52,12 @@ public class SessionManager {
      */
     @WorkerThread
     public void refresh(FRListener<AccessToken> listener) {
-        getAccessToken(new FRListener<>() {
-            @Override
-            public void onSuccess(AccessToken result) {
-                tokenManager.refresh(result, listener);
-            }
-
-            @Override
-            public void onException(@NonNull Exception e) {
-                Listener.onException(listener, e);
-            }
-        });
+        AccessToken token = tokenManager.getAccessToken();
+        if(token == null) {
+            Listener.onException(listener, new AuthenticationRequiredException("Access Token does not exists."));
+            return;
+        }
+        tokenManager.refresh(token, listener);
     }
 
     /**

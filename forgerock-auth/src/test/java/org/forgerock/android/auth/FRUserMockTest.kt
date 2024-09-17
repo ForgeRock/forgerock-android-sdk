@@ -304,6 +304,86 @@ class FRUserMockTest : BaseTest() {
         Assert.assertNotEquals(future.get().value, refreshTokenFuture.get().value)
         Assert.assertNotEquals(future.get().idToken, refreshTokenFuture.get().idToken)
     }
+    @Test(expected = AuthenticationRequiredException::class)
+    @Throws(
+        Throwable::class)
+    fun testAccessTokenIsNullThrowException() {
+        frUserHappyPath()
+        val future = FRListenerFuture<AccessToken>()
+        FRUser.getCurrentUser().getAccessToken(future)
+        Assert.assertNotNull(future.get())
+        // This will clear the token in the OIDC storage
+        Config.getInstance().oidcStorage.delete()
+        val refreshTokenFuture = FRListenerFuture<AccessToken>()
+        FRUser.getCurrentUser().refresh(refreshTokenFuture)
+        // verify the exception
+        try {
+            refreshTokenFuture.get()
+            Assert.fail()
+        } catch (e: ExecutionException) {
+            Assert.assertTrue(e.message!!.contains("Access Token does not exists."))
+            throw e.cause!!
+        }
+    }
+
+    @Test(expected = AuthenticationRequiredException::class)
+    @Throws(
+        Throwable::class)
+    fun testRefreshTokenIsNullThrowException() {
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
+
+        Config.getInstance().oidcStorage = tokenStorage
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
+        Config.getInstance().url = url
+
+        val nodeListenerFuture: NodeListenerFuture<FRUser> =
+            object : NodeListenerFuture<FRUser>() {
+                override fun onCallbackReceived(state: Node) {
+                    if (state.getCallback(NameCallback::class.java) != null) {
+                        state.getCallback(NameCallback::class.java).setName("tester")
+                        state.next(context, this)
+                        return
+                    }
+                    if (state.getCallback(PasswordCallback::class.java) != null) {
+                        state.getCallback(PasswordCallback::class.java)
+                            .setPassword("password".toCharArray())
+                        state.next(context, this)
+                    }
+                }
+            }
+
+        FRUser.login(context, nodeListenerFuture)
+        server.takeRequest()
+        server.takeRequest()
+        server.takeRequest()
+        val recordedRequest = server.takeRequest()
+        val state = Uri.parse(recordedRequest.path).getQueryParameter("state")
+        server.enqueue(MockResponse()
+            .addHeader("Location",
+                "http://www.example.com:8080/callback?code=PmxwECH3mBobKuPEtPmq6Xorgzo&iss=http://openam.example.com:8080/openam/oauth2&" +
+                        "state=" + state + "&client_id=andy_app")
+            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP))
+       // AccessToken returned from the server is empty. The storage does not have refresh token.
+        enqueue("/authTreeMockTest_Authenticate_no_accessToken_no_RefreshToken.json", HttpURLConnection.HTTP_OK)
+
+        Assert.assertNotNull(nodeListenerFuture.get())
+        Assert.assertNotNull(FRUser.getCurrentUser())
+
+        //Check RefreshToken State by sending future as a listener.
+        val refreshTokenFuture = FRListenerFuture<AccessToken>()
+        FRUser.getCurrentUser().refresh(refreshTokenFuture)
+        // If the RefreshToken is null, the refresh token flow should throw an AuthenticationRequiredException.
+        try {
+            refreshTokenFuture.get()
+            Assert.fail()
+        } catch (e: ExecutionException) {
+            Assert.assertTrue(e.message!!.contains("Refresh Token does not exists."))
+            throw e.cause!!
+        }
+    }
 
     @Test(expected = AuthenticationException::class)
     @Throws(
