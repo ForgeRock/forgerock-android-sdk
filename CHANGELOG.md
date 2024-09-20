@@ -5,6 +5,7 @@
 - Support PingOne Protect Marketplace Node [SDKS-3279]
 - Expose Realm, Success Url with SSOToken [SDKS-3351]
 - Support Android 15 [SDKS-3098]
+- Allow http/https scheme for Centralize Login redirect [SDKS-3433]
 
 #### Fixed
 - Potential CustomTabManager ServiceConnection leak. [SDKS-3346]

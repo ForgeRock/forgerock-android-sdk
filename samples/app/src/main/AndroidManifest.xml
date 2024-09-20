@@ -34,8 +34,12 @@
         android:usesCleartextTraffic="true"> <!-- usesCleartextTraffic set to true for testing purpose, DO NOT use this for production -->
 
         <!-- Support Facebook Login, make sure request for email scope App-> App Review -> Request for Permission -->
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
-        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
 
         <activity
             android:name=".MainActivity"
@@ -47,6 +51,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Using Custom scheme
         <activity android:name="net.openid.appauth.RedirectUriReceiverActivity"
             android:exported="true"
             tools:node="replace">
@@ -56,6 +61,24 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="org.forgerock.demo" />
+            </intent-filter>
+        </activity>
+        -->
+
+        <!-- Using https scheme -->
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            android:exported="true"
+            tools:node="replace">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="example.com" />
+                <data android:path="/oauth2redirect" />
             </intent-filter>
         </activity>
 
