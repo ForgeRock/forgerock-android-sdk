@@ -43,6 +43,7 @@ dependencies {
     androidTestImplementation(libs.androidx.biometric.ktx)
     androidTestImplementation(libs.nimbus.jose.jwt)
     androidTestImplementation(libs.okhttp)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
     //For Application Pin
     androidTestImplementation(libs.bcpkix.jdk15on)
@@ -50,4 +51,8 @@ dependencies {
 
     //App Integrity
     androidTestImplementation(libs.integrity)
+
+    // Captcha
+    androidTestImplementation(libs.play.services.safetynet)
+    androidTestImplementation(libs.recaptchaEnterprise)
 }
