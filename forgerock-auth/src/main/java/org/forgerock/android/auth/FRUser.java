@@ -348,6 +348,10 @@ public class FRUser {
 
         private void validateRedirectUri(Context context) throws InvalidRedirectUriException {
             Uri uri = Uri.parse(Config.getInstance().getRedirectUri());
+            if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
+                return;
+            }
+
             PackageManager pm = context.getPackageManager();
             List<ResolveInfo> resolveInfos = null;
             if (pm != null) {
