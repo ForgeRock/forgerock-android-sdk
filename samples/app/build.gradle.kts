@@ -14,11 +14,8 @@ android {
     namespace = "com.example.app"
     compileSdk = 35
     defaultConfig {
+        targetSdk = 35
         minSdk = 23
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -39,9 +36,6 @@ android {
             keyPassword = "android"
         }
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 
     buildFeatures {
         compose = true
@@ -51,6 +45,14 @@ android {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
 }
+
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 
 dependencies {
 
