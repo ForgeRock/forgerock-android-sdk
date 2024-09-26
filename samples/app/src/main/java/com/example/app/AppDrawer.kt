@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GeneratingTokens
@@ -42,6 +43,7 @@ import com.example.app.Destinations.DEVICE_PROFILE
 import com.example.app.Destinations.ENV_ROUTE
 import com.example.app.Destinations.IG
 import com.example.app.Destinations.LAUNCH_ROUTE
+import com.example.app.Destinations.USER_PROFILE
 import com.example.app.Destinations.MANAGE_USER_KEYS
 import com.example.app.Destinations.MANAGE_WEBAUTHN_KEYS
 import com.example.app.Destinations.SETTING
@@ -136,6 +138,17 @@ fun AppDrawer(
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
+        NavigationDrawerItem(
+            label = { Text("User Profile") },
+            selected = false,
+            icon = { Icon(Icons.Filled.AccountBox, null) },
+            onClick = {
+                navigateTo(USER_PROFILE);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
         NavigationDrawerItem(
             label = { Text("Setting") },
             selected = false,

@@ -21,6 +21,8 @@ import org.forgerock.android.auth.Logger
 
 private val TAG = EnvViewModel::class.java.simpleName
 
+const val USER_PROFILE_JOURNEY = "UserProfile"
+
 class EnvViewModel : ViewModel() {
 
     val servers = mutableListOf<FROptions>()

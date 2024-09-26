@@ -25,13 +25,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.app.Error
 import com.example.app.callback.AppIntegrityCallback
+import com.example.app.callback.BooleanAttributeInputCallback
 import com.example.app.callback.ChoiceCallback
 import com.example.app.callback.ConfirmationCallback
 import com.example.app.callback.DeviceBindingCallback
 import com.example.app.callback.DeviceProfileCallback
 import com.example.app.callback.DeviceSigningVerifierCallback
 import com.example.app.callback.IdPCallback
+import com.example.app.callback.KbaCreateCallback
 import com.example.app.callback.NameCallback
+import com.example.app.callback.NumberAttributeInputCallback
 import com.example.app.callback.PasswordCallback
 import com.example.app.callback.PingOneProtectEvaluationCallback
 import com.example.app.callback.PingOneProtectInitializeCallback
@@ -53,11 +56,18 @@ import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
 import org.forgerock.android.auth.callback.PollingWaitCallback
 import com.example.app.callback.ReCaptchaCallback
+import com.example.app.callback.StringAttributeInputCallback
+import com.example.app.callback.TermsAndConditionsCallback
 import org.forgerock.android.auth.PingOneProtectEvaluationCallback
 import org.forgerock.android.auth.PingOneProtectInitializeCallback
+import org.forgerock.android.auth.callback.BooleanAttributeInputCallback
+import org.forgerock.android.auth.callback.KbaCreateCallback
+import org.forgerock.android.auth.callback.NumberAttributeInputCallback
 import org.forgerock.android.auth.callback.ReCaptchaCallback
 import org.forgerock.android.auth.callback.ReCaptchaEnterpriseCallback
 import org.forgerock.android.auth.callback.SelectIdPCallback
+import org.forgerock.android.auth.callback.StringAttributeInputCallback
+import org.forgerock.android.auth.callback.TermsAndConditionsCallback
 import org.forgerock.android.auth.callback.TextInputCallback
 import org.forgerock.android.auth.callback.TextOutputCallback
 import org.forgerock.android.auth.callback.WebAuthnAuthenticationCallback
@@ -177,7 +187,11 @@ fun Journey(state: JourneyState,
                     }
 
                     is TextInputCallback -> TextInputCallback(it)
-
+                    is KbaCreateCallback -> KbaCreateCallback(it)
+                    is NumberAttributeInputCallback -> NumberAttributeInputCallback(it)
+                    is StringAttributeInputCallback -> StringAttributeInputCallback(it)
+                    is BooleanAttributeInputCallback -> BooleanAttributeInputCallback(it)
+                    is TermsAndConditionsCallback -> TermsAndConditionsCallback(it)
 
                     else -> {
                         //Unsupported
