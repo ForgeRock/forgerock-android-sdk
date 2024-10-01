@@ -7,6 +7,7 @@
 
 package com.example.app
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +23,7 @@ import com.example.app.device.DeviceProfileRoute
 import com.example.app.device.DeviceProfileViewModel
 import com.example.app.env.EnvRoute
 import com.example.app.env.EnvViewModel
+import com.example.app.env.USER_PROFILE_JOURNEY
 import com.example.app.ig.IGRoute
 import com.example.app.ig.IGViewModel
 import com.example.app.journey.Journey
@@ -37,6 +39,10 @@ import com.example.app.userprofile.UserProfile
 import com.example.app.userprofile.UserProfileViewModel
 import com.example.app.webauthn.WebAuthRoute
 import com.example.app.webauthn.WebAuthnViewModel
+import org.forgerock.android.auth.Action
+import org.forgerock.android.auth.FRRequestInterceptor
+import org.forgerock.android.auth.Request
+import org.forgerock.android.auth.RequestInterceptorRegistry
 
 @Composable
 fun AppNavHost(navController: NavHostController,
@@ -95,6 +101,31 @@ fun AppNavHost(navController: NavHostController,
         composable(Destinations.DEVICE_PROFILE) {
             val viewModel = viewModel<DeviceProfileViewModel>()
             DeviceProfileRoute(viewModel)
+        }
+
+        composable(Destinations.USER_PROFILE) {
+
+            RequestInterceptorRegistry.getInstance()
+                .register(object : FRRequestInterceptor<Action> {
+                    override fun intercept(request: Request, tag: Action?): Request {
+                        return if (tag?.payload?.getString("tree").equals(USER_PROFILE_JOURNEY)) {
+                            request.newBuilder()
+                                .url(Uri.parse(request.url().toString())
+                                    .buildUpon()
+                                    .appendQueryParameter("ForceAuth", "true").toString())
+                                .build()
+                        } else request
+                    }
+                })
+
+
+            val journeyViewModel = viewModel<JourneyViewModel<String>>(
+                factory = JourneyViewModel.factory(LocalContext.current, USER_PROFILE_JOURNEY)
+            )
+            Journey(journeyViewModel, onSuccess = {
+                navController.navigate(Destinations.USER_SESSION)
+            }) {
+            }
         }
 
         composable(Destinations.JOURNEY_ROUTE + "/{name}", arguments = listOf(
