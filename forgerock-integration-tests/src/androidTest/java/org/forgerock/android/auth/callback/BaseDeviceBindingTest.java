@@ -23,6 +23,7 @@ import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.RetryTestRule;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
@@ -36,7 +37,7 @@ public abstract class BaseDeviceBindingTest {
     protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final static String AM_URL = "https://openam-dbind.forgeblocks.com/am";
+    protected final static String AM_URL = "https://openam-sdks2.forgeblocks.com/am";
     protected final static String REALM = "alpha";
     protected final static String OAUTH_CLIENT = "AndroidTest";
     protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
@@ -86,8 +87,15 @@ public abstract class BaseDeviceBindingTest {
         }
     }
 
+    @Before
+    public void logoutSessionBeforeTest() {
+        if (FRSession.getCurrentSession() != null) {
+            FRSession.getCurrentSession().logout();
+        }
+    }
+
     @After
-    public void logoutSession() {
+    public void logoutSessionAfterTest() {
         if (FRSession.getCurrentSession() != null) {
             FRSession.getCurrentSession().logout();
         }

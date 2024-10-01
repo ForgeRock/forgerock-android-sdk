@@ -14,6 +14,7 @@ import org.forgerock.android.auth.FRSession
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Node
 import org.forgerock.android.auth.NodeListener
+import org.json.JSONObject
 import org.junit.Assert
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -49,11 +50,29 @@ class ReCaptchaEnterpriseCallbackFailureTest : ReCaptchaEnterpriseCallbackBaseTe
                 if (node.getCallback(TextOutputCallback::class.java) != null) {
                     nodeTextOutputHit[0]++
 
-                    // Note: The journey sends back to us the content of CaptchaEnterpriseNode.FAILURE
-                    // in the message of the TextOutputCallback... so we can parse it here and verify results...
-                    val message = node.getCallback(TextOutputCallback::class.java).message
-                    Assertions.assertThat(message).contains("VALIDATION_ERROR")
+                    /*
+                    Note:
+                    The journey sends back to us the content of CaptchaEnterpriseNode.FAILURE
+                    in the message of the TextOutputCallback... so we can parse it here and verify results...
+                    However, tt is also possible that the score is equal exactly to 1.0 (when running on real device)
+                    In that case the node will succeed, and the journey will send back the content of the
+                    CaptchaEnterpriseNode.ASSESSMENT_RESULT variable. We need to account for this in the test,
+                    and make sure tha the score is exactly 1.0...
+                     */
 
+                    val message = node.getCallback(TextOutputCallback::class.java).message
+
+                    if (!message.contains("VALIDATION_ERROR")) {
+                        // If the node doesn't fail, make sure that in case the node doesn't fail the score is exactly 1.0
+                        val jsonObject = JSONObject(message)
+                        Assert.assertNotNull(jsonObject)
+                        Logger.debug("RecaptchaEnterpriseCallbackTest", jsonObject.toString(2))
+                        val score = jsonObject.getJSONObject("riskAnalysis").getDouble("score")
+                        Assertions.assertThat(score).isEqualTo(1.0)
+                    }
+                    else {
+                        Assertions.assertThat(message).contains("VALIDATION_ERROR")
+                    }
                     node.next(context, nodeListener)
                 }
                 super.onCallbackReceived(node)

@@ -99,12 +99,12 @@ public abstract class AndroidBaseTest {
                     firstQuestion.setSelectedQuestion(firstQuestion.getPredefinedQuestions().get(0));
                     firstQuestion.setSelectedAnswer("Test");
 
-                    // Uncomment this block if there are more than one KbaCreateCallbacks in the tree
-                    /*
-                    KbaCreateCallback secondQuestion = (KbaCreateCallback) callbacks.get(1);
-                    secondQuestion.setSelectedQuestion(secondQuestion.getPredefinedQuestions().get(1));
-                    secondQuestion.setSelectedAnswer("Test");
-                    */
+                    // If there are more than one KBA questions, answer the second one
+                    if (callbacks.size() > 1) {
+                        KbaCreateCallback secondQuestion = (KbaCreateCallback) callbacks.get(1);
+                        secondQuestion.setSelectedQuestion(secondQuestion.getPredefinedQuestions().get(1));
+                        secondQuestion.setSelectedAnswer("Test");
+                    }
 
                     node.next(context, this );
                 }
