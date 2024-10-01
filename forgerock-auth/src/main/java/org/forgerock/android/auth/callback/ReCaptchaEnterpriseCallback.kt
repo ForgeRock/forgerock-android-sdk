@@ -26,12 +26,19 @@ class ReCaptchaEnterpriseCallback : AbstractCallback {
     lateinit var reCaptchaSiteKey: String
         private set
 
+    /**
+     * Retrieves the token result.
+     *
+     * @return the token result.
+     */
+    lateinit var tokenResult: String
+        private set
+
     companion object {
         private val TAG = ReCaptchaEnterpriseCallback::class.java.simpleName
         private const val INVALID_CAPTCHA_TOKEN = "INVALID_CAPTCHA_TOKEN"
         private const val UNKNOWN_ERROR = "UNKNOWN_ERROR"
     }
-
 
     @Keep
     @JvmOverloads
@@ -60,15 +67,6 @@ class ReCaptchaEnterpriseCallback : AbstractCallback {
     }
 
     /**
-     * Set the Action for the ReCAPTCHA
-     *
-     * @param value The Action
-     */
-    fun setAction(value: String) {
-        super.setValue(value, 1)
-    }
-
-    /**
      * Input the Client Error to the server
      * @param value Error String.
      */
@@ -83,6 +81,15 @@ class ReCaptchaEnterpriseCallback : AbstractCallback {
      */
     fun setPayload(value: JSONObject) {
         super.setValue(value.toString(), 3)
+    }
+
+    /**
+     * Set the Action for the ReCAPTCHA
+     *
+     * @param value The Action
+     */
+    private fun setAction(value: String) {
+        super.setValue(value, 1)
     }
 
     override fun getType(): String {
@@ -111,7 +118,9 @@ class ReCaptchaEnterpriseCallback : AbstractCallback {
             if (token == null) {
                 throw Exception(INVALID_CAPTCHA_TOKEN)
             }
+            tokenResult = token
             setValue(token)
+            setAction(action)
         }
         catch (e: Exception) {
             Logger.error(TAG, e.message)

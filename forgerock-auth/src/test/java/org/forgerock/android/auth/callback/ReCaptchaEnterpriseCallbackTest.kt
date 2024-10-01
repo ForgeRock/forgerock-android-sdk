@@ -30,7 +30,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class ReCaptchaEnterpriseCallbackTest {
 
-    val application: Application = ApplicationProvider.getApplicationContext()
+    private val application: Application = ApplicationProvider.getApplicationContext()
 
     private lateinit var callback: ReCaptchaEnterpriseCallback
 
@@ -98,7 +98,7 @@ class ReCaptchaEnterpriseCallbackTest {
             verify(recaptchaClientProvider).execute(recaptchaClient, RecaptchaAction.custom("login"), 15000L)
 
             assert(callback.content.contains("test-token"))
-
+            assert(callback.tokenResult == "test-token")
     }
 
     @Test
@@ -153,16 +153,15 @@ class ReCaptchaEnterpriseCallbackTest {
         )
         whenever(recaptchaClientProvider.execute(any(), any<RecaptchaAction>(), anyLong())).thenReturn("test-token")
 
-        callback.execute(application, "login", 15000L, recaptchaClientProvider)
+        callback.execute(application, "custom-action", 15000L, recaptchaClientProvider)
 
         callback.setPayload(JSONObject().put("key", "value"))
-        callback.setAction("custom-action")
 
         verify(recaptchaClientProvider).fetchClient(
             application,
             "6Lf3tbYUAAAAAEm78fAOFRKb-n1M67FDtmpczIBK"
         )
-        verify(recaptchaClientProvider).execute(recaptchaClient, RecaptchaAction.custom("login"), 15000L)
+        verify(recaptchaClientProvider).execute(recaptchaClient, RecaptchaAction.custom("custom-action"), 15000L)
 
         assert(callback.content.contains("test-token"))
         assert(callback.content.contains("key"))
