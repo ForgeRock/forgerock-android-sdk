@@ -159,8 +159,7 @@ fun Journey(state: JourneyState,
                         showNext = false
                     }
                     is ReCaptchaEnterpriseCallback -> {
-                        ReCaptchaEnterpriseCallback(callback = it, onCompleted = onNext)
-                        showNext = false
+                        ReCaptchaEnterpriseCallback(callback = it)
                     }
                     is AppIntegrityCallback -> {
                         AppIntegrityCallback(callback = it, onCompleted = onNext)
