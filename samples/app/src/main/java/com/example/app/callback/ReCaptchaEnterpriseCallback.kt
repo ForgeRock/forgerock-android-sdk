@@ -14,7 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,12 +27,17 @@ import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.callback.ReCaptchaEnterpriseCallback
 
 @Composable
-fun ReCaptchaEnterpriseCallback(callback: ReCaptchaEnterpriseCallback,
-                                onCompleted: () -> Unit) {
+fun ReCaptchaEnterpriseCallback(callback: ReCaptchaEnterpriseCallback) {
 
-
-    val currentOnCompleted by rememberUpdatedState(onCompleted)
     val application = LocalAppContext.current
+    var text by remember {
+        mutableStateOf("Launching Recaptcha...")
+    }
+
+    var showProgress by remember {
+        mutableStateOf(true)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -43,20 +51,25 @@ fun ReCaptchaEnterpriseCallback(callback: ReCaptchaEnterpriseCallback,
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Launching Recaptcha...")
+            Text(text = text)
             Spacer(Modifier.height(8.dp))
-            CircularProgressIndicator()
+            if(showProgress) {
+                CircularProgressIndicator()
+            }
             LaunchedEffect(true) {
                 try {
                     callback.execute(application = application)
+                    text = "Recaptcha Validation Completed..."
+                    showProgress = false
                 }
                 catch (e: Exception) {
+                    text = "Recaptcha Validation Failed..."
+                    showProgress = false
                     if(e is RecaptchaException) {
                         Logger.error("RecaptchaException", "${e.errorCode}:${e.message}")
                     }
                     Logger.error("RecaptchaException", e.message)
                 }
-                currentOnCompleted()
             }
         }
     }
