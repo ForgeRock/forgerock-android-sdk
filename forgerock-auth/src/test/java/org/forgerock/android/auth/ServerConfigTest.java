@@ -81,7 +81,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=")
+                .pin("mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -123,7 +123,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=")
+                .pin("mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=")
                 .pin("invalid")
                 .build();
 
@@ -215,7 +215,7 @@ public class ServerConfigTest {
                 .context(context)
                 .url("https://api.ipify.org")
                 .buildStep(builder -> builder.certificatePinner(
-                        new CertificatePinner.Builder().add("api.ipify.org", "sha256/5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=" ).build()))
+                        new CertificatePinner.Builder().add("api.ipify.org", "sha256/mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=" ).build()))
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);

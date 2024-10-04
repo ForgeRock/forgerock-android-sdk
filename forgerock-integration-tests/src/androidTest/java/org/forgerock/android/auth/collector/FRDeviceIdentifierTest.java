@@ -7,7 +7,6 @@
 
 package org.forgerock.android.auth.collector;
 
-import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -63,7 +62,7 @@ public class FRDeviceIdentifierTest extends AndroidBaseTest {
 
     private KeyStore getKeyStore()
             throws GeneralSecurityException, IOException {
-        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEYSTORE);
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
         return keyStore;
     }

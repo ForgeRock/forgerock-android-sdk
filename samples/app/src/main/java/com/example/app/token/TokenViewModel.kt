@@ -8,8 +8,12 @@
 package com.example.app.token
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import org.forgerock.android.auth.AccessToken
 import org.forgerock.android.auth.FRListener
 import org.forgerock.android.auth.FRUser
@@ -24,22 +28,24 @@ class TokenViewModel : ViewModel() {
     }
 
     fun getAccessToken() {
-        FRUser.getCurrentUser()?.getAccessToken(object : FRListener<AccessToken> {
-            override fun onSuccess(result: AccessToken) {
-                state.update {
-                    it.copy(result, null)
+        viewModelScope.launch(Dispatchers.Default) {
+            try {
+                FRUser.getCurrentUser().accessToken?.let { token ->
+                    state.update {
+                        it.copy(token, null)
+                    }
                 }
-            }
-
-            override fun onException(e: Exception) {
+            } catch (e: Exception) {
+                yield()
                 state.update {
                     it.copy(null, e)
                 }
             }
-        })
+        }
     }
 
     fun forceRefresh() {
+        viewModelScope.launch(Dispatchers.Default) {
             FRUser.getCurrentUser()?.refresh(object : FRListener<AccessToken> {
                 override fun onSuccess(result: AccessToken) {
                     state.update {
@@ -53,7 +59,8 @@ class TokenViewModel : ViewModel() {
                     }
                 }
             })
-       }
+        }
+    }
 
     fun revoke(token: AccessToken? = FRUser.getCurrentUser()?.accessToken) {
         token?.let {
