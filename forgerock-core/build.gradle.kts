@@ -11,6 +11,7 @@ plugins {
     id("maven-publish")
     id("signing")
     id("kotlin-android")
+    alias(libs.plugins.kotlinSerialization)
 }
 
 apply<AndroidBuildGradlePlugin>()
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.kotlinx.serialization.json)
 
     // Biometric
     implementation(libs.androidx.biometric.ktx)

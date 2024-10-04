@@ -8,7 +8,6 @@
 package org.forgerock.android.auth;
 
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
-import static org.forgerock.android.auth.Encryptor.ANDROID_KEYSTORE;
 
 import android.content.Context;
 import android.security.KeyPairGeneratorSpec;
@@ -41,6 +40,7 @@ import lombok.Builder;
 @RestrictTo(LIBRARY_GROUP_PREFIX)
 public class KeyStoreManager {
 
+    public static final String ANDROID_KEYSTORE = "AndroidKeyStore" ;
     private Context context;
 
     private static final String CN_FORGE_ROCK = "CN=ForgeRock";
