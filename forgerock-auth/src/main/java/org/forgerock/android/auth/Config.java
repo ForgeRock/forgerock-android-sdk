@@ -169,7 +169,11 @@ public class Config {
         return mInstance;
     }
 
-    ServerConfig getServerConfig() {
+    /**
+     * Retrieve the Server Configuration
+     * @return The Server Configuration
+     */
+    public ServerConfig getServerConfig() {
         return ServerConfig.builder()
                 .context(context)
                 .identifier(identifier)

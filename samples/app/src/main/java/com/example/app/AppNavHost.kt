@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app
@@ -29,6 +29,8 @@ import com.example.app.ig.IGViewModel
 import com.example.app.journey.Journey
 import com.example.app.journey.JourneyRoute
 import com.example.app.journey.JourneyViewModel
+import com.example.app.selfservice.SelfServiceRoute
+import com.example.app.selfservice.SelfServiceViewModel
 import com.example.app.setting.SettingRoute
 import com.example.app.setting.SettingViewModel
 import com.example.app.token.Token
@@ -127,6 +129,12 @@ fun AppNavHost(navController: NavHostController,
             }) {
             }
         }
+
+        composable(Destinations.SELF_SERVICE) {
+            val viewModel = viewModel<SelfServiceViewModel>()
+            SelfServiceRoute(viewModel)
+        }
+
 
         composable(Destinations.JOURNEY_ROUTE + "/{name}", arguments = listOf(
             navArgument("name") { type = NavType.StringType }

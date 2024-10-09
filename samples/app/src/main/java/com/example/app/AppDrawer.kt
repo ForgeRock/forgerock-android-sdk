@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app
@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GeneratingTokens
@@ -46,6 +47,7 @@ import com.example.app.Destinations.LAUNCH_ROUTE
 import com.example.app.Destinations.USER_PROFILE
 import com.example.app.Destinations.MANAGE_USER_KEYS
 import com.example.app.Destinations.MANAGE_WEBAUTHN_KEYS
+import com.example.app.Destinations.SELF_SERVICE
 import com.example.app.Destinations.SETTING
 import com.example.app.Destinations.TOKEN_ROUTE
 
@@ -144,6 +146,16 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.AccountBox, null) },
             onClick = {
                 navigateTo(USER_PROFILE);
+                closeDrawer()
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            label = { Text("Self Service") },
+            selected = false,
+            icon = { Icon(Icons.Filled.DevicesOther, null) },
+            onClick = {
+                navigateTo(SELF_SERVICE);
                 closeDrawer()
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

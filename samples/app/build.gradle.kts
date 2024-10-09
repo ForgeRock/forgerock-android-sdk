@@ -102,20 +102,19 @@ dependencies {
 
     // End of SDK
 
-    // Keep the sample application specific library out of the toml
     // Material Design 3
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.material)
+    implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.core.splashscreen)
 
     // Android Studio Preview support
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation(libs.androidx.activity.compose)
 
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.material:material-icons-extended:1.6.2")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)

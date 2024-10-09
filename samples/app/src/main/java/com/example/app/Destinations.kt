@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app
@@ -17,6 +17,7 @@ object Destinations {
     const val IG = "IG protected endpoint"
     const val DEVICE_PROFILE = "Device Profile"
     const val USER_PROFILE = "User"
+    const val SELF_SERVICE = "Self Service"
     const val SETTING = "Setting"
     const val CENTRALIZE_ROUTE = "Centralize Login"
     const val USER_SESSION = "User Session"
