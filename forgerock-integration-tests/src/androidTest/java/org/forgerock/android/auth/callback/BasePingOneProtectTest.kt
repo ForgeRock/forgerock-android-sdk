@@ -21,9 +21,9 @@ import java.util.concurrent.TimeUnit
 
 abstract class BasePingOneProtectTest {
     val context: Context = ApplicationProvider.getApplicationContext()
-    private val AM_URL = "https://openam-protect2.forgeblocks.com/am"
+    private val AM_URL = "https://openam-sdks2.forgeblocks.com/am"
     private val REALM = "alpha"
-    private val COOKIE_NAME = "c1c805de4c9b333"
+    private val COOKIE_NAME = "9dfa82bc124226d"
     private val OAUTH_CLIENT = "AndroidTest"
     private val OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect"
     private val SCOPE = "openid profile email address phone"
