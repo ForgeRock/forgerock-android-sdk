@@ -222,7 +222,7 @@ public class AuthServiceMockTest extends BaseTest {
                 .build();
 
         final Node[] lastNode = {null};
-        NodeListenerFuture<Token> nodeListenerFuture = new NodeListenerFuture<Token>() {
+        NodeListenerFuture<SSOToken> nodeListenerFuture = new NodeListenerFuture<SSOToken>() {
 
             @Override
             public void onCallbackReceived(Node state) {
@@ -252,7 +252,7 @@ public class AuthServiceMockTest extends BaseTest {
 
         nodeListenerFuture.reset();
         lastNode[0].next(context, nodeListenerFuture);
-        Token token = nodeListenerFuture.get();
+        SSOToken token = nodeListenerFuture.get();
         assertNotNull(token);
 
         server.takeRequest(); //next
@@ -411,8 +411,7 @@ public class AuthServiceMockTest extends BaseTest {
                 .name("Example")
                 .build();
 
-        NodeListenerFuture<Token> nodeListenerFuture = new NodeListenerFuture<Token>() {
-
+        NodeListenerFuture<SSOToken> nodeListenerFuture = new NodeListenerFuture<>() {
             @Override
             public void onCallbackReceived(Node state) {
                 state.getCallback(MyCustomCallback.class).setCustomField("test");
@@ -421,7 +420,7 @@ public class AuthServiceMockTest extends BaseTest {
         };
 
         authService.next(context, nodeListenerFuture);
-        Token token = nodeListenerFuture.get();
+        SSOToken token = nodeListenerFuture.get();
         assertNotNull(token);
 
     }
@@ -439,8 +438,7 @@ public class AuthServiceMockTest extends BaseTest {
                 .name("Example")
                 .build();
 
-        NodeListenerFuture<Token> nodeListenerFuture = new NodeListenerFuture<Token>() {
-
+        NodeListenerFuture<SSOToken> nodeListenerFuture = new NodeListenerFuture<>() {
             @Override
             public void onCallbackReceived(Node state) {
                 state.getCallback(MyCustomCallback.class).setCustomField("test");
@@ -449,7 +447,7 @@ public class AuthServiceMockTest extends BaseTest {
         };
 
         authService.next(context, nodeListenerFuture);
-        Token token = nodeListenerFuture.get();
+        SSOToken token = nodeListenerFuture.get();
         assertNotNull(token);
 
     }

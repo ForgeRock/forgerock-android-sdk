@@ -74,7 +74,6 @@ dependencies {
     testImplementation(libs.androidx.test.runner)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.commons.io)
     androidTestImplementation(libs.rules)

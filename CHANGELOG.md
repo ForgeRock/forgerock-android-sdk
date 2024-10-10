@@ -1,3 +1,18 @@
+## [4.6.0]
+#### Added
+- Allow developers to customize SDK storage [SDKS-3378]
+- Support PingOne Protect Marketplace nodes [SDKS-3297]
+- Support reCAPTCHA Enterprise node [SDKS-3325]
+- Expose Realm, Success Url with SSOToken [SDKS-3351]
+- Support Android 15 [SDKS-3098]
+- Support http/https scheme for Centralize Login redirect [SDKS-3433]
+
+#### Fixed
+- Skip Type 4 TextOutputCallback [SDKS-3227]
+- Potential CustomTabManager ServiceConnection leak [SDKS-3346]
+- access_token api call triggered twice on force refresh [SDKS-3254]
+- Allow http/https as redirect scheme in centralize login flow [SDKS-3433]
+
 ## [4.5.0]
 #### Added
 - Added SDK support for deleting registered WebAuthn devices from the server. [SDKS-1710]

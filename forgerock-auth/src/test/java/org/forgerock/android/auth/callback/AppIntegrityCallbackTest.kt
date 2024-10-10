@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -133,7 +133,7 @@ class AppIntegrityCallbackTest {
                                         override fun token(): String {
                                             val token = JSONObject()
                                             token.put("value", "test-standard-integrity-token")
-                                            token.put("requestHash", request.a())
+                                            token.put("requestHash", request.requestHash())
                                             return token.toString()
                                         }
                                     }

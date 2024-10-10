@@ -31,6 +31,7 @@ class PingOneProtectEvaluationCallbackTest {
     fun setUp() {
         MockKAnnotations.init(this)
     }
+
     @Test
     fun basicTest() {
         val json = "{\"type\":\"PingOneProtectEvaluationCallback\",\"output\":[{\"name\":\"pauseBehavioralData\",\"value\":true}],\"input\":[{\"name\":\"IDToken1signals\",\"value\":\"HcSd8yBF7G0g0d0lzzz6rci4I0IB+VZdFl6bBiRN2RjMhjSsipf0h0JC4ganxwiBRzSoGwMMZagmq7Teoabm6cZ8X0mStPL\\/bzCCAQPc5wmGmW2M7GKEITiEQbgHN+ZB\\/cd8g6MmCJsYK5OYplbG\\/SDuCtWZDIS4mUdxywlTFDMmXm9tC2Fy5vfgk+9DX4eOSPIHiQq5wPpGsILrY17H87A4Qt4gb6ITC2s9Oo7qf8R0gfiJttuPyWYFL7w1KoiuUi6JPf5v2H0HW04Mc1qlZwD44Dd7RlHGQeGs\\/fk21KZ6kKI4cTd8eHAt3Vrl29yIhn6Ce\\/go1Ve\\/0qj0DWx703SRbuc5IBm8AR\\/q9DpxQkEd8PC8+FWBisuGLTQyjqTS6DCEy7LwgR0LU28Hwdw1jDeZgoZy54kCpo6v9B6x1\\/bkNH8YtlSt9uz\\/A9UinS4g0VdN09H6SXKXNxn4bYhJeWK7c4q9Byvuye1M08qh7JWzMKpkWyZwaeC6zIaMQhiwrodyjS+S25dBk1YcQ==.eDE=\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
@@ -39,6 +40,29 @@ class PingOneProtectEvaluationCallbackTest {
         assertEquals(true,
             pingOneEvalCallback.pauseBehavioralData)
     }
+
+    @Test
+    fun parseMetadataCallbackTest() {
+        val raw = JSONObject("""{
+            "type": "MetadataCallback",
+            "output": [
+                {
+                    "name": "data",
+                    "value": {
+                        "_type": "PingOneProtect",  
+                        "_action": "protect_risk_evaluation",
+                        "envId" : "some_id",
+                        "pauseBehavioralData" : true
+                     }
+                }
+            ],
+            "_id": 0
+        }""")
+
+        val pingOneEvalCallback = PingOneProtectEvaluationCallback(raw, 0)
+        assertEquals(true, pingOneEvalCallback.pauseBehavioralData)
+    }
+
     @Test
     fun initBehaviorData() = runBlocking {
         mockkObject(PIProtect)
@@ -47,7 +71,10 @@ class PingOneProtectEvaluationCallbackTest {
         } returns("result")
         val json = "{\"type\":\"PingOneProtectEvaluationCallback\",\"output\":[{\"name\":\"pauseBehavioralData\",\"value\":true}],\"input\":[{\"name\":\"IDToken1signals\",\"value\":\"HcSd8yBF7G0g0d0lzzz6rci4I0IB+VZdFl6bBiRN2RjMhjSsipf0h0JC4ganxwiBRzSoGwMMZagmq7Teoabm6cZ8X0mStPL\\/bzCCAQPc5wmGmW2M7GKEITiEQbgHN+ZB\\/cd8g6MmCJsYK5OYplbG\\/SDuCtWZDIS4mUdxywlTFDMmXm9tC2Fy5vfgk+9DX4eOSPIHiQq5wPpGsILrY17H87A4Qt4gb6ITC2s9Oo7qf8R0gfiJttuPyWYFL7w1KoiuUi6JPf5v2H0HW04Mc1qlZwD44Dd7RlHGQeGs\\/fk21KZ6kKI4cTd8eHAt3Vrl29yIhn6Ce\\/go1Ve\\/0qj0DWx703SRbuc5IBm8AR\\/q9DpxQkEd8PC8+FWBisuGLTQyjqTS6DCEy7LwgR0LU28Hwdw1jDeZgoZy54kCpo6v9B6x1\\/bkNH8YtlSt9uz\\/A9UinS4g0VdN09H6SXKXNxn4bYhJeWK7c4q9Byvuye1M08qh7JWzMKpkWyZwaeC6zIaMQhiwrodyjS+S25dBk1YcQ==.eDE=\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val raw = JSONObject(json)
+        val node = Node("dummy-auth-id", "", "",
+            "", "", mutableListOf())
         val pingOneEvalCallback = PingOneProtectEvaluationCallback(raw, 0)
+        pingOneEvalCallback.setNode(node)
         pingOneEvalCallback.getData(context)
         assertTrue(pingOneEvalCallback.content.contains("result"))
         coVerify(exactly = 1) { PIProtect.getData() }
@@ -64,7 +91,10 @@ class PingOneProtectEvaluationCallbackTest {
         try {
             val json = "{\"type\":\"PingOneProtectEvaluationCallback\",\"output\":[{\"name\":\"pauseBehavioralData\",\"value\":true}],\"input\":[{\"name\":\"IDToken1signals\",\"value\":\"HcSd8yBF7G0g0d0lzzz6rci4I0IB+VZdFl6bBiRN2RjMhjSsipf0h0JC4ganxwiBRzSoGwMMZagmq7Teoabm6cZ8X0mStPL\\/bzCCAQPc5wmGmW2M7GKEITiEQbgHN+ZB\\/cd8g6MmCJsYK5OYplbG\\/SDuCtWZDIS4mUdxywlTFDMmXm9tC2Fy5vfgk+9DX4eOSPIHiQq5wPpGsILrY17H87A4Qt4gb6ITC2s9Oo7qf8R0gfiJttuPyWYFL7w1KoiuUi6JPf5v2H0HW04Mc1qlZwD44Dd7RlHGQeGs\\/fk21KZ6kKI4cTd8eHAt3Vrl29yIhn6Ce\\/go1Ve\\/0qj0DWx703SRbuc5IBm8AR\\/q9DpxQkEd8PC8+FWBisuGLTQyjqTS6DCEy7LwgR0LU28Hwdw1jDeZgoZy54kCpo6v9B6x1\\/bkNH8YtlSt9uz\\/A9UinS4g0VdN09H6SXKXNxn4bYhJeWK7c4q9Byvuye1M08qh7JWzMKpkWyZwaeC6zIaMQhiwrodyjS+S25dBk1YcQ==.eDE=\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
             val raw = JSONObject(json)
+            val node = Node("dummy-auth-id", "", "",
+                "", "", mutableListOf())
             val pingOneEvalCallback = PingOneProtectEvaluationCallback(raw, 0)
+            pingOneEvalCallback.setNode(node)
             pingOneEvalCallback.getData(context)
             fail()
         } catch (e: Exception) {

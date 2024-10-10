@@ -10,6 +10,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -17,6 +18,11 @@ import org.junit.runner.RunWith
 class ConfigHelperTest {
 
     val context: Context = ApplicationProvider.getApplicationContext()
+
+    @Before
+    fun setUp() {
+        ContextProvider.init(context)
+    }
 
     @Test
     fun testPersistingData() {
@@ -242,8 +248,33 @@ class ConfigHelperTest {
     @Test
     fun loadDefaultFROptionWithNull() {
        val defaultOption = ConfigHelper.load(context, null)
-       val expectedResult = "FROptions(server=Server(url=https://openam.example.com:8081/openam, realm=root, timeout=30, cookieName=iPlanetDirectoryPro, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=andy_app, oauthRedirectUri=https://www.example.com:8080/callback, oauthSignOutRedirectUri=https://www.example.com:8080/signout, oauthScope=openid email address, oauthThresholdSeconds=30, oauthCacheSeconds=0), service=Service(authServiceName=Test, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=, revokeEndpoint=, sessionEndpoint=, tokenEndpoint=, userinfoEndpoint=, authorizeEndpoint=, endSessionEndpoint=), sslPinning=SSLPinning(buildSteps=[], pins=[9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=]), logger=Log(logLevel=null, customLogger=null))"
-        assertTrue(defaultOption.toString() == expectedResult)
+        assertEquals("https://openam.example.com:8081/openam", defaultOption.server.url)
+        assertEquals("root", defaultOption.server.realm)
+        assertEquals(30, defaultOption.server.timeout)
+        assertEquals("iPlanetDirectoryPro", defaultOption.server.cookieName)
+        assertEquals(0, defaultOption.server.cookieCacheSeconds)
+        assertEquals("andy_app", defaultOption.oauth.oauthClientId)
+        assertEquals("https://www.example.com:8080/callback", defaultOption.oauth.oauthRedirectUri)
+        assertEquals("https://www.example.com:8080/signout", defaultOption.oauth.oauthSignOutRedirectUri)
+        assertEquals("openid email address", defaultOption.oauth.oauthScope)
+        assertEquals(30, defaultOption.oauth.oauthThresholdSeconds)
+        assertEquals(0, defaultOption.oauth.oauthCacheSeconds)
+        assertEquals("Test", defaultOption.service.authServiceName)
+        assertEquals("Registration", defaultOption.service.registrationServiceName)
+        assertEquals("", defaultOption.urlPath.authenticateEndpoint)
+        assertEquals("", defaultOption.urlPath.revokeEndpoint)
+        assertEquals("", defaultOption.urlPath.sessionEndpoint)
+        assertEquals("", defaultOption.urlPath.tokenEndpoint)
+        assertEquals("", defaultOption.urlPath.userinfoEndpoint)
+        assertEquals("", defaultOption.urlPath.authorizeEndpoint)
+        assertEquals("", defaultOption.urlPath.endSessionEndpoint)
+        assertTrue(defaultOption.sslPinning.buildSteps.isEmpty())
+        assertEquals("9hNxmEFgLKGJXqgp61hyb8yIyiT9u0vgDZh4y8TmY/M=", defaultOption.sslPinning.pins[0])
+        assertNull(defaultOption.logger.logLevel)
+        assertNull(defaultOption.logger.customLogger)
+        assertEquals(defaultOption.store.oidcStorage, Options.oidcStorage)
+        assertEquals(defaultOption.store.ssoTokenStorage, Options.ssoTokenStorage)
+        assertEquals(defaultOption.store.cookiesStorage, Options.cookieStorage)
     }
 
     @Test
@@ -263,7 +294,6 @@ class ConfigHelperTest {
             }
         }
         val defaultOption = ConfigHelper.load(context, frOptions)
-        val expectedResult = "FROptions(server=Server(url=https://dummy, realm=realm123, timeout=30, cookieName=cookieName, cookieCacheSeconds=0), oauth=OAuth(oauthClientId=client_id, oauthRedirectUri=, oauthSignOutRedirectUri=, oauthScope=, oauthThresholdSeconds=0, oauthCacheSeconds=0), service=Service(authServiceName=Login, registrationServiceName=Registration), urlPath=UrlPath(authenticateEndpoint=null, revokeEndpoint=https://revoke, sessionEndpoint=null, tokenEndpoint=null, userinfoEndpoint=null, authorizeEndpoint=null, endSessionEndpoint=https://endsession), sslPinning=SSLPinning(buildSteps=[], pins=[]), logger=Log(logLevel=null, customLogger=null))"
-        assertTrue(defaultOption.toString() == expectedResult)
+        assertEquals(frOptions, defaultOption)
     }
 }

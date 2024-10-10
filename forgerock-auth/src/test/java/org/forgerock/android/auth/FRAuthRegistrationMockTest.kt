@@ -1,16 +1,15 @@
 /*
  * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth
 
-import android.content.Context
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import okhttp3.mockwebserver.MockResponse
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.callback.BooleanAttributeInputCallback
 import org.forgerock.android.auth.callback.KbaCreateCallback
 import org.forgerock.android.auth.callback.NumberAttributeInputCallback
@@ -18,9 +17,16 @@ import org.forgerock.android.auth.callback.StringAttributeInputCallback
 import org.forgerock.android.auth.callback.TermsAndConditionsCallback
 import org.forgerock.android.auth.callback.ValidatedPasswordCallback
 import org.forgerock.android.auth.callback.ValidatedUsernameCallback
+import org.forgerock.android.auth.storage.Storage
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert.*
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
@@ -28,6 +34,27 @@ import java.util.concurrent.ExecutionException
 
 @RunWith(AndroidJUnit4::class)
 class FRAuthRegistrationMockTest : BaseTest() {
+
+    private lateinit var ssoTokenStorage: Storage<SSOToken>
+    private lateinit var cookiesStorage: Storage<Collection<String>>
+
+    @Before
+    fun setUpStorage() {
+        ssoTokenStorage = sharedPreferencesStorage<SSOToken>(context = context,
+            filename = "ssotoken",
+            key = "ssotoken", cacheable = false)
+        cookiesStorage = sharedPreferencesStorage<Collection<String>>(context = context,
+            filename = "cookies",
+            key = "cookies", cacheable = false)
+    }
+
+    @After
+    fun cleanUp() {
+        ssoTokenStorage.delete()
+        cookiesStorage.delete()
+    }
+
+
     /**
      * Start -> Platform Username -> Platform Password -> Attribute Collector -> Create Object
      */
@@ -38,11 +65,9 @@ class FRAuthRegistrationMockTest : BaseTest() {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK)
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST,
-                Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
 
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
@@ -172,11 +197,9 @@ class FRAuthRegistrationMockTest : BaseTest() {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK)
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST,
-                Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val unique = booleanArrayOf(false)
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
@@ -263,11 +286,9 @@ class FRAuthRegistrationMockTest : BaseTest() {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK)
         enqueue("/registration_attribute_collector.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST,
-                Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val minLength = booleanArrayOf(false)
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
@@ -356,11 +377,9 @@ class FRAuthRegistrationMockTest : BaseTest() {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK)
         enqueue("/registration_kba_definition.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST,
-                Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
             object : NodeListenerFuture<FRUser>() {
@@ -448,11 +467,9 @@ class FRAuthRegistrationMockTest : BaseTest() {
         enqueue("/registration_platform_password.json", HttpURLConnection.HTTP_OK)
         enqueue("/registration_accept_terms_and_conditions.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(DEFAULT_SSO_TOKEN_MANAGER_TEST,
-                Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
             object : NodeListenerFuture<FRUser>() {

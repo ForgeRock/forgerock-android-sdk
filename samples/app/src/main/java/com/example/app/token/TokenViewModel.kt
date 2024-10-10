@@ -39,8 +39,7 @@ class TokenViewModel : ViewModel() {
         })
     }
 
-    fun forceRefresh(token: AccessToken? = FRUser.getCurrentUser()?.accessToken) {
-        token?.let {
+    fun forceRefresh() {
             FRUser.getCurrentUser()?.refresh(object : FRListener<AccessToken> {
                 override fun onSuccess(result: AccessToken) {
                     state.update {
@@ -54,8 +53,7 @@ class TokenViewModel : ViewModel() {
                     }
                 }
             })
-        }
-    }
+       }
 
     fun revoke(token: AccessToken? = FRUser.getCurrentUser()?.accessToken) {
         token?.let {

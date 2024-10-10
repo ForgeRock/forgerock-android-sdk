@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -75,6 +75,7 @@ public class InitProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         Application app = (Application) getContext().getApplicationContext();
+        ContextProvider.INSTANCE.init(app.getApplicationContext());
         app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -159,13 +159,15 @@ open class WebAuthnRegistration() : WebAuthn() {
         //Extension to support username-less
         if (options.authenticatorSelection?.requireResidentKey == true &&
             options.authenticatorSelection?.residentKeyRequirement == ResidentKeyRequirement.RESIDENT_KEY_DISCOURAGED) {
-            val source = PublicKeyCredentialSource.builder()
-                .id(publicKeyCredential.rawId)
-                .rpid(options.rp.id)
-                .userHandle(Base64.decode(options.user.id, Base64.URL_SAFE or Base64.NO_WRAP))
-                .otherUI(options.user.displayName).build()
-            persist(context, source)
-        }
+            publicKeyCredential.rawId?.let {
+                val source = PublicKeyCredentialSource.builder()
+                    .id(it)
+                    .rpid(options.rp.id)
+                    .userHandle(Base64.decode(options.user.id, Base64.URL_SAFE or Base64.NO_WRAP))
+                    .otherUI(options.user.displayName).build()
+                persist(context, source)
+            }
+       }
         return (sb.toString())
     }
 

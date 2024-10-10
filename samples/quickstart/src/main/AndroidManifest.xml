@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
   ~
   ~ This software may be modified and distributed under the terms
   ~ of the MIT license. See the LICENSE file for details.
@@ -12,7 +12,6 @@
     Set usesCleartextTraffic only for test purpose,
     it is highly recommend to set this attribute to false in production
     -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>

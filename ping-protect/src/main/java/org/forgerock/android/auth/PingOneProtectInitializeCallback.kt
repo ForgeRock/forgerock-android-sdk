@@ -8,7 +8,7 @@ package org.forgerock.android.auth
 
 import android.content.Context
 import androidx.annotation.Keep
-import org.forgerock.android.auth.callback.AbstractCallback
+import org.forgerock.android.auth.callback.AbstractProtectCallback
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -19,7 +19,8 @@ private val TAG = PingOneProtectInitializeCallback::class.java.simpleName
 /**
  * Callback to initialize the ping one protect
  */
-open class PingOneProtectInitializeCallback : AbstractCallback {
+open class PingOneProtectInitializeCallback : AbstractProtectCallback {
+
     @Keep
     constructor(jsonObject: JSONObject, index: Int) : super(jsonObject, index)
 
@@ -78,14 +79,6 @@ open class PingOneProtectInitializeCallback : AbstractCallback {
     }
 
     /**
-     * Input the Client Error to the server
-     * @param value Protect ErrorType .
-     */
-    fun setClientError(value: String) {
-        super.setValue(value, 0)
-    }
-
-    /**
      * Collect the behavior. Calling the [start] function.
      *
      * @param context The Application Context
@@ -110,7 +103,7 @@ open class PingOneProtectInitializeCallback : AbstractCallback {
             }
         } catch (e: Exception) {
             Logger.error(TAG, t = e, message = e.message)
-            setClientError(e.message ?: "clientError")
+            setClientError(e.message ?: "clientError", 0)
             throw e
         }
     }

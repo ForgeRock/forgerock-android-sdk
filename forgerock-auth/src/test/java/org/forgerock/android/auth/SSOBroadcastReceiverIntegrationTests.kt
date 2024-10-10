@@ -1,14 +1,12 @@
 /*
- *  Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
- *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package org.forgerock.android.auth
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import okhttp3.mockwebserver.Dispatcher
@@ -16,7 +14,10 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
+import org.forgerock.android.auth.storage.Storage
+import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -26,8 +27,28 @@ import java.util.concurrent.CountDownLatch
 @RunWith(RobolectricTestRunner::class)
 class SSOBroadcastReceiverIntegrationTests: BaseTest() {
 
-    private val defaultTokenManagerTest = "DefaultTokenManagerTest"
-    private val defaultSSOTokenManagerTest = "DefaultSSOManagerTest"
+    private lateinit var ssoTokenStorage: Storage<SSOToken>
+    private lateinit var cookiesStorage: Storage<Collection<String>>
+    private lateinit var storage: Storage<AccessToken>
+
+    @Before
+    fun setUpStorage() {
+        ssoTokenStorage = sharedPreferencesStorage<SSOToken>(context = context,
+            filename = "ssotoken",
+            key = "ssotoken", cacheable = false)
+        cookiesStorage = sharedPreferencesStorage<Collection<String>>(context = context,
+            filename = "cookies",
+            key = "cookies", cacheable = false)
+        storage = MemoryStorage()
+    }
+
+    @After
+    fun cleanUp() {
+        ssoTokenStorage.delete()
+        cookiesStorage.delete()
+        storage.delete()
+    }
+
 
     private fun findRequest(path: String, vararg recordedRequests: RecordedRequest): RecordedRequest {
         for (r: RecordedRequest in recordedRequests) {
@@ -43,16 +64,9 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success.json", HttpURLConnection.HTTP_OK)
-       Config.getInstance().sharedPreferences =
-            context.getSharedPreferences(
-                defaultTokenManagerTest,
-                Context.MODE_PRIVATE
-            )
-        Config.getInstance().ssoSharedPreferences =
-            context.getSharedPreferences(
-                defaultSSOTokenManagerTest,
-                Context.MODE_PRIVATE
-            )
+        Config.getInstance().oidcStorage = storage
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val nodeListenerFuture: NodeListenerFuture<FRUser?> =
             object : NodeListenerFuture<FRUser?>() {
@@ -108,16 +122,9 @@ class SSOBroadcastReceiverIntegrationTests: BaseTest() {
         assertNotNull(FRUser.getCurrentUser())
 
         val config = ConfigHelper.getPersistedConfig(context, null)
-        config.sharedPreferences =  context.getSharedPreferences(
-            defaultTokenManagerTest,
-            Context.MODE_PRIVATE
-        )
-        config.ssoSharedPreferences =
-            context.getSharedPreferences(
-                defaultSSOTokenManagerTest,
-                Context.MODE_PRIVATE
-            )
-
+        config.oidcStorage =  storage
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         val testObject = SSOBroadcastReceiver(config)
         val intent = Intent("org.forgerock.android.auth.broadcast.SSO_LOGOUT")
         intent.putExtra("BROADCAST_PACKAGE_KEY", "com.test.forgerock")

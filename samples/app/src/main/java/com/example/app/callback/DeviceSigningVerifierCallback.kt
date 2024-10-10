@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 -2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -57,7 +55,6 @@ fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
     val currentOnCompleted by rememberUpdatedState(onCompleted)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val scroll = rememberScrollState(0)
     var showProgress by remember {
         mutableStateOf(true)
     }
@@ -85,8 +82,7 @@ fun DeviceSigningVerifierCallback(callback: DeviceSigningVerifierCallback,
                     border = BorderStroke(2.dp, Color.Black),
                     shape = MaterialTheme.shapes.medium) {
                     Text(modifier = Modifier
-                        .padding(4.dp)
-                        .verticalScroll(scroll),
+                        .padding(4.dp),
                         text = callback.challenge)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -143,9 +139,11 @@ suspend fun sign(context: Context, callback: DeviceSigningVerifierCallback) {
                         //custom error example
                         //callback.setClientError("UnAuth")
                     }
+
                     is DeviceBindingErrorStatus.Abort -> {
                         return@loop
                     }
+
                     is DeviceBindingErrorStatus.ClientNotRegistered -> {
                         return@loop
                     }

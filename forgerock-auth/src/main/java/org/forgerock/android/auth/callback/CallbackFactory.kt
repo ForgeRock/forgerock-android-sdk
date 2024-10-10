@@ -30,6 +30,7 @@ class CallbackFactory private constructor() {
         register(TextOutputCallback::class.java)
         register(SuspendedTextOutputCallback::class.java)
         register(ReCaptchaCallback::class.java)
+        register(ReCaptchaEnterpriseCallback::class.java)
         register(ConsentMappingCallback::class.java)
         register(HiddenValueCallback::class.java)
         register(DeviceProfileCallback::class.java)

@@ -1,20 +1,22 @@
 /*
- * Copyright (c) 2023 -2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth
 
-import android.content.Context
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import okhttp3.mockwebserver.MockResponse
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.callback.NameCallback
 import org.forgerock.android.auth.callback.PasswordCallback
+import org.forgerock.android.auth.storage.Storage
 import org.json.JSONException
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
@@ -24,6 +26,26 @@ import java.util.concurrent.ExecutionException
 
 @RunWith(AndroidJUnit4::class)
 class FRLifeCycleListenerTest : BaseTest() {
+
+    private lateinit var ssoTokenStorage: Storage<SSOToken>
+    private lateinit var cookiesStorage: Storage<Collection<String>>
+
+    @Before
+    fun setUpStorage() {
+        ssoTokenStorage = sharedPreferencesStorage<SSOToken>(context = context,
+            filename = "ssotoken",
+            key = "ssotoken", cacheable = false)
+        cookiesStorage = sharedPreferencesStorage<Collection<String>>(context = context,
+            filename = "cookies",
+            key = "cookies", cacheable = false)
+    }
+
+    @After
+    fun cleanUp() {
+        ssoTokenStorage.delete()
+        cookiesStorage.delete()
+    }
+
     @Test
     @Throws(InterruptedException::class,
         ExecutionException::class,
@@ -104,10 +126,9 @@ class FRLifeCycleListenerTest : BaseTest() {
             .addHeader("Set-Cookie",
                 "iPlanetDirectoryPro=C4VbQPUtfu76IvO_JRYbqtGt2hc.*AAJTSQACMDEAAlNLABxQQ1U3VXZXQ0FoTUNCSnFjbzRYeWh4WHYzK0E9AAR0eXBlAANDVFMAAlMxAAA.*; Path=/; Domain=localhost; HttpOnly")
             .setBody(getJson("/authTreeMockTest_Authenticate_success.json")))
-        Config.getInstance().sharedPreferences = context.getSharedPreferences(
-            DEFAULT_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
-        Config.getInstance().ssoSharedPreferences = context.getSharedPreferences(
-            DEFAULT_SSO_TOKEN_MANAGER_TEST, Context.MODE_PRIVATE)
+        Config.getInstance().oidcStorage = MemoryStorage()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
         Config.getInstance().url = url
         val nodeListenerFuture: NodeListenerFuture<FRUser> =
             object : NodeListenerFuture<FRUser>() {

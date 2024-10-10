@@ -9,6 +9,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 apply<AndroidBuildGradlePlugin>()
@@ -24,13 +25,13 @@ dependencies {
     api(project(":forgerock-auth"))
     api(project(":ping-protect"))
 
-    implementation(libs.appcompat)
+    implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.commons.io)
     androidTestImplementation(libs.rules)
@@ -42,6 +43,7 @@ dependencies {
     androidTestImplementation(libs.androidx.biometric.ktx)
     androidTestImplementation(libs.nimbus.jose.jwt)
     androidTestImplementation(libs.okhttp)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
     //For Application Pin
     androidTestImplementation(libs.bcpkix.jdk15on)
@@ -49,4 +51,8 @@ dependencies {
 
     //App Integrity
     androidTestImplementation(libs.integrity)
+
+    // Captcha
+    androidTestImplementation(libs.play.services.safetynet)
+    androidTestImplementation(libs.recaptchaEnterprise)
 }

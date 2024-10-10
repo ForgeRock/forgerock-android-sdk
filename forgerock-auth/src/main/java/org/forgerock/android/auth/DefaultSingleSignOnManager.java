@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,10 +17,13 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
+import org.forgerock.android.auth.storage.Storage;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Set;
 
 import lombok.Builder;
 import okhttp3.Call;
@@ -38,7 +41,8 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
     private static final String TAG = DefaultSingleSignOnManager.class.getSimpleName();
 
-    private final SingleSignOnManager singleSignOnManager;
+    private final Storage<SSOToken> ssoTokenStorage;
+    private final Storage<Collection<String>> cookiesStorage;
     private final ServerConfig serverConfig;
     private final SSOBroadcastModel ssoBroadcastModel;
     private static final Action LOGOUT = new Action(Action.LOGOUT);
@@ -46,12 +50,12 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
     @Builder
     private DefaultSingleSignOnManager(@NonNull Context context,
                                        ServerConfig serverConfig,
-                                       SSOBroadcastModel ssoBroadcastModel,
-                                       SharedPreferences sharedPreferences) {
-        Logger.warn(TAG, "Fallback to SharedPreference to store SSO Token");
-        singleSignOnManager = SharedPreferencesSignOnManager.builder()
-                .context(context)
-                .sharedPreferences(sharedPreferences).build();
+                                       Storage<SSOToken> ssoTokenStorage,
+                                       Storage<Collection<String>> cookiesStorage,
+                                       SSOBroadcastModel ssoBroadcastModel) {
+
+        this.ssoTokenStorage = ssoTokenStorage == null ? Options.INSTANCE.getSsoTokenStorage() : ssoTokenStorage;
+        this.cookiesStorage = cookiesStorage == null? Options.INSTANCE.getCookieStorage(): cookiesStorage;
 
         this.ssoBroadcastModel = ssoBroadcastModel;
         this.serverConfig = serverConfig;
@@ -59,34 +63,44 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
 
     @Override
     public void persist(SSOToken token) {
-        singleSignOnManager.persist(token);
+        ssoTokenStorage.save(token);
     }
 
     @Override
     public void persist(Collection<String> cookies) {
-        singleSignOnManager.persist(cookies);
+        if (cookies.isEmpty()) {
+            cookiesStorage.delete();
+        } else {
+            cookiesStorage.save(cookies);
+        }
     }
 
     @Override
     public void clear() {
-        singleSignOnManager.clear();
+        ssoTokenStorage.delete();
+        cookiesStorage.delete();
         //Broadcast Token removed event
         EventDispatcher.TOKEN_REMOVED.notifyObservers();
     }
 
     @Override
     public SSOToken getToken() {
-        return singleSignOnManager.getToken();
+        return ssoTokenStorage.get();
     }
 
     @Override
     public Collection<String> getCookies() {
-        return singleSignOnManager.getCookies();
+        Collection<String> result = cookiesStorage.get();
+        if (result == null) {
+            return Set.of();
+        } else {
+            return result;
+        }
     }
 
     @Override
     public boolean hasToken() {
-        return singleSignOnManager.hasToken();
+        return ssoTokenStorage.get() != null;
     }
 
     @Override
@@ -98,7 +112,8 @@ class DefaultSingleSignOnManager implements SingleSignOnManager, ResponseHandler
         }
 
         //No matter success or fail, we clear the token
-        singleSignOnManager.revoke(null);
+        ssoTokenStorage.delete();
+        cookiesStorage.delete();
 
         URL logout = null;
         try {

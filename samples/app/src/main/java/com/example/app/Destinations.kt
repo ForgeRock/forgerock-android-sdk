@@ -16,6 +16,7 @@ object Destinations {
     const val MANAGE_USER_KEYS = "User Keys"
     const val IG = "IG protected endpoint"
     const val DEVICE_PROFILE = "Device Profile"
+    const val USER_PROFILE = "User"
     const val SETTING = "Setting"
     const val CENTRALIZE_ROUTE = "Centralize Login"
     const val USER_SESSION = "User Session"

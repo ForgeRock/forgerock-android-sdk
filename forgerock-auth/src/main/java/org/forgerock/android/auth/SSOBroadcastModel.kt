@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -16,7 +16,7 @@ import android.content.Intent.FLAG_RECEIVER_FOREGROUND
  * SSOBroadcastModel to broadcast the SSO SignOut message to single sign on apps
  */
 
-internal class SSOBroadcastModel @JvmOverloads constructor(private val context: Context? = InitProvider.getCurrentActivity(),
+class SSOBroadcastModel @JvmOverloads constructor(private val context: Context? = InitProvider.getCurrentActivity(),
                         private val broadcastIntent: Intent = Intent(context?.resources?.getString(R.string.forgerock_sso_logout))) {
 
     private val broadcastPermission: String? = context?.resources?.getString(R.string.forgerock_sso_permission)

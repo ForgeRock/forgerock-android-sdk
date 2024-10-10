@@ -12,13 +12,10 @@ plugins {
 
 android {
     namespace = "com.example.app"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
+        targetSdk = 35
         minSdk = 23
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -39,9 +36,6 @@ android {
             keyPassword = "android"
         }
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 
     buildFeatures {
         compose = true
@@ -52,6 +46,14 @@ android {
     }
 }
 
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+
 dependencies {
 
     val composeBom = platform("androidx.compose:compose-bom:2022.10.00")
@@ -60,6 +62,12 @@ dependencies {
     // SDK
     implementation(project(":forgerock-auth"))
     implementation(project(":ping-protect"))
+
+    //For Custom Storage
+    implementation(libs.kotlinx.serialization.json)
+
+    //implementation("org.forgerock:forgerock-auth:4.5.0")
+    //implementation("org.forgerock:ping-protect:4.5.0")
 
     // implementation 'org.forgerock:forgerock-auth:4.2.0'
     // Device Binding + JWT + Application Pin
@@ -76,6 +84,7 @@ dependencies {
 
     // Captcha
     implementation(libs.play.services.safetynet)
+    implementation(libs.recaptchaEnterprise)
 
     // Social Login
     implementation(libs.play.services.auth)

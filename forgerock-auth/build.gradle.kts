@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 plugins {
 
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
-
+    alias(libs.plugins.kotlinSerialization)
 
     id("com.adarshr.test-logger")
     id("maven-publish")
@@ -62,8 +62,11 @@ dependencies {
     implementation(libs.jetbrains.kotlinx.coroutines.play.services)
     implementation(libs.androidx.appcompat)
 
+    implementation(libs.kotlinx.serialization.json)
+
     //Make it optional for developer
     compileOnly(libs.play.services.location)
+    compileOnly(libs.recaptchaEnterprise)
     compileOnly(libs.play.services.safetynet)
     // Keeping this version for now, its breaking Apple SignIn for the later versions.
     compileOnly(libs.appauth)
@@ -84,7 +87,6 @@ dependencies {
     compileOnly(libs.integrity)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.commons.io)
     androidTestImplementation(libs.rules)
@@ -105,7 +107,6 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.test.runner)
-    testImplementation(libs.androidx.fragment.testing)
     testImplementation(libs.nimbus.jose.jwt)
 
     testImplementation(libs.junit)
@@ -113,7 +114,6 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(libs.commons.io)
     testImplementation(libs.assertj.core)
-    testImplementation(libs.androidx.espresso.intents)
     testImplementation(libs.appauth)
     testImplementation(libs.play.services.fido)
     testImplementation(libs.play.services.auth)
@@ -129,6 +129,8 @@ dependencies {
 
     //App Integrity
     testImplementation(libs.integrity)
+
+    testImplementation(libs.recaptchaEnterprise)
 
     testImplementation(libs.kotlinx.coroutines.test)
 

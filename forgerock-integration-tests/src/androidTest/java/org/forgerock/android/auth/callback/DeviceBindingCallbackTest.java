@@ -22,17 +22,20 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING) // These tests must run in order
 public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     protected final static String TREE = "device-bind";
 
     @Test
-    public void testDeviceBindingDefaults() throws ExecutionException, InterruptedException {
+    public void test01DeviceBindingDefaults() throws ExecutionException, InterruptedException {
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "default") {
             final NodeListener<FRSession> nodeListener = this;
 
@@ -68,7 +71,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingCustom() throws ExecutionException, InterruptedException {
+    public void test02DeviceBindingCustom() throws ExecutionException, InterruptedException {
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
 
@@ -103,7 +106,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingBind() throws ExecutionException, InterruptedException {
+    public void test03DeviceBindingBind() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
@@ -141,7 +144,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingExceed() throws ExecutionException, InterruptedException {
+    public void test04DeviceBindingExceed() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "exceed-limit") {
             final NodeListener<FRSession> nodeListener = this;
@@ -174,7 +177,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingCustomOutcome() throws ExecutionException, InterruptedException {
+    public void test05DeviceBindingCustomOutcome() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "custom") {
             final NodeListener<FRSession> nodeListener = this;
@@ -210,7 +213,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingApplicationPin() throws ExecutionException, InterruptedException {
+    public void test06DeviceBindingApplicationPin() throws ExecutionException, InterruptedException {
         final int[] bindSuccess = {0};
 
         ActivityScenario<DummyActivity> scenario = ActivityScenario.launch(DummyActivity.class);
@@ -254,7 +257,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindApplicationIdNotMatchingError() {
+    public void test07DeviceBindApplicationIdNotMatchingError() {
         final int[] bindSuccess = {0};
         boolean executionExceptionOccurred = false;
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "wrong-app-id") {
@@ -299,7 +302,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
     }
 
     @Test
-    public void testDeviceBindingDeviceDataVariable() throws ExecutionException, InterruptedException {
+    public void test08DeviceBindingDeviceDataVariable() throws ExecutionException, InterruptedException {
         // This test is to ensure that the Device Binding node sets DeviceBinding.DEVICE variable in shared state
         final int[] bindSuccess = {0};
         final int[] deviceDataVarPresentInAM = {0};
@@ -351,7 +354,7 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
      * Make sure that when user does NOT exist, the Device Binding node triggers the failure outcome (SDKS-2935)
      */
     @Test
-    public void testDeviceBindingUnknownUser() throws ExecutionException, InterruptedException {
+    public void test09DeviceBindingUnknownUser() throws ExecutionException, InterruptedException {
         final int[] hit = {0};
         final int[] failureOutcome = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "default")

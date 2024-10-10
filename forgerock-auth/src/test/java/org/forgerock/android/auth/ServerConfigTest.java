@@ -38,6 +38,7 @@ public class ServerConfigTest {
 
     @Before
     public void setUp() {
+        ContextProvider.INSTANCE.init(context);
         OkHttpClientProvider.getInstance().clear();
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
     }
@@ -80,7 +81,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("2lFvaIHpsTcbb5uqa08S2k6wzLKscXXx1k1hKoX9R1Q=")
+                .pin("5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=")
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
@@ -122,7 +123,7 @@ public class ServerConfigTest {
         ServerConfig serverConfig = ServerConfig.builder()
                 .context(context)
                 .url("https://api.ipify.org")
-                .pin("2lFvaIHpsTcbb5uqa08S2k6wzLKscXXx1k1hKoX9R1Q=")
+                .pin("5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=")
                 .pin("invalid")
                 .build();
 
@@ -214,7 +215,7 @@ public class ServerConfigTest {
                 .context(context)
                 .url("https://api.ipify.org")
                 .buildStep(builder -> builder.certificatePinner(
-                        new CertificatePinner.Builder().add("api.ipify.org", "sha1/FAx66BsuUMrmrBnZ8F0GKxBZxLs=" ).build()))
+                        new CertificatePinner.Builder().add("api.ipify.org", "sha256/5nPgyHPl6VBofcqTPenG8H7ymlYexiUiimAQNRZa07I=" ).build()))
                 .build();
 
         OkHttpClient client = OkHttpClientProvider.getInstance().lookup(serverConfig);
