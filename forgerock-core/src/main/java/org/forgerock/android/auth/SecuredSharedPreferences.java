@@ -7,13 +7,14 @@
 
 package org.forgerock.android.auth;
 
+import static org.forgerock.android.auth.Encryptor.getEncryptor;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,12 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.Getter;
-
-import static org.forgerock.android.auth.Encryptor.getEncryptor;
 
 /**
  * An implementation of {@link SharedPreferences} that encrypts values.
@@ -211,32 +211,19 @@ public class SecuredSharedPreferences implements SharedPreferences {
     private String decrypt(@NonNull String data) {
         try {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
-        } catch (EncryptionException e) {
+        } catch (Exception e) {
             //Failed to decrypt the data, reset the encryptor
             Logger.warn(TAG, "Failed to decrypt the data.", e);
+            if (e instanceof CancellationException) {
+                throw e;
+            }
             edit().clear().commit();
             return null;
         }
     }
 
-    private String encrypt(byte[] value, boolean retry) {
-        try {
-            return Base64.encodeToString(encryptor.encrypt(value), Base64.DEFAULT);
-        } catch (Exception e) {
-            Logger.warn(TAG, "Failed to encrypt data. retrying...", e);
-            try {
-                encryptor.reset();
-                if (retry) {
-                    return encrypt(value, false);
-                } else {
-                    Logger.error(TAG, "Failed to encrypt data after retry.", e);
-                    throw new RuntimeException(e);
-                }
-            } catch (Exception ex) {
-                Logger.error(TAG, "Failed to encrypt data.", e);
-                throw new RuntimeException(ex);
-            }
-        }
+    private String encrypt(byte[] value) {
+        return Base64.encodeToString(encryptor.encrypt(value), Base64.DEFAULT);
     }
 
 
@@ -380,7 +367,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
 
         private void put(String key, byte[] value) {
             keysChanged.add(key);
-            String v = securedSharedPreferences.encrypt(value, true);
+            String v = securedSharedPreferences.encrypt(value);
             editor.putString(key, v);
         }
 
