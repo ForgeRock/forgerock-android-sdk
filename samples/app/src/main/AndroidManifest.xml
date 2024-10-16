@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2023 ForgeRock. All rights reserved.
+  ~ Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
   ~
-  ~  This software may be modified and distributed under the terms
-  ~  of the MIT license. See the LICENSE file for details.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license. See the LICENSE file for details.
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -51,7 +51,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Using Custom scheme
         <activity android:name="net.openid.appauth.RedirectUriReceiverActivity"
             android:exported="true"
             tools:node="replace">
@@ -63,9 +62,9 @@
                     android:scheme="org.forgerock.demo" />
             </intent-filter>
         </activity>
-        -->
 
         <!-- Using https scheme -->
+        <!--
         <activity
             android:name="net.openid.appauth.RedirectUriReceiverActivity"
             android:exported="true"
@@ -77,10 +76,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="example.com" />
-                <data android:path="/oauth2redirect" />
+                <data android:host="https://openam-sdks2.forgeblocks.com/" />
+                <data android:path="/login" />
             </intent-filter>
         </activity>
+        -->
 
     </application>
 

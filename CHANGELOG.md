@@ -1,3 +1,7 @@
+## [4.X.X]
+#### Added
+- Self device management [SDKS-3408]
+
 ## [4.6.0]
 #### Added
 - Allow developers to customize SDK storage [SDKS-3378]

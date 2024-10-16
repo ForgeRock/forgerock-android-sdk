@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 
 package com.example.app
@@ -33,6 +33,48 @@ fun Alert(throwable: Throwable) {
             },
             text = {
                 Text(text = throwable.toString())
+            }
+        )
+    }
+}
+
+@Composable
+fun Alert(throwable: Throwable?, onDismiss: () -> Unit) {
+    throwable?.let {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { onDismiss() })
+                { Text(text = "Ok") }
+            },
+            text = {
+                Text(text = throwable.toString())
+            }
+        )
+    }
+}
+
+@Composable
+fun Alert(msg: String, onOK: () -> Unit) {
+
+    var showConfirmation by remember {
+        mutableStateOf(true)
+    }
+
+    if (showConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showConfirmation = false },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfirmation = false
+                    onOK()
+                })
+                { Text(text = "Ok") }
+            },
+            text = {
+                Text(text = msg)
             }
         )
     }

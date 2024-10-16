@@ -1,0 +1,18 @@
+{
+  "_id": "c026fcf5-633e-4d06-894f-aa23ba32bc0b",
+  "_rev": "1929732901",
+  "uuid": "c026fcf5-633e-4d06-894f-aa23ba32bc0b",
+  "recoveryCodes": [],
+  "deviceName": "Test3",
+  "deviceId": "e7705077f38022ab-6d25ef5a8578518bfa8894aaa6f8d1033aad9357",
+  "createdDate": 1726012192353,
+  "lastAccessDate": 1726012206459,
+  "key": {
+    "kty": "RSA",
+    "kid": "c026fcf5-633e-4d06-894f-aa23ba32bc0b",
+    "use": "sig",
+    "alg": "RS512",
+    "n": "sXr801I8V9-hzK0dGdreXRnUe7G6cbhbOPht_UZPNxxYOqRgIWk2IZgUn3PDpcidQmHM0Nb3KJDv4ATnv96huuL8BFEo8jziO9783xOauhYI29nNtQvYNIBHxIJW2KMbFiy_R9ZEnBH5PDg4RopFgjrqJ2lsqHz4AiAtf90axA4skNLOpZ_pgXAhx-fyFk-uAfh2tqGtWomhh1crzNdFVIBETE-429KdHXq_GgmOLVXz9osVF4onkDgBUaV-FdyyWvHZxs6PvUdTO59wc92OzSJ6jeViMyQkHlywGZX7tVYPFF3KHPc6lsdD9LFDgJhI2irSCi-gccjlam5D3DiESQ",
+    "e": "AQAB"
+  }
+}
