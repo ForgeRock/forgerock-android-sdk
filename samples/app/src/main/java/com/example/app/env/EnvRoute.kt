@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2024 ForgeRock. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +34,9 @@ import org.forgerock.android.auth.FROptions
 @Composable
 fun EnvRoute(envViewModel: EnvViewModel, preferenceViewModel: PreferenceViewModel) {
     val context = LocalContext.current
-    envViewModel.select(context, preferenceViewModel.getLastEnv())
+    LaunchedEffect(true) {
+        envViewModel.select(context, preferenceViewModel.getLastEnv())
+    }
     EnvRoute(envViewModel.getAll(),
         envViewModel.current,
         onServerSelected = {
