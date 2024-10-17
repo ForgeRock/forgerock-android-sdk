@@ -28,6 +28,11 @@ tasks.dokkaJavadoc.configure {
     outputDirectory.set(file("$buildDir/javadoc"))
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
+
 /**
  * JCenter Dependency Manager
  */

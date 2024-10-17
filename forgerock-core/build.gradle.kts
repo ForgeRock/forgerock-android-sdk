@@ -6,11 +6,14 @@
  */
 
 plugins {
-    id("com.android.library")
+
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
+
     id("com.adarshr.test-logger")
     id("maven-publish")
     id("signing")
-    id("kotlin-android")
+
 }
 
 apply<AndroidBuildGradlePlugin>()
@@ -39,8 +42,11 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+    kotlin {
+        jvmToolchain(17)
+        compilerOptions {
+            freeCompilerArgs = listOf("-Xjvm-default=all")
+        }
     }
 
 }
