@@ -23,10 +23,10 @@ import org.junit.runner.RunWith
 import java.net.HttpURLConnection
 
 @RunWith(AndroidJUnit4::class)
-class UserRepositoryMockTest : BaseTest() {
+class DeviceClientMockTest : BaseTest() {
 
     var context: Context = ApplicationProvider.getApplicationContext()
-    private lateinit var userRepository: UserRepository
+    private lateinit var deviceClient: DeviceClient
 
     @Before
     fun setUp() {
@@ -37,7 +37,7 @@ class UserRepositoryMockTest : BaseTest() {
             .url(url)
             .realm("alpha")
             .cookieName("5421aeddf91aa20")
-        userRepository = UserRepository(serverConfig.build()) {
+        deviceClient = DeviceClient(serverConfig.build()) {
             SSOToken("ssoTokenValue")
         }
     }
@@ -46,7 +46,7 @@ class UserRepositoryMockTest : BaseTest() {
     fun oathDevice_returnsListOfOathDevices() = runTest {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successOath.json", HttpURLConnection.HTTP_OK)
-        val devices = userRepository.oathDevice()
+        val devices = deviceClient.oathDevices()
         assert(devices.isNotEmpty())
         val sessionInfoReq = server.takeRequest()
         assertThat(sessionInfoReq.method).isEqualTo("POST")
@@ -71,7 +71,7 @@ class UserRepositoryMockTest : BaseTest() {
     fun pushDevice_returnsListOfPushDevices() = runTest {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successPush.json", HttpURLConnection.HTTP_OK)
-        val devices = userRepository.pushDevice()
+        val devices = deviceClient.pushDevices()
         assert(devices.isNotEmpty())
 
         val sessionInfoReq = server.takeRequest()
@@ -93,7 +93,7 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = userRepository.bindingDevice()
+        val devices = deviceClient.bindingDevices()
         assert(devices.isNotEmpty())
         assertThat(devices.size).isEqualTo(4)
         val sessionInfoReq = server.takeRequest()
@@ -116,7 +116,7 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successWebAuthn.json", HttpURLConnection.HTTP_OK)
 
-        val devices = userRepository.webAuthnDevice()
+        val devices = deviceClient.webAuthnDevices()
         assert(devices.isNotEmpty())
         val sessionInfoReq = server.takeRequest()
         val oathReq = server.takeRequest()
@@ -138,7 +138,7 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successDeviceProfile.json", HttpURLConnection.HTTP_OK)
 
-        val devices = userRepository.profileDevice()
+        val devices = deviceClient.profileDevices()
         assert(devices.isNotEmpty())
 
         val sessionInfoReq = server.takeRequest()
@@ -163,10 +163,10 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successUpdateDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = userRepository.bindingDevice()
+        val devices = deviceClient.bindingDevices()
         assert(devices.isNotEmpty())
         assertThat(devices.size).isEqualTo(4)
-        userRepository.update(devices[0])
+        deviceClient.update(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -184,9 +184,9 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successUpdateDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = userRepository.bindingDevice()
+        val devices = deviceClient.bindingDevices()
         assert(devices.isNotEmpty())
-        userRepository.delete(devices[0])
+        deviceClient.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -205,9 +205,9 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/accessDenied.json", HttpURLConnection.HTTP_UNAUTHORIZED)
 
-        val devices = userRepository.bindingDevice()
+        val devices = deviceClient.bindingDevices()
         assert(devices.isNotEmpty())
-        userRepository.delete(devices[0])
+        deviceClient.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -227,9 +227,9 @@ class UserRepositoryMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/forbidden.json", HttpURLConnection.HTTP_UNAUTHORIZED)
 
-        val devices = userRepository.bindingDevice()
+        val devices = deviceClient.bindingDevices()
         assert(devices.isNotEmpty())
-        userRepository.delete(devices[0])
+        deviceClient.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -247,7 +247,7 @@ class UserRepositoryMockTest : BaseTest() {
     fun sessionExpired() = runTest {
         enqueue("/selfservice/accessDenied.json", HttpURLConnection.HTTP_UNAUTHORIZED)
         try {
-             userRepository.bindingDevice()
+             deviceClient.bindingDevices()
         } catch (e: ApiException) {
             assertThat(e.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAUTHORIZED)
             throw e

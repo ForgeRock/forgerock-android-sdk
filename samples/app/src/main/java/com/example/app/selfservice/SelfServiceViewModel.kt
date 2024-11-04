@@ -9,17 +9,16 @@ package com.example.app.selfservice
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app.token.TokenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import org.forgerock.android.auth.selfservice.Device
-import org.forgerock.android.auth.selfservice.UserRepository
+import org.forgerock.android.auth.selfservice.DeviceClient
 
 class SelfServiceViewModel : ViewModel() {
 
-    private val repo = UserRepository()
+    private val repo = DeviceClient()
     private var selectedType = "Oath"
 
     var state = MutableStateFlow(SelfServiceState())
@@ -57,11 +56,11 @@ class SelfServiceViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 selectedDevices = when (type) {
-                    "Oath" -> repo.oathDevice()
-                    "Push" -> repo.pushDevice()
-                    "WebAuthn" -> repo.webAuthnDevice()
-                    "Binding" -> repo.bindingDevice()
-                    "Profile" -> repo.profileDevice()
+                    "Oath" -> repo.oathDevices()
+                    "Push" -> repo.pushDevices()
+                    "WebAuthn" -> repo.webAuthnDevices()
+                    "Binding" -> repo.bindingDevices()
+                    "Profile" -> repo.profileDevices()
                     else -> emptyList()
                 }
                 state.update { it.copy(devices = selectedDevices, throwable = null) }

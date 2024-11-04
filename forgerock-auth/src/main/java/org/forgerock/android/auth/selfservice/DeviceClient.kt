@@ -35,36 +35,36 @@ private const val APPLICATION_JSON = "application/json"
 /**
  * Interface defining the repository for user devices.
  */
-interface UserRepo {
+interface DeviceRepository {
     /**
      * Retrieves a list of Oath devices.
      * @return A list of [OathDevice].
      */
-    suspend fun oathDevice(): List<OathDevice>
+    suspend fun oathDevices(): List<OathDevice>
 
     /**
      * Retrieves a list of Push devices.
      * @return A list of [PushDevice].
      */
-    suspend fun pushDevice(): List<PushDevice>
+    suspend fun pushDevices(): List<PushDevice>
 
     /**
      * Retrieves a list of Binding devices.
      * @return A list of [BindingDevice].
      */
-    suspend fun bindingDevice(): List<BindingDevice>
+    suspend fun bindingDevices(): List<BindingDevice>
 
     /**
      * Retrieves a list of WebAuthn devices.
      * @return A list of [WebAuthnDevice].
      */
-    suspend fun webAuthnDevice(): List<WebAuthnDevice>
+    suspend fun webAuthnDevices(): List<WebAuthnDevice>
 
     /**
      * Retrieves a list of Profile devices.
      * @return A list of [ProfileDevice].
      */
-    suspend fun profileDevice(): List<ProfileDevice>
+    suspend fun profileDevices(): List<ProfileDevice>
 
     /**
      * Updates the given device.
@@ -80,14 +80,14 @@ interface UserRepo {
 }
 
 /**
- * Implementation of [UserRepo] for managing user devices.
+ * Implementation of [DeviceRepository] for managing user devices.
  * @property server The server configuration.
  * @property ssoTokenBlock A suspend function to retrieve the SSO token.
  */
-class UserRepository(
+class DeviceClient(
     private val server: ServerConfig = Config.getInstance().serverConfig,
     private val ssoTokenBlock: suspend () -> SSOToken = { ssoToken() }
-) : UserRepo {
+) : DeviceRepository {
 
     private val httpClient: OkHttpClient = OkHttpClientProvider.getInstance()
         .lookup(server)
@@ -96,7 +96,7 @@ class UserRepository(
      * Retrieves a list of Oath devices.
      * @return A list of [OathDevice].
      */
-    override suspend fun oathDevice(): List<OathDevice> = withContext(Dispatchers.IO) {
+    override suspend fun oathDevices(): List<OathDevice> = withContext(Dispatchers.IO) {
         httpClient.newCall(request("devices/2fa/oath")).execute().use { response ->
             get(response)
         }
@@ -106,7 +106,7 @@ class UserRepository(
      * Retrieves a list of Push devices.
      * @return A list of [PushDevice].
      */
-    override suspend fun pushDevice(): List<PushDevice> = withContext(Dispatchers.IO) {
+    override suspend fun pushDevices(): List<PushDevice> = withContext(Dispatchers.IO) {
         httpClient.newCall(request("devices/2fa/push")).execute().use { response ->
             get(response)
         }
@@ -116,7 +116,7 @@ class UserRepository(
      * Retrieves a list of Binding devices.
      * @return A list of [BindingDevice].
      */
-    override suspend fun bindingDevice(): List<BindingDevice> = withContext(Dispatchers.IO) {
+    override suspend fun bindingDevices(): List<BindingDevice> = withContext(Dispatchers.IO) {
         httpClient.newCall(request("devices/2fa/binding")).execute().use { response ->
             get(response)
         }
@@ -126,7 +126,7 @@ class UserRepository(
      * Retrieves a list of WebAuthn devices.
      * @return A list of [WebAuthnDevice].
      */
-    override suspend fun webAuthnDevice(): List<WebAuthnDevice> = withContext(Dispatchers.IO) {
+    override suspend fun webAuthnDevices(): List<WebAuthnDevice> = withContext(Dispatchers.IO) {
         httpClient.newCall(request("devices/2fa/webauthn")).execute().use { response ->
             get(response)
         }
@@ -136,7 +136,7 @@ class UserRepository(
      * Retrieves a list of Profile devices.
      * @return A list of [ProfileDevice].
      */
-    override suspend fun profileDevice(): List<ProfileDevice> = withContext(Dispatchers.IO) {
+    override suspend fun profileDevices(): List<ProfileDevice> = withContext(Dispatchers.IO) {
         httpClient.newCall(request("devices/profile")).execute().use { response ->
             get(response)
         }
