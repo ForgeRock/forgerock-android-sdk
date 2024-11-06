@@ -105,8 +105,13 @@ data class FROptions(val server: Server,
                         tokenEndpoint = openIdConfiguration?.getString("token_endpoint"),
                         userinfoEndpoint = openIdConfiguration?.getString("userinfo_endpoint"),
                         revokeEndpoint = openIdConfiguration?.getString("revocation_endpoint"),
-                        endSessionEndpoint = openIdConfiguration?.getString("end_session_endpoint"))
-
+                        endSessionEndpoint = if (oauth.oauthSignOutRedirectUri.isEmpty()) {
+                            openIdConfiguration?.optString("ping_end_idp_session_endpoint",
+                                openIdConfiguration.getString("end_session_endpoint"))
+                        } else {
+                            openIdConfiguration?.getString("end_session_endpoint")
+                        }
+                    )
                     this@FROptions.copy(urlPath = urlPath, server = server)
 
                 }
