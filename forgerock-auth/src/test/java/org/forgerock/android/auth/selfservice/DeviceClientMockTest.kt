@@ -46,7 +46,7 @@ class DeviceClientMockTest : BaseTest() {
     fun oathDevice_returnsListOfOathDevices() = runTest {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successOath.json", HttpURLConnection.HTTP_OK)
-        val devices = deviceClient.oathDevices()
+        val devices = deviceClient.oath.get()
         assert(devices.isNotEmpty())
         val sessionInfoReq = server.takeRequest()
         assertThat(sessionInfoReq.method).isEqualTo("POST")
@@ -71,7 +71,7 @@ class DeviceClientMockTest : BaseTest() {
     fun pushDevice_returnsListOfPushDevices() = runTest {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successPush.json", HttpURLConnection.HTTP_OK)
-        val devices = deviceClient.pushDevices()
+        val devices = deviceClient.push.get()
         assert(devices.isNotEmpty())
 
         val sessionInfoReq = server.takeRequest()
@@ -93,7 +93,7 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = deviceClient.bindingDevices()
+        val devices = deviceClient.bound.get()
         assert(devices.isNotEmpty())
         assertThat(devices.size).isEqualTo(4)
         val sessionInfoReq = server.takeRequest()
@@ -116,7 +116,7 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successWebAuthn.json", HttpURLConnection.HTTP_OK)
 
-        val devices = deviceClient.webAuthnDevices()
+        val devices = deviceClient.webAuthn.get()
         assert(devices.isNotEmpty())
         val sessionInfoReq = server.takeRequest()
         val oathReq = server.takeRequest()
@@ -138,7 +138,7 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successDeviceProfile.json", HttpURLConnection.HTTP_OK)
 
-        val devices = deviceClient.profileDevices()
+        val devices = deviceClient.profile.get()
         assert(devices.isNotEmpty())
 
         val sessionInfoReq = server.takeRequest()
@@ -163,10 +163,10 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successUpdateDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = deviceClient.bindingDevices()
+        val devices = deviceClient.bound.get()
         assert(devices.isNotEmpty())
         assertThat(devices.size).isEqualTo(4)
-        deviceClient.update(devices[0])
+        deviceClient.bound.update(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -184,9 +184,9 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/successUpdateDeviceBinding.json", HttpURLConnection.HTTP_OK)
 
-        val devices = deviceClient.bindingDevices()
+        val devices = deviceClient.bound.get()
         assert(devices.isNotEmpty())
-        deviceClient.delete(devices[0])
+        deviceClient.bound.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -205,9 +205,9 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/accessDenied.json", HttpURLConnection.HTTP_UNAUTHORIZED)
 
-        val devices = deviceClient.bindingDevices()
+        val devices = deviceClient.bound.get()
         assert(devices.isNotEmpty())
-        deviceClient.delete(devices[0])
+        deviceClient.bound.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -227,9 +227,9 @@ class DeviceClientMockTest : BaseTest() {
         enqueue("/selfservice/sessionInfo.json", HttpURLConnection.HTTP_OK)
         enqueue("/selfservice/forbidden.json", HttpURLConnection.HTTP_UNAUTHORIZED)
 
-        val devices = deviceClient.bindingDevices()
+        val devices = deviceClient.bound.get()
         assert(devices.isNotEmpty())
-        deviceClient.delete(devices[0])
+        deviceClient.bound.delete(devices[0])
         val sessionInfoReq = server.takeRequest()
         val bindingReq = server.takeRequest()
         val sessionInfoReq2 = server.takeRequest()
@@ -247,7 +247,7 @@ class DeviceClientMockTest : BaseTest() {
     fun sessionExpired() = runTest {
         enqueue("/selfservice/accessDenied.json", HttpURLConnection.HTTP_UNAUTHORIZED)
         try {
-             deviceClient.bindingDevices()
+             deviceClient.bound.get()
         } catch (e: ApiException) {
             assertThat(e.statusCode).isEqualTo(HttpURLConnection.HTTP_UNAUTHORIZED)
             throw e

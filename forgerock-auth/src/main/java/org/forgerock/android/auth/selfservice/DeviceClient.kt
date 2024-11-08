@@ -11,9 +11,6 @@ import android.net.Uri
 import android.net.Uri.Builder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.serializer
@@ -33,112 +30,132 @@ private const val CONTENT_TYPE = "Content-Type"
 private const val APPLICATION_JSON = "application/json"
 
 /**
- * Interface defining the repository for user devices.
- */
-interface DeviceRepository {
-    /**
-     * Retrieves a list of Oath devices.
-     * @return A list of [OathDevice].
-     */
-    suspend fun oathDevices(): List<OathDevice>
-
-    /**
-     * Retrieves a list of Push devices.
-     * @return A list of [PushDevice].
-     */
-    suspend fun pushDevices(): List<PushDevice>
-
-    /**
-     * Retrieves a list of Binding devices.
-     * @return A list of [BindingDevice].
-     */
-    suspend fun bindingDevices(): List<BindingDevice>
-
-    /**
-     * Retrieves a list of WebAuthn devices.
-     * @return A list of [WebAuthnDevice].
-     */
-    suspend fun webAuthnDevices(): List<WebAuthnDevice>
-
-    /**
-     * Retrieves a list of Profile devices.
-     * @return A list of [ProfileDevice].
-     */
-    suspend fun profileDevices(): List<ProfileDevice>
-
-    /**
-     * Updates the given device.
-     * @param device The [Device] to update.
-     */
-    suspend fun update(device: Device)
-
-    /**
-     * Deletes the given device.
-     * @param device The [Device] to delete.
-     */
-    suspend fun delete(device: Device)
-}
-
-/**
- * Implementation of [DeviceRepository] for managing user devices.
  * @property server The server configuration.
  * @property ssoTokenBlock A suspend function to retrieve the SSO token.
  */
 class DeviceClient(
     private val server: ServerConfig = Config.getInstance().serverConfig,
     private val ssoTokenBlock: suspend () -> SSOToken = { ssoToken() }
-) : DeviceRepository {
+) {
 
     private val httpClient: OkHttpClient = OkHttpClientProvider.getInstance()
         .lookup(server)
 
-    /**
-     * Retrieves a list of Oath devices.
-     * @return A list of [OathDevice].
-     */
-    override suspend fun oathDevices(): List<OathDevice> = withContext(Dispatchers.IO) {
-        httpClient.newCall(request("devices/2fa/oath")).execute().use { response ->
-            get(response)
+    val oath: ImmutableDevice<OathDevice> by lazy {
+        object : ImmutableDevice<OathDevice> {
+            /**
+             * Retrieves a list of Oath devices.
+             * @return A list of [OathDevice].
+             */
+            override suspend fun get(): List<OathDevice> = withContext(Dispatchers.IO) {
+                httpClient.newCall(request("devices/2fa/oath")).execute().use { response ->
+                    get(response)
+                }
+            }
+
+            /**
+             * Deletes the specified Oath device.
+             * @param device The [OathDevice] to delete.
+             */
+            override suspend fun delete(device: OathDevice) = deleteDevice(device)
         }
     }
 
-    /**
-     * Retrieves a list of Push devices.
-     * @return A list of [PushDevice].
-     */
-    override suspend fun pushDevices(): List<PushDevice> = withContext(Dispatchers.IO) {
-        httpClient.newCall(request("devices/2fa/push")).execute().use { response ->
-            get(response)
+    val push: ImmutableDevice<PushDevice> by lazy {
+        object : ImmutableDevice<PushDevice> {
+            /**
+             * Retrieves a list of Push devices.
+             * @return A list of [PushDevice].
+             */
+            override suspend fun get(): List<PushDevice> = withContext(Dispatchers.IO) {
+                httpClient.newCall(request("devices/2fa/push")).execute().use { response ->
+                    get(response)
+                }
+            }
+
+            /**
+             * Deletes the specified Push device.
+             * @param device The [PushDevice] to delete.
+             */
+            override suspend fun delete(device: PushDevice) = deleteDevice(device)
         }
     }
 
-    /**
-     * Retrieves a list of Binding devices.
-     * @return A list of [BindingDevice].
-     */
-    override suspend fun bindingDevices(): List<BindingDevice> = withContext(Dispatchers.IO) {
-        httpClient.newCall(request("devices/2fa/binding")).execute().use { response ->
-            get(response)
+    val bound: MutableDevice<BoundDevice> by lazy {
+        object : MutableDevice<BoundDevice> {
+            /**
+             * Retrieves a list of Bound devices.
+             * @return A list of [BoundDevice].
+             */
+            override suspend fun get(): List<BoundDevice> = withContext(Dispatchers.IO) {
+                httpClient.newCall(request("devices/2fa/binding")).execute().use { response ->
+                    get(response)
+                }
+            }
+
+            /**
+             * Deletes the specified Bound device.
+             * @param device The [BoundDevice] to delete.
+             */
+            override suspend fun delete(device: BoundDevice) = deleteDevice(device)
+
+            /**
+             * Updates the specified Bound device.
+             * @param device The [BoundDevice] to update.
+             */
+            override suspend fun update(device: BoundDevice) = updateDevice(device)
         }
     }
 
-    /**
-     * Retrieves a list of WebAuthn devices.
-     * @return A list of [WebAuthnDevice].
-     */
-    override suspend fun webAuthnDevices(): List<WebAuthnDevice> = withContext(Dispatchers.IO) {
-        httpClient.newCall(request("devices/2fa/webauthn")).execute().use { response ->
-            get(response)
+    val profile: MutableDevice<ProfileDevice> by lazy {
+        object : MutableDevice<ProfileDevice> {
+            /**
+             * Retrieves a list of Profile devices.
+             * @return A list of [ProfileDevice].
+             */
+            override suspend fun get(): List<ProfileDevice> = withContext(Dispatchers.IO) {
+                httpClient.newCall(request("devices/profile")).execute().use { response ->
+                    get(response)
+                }
+            }
+
+            /**
+             * Deletes the specified Profile device.
+             * @param device The [ProfileDevice] to delete.
+             */
+            override suspend fun delete(device: ProfileDevice) = deleteDevice(device)
+
+            /**
+             * Updates the specified Profile device.
+             * @param device The [ProfileDevice] to update.
+             */
+            override suspend fun update(device: ProfileDevice) = updateDevice(device)
         }
     }
 
-    /**
-     * Retrieves a list of Profile devices.
-     * @return A list of [ProfileDevice].
-     */
-    override suspend fun profileDevices(): List<ProfileDevice> = withContext(Dispatchers.IO) {
-        httpClient.newCall(request("devices/profile")).execute().use { response ->
-            get(response)
+    val webAuthn: MutableDevice<WebAuthnDevice> by lazy {
+        object : MutableDevice<WebAuthnDevice> {
+            /**
+             * Retrieves a list of WebAuthn devices.
+             * @return A list of [WebAuthnDevice].
+             */
+            override suspend fun get(): List<WebAuthnDevice> = withContext(Dispatchers.IO) {
+                httpClient.newCall(request("devices/2fa/webauthn")).execute().use { response ->
+                    get(response)
+                }
+            }
+
+            /**
+             * Deletes the specified WebAuthn device.
+             * @param device The [WebAuthnDevice] to delete.
+             */
+            override suspend fun delete(device: WebAuthnDevice) = deleteDevice(device)
+
+            /**
+             * Updates the specified WebAuthn device.
+             * @param device The [WebAuthnDevice] to update.
+             */
+            override suspend fun update(device: WebAuthnDevice) = updateDevice(device)
         }
     }
 
@@ -247,7 +264,7 @@ class DeviceClient(
      * Updates the given device.
      * @param device The [Device] to update.
      */
-    override suspend fun update(device: Device) = withContext(Dispatchers.IO) {
+    private suspend fun updateDevice(device: Device) = withContext(Dispatchers.IO) {
         httpClient.newCall(putRequest(device)).execute().use { response ->
             put(response)
         }
@@ -257,132 +274,9 @@ class DeviceClient(
      * Deletes the given device.
      * @param device The [Device] to delete.
      */
-    override suspend fun delete(device: Device) = withContext(Dispatchers.IO) {
+    private suspend fun deleteDevice(device: Device) = withContext(Dispatchers.IO) {
         httpClient.newCall(deleteRequest(device)).execute().use { response ->
             put(response)
         }
     }
 }
-
-/**
- * Abstract class representing a device.
- */
-@Serializable
-sealed class Device {
-    abstract val id: String
-    abstract val deviceName: String
-    abstract val urlSuffix: String
-}
-
-/**
- * Data class representing a Binding device.
- * @property id The ID of the device.
- * @property deviceName The name of the device.
- * @property deviceId The device ID.
- * @property uuid The UUID of the device.
- * @property createdDate The creation date of the device.
- * @property lastAccessDate The last access date of the device.
- */
-@Serializable
-data class BindingDevice(
-    @SerialName("_id")
-    override val id: String,
-    override var deviceName: String,
-    val deviceId: String,
-    val uuid: String,
-    val createdDate: Long,
-    val lastAccessDate: Long) : Device() {
-    override var urlSuffix: String = "devices/2fa/binding"
-}
-
-/**
- * Data class representing an Oath device.
- * @property id The ID of the device.
- * @property deviceName The name of the device.
- * @property uuid The UUID of the device.
- * @property createdDate The creation date of the device.
- * @property lastAccessDate The last access date of the device.
- */
-@Serializable
-data class OathDevice(
-    @SerialName("_id")
-    override val id: String,
-    override val deviceName: String,
-    val uuid: String,
-    val createdDate: Long,
-    val lastAccessDate: Long,
-) : Device() {
-    override var urlSuffix: String = "devices/2fa/oath"
-}
-
-/**
- * Data class representing a Push device.
- * @property id The ID of the device.
- * @property deviceName The name of the device.
- * @property uuid The UUID of the device.
- * @property createdDate The creation date of the device.
- * @property lastAccessDate The last access date of the device.
- */
-@Serializable
-data class PushDevice(
-    @SerialName("_id")
-    override val id: String,
-    override val deviceName: String,
-    val uuid: String,
-    val createdDate: Long,
-    val lastAccessDate: Long,
-) : Device() {
-    override var urlSuffix: String = "devices/2fa/push"
-}
-
-/**
- * Data class representing a WebAuthn device.
- * @property id The ID of the device.
- * @property deviceName The name of the device.
- * @property uuid The UUID of the device.
- * @property credentialId The credential ID of the device.
- * @property createdDate The creation date of the device.
- * @property lastAccessDate The last access date of the device.
- */
-@Serializable
-data class WebAuthnDevice(
-    @SerialName("_id")
-    override val id: String,
-    override var deviceName: String,
-    val uuid: String,
-    val credentialId: String,
-    val createdDate: Long,
-    val lastAccessDate: Long,
-) : Device() {
-    override var urlSuffix: String = "devices/2fa/webauthn"
-}
-
-/**
- * Data class representing a Profile device.
- * @property id The ID of the device.
- * @property deviceName The name of the device (alias).
- * @property identifier The identifier of the device.
- * @property metadata The metadata of the device.
- * @property location The location of the device.
- * @property lastSelectedDate The last selected date of the device.
- */
-@Serializable
-data class ProfileDevice(
-    @SerialName("_id")
-    override val id: String,
-    @SerialName("alias")
-    override var deviceName: String, //alias
-    val identifier: String,
-    val metadata: JsonObject,
-    val location: Location? = null,
-    val lastSelectedDate: Long) : Device() {
-    override var urlSuffix: String = "devices/profile"
-}
-
-/**
- * Data class representing a location.
- * @property latitude The latitude of the location.
- * @property longitude The longitude of the location.
- */
-@Serializable
-data class Location(val latitude: Double, val longitude: Double)
