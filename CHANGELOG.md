@@ -1,6 +1,7 @@
 ## [4.X.X]
 #### Added
 - Self device management [SDKS-3408]
+- Support Sign out with ID Token for PingOne Platform [SDKS-3423]
 
 ## [4.6.0]
 #### Added

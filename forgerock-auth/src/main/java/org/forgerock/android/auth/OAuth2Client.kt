@@ -218,6 +218,7 @@ class OAuth2Client(
         try {
             request = Request.Builder()
                 .url(getEndSessionUrl(clientId, idToken))
+                .header("Accept", "application/json")
                 .get()
                 .tag(END_SESSION)
                 .build()
