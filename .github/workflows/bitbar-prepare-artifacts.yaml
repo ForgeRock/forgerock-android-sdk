@@ -50,7 +50,7 @@ jobs:
       - name: Sign app-debug-androidTest.apk
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: samples/app/build/outputs/apk/androidTest/debug
+          releaseDirectory: e2e/app/build/outputs/apk/androidTest/debug
           signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
           alias: ${{ secrets.SIGNING_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
@@ -76,7 +76,7 @@ jobs:
         if: success()
         with:
           name: app-debug-androidTest-signed.apk
-          path: samples/app/build/outputs/apk/androidTest/debug/app-debug-androidTest-signed.apk
+          path: e2e/app/build/outputs/apk/androidTest/debug/app-debug-androidTest-signed.apk
 
       - name: Publish forgerock-integration-tests-debug-androidTest-signed.apk
         uses: actions/upload-artifact@v3

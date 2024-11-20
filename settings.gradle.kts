@@ -25,25 +25,8 @@ include(":forgerock-auth-ui")
 include(":forgerock-core")
 include(":forgerock-authenticator")
 include(":ping-protect")
-
-include(":auth")
-project(":auth").projectDir = File("samples/auth")
-
-include(":authenticator")
-project(":authenticator").projectDir = File("samples/authenticator")
-
-/*
-include ':pebblebank'
-project(':pebblebank').projectDir = new File('demo/pebblebank')
-*/
-
-include(":quickstart")
-project(":quickstart").projectDir = File("samples/quickstart")
-
-include(":kotlin")
-project(":kotlin").projectDir = File("samples/kotlin")
+include(":forgerock-integration-tests")
 
 include(":app")
-project(":app").projectDir = File("samples/app")
+project(":app").projectDir = File("e2e/app")
 
-include(":forgerock-integration-tests")
