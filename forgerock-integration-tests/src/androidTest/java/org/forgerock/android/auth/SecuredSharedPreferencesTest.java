@@ -8,7 +8,6 @@
 package org.forgerock.android.auth;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -42,7 +41,7 @@ public class SecuredSharedPreferencesTest {
     private static final String TEST_ALIAS = "TestAlias";
 
     private SharedPreferences sharedPreferences;
-    private Context context = ApplicationProvider.getApplicationContext();
+    private final Context context = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUp() {
@@ -59,37 +58,24 @@ public class SecuredSharedPreferencesTest {
         String filePath = context.getFilesDir().getParent() + "/shared_prefs/test.xml";
         File deletePrefFile = new File(filePath);
         deletePrefFile.delete();
-        AndroidMEncryptor.Companion.getKeyReferenceCache().set(null);
     }
-
-    @Test
-    public void testCache() {
-        AndroidMEncryptor.Companion.getKeyReferenceCache().set(null);
-        sharedPreferences.edit().putString("Test", "Value").commit();
-        assertEquals("Value", sharedPreferences.getString("Test", null));
-        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
-    }
-
 
     @Test
     public void testPutString() {
         sharedPreferences.edit().putString("Test", "Value").commit();
         assertEquals("Value", sharedPreferences.getString("Test", null));
-        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
     public void testPutInt() {
         sharedPreferences.edit().putInt("Test", 100).commit();
         assertEquals(100, sharedPreferences.getInt("Test", 0));
-        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
     public void testPutFloat() {
         sharedPreferences.edit().putFloat("Test", 1.5f).commit();
         assertEquals(1.5f, sharedPreferences.getFloat("Test", 1.5f), 0);
-        assertNotNull(AndroidMEncryptor.Companion.getKeyReferenceCache().get());
     }
 
     @Test
