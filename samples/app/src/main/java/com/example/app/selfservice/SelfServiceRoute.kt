@@ -49,8 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.app.Alert
 import kotlinx.serialization.json.Json
-import org.forgerock.android.auth.Logger
-import org.forgerock.android.auth.selfservice.BindingDevice
+import org.forgerock.android.auth.selfservice.BoundDevice
 import org.forgerock.android.auth.selfservice.Device
 import org.forgerock.android.auth.selfservice.ProfileDevice
 import org.forgerock.android.auth.selfservice.WebAuthnDevice
@@ -170,7 +169,7 @@ fun SelfServiceRoute(selfServiceViewModel: SelfServiceViewModel) {
                                 showUpdateConfirmation = false
                                 selected?.let {
                                     if (it is WebAuthnDevice) it.deviceName = deviceName
-                                    if (it is BindingDevice) it.deviceName = deviceName
+                                    if (it is BoundDevice) it.deviceName = deviceName
                                     if (it is ProfileDevice) it.deviceName = deviceName
                                     selfServiceViewModel.update(it)
                                     deviceName = ""
@@ -248,7 +247,7 @@ private fun Device(device: Device,
         }
         Row(modifier = Modifier.padding(4.dp)) {
             Spacer(modifier = Modifier.weight(1f))
-            if (device is WebAuthnDevice || device is BindingDevice || device is ProfileDevice) {
+            if (device is WebAuthnDevice || device is BoundDevice || device is ProfileDevice) {
                 Column(modifier = Modifier.padding(2.dp)) {
                     Button(
                         onClick = {

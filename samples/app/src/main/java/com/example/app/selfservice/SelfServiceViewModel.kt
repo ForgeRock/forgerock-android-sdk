@@ -13,8 +13,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import org.forgerock.android.auth.selfservice.BoundDevice
 import org.forgerock.android.auth.selfservice.Device
 import org.forgerock.android.auth.selfservice.DeviceClient
+import org.forgerock.android.auth.selfservice.OathDevice
+import org.forgerock.android.auth.selfservice.ProfileDevice
+import org.forgerock.android.auth.selfservice.PushDevice
+import org.forgerock.android.auth.selfservice.WebAuthnDevice
 
 class SelfServiceViewModel : ViewModel() {
 
@@ -27,7 +32,14 @@ class SelfServiceViewModel : ViewModel() {
     fun delete(device: Device) {
         viewModelScope.launch {
             try {
-                repo.delete(device)
+                when (device) {
+                    is OathDevice -> repo.oath.delete(device)
+                    is PushDevice -> repo.push.delete(device)
+                    is WebAuthnDevice -> repo.webAuthn.update(device)
+                    is BoundDevice -> repo.bound.update(device)
+                    is ProfileDevice -> repo.profile.update(device)
+                    else -> throw IllegalArgumentException("Unsupported Device Type")
+                }
                 fetch(selectedType)
             } catch (e: Exception) {
                 yield()
@@ -40,7 +52,12 @@ class SelfServiceViewModel : ViewModel() {
     fun update(device: Device) {
         viewModelScope.launch {
             try {
-                repo.update(device)
+                when (device) {
+                    is WebAuthnDevice -> repo.webAuthn.update(device)
+                    is BoundDevice -> repo.bound.update(device)
+                    is ProfileDevice -> repo.profile.update(device)
+                    else -> throw IllegalArgumentException("Unsupported Device Type")
+                }
                 fetch(selectedType)
             } catch (e: Exception) {
                 yield()
@@ -56,11 +73,11 @@ class SelfServiceViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 selectedDevices = when (type) {
-                    "Oath" -> repo.oathDevices()
-                    "Push" -> repo.pushDevices()
-                    "WebAuthn" -> repo.webAuthnDevices()
-                    "Binding" -> repo.bindingDevices()
-                    "Profile" -> repo.profileDevices()
+                    "Oath" -> repo.oath.get()
+                    "Push" -> repo.push.get()
+                    "WebAuthn" -> repo.webAuthn.get()
+                    "Binding" -> repo.bound.get()
+                    "Profile" -> repo.profile.get()
                     else -> emptyList()
                 }
                 state.update { it.copy(devices = selectedDevices, throwable = null) }
