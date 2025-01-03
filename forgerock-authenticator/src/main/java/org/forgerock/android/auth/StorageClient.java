@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -104,6 +104,13 @@ public interface StorageClient {
      * @return The PushNotification object.
      */
     PushNotification getNotification(String notificationId);
+
+    /**
+     * Get the PushNotification object with its messageId
+     * @param messageId The PushNotification messageId
+     * @return The PushNotification object.
+     */
+    PushNotification getNotificationByMessageId(String messageId);
 
     /**
      * Whether the storage system currently contains any data.

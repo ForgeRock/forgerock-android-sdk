@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Calendar;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
@@ -287,6 +288,22 @@ public class NotificationFactoryTest extends FRABaseTest {
             assertTrue(e instanceof InvalidNotificationException);
             assertTrue(e.getLocalizedMessage().equals("Unable to store Push Notification on the target stored system."));
         }
+    }
+
+    @Test
+    public void testShouldReturnExistingPushNotification() throws Exception {
+        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, generateBaseMessage());
+        PushNotification storedPushNotification = createPushNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+                AMLB_COOKIE, Calendar.getInstance(), TTL);
+        given(storageClient.getNotificationByMessageId(MESSAGE_ID)).willReturn(storedPushNotification);
+
+        PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
+
+        assertNotNull(pushNotification);
+        assertEquals(MESSAGE_ID, pushNotification.getMessageId());
+        assertEquals(CHALLENGE, pushNotification.getChallenge());
+        assertEquals(MECHANISM_UID, pushNotification.getMechanismUID());
+        assertEquals(TTL, pushNotification.getTtl());
     }
 
 }
