@@ -7,6 +7,7 @@
 
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -72,13 +73,21 @@ subprojects {
 
     apply(plugin = "org.jetbrains.dokka")
 
-    tasks.dokkaHtml {
-        val map = mutableMapOf<String, String>()
-        map["org.jetbrains.dokka.base.DokkaBase"] = """{
-                    "customStyleSheets": ["$customCSSFile"],
-                    "templatesDir": "$customTemplatesFolder"
-                }"""
-        pluginsMapConfiguration.set(map)
+    // configure all format tasks at once
+    tasks.withType<DokkaTaskPartial>().configureEach {
+        val dokkaBaseConfiguration = """
+        {
+          "customStyleSheets": ["$customCSSFile"],
+          "templatesDir": "$customTemplatesFolder"
+        }
+        """
+        pluginsMapConfiguration.set(
+            mapOf(
+                // fully qualified plugin name to json configuration
+                "org.jetbrains.dokka.base.DokkaBase" to dokkaBaseConfiguration
+            )
+        )
+
         moduleVersion.set(project.property("VERSION") as? String)
         outputDirectory.set(file("build/html/${project.name}-dokka"))
 
@@ -99,6 +108,33 @@ subprojects {
         }
     }
 
+//    tasks.dokkaHtml {
+//        val map = mutableMapOf<String, String>()
+//        map["org.jetbrains.dokka.base.DokkaBase"] = """{
+//                    "customStyleSheets": ["$customCSSFile"],
+//                    "templatesDir": "$customTemplatesFolder"
+//                }"""
+//        pluginsMapConfiguration.set(map)
+//        moduleVersion.set(project.property("VERSION") as? String)
+//        outputDirectory.set(file("build/html/${project.name}-dokka"))
+//
+//        dokkaSourceSets.configureEach {
+//            documentedVisibilities.set(
+//                setOf(
+//                    Visibility.PUBLIC,
+//                    Visibility.PROTECTED,
+//                    Visibility.PRIVATE,
+//                    Visibility.INTERNAL,
+//                    Visibility.PACKAGE
+//                )
+//            )
+//            perPackageOption {
+//                matchingRegex.set(".*internal.*")
+//                suppress.set(true)
+//            }
+//        }
+//    }
+
 
     tasks.withType<Test>().configureEach {
         jvmArgs = jvmArgs?.plus("--add-opens=java.base/java.lang=ALL-UNNAMED") as MutableList<String>
@@ -111,15 +147,21 @@ subprojects {
 afterEvaluate {
 
     tasks.dokkaHtmlMultiModule {
-        moduleName.set("ForgeRock SDK for Android")
+        moduleName.set("Ping SDK for Android")
         moduleVersion.set(project.property("VERSION") as? String)
         outputDirectory.set(file("build/api-reference/html"))
-        val map = mutableMapOf<String, String>()
-        map["org.jetbrains.dokka.base.DokkaBase"] = """{
-                    "customStyleSheets": ["$customCSSFile"],
-                    "templatesDir": "$customTemplatesFolder"
-                }"""
-        pluginsMapConfiguration.set(map)
+        val dokkaBaseConfiguration = """
+        {
+          "customStyleSheets": ["$customCSSFile"],
+          "templatesDir": "$customTemplatesFolder"
+        }
+        """
+        pluginsMapConfiguration.set(
+            mapOf(
+                // fully qualified plugin name to json configuration
+                "org.jetbrains.dokka.base.DokkaBase" to dokkaBaseConfiguration
+            )
+        )
     }
 
 
@@ -138,9 +180,9 @@ ossIndexAudit {
     excludeVulnerabilityIds = setOf("CVE-2020-15250")
 }
 
-tasks.register<Delete>("clean").configure {
-    delete(rootProject.buildDir)
-}
+//tasks.register<Delete>("clean").configure {
+//    delete(rootProject.buildDir)
+//}
 
 // Need to be removed this in future
 project.ext.set("versionName", project.property("VERSION") as? String ?: "")
