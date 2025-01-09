@@ -1,5 +1,5 @@
-<#-- Copyright 2023 ForgeRock AS. All Rights Reserved. -->
+<#-- Copyright 2023-2025 Ping Identity Corp. All Rights Reserved. -->
 <#macro display>
-    <title>ForgeRock SDK for Android - ${pageName}</title>
-    <link rel="icon" type="image/x-icon" href="https://cdn.forgerock.com/favicon.ico">
+    <title>${pageName} | Ping SDK for Android</title>
+    <link rel="icon" href="https://docs.pingidentity.com/favicon.ico" type="image/x-icon">
 </#macro>

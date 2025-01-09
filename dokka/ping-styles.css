@@ -1,0 +1,173 @@
+/* Copyright 2023-2025 Ping Identity Corp. All Rights Reserved. */
+
+#container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: white;
+    padding-top: 72px;
+}
+
+.main-col {
+    flex-grow: 1;
+}
+
+.main-grid {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+#leftColumn {
+    width: 20% !important;
+    min-width: 300px;
+    background-color: white;
+    height: calc(100vh - 135px);
+    overflow-x: scroll;
+}
+
+#titlePanel {
+    border-bottom: none;
+    padding: 1.2em 1em 0 0;
+}
+
+.toc-version-dropdown .dropdown-toggle:after {
+    display: none !important;
+}
+
+#sideMenu {
+    font-size: 0.9em;
+    line-height: 1.4em;
+    padding-top: 0px !important;
+    padding-right: 1.2rem;
+}
+
+.sideMenuPart {
+    padding-left: 1rem;
+    box-sizing: border-box;
+}
+
+.sideMenuPart a {
+    color: #23282e;
+    padding: 6px 8px 6px 1rem;
+}
+
+.sideMenuPart > .overview:before {
+    width: 100%;
+    z-index: -1;
+}
+
+.sideMenuPart[data-active] > .overview:before {
+    background: var(--forgerock-light-blue) !important;
+    z-index: 0;
+}
+
+.sideMenuPart > .overview {
+    padding: 0.2em 0;
+}
+
+span.navButtonContent {
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sideMenuPart > .overview .navButtonContent::before {
+    content: "chevron_right";
+    font-family: "Material Icons Outlined",sans-serif;
+    mask: none;
+    background: none;
+    background-color: transparent !important;
+}
+
+.sideMenuPart[data-active] > .overview {
+    background-color: rgb(234.3,241.32,250.95);
+    color: #1967d2;
+    border-radius: 0.2rem;
+}
+
+.sideMenuPart[data-active] > .overview > a {
+    z-index: 1;
+    color: #1967d2;
+}
+
+#content-container {
+  flex-grow: 1;
+}
+
+.main-content {
+    background-color: white;
+    line-height: var(--doc-line-height);
+    margin-bottom: 2em;
+    padding-bottom: var(--bottom-spacing);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    width: 100%;
+    z-index: 0;
+}
+
+h1.cover {
+    font-size: 2.109375rem;
+    font-weight: 600;
+    margin: .5rem 0 1.5rem 0;
+    letter-spacing: normal !important;
+    color: #23282e;
+    padding: 0;
+}
+
+h2 {
+    font-weight: normal;
+}
+
+#searchBar {
+    display: inline-block;
+    position: fixed;
+    right: 1.6em;
+    top: calc(var(--top-navigation-height) + 1.6em);
+}
+
+.search button {
+    margin-top: 0px !important;
+    border-radius: 6px;
+    padding: 8px 3px 0 8px;
+    background: var(--forgerock-green)
+}
+
+.breadcrumbs, .breadcrumbs a, .breadcrumbs a:hover {
+    margin-top: 2rem;
+    color: #5e6d82;
+    overflow-wrap: break-word;
+    font-weight: 400;
+    font-size: 0.825rem;
+}
+
+.breadcrumbs .delimiter {
+    margin: auto 0.5rem;
+}
+
+.breadcrumbs a:not([data-name]) {
+    padding-bottom: 2px;
+    border-bottom: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    transition: color .1s, border-color .1s;
+}
+
+.tabs-section-body > div {
+    margin-top: 12px;
+    display: none;
+}
+
+.tabs-section-body > div[data-active=""] {
+    display: block;
+}
+
+.symbol:not(.token), code {
+    background-color: #f5f8fa !important;
+}
+
+

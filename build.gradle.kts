@@ -11,8 +11,7 @@ import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import java.io.FileInputStream
 import java.util.Properties
 
-val customCSSFile = "$projectDir/dokka/fr-backstage-styles.css"
-val customLogoFile = "$projectDir/dokka/logo-icon.svg"
+val customCSSFile = "$projectDir/dokka/ping-styles.css"
 val customTemplatesFolder = file("$projectDir/dokka/templates")
 
 buildscript {
