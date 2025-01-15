@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -83,6 +83,13 @@ class NotificationFactory {
         String customPayload;
         String numbersChallenge;
         String contextInfo;
+
+        // Check if notification with given messageId already exists
+        pushNotification = storageClient.getNotificationByMessageId(messageId);
+        if (pushNotification != null) {
+            Logger.debug(TAG, "PushNotification object with messageId %s already exists.", messageId);
+            return pushNotification;
+        }
 
         // Reconstruct JWT
         try {

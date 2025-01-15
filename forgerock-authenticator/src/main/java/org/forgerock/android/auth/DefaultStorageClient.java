@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -207,6 +207,17 @@ class DefaultStorageClient implements StorageClient {
     public PushNotification getNotification(String notificationId) {
         String json = notificationData.getString(notificationId, null);
         return PushNotification.deserialize(json);
+    }
+
+    @Override
+    public PushNotification getNotificationByMessageId(String messageId) {
+        List<PushNotification> allPushNotifications = getAllNotifications();
+        for(PushNotification pushNotification : allPushNotifications){
+            if(pushNotification.getMessageId().equals(messageId)){
+                return pushNotification;
+            }
+        }
+        return null;
     }
 
     @Override

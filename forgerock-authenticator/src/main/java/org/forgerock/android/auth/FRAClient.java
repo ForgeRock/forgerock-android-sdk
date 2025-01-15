@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -281,6 +281,15 @@ public class FRAClient {
      */
     public PushNotification getNotification(@NonNull String notificationId) {
         return this.authenticatorManager.getNotification(notificationId);
+    }
+
+    /**
+     * Get the PushNotification object with its messageId.
+     * @param messageId The message unique ID
+     * @return The PushNotification object
+     */
+    public PushNotification getNotificationByMessageId(@NonNull String messageId) {
+        return this.authenticatorManager.getNotificationByMessageId(messageId);
     }
 
     /**
