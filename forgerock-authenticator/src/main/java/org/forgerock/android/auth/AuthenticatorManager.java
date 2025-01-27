@@ -23,6 +23,7 @@ import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -268,6 +269,42 @@ class AuthenticatorManager {
                 throw new AuthenticatorException("The SDK was initialized with a different deviceToken.");
             }
         }
+    }
+
+    void updateDeviceToken(String newDeviceToken) {
+        this.deviceToken = newDeviceToken;
+        this.pushFactory = new PushFactory(context, storageClient, newDeviceToken);
+        this.notificationFactory = new NotificationFactory(storageClient);
+
+        // Get all push mechanisms and update device token
+        List<PushMechanism> pushMechanismList = getAllPushMechanisms();
+        for (PushMechanism pushMechanism : pushMechanismList) {
+            PushResponder.getInstance(storageClient).updateDeviceToken(pushMechanism, newDeviceToken, new FRAListener<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    Logger.debug(TAG, "FCM device token updated successfully.");
+                }
+
+                @Override
+                public void onException(Exception e) {
+                    Logger.warn(TAG, "Error updating FCM device token.", e);
+                }
+            });
+        }
+    }
+
+    private List<PushMechanism> getAllPushMechanisms() {
+        List<PushMechanism> pushMechanismList = new ArrayList<>();
+        List<Account> accountList = getAllAccounts();
+        for (Account account : accountList) {
+            List<Mechanism> mechanismList = account.getMechanisms();
+            for (Mechanism mechanism : mechanismList) {
+                if(mechanism.getType().equals(Mechanism.PUSH)) {
+                    pushMechanismList.add((PushMechanism) mechanism);
+                }
+            }
+        }
+        return pushMechanismList;
     }
 
     PushNotification handleMessage(RemoteMessage message)

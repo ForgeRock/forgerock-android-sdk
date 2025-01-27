@@ -329,15 +329,23 @@ public class FRAClient {
     /**
      * This method allows to register the FCM device token to handle Push mechanisms after the
      * SDK initialization.
-     * Note: This method cannot be used to handle FCM device token updates received on
-     * {@link FirebaseMessagingService#onNewToken}. Currently, AM does not accept deviceToken updates
-     * from the SDK. If any {@link PushMechanism} was registered with the previous token, this
-     * mechanism needs to be removed and registered again using this new deviceToken.
+     * Note: This method cannot be used to handle FCM device token updates. Instead, use the
+     * method {@link #updateDeviceToken}
      * @param deviceToken the FCM device token
      * @throws AuthenticatorException if the SDK was already initialized with a device token
      */
     public void registerForRemoteNotifications(@NonNull String deviceToken) throws AuthenticatorException {
         this.authenticatorManager.registerForRemoteNotifications(deviceToken);
+    }
+
+    /**
+     * This method allows to update the FCM device token for all registered Push mechanisms.
+     * Use this method to handle device token updates received on {@link FirebaseMessagingService#onNewToken}.
+     *
+     * @param deviceToken the new FCM device token
+     */
+    public void updateDeviceToken(@NonNull String deviceToken) {
+        this.authenticatorManager.updateDeviceToken(deviceToken);
     }
 
     /** No Public methods **/

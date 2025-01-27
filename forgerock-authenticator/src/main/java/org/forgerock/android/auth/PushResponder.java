@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.PushMechanismException;
+import org.forgerock.android.auth.util.RequestBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +67,8 @@ class PushResponder {
     private static final String RESPONSE_KEY = "response";
     private static final String DENY_KEY = "deny";
     private static final String CHALLENGE_RESPONSE_KEY = "challengeResponse";
+    private static final String MESSAGE_ID_KEY = "messageId";
+    private static final String MECHANISM_UID_KEY = "mechanismUid";
 
     private static final int TIMEOUT = 30;
 
@@ -233,6 +236,67 @@ class PushResponder {
     }
 
     /**
+     * Used to update the device token
+     *
+     * @param pushMechanism The push mechanism
+     * @param token The device token
+     * @param listener Listener for receiving the HTTP call response code.
+     */
+    void updateDeviceToken(@NonNull PushMechanism pushMechanism, @NonNull String token, final FRAListener<Void> listener) {
+        // Get Update endpoint
+        URL url = null;
+        try {
+            url = new URL(pushMechanism.getUpdateEndpoint());
+
+            // Keys
+            Map<String, String> keys = new HashMap<>();
+            keys.put(MECHANISM_UID_KEY, pushMechanism.getMechanismUID());
+
+            // Prepare payload
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("deviceId", token);
+            payload.put("deviceType", "android");
+            payload.put("communicationType", "gcm");
+
+            // Build request
+            OkHttpClient okHttpClient = getOkHttpClient(url);
+            Request request = new RequestBuilder.Builder()
+                    .url(url)
+                    .keys(keys)
+                    .data(payload)
+                    .action(Action.PUSH_UPDATE)
+                    .build();
+
+            // Invoke URL
+            okHttpClient.newCall(request).enqueue(new okhttp3.Callback() {
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) {
+                    Logger.debug(TAG, "Response from server: \n" + response.toString());
+                    if(response.code() == 200) {
+                        listener.onSuccess(null);
+                    } else {
+                        listener.onException(new PushMechanismException("Communication with " +
+                                "server returned " + response.code() + " code."));
+                    }
+                    response.close();
+                }
+
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Logger.warn(TAG, "Failure on connecting to the server: \n" + call.request().toString());
+                    listener.onException(new PushMechanismException("Network error while processing the Push " +
+                            "Update request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
+                }
+            });
+        } catch (MalformedURLException | JSONException | JOSEException e) {
+            listener.onException(new PushMechanismException("Error processing the Push " +
+                    "Device Token Update request.\n Error Detail: \n" + e.getLocalizedMessage(), e));
+        }
+
+
+    }
+
+    /**
      * Used to respond an authentication request from a given message
      *
      * @param pushNotification The push notification object.
@@ -329,65 +393,30 @@ class PushResponder {
     /**
      * Build a request
      *
-     * @param url   the endpoint url
+     * @param url the endpoint url
      * @param amlbCookie the AM load balance cookie
      * @return the request object
      */
     private Request buildRequest(URL url, String amlbCookie, String base64Secret,
                                  String messageId, Map<String, Object> data, String action)
             throws IllegalArgumentException, JOSEException, JSONException {
-        Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(url.toString());
 
-        // Add header properties to the request
-        requestBuilder.addHeader("Content-Type", "application/json");
-        requestBuilder.addHeader("Accept-API-Version", "resource=1.0, protocol=1.0");
+        RequestBuilder.Builder requestBuilder = new RequestBuilder.Builder();
+        requestBuilder.url(url);
+
+        Map<String, String> keys = new HashMap<>();
+        keys.put(MESSAGE_ID_KEY, messageId);
+        requestBuilder.keys(keys);
+
+        requestBuilder.data(data);
+        requestBuilder.base64Secret(base64Secret);
+        requestBuilder.action(action);
+
         if (amlbCookie != null) {
-            requestBuilder.addHeader("Cookie", amlbCookie);
+            requestBuilder.amlbCookie(amlbCookie);
         }
-
-        // Add body parameters to the request
-        JSONObject message = new JSONObject();
-        message.put("messageId", messageId);
-        message.put("jwt", generateJwt(base64Secret, data));
-        RequestBody body = RequestBody.create(message.toString(), MediaType.parse("application/json; charset=utf-8"));
-        requestBuilder.post(body);
-        requestBuilder.tag(new Action(action));
 
         return requestBuilder.build();
-    }
-
-    /**
-     * Sign the payload with JWT
-     */
-    private static String generateJwt(String base64Secret, Map<String, Object> data)
-            throws IllegalArgumentException, JOSEException {
-        // Check shared secret
-        if(base64Secret == null || base64Secret.length() == 0) {
-            Logger.debug(TAG, "Error generating JWT data. Secret is empty or null.");
-            throw new IllegalArgumentException("Passed empty secret");
-        }
-
-        // Prepare JWT with claims
-        JWTClaimsSet.Builder claimBuilder = new JWTClaimsSet.Builder();
-        for (String key : data.keySet()) {
-            claimBuilder.claim(key, data.get(key));
-        }
-
-        // Apply the HMAC protection
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
-                .type(JOSEObjectType.JWT)
-                .build();
-
-        SignedJWT signedJWT = new SignedJWT(header, claimBuilder.build());
-
-        // Create HMAC signer
-        byte[] secret = Base64.decode(base64Secret, Base64.NO_WRAP);
-        JWSSigner signer = new MACSigner(secret);
-
-        // Sign JWT
-        signedJWT.sign(signer);
-        return signedJWT.serialize();
     }
 
     private Map<String, Object> getAuthenticationPayload(PushNotification pushNotification)

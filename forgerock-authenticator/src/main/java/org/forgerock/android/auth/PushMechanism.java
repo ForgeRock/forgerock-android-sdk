@@ -64,6 +64,14 @@ public class PushMechanism extends Mechanism {
     }
 
     /**
+     * The update URL for Push mechanism.
+     * @return String representing the update URL
+     */
+    String getUpdateEndpoint() {
+        return registrationEndpoint.replace("action=register", "action=update");
+    }
+
+    /**
      * Get all of the notifications that belong to this Push mechanism.
      * @return The list of notifications.
      */
