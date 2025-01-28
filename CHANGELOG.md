@@ -1,7 +1,10 @@
-## [4.X.X]
+## [4.7.0]
 #### Added
-- Self device management [SDKS-3408]
-- Support Sign out with ID Token for PingOne Platform [SDKS-3423]
+- Support for Self-Service [SDKS-3408]
+- Support for Sign-out with ID Token in the PingOne Platform [SDKS-3423]
+
+#### Fixed
+- Prevent duplicate PUSH notifications in the Authenticator module [SDKS-3533]
 
 ## [4.6.0]
 #### Added
