@@ -26,7 +26,7 @@ buildscript {
 plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.sonatype.gradle.plugins.scan") version "2.4.0"
-    id("org.jetbrains.dokka") version "1.9.10"
+    id("org.jetbrains.dokka") version "2.0.0"
     id("com.android.application") version "8.6.0" apply false
     id("com.android.library") version "8.6.0" apply false
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
@@ -47,9 +47,9 @@ allprojects {
 
         resolutionStrategy {
             // Due to vulnerability [CVE-2022-40152] from dokka project.
-            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5")
-            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.5")
-            force("com.fasterxml.jackson.core:jackson-databind:2.13.5")
+            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
+            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.0")
+            force("com.fasterxml.jackson.core:jackson-databind:2.15.0")
             // Junit test project
             force("junit:junit:4.13.2")
             //Due to Vulnerability [CVE-2022-2390]: CWE-471 The product does not properly
