@@ -41,12 +41,12 @@ jobs:
     steps:
       # Get the test artifacts prepared in previous step
       - name: Get the app-debug-androidTest.apk BitBar artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-debug-androidTest-signed.apk
 
       - name: Get the forgerock-integration-tests-debug-androidTest.apk BitBar artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: forgerock-integration-tests-debug-androidTest-signed.apk
 
