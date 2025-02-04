@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -112,7 +112,7 @@ class DefaultTokenManager implements TokenManager {
 
             if (verifier != null && !verifier.isValid(accessToken)) {
                 //This can run in the background.
-                revoke(new FRListener<Void>() {
+                revokeAndEndSession(new FRListener<>() {
                     @Override
                     public void onSuccess(Void result) {
                         //Success revoke, but we telling caller that, no Access Token is available.
@@ -276,6 +276,26 @@ class DefaultTokenManager implements TokenManager {
 
     @Override
     public void revokeAndEndSession(Supplier<AppAuthConfiguration> appAuthConfiguration, FRListener<Void> listener) {
+        revokeAndEndSession((accessToken, l) -> {
+                    if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
+                        oAuth2Client.endSessionWithBrowser(accessToken.getIdToken(), oAuth2Client, appAuthConfiguration.get(), l);
+                    } else {
+                        oAuth2Client.endSession(accessToken.getIdToken(), l);
+                    }
+                },
+                listener);
+    }
+
+    @Override
+    public void revokeAndEndSession(FRListener<Void> listener) {
+        revokeAndEndSession((accessToken, l) -> {
+                    oAuth2Client.endSession(accessToken.getIdToken(), l);
+                },
+                listener);
+    }
+
+
+    private void revokeAndEndSession(BiConsumer<AccessToken, FRListener<Void>> endSessionBlock, FRListener<Void> listener) {
 
         AccessToken accessToken = getAccessTokenLocally();
         //No matter success revoke or not, clear the token locally.
@@ -315,15 +335,12 @@ class DefaultTokenManager implements TokenManager {
                 }
                 //getSessionToken return null when using centralize login
                 if (accessToken.getSessionToken() == null && isNotEmpty(accessToken.getIdToken())) {
-                    if (StringUtils.isNotEmpty(oAuth2Client.getSignOutRedirectUri())) {
-                        oAuth2Client.endSessionWithBrowser(accessToken.getIdToken(), oAuth2Client, appAuthConfiguration.get(), l);
-                    } else {
-                        oAuth2Client.endSession(accessToken.getIdToken(), l);
-                    }
+                    endSessionBlock.accept(accessToken, l);
                     return true;
                 }
                 return false;
             }
         });
     }
+
 }
