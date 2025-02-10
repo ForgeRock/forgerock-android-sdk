@@ -1,3 +1,13 @@
+## [4.7.0]
+#### Added
+- A fallback mechanism that uses an asymmetric key if symmetric key generation in the Android Keystore fails [SDKS-3467]
+- Support for Self-Service [SDKS-3408]
+- Support for Sign-out with ID Token in the PingOne Platform [SDKS-3423]
+
+#### Fixed
+- Prevent duplicate PUSH notifications in the Authenticator module [SDKS-3533]
+- Fixed an issue where, in some cases, a user's session was not invalidated upon re-authentication [SDKS-3772]
+
 ## [4.6.0]
 #### Added
 - Allow developers to customize SDK storage [SDKS-3378]
@@ -188,7 +198,7 @@
 #### Added
 - `Set Persistent Cookie Node` is now supported to persist and manage Cookie [SDKS-182]
 - `Device Profile Collector Node` is now supported [SDKS-293]
-- `MetadataCallback` is now supported. For AM 6.5.2, when `MetadataCallback` is returned with stage value, SDK automatically parses `MetadataCallback` into Node's stage property. Please refer [this blog post](https://forum.forgerock.com/2020/02/using-an-authentication-tree-stage-to-build-a-custom-ui-with-the-forgerock-javascript-sdk/) for more details. [SDKS-305]
+- `MetadataCallback` is now supported. For AM 6.5.2, when `MetadataCallback` is returned with stage value, SDK automatically parses `MetadataCallback` into Node's stage property. [SDKS-305]
 - Allow server url paths to be configurable, Custom URL paths can be configured through `String.xml` or `ServerConfig` [SDKS-307]
 - Support `Authentication by Server` and `Transaction Authenticate to Tree` in Policy Environment. [SDKS-88]
 - Interface alignment with other platforms and introduce FRSession to authenticate against Authentication Tree in AM, persist and manage Session Token [SDKS-177]

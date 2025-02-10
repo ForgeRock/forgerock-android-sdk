@@ -85,7 +85,7 @@ jobs:
 
       # Save the logcat logs as run artifact
       - name: Upload logcat logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Logcat-logs
           path: forgerock-auth/build/outputs/androidTest-results/connected/**/logcat-org*.txt

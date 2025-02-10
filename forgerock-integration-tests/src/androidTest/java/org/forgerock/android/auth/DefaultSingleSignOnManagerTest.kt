@@ -25,7 +25,7 @@ class DefaultSingleSignOnManagerTest : AndroidBaseTest() {
     @After
     @Throws(Exception::class)
     fun cleanup() {
-        AsymmetricEncryptor(context, "org.forgerock.v1.SSO_TOKEN").reset()
+        tokenManager.clear()
     }
 
     @Test

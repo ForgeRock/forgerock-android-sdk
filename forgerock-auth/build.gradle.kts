@@ -28,8 +28,11 @@ android {
         viewBinding = true
     }
 
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+    kotlin {
+        jvmToolchain(17)
+        compilerOptions {
+            freeCompilerArgs = listOf("-Xjvm-default=all")
+        }
     }
 
     unitTestVariants.all {

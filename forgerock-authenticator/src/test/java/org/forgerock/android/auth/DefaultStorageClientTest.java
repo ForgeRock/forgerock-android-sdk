@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -381,6 +381,39 @@ public class DefaultStorageClientTest extends FRABaseTest {
         Account accountFromStorage = defaultStorage.getAccount(account.getId());
         PushMechanism pushMechanismFromStorage = (PushMechanism) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
         PushNotification pushNotificationFromStorage = defaultStorage.getNotification(pushNotification.getId());
+
+        assertNotNull(accountFromStorage);
+        assertNotNull(pushMechanismFromStorage);
+        assertNotNull(pushNotificationFromStorage);
+        assertEquals(pushNotificationFromStorage.getMechanismUID(), MECHANISM_UID);
+        assertEquals(pushNotificationFromStorage.getMessageId(), MESSAGE_ID);
+    }
+
+    @Test
+    public void testShouldGetNotificationByMessageId() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        defaultStorage.setAccountData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_ACCOUNT, Context.MODE_PRIVATE));
+        defaultStorage.setMechanismData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE));
+        defaultStorage.setNotificationData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE));
+
+        Calendar timeAdded = Calendar.getInstance();
+
+        Account account = createAccountWithoutAdditionalData(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = createPushMechanism(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
+        PushNotification pushNotification = createPushNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
+                AMLB_COOKIE, timeAdded, TTL);
+
+        defaultStorage.setAccount(account);
+        defaultStorage.setMechanism(mechanism);
+        defaultStorage.setNotification(pushNotification);
+
+        Account accountFromStorage = defaultStorage.getAccount(account.getId());
+        PushMechanism pushMechanismFromStorage = (PushMechanism) defaultStorage.getMechanismsForAccount(accountFromStorage).get(0);
+        PushNotification pushNotificationFromStorage = defaultStorage.getNotificationByMessageId(pushNotification.getMessageId());
 
         assertNotNull(accountFromStorage);
         assertNotNull(pushMechanismFromStorage);

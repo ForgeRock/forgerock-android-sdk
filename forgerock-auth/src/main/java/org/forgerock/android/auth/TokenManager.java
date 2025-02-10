@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2025 ForgeRock. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -100,4 +100,10 @@ public interface TokenManager {
     void revokeAndEndSession(Supplier<AppAuthConfiguration> appAuthConfiguration, FRListener<Void> listener);
 
 
+    /**
+     * OAuth2 Token Revocation, and end the session
+     *
+     * @param listener Listener to listen for token revocation event.
+     */
+    void revokeAndEndSession(FRListener<Void> listener);
 }

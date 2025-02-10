@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -719,6 +719,39 @@ public class FRAClientTest extends FRABaseTest {
         given(storageClient.getNotification(anyString())).willReturn(notification);
 
         PushNotification notificationFromStorage = fraClient.getNotification(notification.getId());
+
+        assertNotNull(notificationFromStorage);
+        assertEquals(notification, notificationFromStorage);
+    }
+
+    @Test
+    public void testShouldGetStoredNotificationByMessageID() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withDeviceToken("s-o-m-e-t-o-k-e-n")
+                .withStorage(storageClient)
+                .start();
+
+        assertNotNull(fraClient);
+        assertNotNull(fraClient.getAuthenticatorManagerInstance());
+
+        Account account = createAccount(ACCOUNT_NAME, ISSUER);
+        Mechanism push = createPushMechanism(ACCOUNT_NAME, ISSUER, MECHANISM_UID);
+        PushNotification notification = createPushNotification(MESSAGE_ID, push);
+
+        List<Mechanism> mechanismList= new ArrayList<>();
+        mechanismList.add(push);
+
+        List<PushNotification> notificationList = new ArrayList<>();
+        notificationList.add(createPushNotification(MESSAGE_ID, push));
+        notificationList.add(createPushNotification(OTHER_MESSAGE_ID, push));
+
+        given(storageClient.getAccount(any(String.class))).willReturn(account);
+        given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(mechanismList);
+        given(storageClient.getAllNotificationsForMechanism(any(Mechanism.class))).willReturn(notificationList);
+        given(storageClient.getNotificationByMessageId(anyString())).willReturn(notification);
+
+        PushNotification notificationFromStorage = fraClient.getNotificationByMessageId(notification.getMessageId());
 
         assertNotNull(notificationFromStorage);
         assertEquals(notification, notificationFromStorage);
