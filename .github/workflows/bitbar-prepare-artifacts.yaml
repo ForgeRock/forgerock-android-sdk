@@ -72,14 +72,14 @@ jobs:
 
       # Publish the signed APKs as build artifacts
       - name: Publish app-debug-androidTest.apk
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: app-debug-androidTest-signed.apk
           path: e2e/app/build/outputs/apk/androidTest/debug/app-debug-androidTest-signed.apk
 
       - name: Publish forgerock-integration-tests-debug-androidTest-signed.apk
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: forgerock-integration-tests-debug-androidTest-signed.apk

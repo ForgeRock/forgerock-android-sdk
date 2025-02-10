@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.forgerock.android.auth.callback.NameCallback;
 import org.forgerock.android.auth.callback.PasswordCallback;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,8 +25,15 @@ import static org.junit.Assert.assertNull;
 @RunWith(AndroidJUnit4.class)
 public class FRUserTest extends AndroidBaseTest {
 
+    @Before
+    public void logoutUserBeforeTest() throws Exception {
+        if (FRUser.getCurrentUser() != null) {
+            FRUser.getCurrentUser().logout();
+        }
+    }
+
     @After
-    public void logoutUser() throws Exception {
+    public void logoutUserAfterTest() throws Exception {
         if (FRUser.getCurrentUser() != null) {
             FRUser.getCurrentUser().logout();
         }

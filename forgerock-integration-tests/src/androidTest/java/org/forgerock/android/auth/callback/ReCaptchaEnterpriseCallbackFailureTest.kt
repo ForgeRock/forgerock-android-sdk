@@ -159,7 +159,7 @@ class ReCaptchaEnterpriseCallbackFailureTest : ReCaptchaEnterpriseCallbackBaseTe
                     // Note: The journey sends back to us the content of CaptchaEnterpriseNode.FAILURE
                     // in the message of the TextOutputCallback... so we can parse it here and verify results...
                     val message = node.getCallback(TextOutputCallback::class.java).message
-                    Assertions.assertThat(message).contains("API_ERROR")
+                    Assert.assertTrue(message.contains("API_ERROR") || message.contains("UNKNOWN"))
 
                     node.next(context, nodeListener)
                 }

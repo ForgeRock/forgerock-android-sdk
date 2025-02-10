@@ -1,7 +1,12 @@
-## [4.X.X]
+## [4.7.0]
 #### Added
-- Self device management [SDKS-3408]
-- Support Sign out with ID Token for PingOne Platform [SDKS-3423]
+- A fallback mechanism that uses an asymmetric key if symmetric key generation in the Android Keystore fails [SDKS-3467]
+- Support for Self-Service [SDKS-3408]
+- Support for Sign-out with ID Token in the PingOne Platform [SDKS-3423]
+
+#### Fixed
+- Prevent duplicate PUSH notifications in the Authenticator module [SDKS-3533]
+- Fixed an issue where, in some cases, a user's session was not invalidated upon re-authentication [SDKS-3772]
 
 ## [4.6.0]
 #### Added
