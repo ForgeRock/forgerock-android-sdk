@@ -55,6 +55,7 @@ public class FRAClientTest extends FRABaseTest {
     private DefaultStorageClient storageClient;
     private PushFactory pushFactory;
     private NotificationFactory notificationFactory;
+    private PushDeviceTokenManager pushDeviceTokenManager;
     private FRAPolicyEvaluator policyEvaluator;
     private PushMechanism push;
     private MockWebServer server;
@@ -72,7 +73,8 @@ public class FRAClientTest extends FRABaseTest {
         given(storageClient.setNotification(any(PushNotification.class))).willReturn(true);
         given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
 
-        pushFactory = spy(new PushFactory(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushDeviceTokenManager = spy(new PushDeviceTokenManager(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushFactory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(pushFactory).checkGooglePlayServices();
 
         FRAPolicyEvaluator.Result result = new FRAPolicyEvaluator.Result(true, null);

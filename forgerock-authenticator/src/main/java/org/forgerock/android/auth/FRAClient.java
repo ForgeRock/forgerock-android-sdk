@@ -129,7 +129,7 @@ public class FRAClient {
             }
 
             if (fcmToken == null) {
-                Logger.warn(TAG, "A FCM token must be provided to handle Push Registrations. The method" +
+                Logger.info(TAG, "A FCM token must be provided to handle Push Registrations. The method" +
                         " FRAClient#registerForRemoteNotifications can also be used to register the device token.");
             }
 
@@ -341,11 +341,34 @@ public class FRAClient {
     /**
      * This method allows to update the FCM device token for all registered Push mechanisms.
      * Use this method to handle device token updates received on {@link FirebaseMessagingService#onNewToken}.
-     *
+     * Overall Success/Failure Logic:
+     * If all mechanisms succeed, listener.onSuccess(true) is called.
+     * If any mechanism fails, listener.onSuccess(false) is called.
+     * If there are no Push mechanisms found, listener.onSuccess(false) is called.
      * @param deviceToken the new FCM device token
+     * @param listener Callback for receiving the result of device token update
      */
-    public void updateDeviceToken(@NonNull String deviceToken) {
-        this.authenticatorManager.updateDeviceToken(deviceToken);
+    public void updateDeviceToken(@NonNull String deviceToken, @NonNull FRAListener<Boolean> listener) {
+        this.authenticatorManager.updateDeviceToken(deviceToken, listener);
+    }
+
+    /**
+     * This method allows to update the FCM device token for a specific Push mechanism.
+     * @param deviceToken the new FCM device token
+     * @param pushMechanism the PushMechanism object
+     * @param listener Callback for receiving the result of device token update
+     */
+    public void updateDeviceTokenForMechanism(@NonNull String deviceToken, @NonNull PushMechanism pushMechanism, @NonNull FRAListener<Void> listener) {
+        this.authenticatorManager.updateDeviceTokenForMechanism(deviceToken, pushMechanism, listener);
+    }
+
+    /**
+     * Get the PushDeviceToken object containing the FCM device token and its issued date time.
+     * If no PushDeviceToken was found in the storage, returns {@code null}.
+     * @return PushDeviceToken The PushDeviceToken object
+     */
+    public PushDeviceToken getPushDeviceToken() {
+        return this.authenticatorManager.getPushDeviceToken();
     }
 
     /** No Public methods **/

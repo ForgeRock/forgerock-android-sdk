@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -77,6 +77,7 @@ public abstract class FRABaseTest {
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
+    public static final String TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN = "test.DATA.DEVICE_TOKEN";
     public static final String POLICIES = "{\"biometricAvailable\": { },\"deviceTampering\": {\"score\": 0.8}}";
 
     @BeforeClass
@@ -135,6 +136,7 @@ public abstract class FRABaseTest {
         given(push.getSecret()).willReturn(CORRECT_SECRET);
         given(push.getAuthenticationEndpoint()).willReturn(serverUrl+"authenticate");
         given(push.getRegistrationEndpoint()).willReturn(serverUrl+"register");
+        given(push.getUpdateEndpoint()).willReturn(serverUrl+"update");
         return push;
     }
 

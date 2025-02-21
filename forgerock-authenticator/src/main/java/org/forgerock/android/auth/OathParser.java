@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -33,6 +33,9 @@ class OathParser extends MechanismParser {
     /** The frequency with which the OTP updates */
     public static final String PERIOD = "period";
 
+    /** The unique identifier of the OATH mechanism on the server */
+    public static final String OATH_RESOURCE_ID = "oid";
+
     private static final String[] ALLOWED_TYPES = new String[]{"hotp", "totp"};
 
     @Override
@@ -58,6 +61,11 @@ class OathParser extends MechanismParser {
         // Decode Issuer for MFAUTH schemes
         if (containsNonEmpty(values, ISSUER) && Objects.equals(values.get(SCHEME), Mechanism.MFAUTH)) {
             values.put(ISSUER, getBase64DecodedString(values.get(ISSUER)));
+        }
+
+        // OATH Resource Id is OPTIONAL
+        if (containsNonEmpty(values, OATH_RESOURCE_ID)) {
+            values.put(OATH_RESOURCE_ID, getBase64DecodedString(values.get(OATH_RESOURCE_ID)));
         }
 
         return values;

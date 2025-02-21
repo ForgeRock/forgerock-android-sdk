@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,10 +23,11 @@ public class TOTPMechanism extends OathMechanism {
     /** The frequency with which the OTP changes */
     private int period;
 
-    private TOTPMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                          String algorithm, String secret, int digits, int period, Calendar timeAdded) {
+    private TOTPMechanism(String mechanismUID, String issuer, String accountName, String type,
+                          TokenType oathType, String algorithm, String secret, String uid,
+                          String resourceId, int digits, int period, Calendar timeAdded) {
         super(mechanismUID, issuer, accountName, type, oathType, algorithm,
-                secret, digits, timeAdded);
+                secret, uid, resourceId, digits, timeAdded);
         this.period = period;
     }
 
@@ -52,6 +53,8 @@ public class TOTPMechanism extends OathMechanism {
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("secret", getSecret());
+            jsonObject.put("uid", getUid());
+            jsonObject.put("resourceId", getResourceId());
             jsonObject.put("type", getType());
             jsonObject.put("oathType", getOathType());
             jsonObject.put("algorithm", getAlgorithm());
@@ -76,7 +79,7 @@ public class TOTPMechanism extends OathMechanism {
      * if {@code jsonString} is empty or not able to parse it.
      */
     public static TOTPMechanism deserialize(String jsonString) {
-        if (jsonString == null || jsonString.length() == 0) {
+        if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }
         try {
@@ -86,6 +89,8 @@ public class TOTPMechanism extends OathMechanism {
                     .setAccountName(jsonObject.getString("accountName"))
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
                     .setSecret(jsonObject.getString("secret"))
+                    .setUid(jsonObject.has("uid") ? jsonObject.getString("uid") : null)
+                    .setResourceId(jsonObject.has("resourceId") ? jsonObject.getString("resourceId") : null)
                     .setAlgorithm(jsonObject.getString("algorithm"))
                     .setDigits(jsonObject.getInt("digits"))
                     .setPeriod(jsonObject.getInt("period"))
@@ -131,8 +136,8 @@ public class TOTPMechanism extends OathMechanism {
          */
         @Override
         TOTPMechanism buildOath() {
-            return new TOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH, TokenType.TOTP, algorithm,
-                    secret, digits, period, timeAdded);
+            return new TOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH,
+                    TokenType.TOTP, algorithm, secret, uid, resourceId, digits, period, timeAdded);
         }
 
     }

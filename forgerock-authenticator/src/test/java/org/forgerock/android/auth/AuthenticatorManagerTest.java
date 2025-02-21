@@ -20,6 +20,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+
 import android.content.Context;
 import android.util.Base64;
 
@@ -48,6 +50,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
@@ -60,6 +63,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     private FRAListenerFuture pushListenerFuture;
     private FRAListenerFuture oathListenerFuture;
     private AuthenticatorManager authenticatorManager;
+    private PushDeviceTokenManager pushDeviceTokenManager;
     private PushMechanism push;
     private MockWebServer server;
     private FRAPolicyEvaluator policyEvaluator;
@@ -88,7 +92,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         oathListenerFuture = new FRAListenerFuture<Mechanism>();
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
 
-        pushFactory = spy(new PushFactory(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushDeviceTokenManager = spy(new PushDeviceTokenManager(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushFactory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(pushFactory).checkGooglePlayServices();
 
         server = new MockWebServer();
@@ -994,6 +999,78 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         assertTrue(result);
         assertFalse(account.isLocked());
         assertNull(account.getLockingPolicy());
+    }
+
+    @Test
+    public void updateDeviceTokenSuccess() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.start();
+        server.enqueue(new MockResponse());
+        HttpUrl baseUrl = server.url("/");
+
+        PushMechanism pushMechanism = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(pushMechanism);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Boolean> listenerFuture = new FRAListenerFuture<Boolean>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            Boolean result = (Boolean) listenerFuture.get();
+            assertTrue(result);
+        } catch (Exception ignored) {
+            // ignored
+        }
+
+        server.shutdown();
+    }
+
+    @Test
+    public void updateDeviceTokenFailure() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.start();
+        server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
+        HttpUrl baseUrl = server.url("/");
+
+        PushMechanism pushMechanism = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(pushMechanism);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Boolean> listenerFuture = new FRAListenerFuture<Boolean>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            Boolean result = (Boolean) listenerFuture.get();
+            assertFalse(result);
+        } catch (Exception ignored) {
+            // ignored
+        }
+
+        server.shutdown();
     }
 
 }

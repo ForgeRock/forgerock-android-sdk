@@ -38,6 +38,7 @@ public class DefaultStorageClientTest extends FRABaseTest {
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_ACCOUNT);
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM);
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS);
+            context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN);
         }
     }
 

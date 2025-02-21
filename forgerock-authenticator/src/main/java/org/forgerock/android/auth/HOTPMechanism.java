@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,10 +23,11 @@ public class HOTPMechanism extends OathMechanism {
     /** Counter as in Int for number of OTP credentials generated */
     protected long counter;
 
-    private HOTPMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                          String algorithm, String secret, int digits, long counter, Calendar timeAdded) {
-        super(mechanismUID, issuer, accountName, type, oathType, algorithm,
-                secret, digits, timeAdded);
+    private HOTPMechanism(String mechanismUID, String issuer, String accountName, String type,
+                          TokenType oathType, String algorithm, String secret, String uid,
+                          String resourceId, int digits, long counter, Calendar timeAdded) {
+        super(mechanismUID, issuer, accountName, type, oathType, algorithm, secret, uid,
+                resourceId, digits, timeAdded);
         this.counter = counter;
     }
 
@@ -56,6 +57,8 @@ public class HOTPMechanism extends OathMechanism {
             jsonObject.put("accountName", getAccountName());
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("secret", getSecret());
+            jsonObject.put("uid", getUid());
+            jsonObject.put("resourceId", getResourceId());
             jsonObject.put("type", getType());
             jsonObject.put("oathType", getOathType());
             jsonObject.put("algorithm", getAlgorithm());
@@ -80,7 +83,7 @@ public class HOTPMechanism extends OathMechanism {
      * if {@code jsonString} is empty or not able to parse it.
      */
     public static HOTPMechanism deserialize(String jsonString) {
-        if (jsonString == null || jsonString.length() == 0) {
+        if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }
         try {
@@ -90,6 +93,8 @@ public class HOTPMechanism extends OathMechanism {
                     .setAccountName(jsonObject.getString("accountName"))
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
                     .setSecret(jsonObject.getString("secret"))
+                    .setUid(jsonObject.has("uid") ? jsonObject.getString("uid") : null)
+                    .setResourceId(jsonObject.has("resourceId") ? jsonObject.getString("resourceId") : null)
                     .setAlgorithm(jsonObject.getString("algorithm"))
                     .setDigits(jsonObject.getInt("digits"))
                     .setCounter(jsonObject.getLong("counter"))
@@ -137,8 +142,8 @@ public class HOTPMechanism extends OathMechanism {
          */
         @Override
         HOTPMechanism buildOath() {
-            return new HOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH, TokenType.HOTP, algorithm,
-                    secret, digits, counter, timeAdded);
+            return new HOTPMechanism(mechanismUID, issuer, accountName, Mechanism.OATH,
+                    TokenType.HOTP, algorithm, secret, uid, resourceId, digits, counter, timeAdded);
         }
 
     }

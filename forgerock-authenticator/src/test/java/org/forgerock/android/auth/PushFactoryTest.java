@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -42,6 +42,7 @@ public class PushFactoryTest extends FRABaseTest {
 
     private DefaultStorageClient storageClient;
     private PushFactory factory;
+    private PushDeviceTokenManager pushDeviceTokenManager;
     private Context context;
     private FRAListenerFuture pushListenerFuture;
     private MockWebServer server;
@@ -71,10 +72,13 @@ public class PushFactoryTest extends FRABaseTest {
                 .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE));
         storageClient.setNotificationData(context.getApplicationContext()
                 .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE));
+        storageClient.setDeviceTokenData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, Context.MODE_PRIVATE));
 
         PushResponder.getInstance(storageClient);
 
-        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        pushDeviceTokenManager = spy(new PushDeviceTokenManager(context, storageClient, "s-o-m-e-i-d"));
+        factory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(factory).checkGooglePlayServices();
     }
 
@@ -200,7 +204,7 @@ public class PushFactoryTest extends FRABaseTest {
         given(storageClient.setAccount(any(Account.class))).willReturn(false);
         given(storageClient.getMechanismsForAccount(any(Account.class))).willReturn(Collections.emptyList());
         given(storageClient.setMechanism(any(Mechanism.class))).willReturn(true);
-        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        factory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(factory).checkGooglePlayServices();
 
         try {
@@ -232,7 +236,7 @@ public class PushFactoryTest extends FRABaseTest {
         given(storageClient.getAccount(any(String.class))).willReturn(null);
         given(storageClient.setAccount(any(Account.class))).willReturn(true);
         given(storageClient.setMechanism(any(Mechanism.class))).willReturn(false);
-        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        factory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(factory).checkGooglePlayServices();
 
         try {
@@ -293,7 +297,8 @@ public class PushFactoryTest extends FRABaseTest {
                 "issuer=Rm9yZ2Vyb2Nr&" +
                 "version=1";
 
-        factory = spy(new PushFactory(context, storageClient, ""));
+        pushDeviceTokenManager = spy(new PushDeviceTokenManager(context, storageClient, ""));
+        factory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(factory).checkGooglePlayServices();
 
         try {
@@ -320,7 +325,7 @@ public class PushFactoryTest extends FRABaseTest {
                 "issuer=Rm9yZ2Vyb2Nr&" +
                 "version=1";
 
-        factory = spy(new PushFactory(context, storageClient, "s-o-m-e-i-d"));
+        factory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(false).when(factory).checkGooglePlayServices();
         try {
             factory.createFromUri(uri, pushListenerFuture);

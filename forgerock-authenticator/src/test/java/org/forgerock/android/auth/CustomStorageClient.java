@@ -100,6 +100,16 @@ public class CustomStorageClient implements StorageClient {
     }
 
     @Override
+    public boolean setPushDeviceToken(PushDeviceToken pushDeviceToken) {
+        return false;
+    }
+
+    @Override
+    public PushDeviceToken getPushDeviceToken() {
+        return null;
+    }
+
+    @Override
     public boolean isEmpty() {
         return false;
     }

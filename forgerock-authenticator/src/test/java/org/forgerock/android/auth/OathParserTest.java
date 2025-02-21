@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -124,6 +124,18 @@ public class OathParserTest {
     @Test (expected = MechanismParsingException.class)
     public void testShouldValidateIncorrectAuthorityType() throws MechanismParsingException {
         oathParser.map("otpauth://badger/Forgerock:user@forgerock.com?secret=ABC");
+    }
+
+    @Test
+    public void testShouldParseUid() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Forgerock:demo?secret=ABC&uid=dXNlcjM");
+        assertEquals(result.get(OathParser.USER_ID), "user3");
+    }
+
+    @Test
+    public void testShouldParseResourceId() throws MechanismParsingException {
+        Map<String, String> result = oathParser.map("otpauth://totp/Forgerock:demo?secret=ABC&oid=NTgxZGQzYzgtM2M2OS00OWFjLWIwMWEtMDc0NDUwYjIyNmM1");
+        assertEquals(result.get(OathParser.OATH_RESOURCE_ID), "581dd3c8-3c69-49ac-b01a-074450b226c5");
     }
 
     @Test

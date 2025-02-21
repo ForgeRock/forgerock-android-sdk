@@ -24,16 +24,17 @@ import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class AuthenticatorManager {
 
     /** The Storage client. */
     private StorageClient storageClient;
-    /** The FCM Device token. */
-    private String deviceToken;
     /** The Application Context. */
     private Context context;
     /** The Oath Factory responsible to build Oath mechanisms. */
@@ -44,6 +45,8 @@ class AuthenticatorManager {
     private NotificationFactory notificationFactory;
     /** The Policy Evaluator is used to enforce policy compliance. */
     private FRAPolicyEvaluator policyEvaluator;
+    /** The Device token manager is used to manage the device token. **/
+    private PushDeviceTokenManager pushDeviceTokenManager;
 
     private static final String TAG = AuthenticatorManager.class.getSimpleName();
 
@@ -51,10 +54,10 @@ class AuthenticatorManager {
                          String deviceToken) {
         this.context = context;
         this.storageClient = storageClient;
-        this.deviceToken = deviceToken;
         this.policyEvaluator = policyEvaluator;
         this.oathFactory = new OathFactory(context, storageClient);
-        this.pushFactory = new PushFactory(context, storageClient, deviceToken);
+        this.pushDeviceTokenManager = new PushDeviceTokenManager(context, storageClient, deviceToken);
+        this.pushFactory = new PushFactory(context, storageClient, pushDeviceTokenManager);
         this.notificationFactory = new NotificationFactory(storageClient);
 
         OathCodeGenerator.getInstance(storageClient);
@@ -64,7 +67,7 @@ class AuthenticatorManager {
     void createMechanismFromUri(String uri, FRAListener<Mechanism> listener) {
         Logger.debug(TAG, "Creating new mechanism from URI: %s", uri);
         if(uri.startsWith(Mechanism.PUSH)) {
-            if(deviceToken != null) {
+            if(pushDeviceTokenManager.getDeviceTokenId() != null) {
                 pushFactory.createFromUri(uri, listener);
             } else {
                 Logger.warn(TAG, "Attempt to add a Push mechanism has failed. " +
@@ -252,59 +255,76 @@ class AuthenticatorManager {
         return storageClient.getNotificationByMessageId(messageId);
     }
 
-    void registerForRemoteNotifications(String newDeviceToken) throws AuthenticatorException {
-        if(this.deviceToken == null) {
-            this.deviceToken = newDeviceToken;
-            this.pushFactory = new PushFactory(context, storageClient, newDeviceToken);
-            this.notificationFactory = new NotificationFactory(storageClient);
-            PushResponder.getInstance(storageClient);
+    void registerForRemoteNotifications(String deviceToken) throws AuthenticatorException {
+        if(this.pushDeviceTokenManager.getDeviceTokenId() == null) {
+            this.pushDeviceTokenManager.setDeviceToken(deviceToken);
         } else {
-            if(this.deviceToken.equals(newDeviceToken)) {
+            if(this.pushDeviceTokenManager.getDeviceTokenId().equals(deviceToken)) {
                 Logger.warn(TAG, "The SDK was already initialized with this device token: %s",
-                        newDeviceToken);
+                        deviceToken);
                 throw new AuthenticatorException("The SDK was already initialized with the FCM device token.");
             } else {
                 Logger.warn(TAG, "The SDK was initialized with a different deviceToken: %s, however a new " +
-                        "device token (%s) was received.", this.deviceToken, newDeviceToken);
-                throw new AuthenticatorException("The SDK was initialized with a different deviceToken.");
+                        "device token (%s) was received.", this.pushDeviceTokenManager.getDeviceTokenId(), deviceToken);
+                throw new AuthenticatorException("The SDK was initialized with a different deviceToken. " +
+                        "Use FRAClient#updateDeviceToken method to update the device token.");
             }
         }
     }
 
-    void updateDeviceToken(String newDeviceToken) {
-        this.deviceToken = newDeviceToken;
-        this.pushFactory = new PushFactory(context, storageClient, newDeviceToken);
-        this.notificationFactory = new NotificationFactory(storageClient);
+    void updateDeviceToken(String newDeviceToken, FRAListener<Boolean> listener) {
+        Logger.debug(TAG, "Updating FCM device token for all Push mechanisms. New token: %s", newDeviceToken);
 
-        // Get all push mechanisms and update device token
+        // Get all push mechanisms
         List<PushMechanism> pushMechanismList = getAllPushMechanisms();
+
+        // If no push mechanisms found, return false
+        if (pushMechanismList.isEmpty()) {
+            Logger.debug(TAG, "No push mechanisms found. Skipping device token update.");
+            listener.onSuccess(false);
+            return;
+        }
+
+        // Update device token for each push mechanism
+        final int totalMechanisms = pushMechanismList.size();
+        final AtomicInteger completedMechanisms = new AtomicInteger(0);
+        final AtomicInteger failedMechanisms = new AtomicInteger(0);
         for (PushMechanism pushMechanism : pushMechanismList) {
-            PushResponder.getInstance(storageClient).updateDeviceToken(pushMechanism, newDeviceToken, new FRAListener<Void>() {
+            pushDeviceTokenManager.updateDeviceToken(newDeviceToken, pushMechanism, new FRAListener<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    Logger.debug(TAG, "FCM device token updated successfully.");
+                    Logger.debug(TAG, "FCM device token for mechanism %s updated successfully.", pushMechanism.getMechanismUID());
+                    if (completedMechanisms.incrementAndGet() == totalMechanisms) {
+                        // All mechanisms have completed successfully
+                        if (failedMechanisms.get() == 0) {
+                            listener.onSuccess(true);
+                        } else {
+                            listener.onSuccess(false);
+                        }
+                    }
                 }
 
                 @Override
                 public void onException(Exception e) {
-                    Logger.warn(TAG, "Error updating FCM device token.", e);
+                    Logger.warn(TAG, "Error updating FCM device token for mechanism %s.", pushMechanism.getMechanismUID(), e);
+                    failedMechanisms.incrementAndGet();
+                    if (completedMechanisms.incrementAndGet() == totalMechanisms) {
+                        // All mechanisms have completed, but some failed
+                        listener.onSuccess(false);
+                    }
                 }
             });
         }
     }
 
-    private List<PushMechanism> getAllPushMechanisms() {
-        List<PushMechanism> pushMechanismList = new ArrayList<>();
-        List<Account> accountList = getAllAccounts();
-        for (Account account : accountList) {
-            List<Mechanism> mechanismList = account.getMechanisms();
-            for (Mechanism mechanism : mechanismList) {
-                if(mechanism.getType().equals(Mechanism.PUSH)) {
-                    pushMechanismList.add((PushMechanism) mechanism);
-                }
-            }
-        }
-        return pushMechanismList;
+    void updateDeviceTokenForMechanism(String newDeviceToken, PushMechanism pushMechanism, FRAListener<Void> listener) {
+        Logger.debug(TAG, "Updating FCM device token for mechanism %s. New token: %s", pushMechanism.getMechanismUID(), newDeviceToken);
+        pushDeviceTokenManager.updateDeviceToken(newDeviceToken, pushMechanism, listener);
+    }
+
+    PushDeviceToken getPushDeviceToken() {
+        Logger.debug(TAG, "Retrieving FCM device token from StorageClient.");
+        return pushDeviceTokenManager.getPushDeviceToken();
     }
 
     PushNotification handleMessage(RemoteMessage message)
@@ -442,6 +462,21 @@ class AuthenticatorManager {
     @VisibleForTesting
     void setNotificationFactory(NotificationFactory notificationFactory) {
         this.notificationFactory = notificationFactory;
+    }
+
+    @VisibleForTesting
+    List<PushMechanism> getAllPushMechanisms() {
+        List<PushMechanism> pushMechanismList = new ArrayList<>();
+        List<Account> accountList = getAllAccounts();
+        for (Account account : accountList) {
+            List<Mechanism> mechanismList = account.getMechanisms();
+            for (Mechanism mechanism : mechanismList) {
+                if(mechanism.getType().equals(Mechanism.PUSH)) {
+                    pushMechanismList.add((PushMechanism) mechanism);
+                }
+            }
+        }
+        return pushMechanismList;
     }
 
 }

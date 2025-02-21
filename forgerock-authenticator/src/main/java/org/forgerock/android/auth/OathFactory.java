@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -144,6 +144,10 @@ class OathFactory extends MechanismFactory {
             return;
         }
 
+        // User id and resource id are optional
+        String uid = getFromMap(map, MechanismParser.USER_ID, null);
+        String resourceId = getFromMap(map, OathParser.OATH_RESOURCE_ID, null);
+
         Mechanism oath;
         switch (otpType) {
             case HOTP:
@@ -156,6 +160,8 @@ class OathFactory extends MechanismFactory {
                         .setDigits(digits)
                         .setCounter(counter)
                         .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                        .setResourceId(resourceId)
+                        .setUid(uid)
                         .build();
                 break;
             case TOTP:
@@ -168,6 +174,8 @@ class OathFactory extends MechanismFactory {
                         .setDigits(digits)
                         .setPeriod(period)
                         .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                        .setResourceId(resourceId)
+                        .setUid(uid)
                         .build();
                 break;
             default:

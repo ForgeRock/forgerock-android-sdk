@@ -113,6 +113,19 @@ public interface StorageClient {
     PushNotification getNotificationByMessageId(String messageId);
 
     /**
+     * Set the PushDeviceToken object to the storage system.
+     * @param pushDeviceToken The PushDeviceToken object to store.
+     * @return boolean as result of the operation
+     */
+    boolean setPushDeviceToken(PushDeviceToken pushDeviceToken);
+
+    /**
+     * Get the current stored PushDeviceToken object with its id
+     * @return The PushDeviceToken object.
+     */
+    PushDeviceToken getPushDeviceToken();
+
+    /**
      * Whether the storage system currently contains any data.
      * @return True if the storage system is empty, false otherwise.
      */

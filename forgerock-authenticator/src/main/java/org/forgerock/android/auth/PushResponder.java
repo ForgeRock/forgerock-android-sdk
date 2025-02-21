@@ -242,7 +242,7 @@ class PushResponder {
      * @param token The device token
      * @param listener Listener for receiving the HTTP call response code.
      */
-    void updateDeviceToken(@NonNull PushMechanism pushMechanism, @NonNull String token, final FRAListener<Void> listener) {
+    void updateDeviceToken(@NonNull PushMechanism pushMechanism, @NonNull String token, String deviceName, final FRAListener<Void> listener) {
         // Get Update endpoint
         URL url = null;
         try {
@@ -255,6 +255,7 @@ class PushResponder {
             // Prepare payload
             Map<String, Object> payload = new HashMap<>();
             payload.put("deviceId", token);
+            payload.put("deviceName", deviceName);
             payload.put("deviceType", "android");
             payload.put("communicationType", "gcm");
 
@@ -263,6 +264,7 @@ class PushResponder {
             Request request = new RequestBuilder.Builder()
                     .url(url)
                     .keys(keys)
+                    .base64Secret(pushMechanism.getSecret())
                     .data(payload)
                     .action(Action.PUSH_UPDATE)
                     .build();
