@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,14 +8,20 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.util.UrlUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an instance of a Push authentication mechanism. Associated with an Account.
@@ -70,8 +76,28 @@ public class PushMechanism extends Mechanism {
      * The update URL for Push mechanism.
      * @return String representing the update URL
      */
-    String getUpdateEndpoint() {
-        return registrationEndpoint.replace("action=register", "action=refresh");
+    String getUpdateEndpoint() throws MalformedURLException {
+        if (registrationEndpoint == null || registrationEndpoint.isEmpty()) {
+            throw new MalformedURLException("Invalid registration endpoint URL");
+        }
+
+        try {
+            String query = UrlUtils.getQueryString(registrationEndpoint);
+            if (query == null || query.isEmpty()) {
+                throw new MalformedURLException("Invalid registration endpoint URL, it does not contain a query string");
+            }
+
+            Map<String, String> queryParams = UrlUtils.parseQueryParams(query);
+            if (queryParams.containsKey("_action") && queryParams.get("_action").equals("register")) {
+                queryParams.put("_action", "refresh");
+            } else {
+                throw new MalformedURLException("Invalid registration endpoint URL, it does not contain '_action=register'");
+            }
+
+            return UrlUtils.updateQueryParams(registrationEndpoint, queryParams);
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
+            throw new MalformedURLException("Failed to construct update URL: " + e.getLocalizedMessage());
+        }
     }
 
     /**
