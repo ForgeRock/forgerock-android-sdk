@@ -69,6 +69,7 @@ class PushResponder {
     private static final String CHALLENGE_RESPONSE_KEY = "challengeResponse";
     private static final String MESSAGE_ID_KEY = "messageId";
     private static final String MECHANISM_UID_KEY = "mechanismUid";
+    private static final String USERNAME_KEY = "username";
 
     private static final int TIMEOUT = 30;
 
@@ -251,6 +252,9 @@ class PushResponder {
             // Keys
             Map<String, String> keys = new HashMap<>();
             keys.put(MECHANISM_UID_KEY, pushMechanism.getMechanismUID());
+            if (pushMechanism.getUid() != null && !pushMechanism.getUid().isEmpty()) {
+                keys.put(USERNAME_KEY, pushMechanism.getUid());
+            }
 
             // Prepare payload
             Map<String, Object> payload = new HashMap<>();

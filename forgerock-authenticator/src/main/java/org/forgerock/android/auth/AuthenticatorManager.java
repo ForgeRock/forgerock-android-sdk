@@ -21,14 +21,13 @@ import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
+import org.forgerock.android.auth.exception.MechanismUpdatePushTokenException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class AuthenticatorManager {
@@ -272,34 +271,36 @@ class AuthenticatorManager {
         }
     }
 
-    void updateDeviceToken(String newDeviceToken, FRAListener<Boolean> listener) {
+    void updateDeviceToken(String newDeviceToken, FRAListener<Void> listener) {
         Logger.debug(TAG, "Updating FCM device token for all Push mechanisms. New token: %s", newDeviceToken);
 
         // Get all push mechanisms
         List<PushMechanism> pushMechanismList = getAllPushMechanisms();
 
-        // If no push mechanisms found, return false
+        // If no push mechanisms found, return success
         if (pushMechanismList.isEmpty()) {
             Logger.debug(TAG, "No push mechanisms found. Skipping device token update.");
-            listener.onSuccess(false);
+            listener.onSuccess(null);
             return;
         }
 
         // Update device token for each push mechanism
         final int totalMechanisms = pushMechanismList.size();
         final AtomicInteger completedMechanisms = new AtomicInteger(0);
-        final AtomicInteger failedMechanisms = new AtomicInteger(0);
+        final List<PushMechanism> failedMechanisms = new ArrayList<>();
         for (PushMechanism pushMechanism : pushMechanismList) {
             pushDeviceTokenManager.updateDeviceToken(newDeviceToken, pushMechanism, new FRAListener<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     Logger.debug(TAG, "FCM device token for mechanism %s updated successfully.", pushMechanism.getMechanismUID());
                     if (completedMechanisms.incrementAndGet() == totalMechanisms) {
-                        // All mechanisms have completed successfully
-                        if (failedMechanisms.get() == 0) {
-                            listener.onSuccess(true);
+                        if (failedMechanisms.isEmpty()) {
+                            // All mechanisms have completed successfully
+                            listener.onSuccess(null);
                         } else {
-                            listener.onSuccess(false);
+                            // If any mechanism failed, we report the list of failed mechanisms.
+                            listener.onException(new MechanismUpdatePushTokenException(
+                                    "Error updating FCM device token for some mechanisms.", failedMechanisms));
                         }
                     }
                 }
@@ -307,10 +308,11 @@ class AuthenticatorManager {
                 @Override
                 public void onException(Exception e) {
                     Logger.warn(TAG, "Error updating FCM device token for mechanism %s.", pushMechanism.getMechanismUID(), e);
-                    failedMechanisms.incrementAndGet();
+                    failedMechanisms.add(pushMechanism);
                     if (completedMechanisms.incrementAndGet() == totalMechanisms) {
                         // All mechanisms have completed, but some failed
-                        listener.onSuccess(false);
+                        listener.onException(new MechanismUpdatePushTokenException(
+                                "Error updating FCM device token for some mechanisms.", failedMechanisms));
                     }
                 }
             });

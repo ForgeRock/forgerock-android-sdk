@@ -36,6 +36,7 @@ import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
+import org.forgerock.android.auth.exception.MechanismUpdatePushTokenException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -1023,13 +1024,13 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         PushResponder.getInstance(storageClient);
 
-        FRAListenerFuture<Boolean> listenerFuture = new FRAListenerFuture<Boolean>();
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
 
         authenticatorManager.updateDeviceToken(newToken, listenerFuture);
 
         try {
-            Boolean result = (Boolean) listenerFuture.get();
-            assertTrue(result);
+            listenerFuture.get();
+            assertEquals(server.getRequestCount(), 1);
         } catch (Exception ignored) {
             // ignored
         }
@@ -1059,15 +1060,16 @@ public class AuthenticatorManagerTest extends FRABaseTest {
 
         PushResponder.getInstance(storageClient);
 
-        FRAListenerFuture<Boolean> listenerFuture = new FRAListenerFuture<Boolean>();
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
 
         authenticatorManager.updateDeviceToken(newToken, listenerFuture);
 
         try {
-            Boolean result = (Boolean) listenerFuture.get();
-            assertFalse(result);
-        } catch (Exception ignored) {
-            // ignored
+            listenerFuture.get();
+            fail("Should throw MechanismUpdatePushTokenException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismUpdatePushTokenException);
+            assertEquals(1, ((MechanismUpdatePushTokenException) e.getCause()).getPushMechanisms().size());
         }
 
         server.shutdown();

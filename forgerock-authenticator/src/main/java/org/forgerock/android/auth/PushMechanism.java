@@ -71,7 +71,7 @@ public class PushMechanism extends Mechanism {
      * @return String representing the update URL
      */
     String getUpdateEndpoint() {
-        return registrationEndpoint.replace("action=register", "action=update");
+        return registrationEndpoint.replace("action=register", "action=refresh");
     }
 
     /**
