@@ -22,6 +22,7 @@ import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismParsingException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.exception.MechanismUpdatePushTokenException;
+import org.forgerock.android.auth.exception.PushMechanismException;
 import org.forgerock.android.auth.policy.FRAPolicy;
 
 import java.util.ArrayList;
@@ -280,7 +281,7 @@ class AuthenticatorManager {
         // If no push mechanisms found, return success
         if (pushMechanismList.isEmpty()) {
             Logger.debug(TAG, "No push mechanisms found. Skipping device token update.");
-            listener.onSuccess(null);
+            listener.onException(new PushMechanismException("Failed to retrieve PushMechanism objects."));
             return;
         }
 

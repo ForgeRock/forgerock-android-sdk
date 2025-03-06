@@ -37,6 +37,7 @@ import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
 import org.forgerock.android.auth.exception.MechanismUpdatePushTokenException;
+import org.forgerock.android.auth.exception.PushMechanismException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -49,6 +50,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import okhttp3.HttpUrl;
@@ -1039,7 +1041,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     }
 
     @Test
-    public void updateDeviceTokenFailure() throws IOException {
+    public void updateDeviceTokenNetworkFailure() throws IOException {
         MockWebServer server = new MockWebServer();
         server.start();
         server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
@@ -1075,4 +1077,29 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         server.shutdown();
     }
 
+    @Test
+    public void updateDeviceTokenNoPushMechanismFailure() throws IOException {
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(Collections.emptyList());
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            listenerFuture.get();
+            fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+        }
+    }
 }
