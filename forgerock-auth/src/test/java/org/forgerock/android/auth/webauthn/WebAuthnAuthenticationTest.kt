@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2025 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
@@ -14,6 +14,7 @@ import com.google.android.gms.fido.fido2.api.common.AuthenticatorAssertionRespon
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.forgerock.android.auth.WebAuthnDataRepository
@@ -92,6 +93,59 @@ class WebAuthnAuthenticationTest {
 
         assertThat(result).isEqualTo("clientDataJson::97,117,116,104,101,110,116,105,99,97,116,105,111,110,68,97,116,97::115,105,103,110,97,116,117,114,101::cmF3SWQ::dGVzdA==")
     }
+
+    @Test
+    fun testSupportJsonResponse(): Unit = runTest {
+        val value = JSONObject(getJson("/webAuthn_authentication_supportsJsonResponse.json"))
+            .getJSONArray("callbacks")
+            .getJSONObject(0)
+            .getJSONArray("output")
+            .getJSONObject(0)
+            .getJSONObject("value")
+
+        val sharedPreferences = context.getSharedPreferences("Test", Context.MODE_PRIVATE)
+        val repository: WebAuthnDataRepository =
+            object : WebAuthnDataRepository(context, sharedPreferences) {
+                override fun getNewSharedPreferences(): SharedPreferences {
+                    return sharedPreferences
+                }
+            }
+
+        val source = PublicKeyCredentialSource.builder()
+            .id("keyHandle".toByteArray())
+            .otherUI("test")
+            .rpid("humorous-cuddly-carrot.glitch.me")
+            .userHandle("test".toByteArray())
+            .type("public-key")
+            .build()
+        repository.persist(source)
+
+        whenever(publicKeyCredential.authenticatorAttachment).thenReturn("platform")
+        whenever(publicKeyCredential.response).thenReturn(authenticatorAssertionResponse)
+        whenever(publicKeyCredential.rawId).thenReturn("rawId".toByteArray())
+        whenever(authenticatorAssertionResponse.authenticatorData).thenReturn("authenticationData".toByteArray())
+        whenever(authenticatorAssertionResponse.clientDataJSON).thenReturn("clientDataJson".toByteArray())
+        whenever(authenticatorAssertionResponse.signature).thenReturn("signature".toByteArray())
+
+        webAuthnAuthentication = object : WebAuthnAuthentication(value) {
+            override fun getPublicKeyCredentialSource(context: Context): List<PublicKeyCredentialSource> {
+                return repository.getPublicKeyCredentialSource(source.rpid)
+            }
+
+            override suspend fun getPublicKeyCredential(context: Context): PublicKeyCredential {
+                return publicKeyCredential
+            }
+        }
+        assertThat(webAuthnAuthentication.supportsJsonResponse).isTrue
+        val result = webAuthnAuthentication.authenticate(context, object : WebAuthnKeySelector {
+            override suspend fun select(sourceList: List<PublicKeyCredentialSource>): PublicKeyCredentialSource {
+                return sourceList.first()
+            }
+        })
+
+        assertThat(result).isEqualTo("{\"authenticatorAttachment\":\"platform\",\"legacyData\":\"clientDataJson::97,117,116,104,101,110,116,105,99,97,116,105,111,110,68,97,116,97::115,105,103,110,97,116,117,114,101::cmF3SWQ::dGVzdA==\"}")
+    }
+
 
     private fun testParsingParameterWithUsernameLess(input: JSONObject) {
         webAuthnAuthentication = WebAuthnAuthentication(input)

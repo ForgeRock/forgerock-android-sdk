@@ -1,3 +1,7 @@
+## [4.X.X]
+####
+- WebAuthn supports new response payload [SDKS-3843]
+
 ## [4.7.0]
 #### Added
 - A fallback mechanism that uses an asymmetric key if symmetric key generation in the Android Keystore fails [SDKS-3467]
