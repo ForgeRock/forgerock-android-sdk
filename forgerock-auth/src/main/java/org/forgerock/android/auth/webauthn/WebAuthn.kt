@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2025 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
@@ -25,6 +25,8 @@ import org.json.JSONObject
  * [WebAuthnRegistration]
  */
 abstract class WebAuthn {
+
+    internal var supportsJsonResponse: Boolean = false
 
     /**
      * Parse the relaying party id.
@@ -95,6 +97,7 @@ abstract class WebAuthn {
         const val WEBAUTHN_REGISTRATION = "webauthn_registration"
         const val WEBAUTHN_AUTHENTICATION = "webauthn_authentication"
         const val _TYPE = "_type"
+        const val SUPPORTS_JSON_RESPONSE = "supportsJsonResponse"
 
         /**
          * Format the bytes array to string.

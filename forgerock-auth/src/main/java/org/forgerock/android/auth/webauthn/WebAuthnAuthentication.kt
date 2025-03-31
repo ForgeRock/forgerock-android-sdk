@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2025 ForgeRock. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
@@ -14,6 +14,10 @@ import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialDescriptor
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOptions
 import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.json.JSONArray
 import org.json.JSONException
@@ -38,6 +42,7 @@ open class WebAuthnAuthentication() : WebAuthn() {
             .setChallenge(challenge)
             .setTimeoutSeconds(timeout)
             .build()
+        supportsJsonResponse = input.optBoolean(SUPPORTS_JSON_RESPONSE, false)
     }
 
     constructor(options: PublicKeyCredentialRequestOptions) : this() {
@@ -128,7 +133,13 @@ open class WebAuthnAuthentication() : WebAuthn() {
                 sb.append(Base64.encodeToString(decoded, Base64.URL_SAFE or Base64.NO_WRAP))
             }
         }
-        return (sb.toString())
+        return if (supportsJsonResponse) {
+            val outcome = WebAuthnOutcome(publicKeyCredential.authenticatorAttachment ?: "platform",
+                sb.toString())
+            return Json.encodeToString(outcome)
+        } else {
+            sb.toString()
+        }
     }
 
     override suspend fun getPublicKeyCredential(context: Context): PublicKeyCredential {
