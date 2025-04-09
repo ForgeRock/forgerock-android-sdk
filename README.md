@@ -71,22 +71,6 @@ Documentation for the SDKs is provided at **<https://docs.pingidentity.com/sdks>
 * Introducing the SDK Features
 * Preparing AM for use with the SDKS
 
-### Build API Reference Documentation
-
-You can build the API reference documentation, which uses Dokka to generate either Javadoc or HTML output.
-
-HTML
-: `./gradlew clean dokkaHtmlMultiModule` 
-: View the output at [`build/api-reference/html/`](build/api-reference/html/index.html).
-
-JavaDoc
-: `./gradlew clean dokkaJavadocCollector`
-: View the output at [`build/api-reference/javadoc/`](build/api-reference/javadoc/index.html).
-
-> **TIP**: Use the following command to build both HTML and JavaDoc: 
-> 
->`./gradlew clean dokkaHtmlMultiModule dokkaJavadocCollector`
-
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- SUPPORT -->
 
@@ -108,7 +92,7 @@ The support portal shows all currently open support tickets and allows you to ra
 
 ## Contributing
 
-If you would like to contribute to this project you can fork the repository, clone it to your machine and get started.
+If you would like to contribute to this project, please see the [contributions guide](./CONTRIBUTION.md).
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- LEGAL -->
@@ -129,5 +113,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-&copy; Copyright 2020-2025 Ping Identity. All Rights Reserved
+&copy; Copyright 2020-2025 Ping Identity Corporation. All Rights Reserved
 
