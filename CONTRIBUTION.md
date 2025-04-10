@@ -1,8 +1,7 @@
 # Contribution Guidelines for Ping SDK for Android
 
 Welcome! We are excited that you are interested in contributing to the **Ping SDK for Android**. 
-This document will guide you through the steps required to contribute to the project. Your 
-contribution is very valuable for us.
+This document will guide you through the steps required to contribute to the project.
 
 We appreciate your help in making the Ping SDK for Android better for everyone.
 
@@ -26,7 +25,7 @@ in your local machine.
  
 2. Clone your forked repository to your local machine:
    ```bash
-   git clone https://github.com/ForgeRock/forgerock-android-sdk.git
+   git clone https://github.com/your-username/forgerock-android-sdk.git
    ```
 
 3. Navigate into the project folder:
@@ -51,7 +50,7 @@ more efficient.
      |── e2e                               # Contains the sample app for end-to-end tests
      |── forgerock-auth                    # Provides the OIDC client and integrates with Journey
      |── forgerock-auth-ui*                # Contains UI components for rapid prototype apps with Journey
-     |── forgerock-authenticator           # Alloes to add Push and OATH mechanisms to the app
+     |── forgerock-authenticator           # Allows to add Push and OATH mechanisms to the app
      |── forgerock-core                    # Provide common functions for all modules
      |── forgerock-integration-tests       # Includes tests for the SDK
      |── ping-protect                      # Provide access to the Ping Protect API
@@ -78,7 +77,7 @@ Journey framework. This module is deprecated.
 
 * **forgerock-authenticator**: This module empowers you to add powerful multi-factor authentication (MFA) capabilities to an 
 application. It includes support for Push notifications and Time-based One-Time Passwords (TOTP) 
-mechanisms (OATH), enabling developers to enhance security and protect users' accounts.
+mechanisms (OATH), enabling you to enhance security and protect users' accounts.
 
 * **forgerock-core**: The forgerock-core module acts as the foundational layer for all other modules within the SDK. It 
 provides a set of common functions and utilities that are shared across the SDK, ensuring 
@@ -122,11 +121,11 @@ tests for each SDK module.
 
 Comprehensive and accurate API reference documentation is essential for developers working with the
 Ping SDK for Android. It serves as the definitive guide to the SDK's classes, methods, and
-functions, enabling developers to quickly understand how to utilize its capabilities effectively.
+functions, enabling you to quickly understand how to utilize its capabilities effectively.
 This section outlines the process for generating API reference documentation directly from the
 source code.
 
-You can build the API reference documentation, which uses Dokka to generate either Javadoc or HTML 
+You can build the API reference documentation, which uses Dokka to generate either JavaDoc or HTML 
 output, using the following commands:
 
 HTML
@@ -149,26 +148,27 @@ For more details on our Standards of Practice, please refer to the [SDK Standard
 
 ## 3. Creating a Pull Request (PR)
 
-Once you've implemented your changes, the next step is to submit them for review by creating a 
-Pull Request (PR). A PR is a formal request to merge your changes from your forked repository into 
-the main project. This section outlines the process for creating a well-structured PR that 
-facilitates efficient review and integration of your contributions. By following these guidelines, 
-you ensure your code is presented clearly and is ready for consideration.
+This section covers how to create your changes, and submit them for review by Ping Identity engineers 
+by using a Pull Request. A PR is a formal request to merge your changes from your forked repository into 
+the main project. The following steps will guide you on creating a well-structured PR that 
+facilitates efficient review and integration of your contributions.
 
-### Step-by-Step Guide
-
-#### 1. Create a New Branch
+### 1. Create a New Branch
    Always create a new branch to work on your changes. Avoid making changes directly on the `develop` or `master` branch.
 
    ```bash
    git checkout -b feature/my-new-feature
    ```
    
-#### 2. Make Your Changes
+### 2. Make Your Changes
 Implement the required changes or new features. Make sure to write clean, well-commented, and readable code. If applicable, include tests and documentation for the new functionality.
 
-#### 3. Commit Your Changes
-Once you’ve made your changes, commit them with a clear and descriptive message. The commit message should follow this structure:
+### 3. Commit Your Changes
+Once you’ve made your changes, commit them with a clear and descriptive message. Note that our 
+repository requires all commits to be signed. For more information on signing commits, please refer to
+the [GitHub Docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+
+The commit message should follow this structure:
 
 ```
 [TYPE] Short description of the changes
@@ -184,17 +184,17 @@ Types:
 Example:
 
    ```bash
-   git commit -m "feat: add login functionality"
+   git commit -S -m "feat: add login functionality"
    ```
 
-#### 4. Push Your Changes
+### 4. Push Your Changes
 After committing your changes, push them to your fork:
 
    ```bash
     git push origin feature/my-new-feature
    ```
 
-#### 5. Create a Pull Request
+### 5. Create a Pull Request
 
 1. Go to your fork on GitHub.
 
@@ -202,18 +202,18 @@ After committing your changes, push them to your fork:
 
 3. Select the base repository and base branch (usually `develop`), then select the branch you just pushed.
 
-4. Fill Out the PR Template
+4. Fill out the PR Template
 
-   Make sure to fill out the PR template provided. The template helps us better understand your change. Typically, an PR will require the following information:
+   Make sure to fill out the PR template provided. The template helps us better understand your change. Typically, a PR will require the following information:
 
    * Add a title and description for the PR. The description should include:
      * What was changed and why.
      * Any related issues.
-     * Any additional context if necessary (e.g., relevant screenshots or breaking changes). 
+     * Any additional context if necessary, for example relevant screenshots or breaking changes. 
    
    Once everything looks good, submit the PR for review.
 
-### PR Review and Feedback
+### 6. PR Review and Feedback
 
 Once the PR is submitted, the team will review it. Be prepared to:
 
@@ -224,7 +224,7 @@ Once the PR is submitted, the team will review it. Be prepared to:
 
 * **Testing:** Please ensure that your code is well-tested. If your changes introduce new features or bug fixes, add appropriate tests to verify the behavior.
 
-* **Documentation**: Update relevant documentation to reflect any new features or changes to existing functionality.
+* **Documentation**: Update relevant API documentation to reflect any new features or changes to existing functionality.
 
 * **Style Guide**: Please follow the [coding style guide](https://github.com/ForgeRock/sdk-standards-of-practice/blob/main/code-style/android-coding-standard.md) for the language you are working with.
 
