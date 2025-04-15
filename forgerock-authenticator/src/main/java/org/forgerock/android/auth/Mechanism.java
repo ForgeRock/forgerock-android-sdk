@@ -30,12 +30,12 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     private final String type;
     /** The shared secret of the Mechanism */
     private final String secret;
-    /** The unique identifier of the user associated with this mechanism */
-    private final String uid;
     /** The unique identifier of this mechanism on the server */
     private final String resourceId;
     /** Date this object was stored */
     private final Calendar timeAdded;
+    /** The unique identifier of the user associated with this mechanism */
+    private String uid;
     /** The Account associated with this mechanism **/
     private Account account;
 
@@ -141,6 +141,14 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      */
     String getUid() {
         return uid;
+    }
+
+    /**
+     * Sets the unique identifier of the user associated with this mechanism.
+     * @param uid The unique identifier of the user.
+     */
+    void setUid(String uid) {
+        this.uid = uid;
     }
 
     /**

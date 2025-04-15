@@ -176,6 +176,22 @@ public class NotificationFactoryTest extends FRABaseTest {
     }
 
     @Test
+    public void testShouldHandleMessageWithUserdId() throws Exception {
+        push = (PushMechanism) createPushMechanism("user1@example.com", "ForgeRock", MECHANISM_UID);
+        given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
+
+        Map<String, String> baseMessage = generateBaseMessage();
+        baseMessage.put(PushParser.USER_ID, "user1");
+
+        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, baseMessage);
+        PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
+
+        assertNotNull(pushNotification);
+        assertEquals(MESSAGE_ID, pushNotification.getMessageId());
+        assertEquals("user1", push.getUid());
+    }
+
+    @Test
     public void testShouldNotHandleRemoteMessageWrongSecret() throws Exception {
         RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, INCORRECT_SECRET, generateBaseMessage());
 

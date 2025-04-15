@@ -50,6 +50,8 @@ class PushParser extends MechanismParser {
     public static final String CONTEXT_INFO = "x";
     /** The unique identifier of the PUSH mechanism on the server */
     public static final String PUSH_RESOURCE_ID = "pid";
+    /** The user id associated with the notification */
+    public static final String USER_ID = "d";
 
     private static final String BASE_64_URL_SHARED_SECRET = "s";
     private static final String BASE_64_URL_CHALLENGE = "c";
