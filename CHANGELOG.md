@@ -1,6 +1,6 @@
-## [4.X.X]
-####
-- WebAuthn supports new response payload [SDKS-3843]
+## [4.8.0]
+#### Added
+- Support for new response payload in WebAuthn authentication and regitration [SDKS-3843]
 
 ## [4.7.0]
 #### Added

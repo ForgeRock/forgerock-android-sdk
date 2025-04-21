@@ -32,7 +32,7 @@ open class ReCaptchaEnterpriseCallbackBaseTest {
         val context: Context = ApplicationProvider.getApplicationContext()
         val application: Application = ApplicationProvider.getApplicationContext()
 
-        protected const val AM_URL: String = "https://openam-recaptcha.forgeblocks.com/am"
+        protected const val AM_URL: String = "https://openam-sdks2.forgeblocks.com/am"
         protected const val REALM: String = "alpha"
         protected const val OAUTH_CLIENT: String = "AndroidTest"
         protected const val OAUTH_REDIRECT_URI: String = "org.forgerock.demo:/oauth2redirect"
