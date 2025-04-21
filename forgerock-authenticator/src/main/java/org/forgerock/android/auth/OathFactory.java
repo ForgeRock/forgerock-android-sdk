@@ -145,7 +145,7 @@ class OathFactory extends MechanismFactory {
         }
 
         // User id and resource id are optional
-        String uid = getFromMap(map, MechanismParser.USER_ID, null);
+        String uid = getFromMap(map, MechanismParser.UID, null);
         String resourceId = getFromMap(map, OathParser.OATH_RESOURCE_ID, null);
 
         Mechanism oath;

@@ -129,7 +129,7 @@ public class OathParserTest {
     @Test
     public void testShouldParseUid() throws MechanismParsingException {
         Map<String, String> result = oathParser.map("otpauth://totp/Forgerock:demo?secret=ABC&uid=dXNlcjM");
-        assertEquals(result.get(OathParser.USER_ID), "user3");
+        assertEquals(result.get(OathParser.UID), "user3");
     }
 
     @Test

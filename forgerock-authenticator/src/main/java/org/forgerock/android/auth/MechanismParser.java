@@ -47,7 +47,7 @@ abstract class MechanismParser {
     /** The Authenticator Policies. */
     public static final String POLICIES = "policies";
     /** The User ID. */
-    public static final String USER_ID = "uid";
+    public static final String UID = "uid";
 
     private static final String SLASH = "/";
 
@@ -127,8 +127,8 @@ abstract class MechanismParser {
         }
 
         // The user id is OPTIONAL
-        if (containsNonEmpty(r, USER_ID)) {
-            r.put(USER_ID, getBase64DecodedString(r.get(USER_ID)));
+        if (containsNonEmpty(r, UID)) {
+            r.put(UID, getBase64DecodedString(r.get(UID)));
         }
 
         return r;

@@ -107,7 +107,7 @@ class PushFactory extends MechanismFactory {
         String base64Challenge = map.get(PushParser.CHALLENGE);
         String amlbCookie = map.get(PushParser.AM_LOAD_BALANCER_COOKIE);
         String messageId = getFromMap(map, PushParser.MESSAGE_ID, null);
-        String uid = getFromMap(map, MechanismParser.USER_ID, null);
+        String uid = getFromMap(map, MechanismParser.UID, null);
         String resourceId = getFromMap(map, PushParser.PUSH_RESOURCE_ID, null);
 
         String challengeResponse;
