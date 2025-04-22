@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -46,6 +46,8 @@ abstract class MechanismParser {
     public static final String UNTITLED = "Untitled";
     /** The Authenticator Policies. */
     public static final String POLICIES = "policies";
+    /** The User ID. */
+    public static final String UID = "uid";
 
     private static final String SLASH = "/";
 
@@ -122,6 +124,11 @@ abstract class MechanismParser {
         // Check policy
         if (containsNonEmpty(r, POLICIES) && isBase64Encoded(r.get(POLICIES))) {
             r.put(POLICIES, getBase64DecodedString(r.get(POLICIES)));
+        }
+
+        // The user id is OPTIONAL
+        if (containsNonEmpty(r, UID)) {
+            r.put(UID, getBase64DecodedString(r.get(UID)));
         }
 
         return r;

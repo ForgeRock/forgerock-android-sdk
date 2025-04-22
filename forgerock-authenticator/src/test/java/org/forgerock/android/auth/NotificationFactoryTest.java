@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -173,6 +173,22 @@ public class NotificationFactoryTest extends FRABaseTest {
         assertEquals(Integer.parseInt(numbersString[0]), numbersInt[0]);
         assertEquals(Integer.parseInt(numbersString[1]), numbersInt[1]);
         assertEquals(Integer.parseInt(numbersString[2]), numbersInt[2]);
+    }
+
+    @Test
+    public void testShouldHandleMessageWithUserdId() throws Exception {
+        push = (PushMechanism) createPushMechanism("user1@example.com", "ForgeRock", MECHANISM_UID);
+        given(storageClient.getMechanismByUUID(MECHANISM_UID)).willReturn(push);
+
+        Map<String, String> baseMessage = generateBaseMessage();
+        baseMessage.put(PushParser.USER_ID, "user1");
+
+        RemoteMessage remoteMessage = generateMockRemoteMessage(MESSAGE_ID, CORRECT_SECRET, baseMessage);
+        PushNotification pushNotification = notificationFactory.handleMessage(remoteMessage);
+
+        assertNotNull(pushNotification);
+        assertEquals(MESSAGE_ID, pushNotification.getMessageId());
+        assertEquals("user1", push.getUid());
     }
 
     @Test

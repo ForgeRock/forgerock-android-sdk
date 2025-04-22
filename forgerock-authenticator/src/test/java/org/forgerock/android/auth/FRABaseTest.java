@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ public abstract class FRABaseTest {
     public static final String OTHER_REGISTRATION_ENDPOINT = "http://develop.openam.forgerock.com:8080/openam/json/push/sns/message?_action=register";
     public static final String AUTHENTICATION_ENDPOINT = "http://openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
     public static final String OTHER_AUTHENTICATION_ENDPOINT = "http://develop.openam.forgerock.com:8080/openam/json/push/sns/message?_action=authenticate";
+    public static final String UPDATE_ENDPOINT = "http://openam.forgerock.com:8080/openam/json/push/sns/message?_action=refresh";
     public static final String MESSAGE_ID = "AUTHENTICATE:63ca6f18-7cfb-4198-bcd0-ac5041fbbea01583798229441";
     public static final String MESSAGE = "Login attempt at ForgeRock";
     public static final String OTHER_MESSAGE_ID = "AUTHENTICATE:10ce6f20-1bfb-4198-eed1-aa5041fbbea0158123456789";
@@ -77,6 +79,7 @@ public abstract class FRABaseTest {
     public static final String TEST_SHARED_PREFERENCES_DATA_ACCOUNT = "test.DATA.ACCOUNT";
     public static final String TEST_SHARED_PREFERENCES_DATA_MECHANISM = "test.DATA.MECHANISM";
     public static final String TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "test.DATA.NOTIFICATIONS";
+    public static final String TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN = "test.DATA.DEVICE_TOKEN";
     public static final String POLICIES = "{\"biometricAvailable\": { },\"deviceTampering\": {\"score\": 0.8}}";
 
     @BeforeClass
@@ -135,6 +138,11 @@ public abstract class FRABaseTest {
         given(push.getSecret()).willReturn(CORRECT_SECRET);
         given(push.getAuthenticationEndpoint()).willReturn(serverUrl+"authenticate");
         given(push.getRegistrationEndpoint()).willReturn(serverUrl+"register");
+        try {
+            given(push.getUpdateEndpoint()).willReturn(serverUrl+"update");
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
         return push;
     }
 

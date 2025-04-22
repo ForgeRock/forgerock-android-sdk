@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -111,6 +111,19 @@ public interface StorageClient {
      * @return The PushNotification object.
      */
     PushNotification getNotificationByMessageId(String messageId);
+
+    /**
+     * Set the PushDeviceToken object to the storage system.
+     * @param pushDeviceToken The PushDeviceToken object to store.
+     * @return boolean as result of the operation
+     */
+    boolean setPushDeviceToken(PushDeviceToken pushDeviceToken);
+
+    /**
+     * Get the current stored PushDeviceToken object with its id
+     * @return The PushDeviceToken object.
+     */
+    PushDeviceToken getPushDeviceToken();
 
     /**
      * Whether the storage system currently contains any data.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -48,6 +48,10 @@ class PushParser extends MechanismParser {
     public static final String NUMBERS_CHALLENGE = "n";
     /** The key for the context info. */
     public static final String CONTEXT_INFO = "x";
+    /** The unique identifier of the PUSH mechanism on the server */
+    public static final String PUSH_RESOURCE_ID = "pid";
+    /** The user id associated with the notification */
+    public static final String USER_ID = "d";
 
     private static final String BASE_64_URL_SHARED_SECRET = "s";
     private static final String BASE_64_URL_CHALLENGE = "c";
@@ -83,6 +87,11 @@ class PushParser extends MechanismParser {
         values.put(AUTHENTICATION_ENDPOINT, recodeBase64UrlValueToStringWithValidation(values, BASE_64_URL_AUTH_ENDPOINT));
         values.put(SHARED_SECRET, recodeBase64UrlValueToBase64WithValidation(values, BASE_64_URL_SHARED_SECRET));
         values.put(CHALLENGE, recodeBase64UrlValueToBase64WithValidation(values, BASE_64_URL_CHALLENGE));
+
+        // PUSH Resource Id is OPTIONAL
+        if (containsNonEmpty(values, PUSH_RESOURCE_ID)) {
+            values.put(PUSH_RESOURCE_ID, getBase64DecodedString(values.get(PUSH_RESOURCE_ID)));
+        }
 
         return values;
     }

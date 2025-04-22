@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -38,6 +38,7 @@ public class DefaultStorageClientTest extends FRABaseTest {
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_ACCOUNT);
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM);
             context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS);
+            context.deleteSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN);
         }
     }
 

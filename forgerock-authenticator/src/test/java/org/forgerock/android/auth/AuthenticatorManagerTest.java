@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,6 +20,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+
 import android.content.Context;
 import android.util.Base64;
 
@@ -34,6 +36,8 @@ import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.InvalidPolicyException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.MechanismPolicyViolationException;
+import org.forgerock.android.auth.exception.MechanismUpdatePushTokenException;
+import org.forgerock.android.auth.exception.PushMechanismException;
 import org.forgerock.android.auth.policy.DeviceTamperingPolicy;
 import org.forgerock.android.auth.policy.FRAPolicy;
 import org.json.JSONException;
@@ -46,8 +50,10 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
@@ -60,6 +66,7 @@ public class AuthenticatorManagerTest extends FRABaseTest {
     private FRAListenerFuture pushListenerFuture;
     private FRAListenerFuture oathListenerFuture;
     private AuthenticatorManager authenticatorManager;
+    private PushDeviceTokenManager pushDeviceTokenManager;
     private PushMechanism push;
     private MockWebServer server;
     private FRAPolicyEvaluator policyEvaluator;
@@ -88,7 +95,8 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         oathListenerFuture = new FRAListenerFuture<Mechanism>();
         pushListenerFuture = new FRAListenerFuture<Mechanism>();
 
-        pushFactory = spy(new PushFactory(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushDeviceTokenManager = spy(new PushDeviceTokenManager(context, storageClient, "s-o-m-e-t-o-k-e-n"));
+        pushFactory = spy(new PushFactory(context, storageClient, pushDeviceTokenManager));
         doReturn(true).when(pushFactory).checkGooglePlayServices();
 
         server = new MockWebServer();
@@ -996,4 +1004,102 @@ public class AuthenticatorManagerTest extends FRABaseTest {
         assertNull(account.getLockingPolicy());
     }
 
+    @Test
+    public void updateDeviceTokenSuccess() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.start();
+        server.enqueue(new MockResponse());
+        HttpUrl baseUrl = server.url("/");
+
+        PushMechanism pushMechanism = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(pushMechanism);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            listenerFuture.get();
+            assertEquals(server.getRequestCount(), 1);
+        } catch (Exception ignored) {
+            // ignored
+        }
+
+        server.shutdown();
+    }
+
+    @Test
+    public void updateDeviceTokenNetworkFailure() throws IOException {
+        MockWebServer server = new MockWebServer();
+        server.start();
+        server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
+        HttpUrl baseUrl = server.url("/");
+
+        PushMechanism pushMechanism = mockPushMechanism(MECHANISM_UID, baseUrl.toString());
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+        List<Mechanism> mechanismList = new ArrayList<>();
+        mechanismList.add(pushMechanism);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(mechanismList);
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            listenerFuture.get();
+            fail("Should throw MechanismUpdatePushTokenException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof MechanismUpdatePushTokenException);
+            assertEquals(1, ((MechanismUpdatePushTokenException) e.getCause()).getPushMechanisms().size());
+        }
+
+        server.shutdown();
+    }
+
+    @Test
+    public void updateDeviceTokenNoPushMechanismFailure() throws IOException {
+        String newToken = "newToken";
+
+        Account account = createAccount("demo", "ForgeRock");
+        List<Account> accountList= new ArrayList<>();
+        accountList.add(account);
+
+        given(storageClient.getAllAccounts()).willReturn(accountList);
+        given(storageClient.getAccount(anyString())).willReturn(account);
+        given(storageClient.getMechanismsForAccount(account)).willReturn(Collections.emptyList());
+
+        PushResponder.getInstance(storageClient);
+
+        FRAListenerFuture<Void> listenerFuture = new FRAListenerFuture<Void>();
+
+        authenticatorManager.updateDeviceToken(newToken, listenerFuture);
+
+        try {
+            listenerFuture.get();
+            fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+        }
+    }
 }

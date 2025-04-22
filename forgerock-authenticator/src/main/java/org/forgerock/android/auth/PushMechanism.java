@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,14 +8,20 @@
 package org.forgerock.android.auth;
 
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.util.UrlUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an instance of a Push authentication mechanism. Associated with an Account.
@@ -38,11 +44,14 @@ public class PushMechanism extends Mechanism {
      * @param secret String value of the shared secret
      * @param registrationEndpoint registration URL for Push
      * @param authenticationEndpoint authentication URL for Push
+     * @param uid unique identifier of the user associated with this mechanism
+     * @param resourceId unique identifier of the resource associated with this mechanism
      * @param timeCreated Date and Time this Mechanism was stored
      */
-    private PushMechanism(String mechanismUID, String issuer, String accountName, String type, String secret,
-                          String registrationEndpoint, String authenticationEndpoint, Calendar timeCreated) {
-        super(mechanismUID, issuer, accountName, type, secret, timeCreated);
+    private PushMechanism(String mechanismUID, String issuer, String accountName, String type,
+                          String secret,  String uid, String resourceId, String registrationEndpoint,
+                          String authenticationEndpoint, Calendar timeCreated) {
+        super(mechanismUID, issuer, accountName, type, secret, uid, resourceId, timeCreated);
         this.registrationEndpoint = registrationEndpoint;
         this.authenticationEndpoint = authenticationEndpoint;
     }
@@ -61,6 +70,34 @@ public class PushMechanism extends Mechanism {
      */
     String getAuthenticationEndpoint() {
         return authenticationEndpoint;
+    }
+
+    /**
+     * The update URL for Push mechanism.
+     * @return String representing the update URL
+     */
+    String getUpdateEndpoint() throws MalformedURLException {
+        if (registrationEndpoint == null || registrationEndpoint.isEmpty()) {
+            throw new MalformedURLException("Invalid registration endpoint URL");
+        }
+
+        try {
+            String query = UrlUtils.getQueryString(registrationEndpoint);
+            if (query == null || query.isEmpty()) {
+                throw new MalformedURLException("Invalid registration endpoint URL, it does not contain a query string");
+            }
+
+            Map<String, String> queryParams = UrlUtils.parseQueryParams(query);
+            if (queryParams.containsKey("_action") && queryParams.get("_action").equals("register")) {
+                queryParams.put("_action", "refresh");
+            } else {
+                throw new MalformedURLException("Invalid registration endpoint URL, it does not contain '_action=register'");
+            }
+
+            return UrlUtils.updateQueryParams(registrationEndpoint, queryParams);
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
+            throw new MalformedURLException("Failed to construct update URL: " + e.getLocalizedMessage());
+        }
     }
 
     /**
@@ -103,6 +140,7 @@ public class PushMechanism extends Mechanism {
             jsonObject.put("mechanismUID", getMechanismUID());
             jsonObject.put("secret", getSecret());
             jsonObject.put("type", getType());
+            jsonObject.put("uid", getUid());
             jsonObject.put("registrationEndpoint", getRegistrationEndpoint());
             jsonObject.put("authenticationEndpoint", getAuthenticationEndpoint());
             jsonObject.put("timeAdded", getTimeAdded() != null ? getTimeAdded().getTimeInMillis() : null);
@@ -134,6 +172,8 @@ public class PushMechanism extends Mechanism {
                     .setAccountName(jsonObject.getString("accountName"))
                     .setMechanismUID(jsonObject.getString("mechanismUID"))
                     .setSecret(jsonObject.getString("secret"))
+                    .setUid(jsonObject.has("uid") ? jsonObject.getString("uid") : null)
+                    .setResourceId(jsonObject.has("resourceId") ? jsonObject.getString("resourceId") : null)
                     .setRegistrationEndpoint(jsonObject.getString("registrationEndpoint"))
                     .setAuthenticationEndpoint(jsonObject.getString("authenticationEndpoint"))
                     .setTimeAdded(jsonObject.has("timeAdded") ? getDate(jsonObject.optLong("timeAdded")) : null)
@@ -161,6 +201,8 @@ public class PushMechanism extends Mechanism {
         private String registrationEndpoint;
         private String authenticationEndpoint;
         private String secret;
+        private String uid;
+        private String resourceId;
         private Calendar timeAdded;
 
         /**
@@ -212,6 +254,26 @@ public class PushMechanism extends Mechanism {
         }
 
         /**
+         * Set the user ID that this mechanism shares with the server.
+         * @param uid The user ID
+         * @return This builder
+         */
+        public PushBuilder setUid(String uid) {
+            this.uid = uid;
+            return this;
+        }
+
+        /**
+         * Set the resource ID that this mechanism shares with the server.
+         * @param resourceId The resource ID
+         * @return This builder
+         */
+        public PushBuilder setResourceId(String resourceId) {
+            this.resourceId = resourceId;
+            return this;
+        }
+
+        /**
          * Set the secret that this mechanism shares with the server.
          * @param secret The shared secret
          * @return This builder
@@ -243,8 +305,8 @@ public class PushMechanism extends Mechanism {
                 throw new MechanismCreationException("accountName cannot be empty or null.");
             }
 
-            return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret,
-                    registrationEndpoint, authenticationEndpoint, timeAdded);
+            return new PushMechanism(mechanismUID, issuer, accountName, Mechanism.PUSH, secret, uid,
+                    resourceId, registrationEndpoint, authenticationEndpoint, timeAdded);
         }
 
     }
