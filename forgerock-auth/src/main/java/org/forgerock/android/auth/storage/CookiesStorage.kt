@@ -47,7 +47,7 @@ class CookiesStorage(
                 }
             }
         } catch (e: Throwable) {
-            Logger.error(TAG, "Failed to migrate cookies", e)
+            Logger.error(TAG, e, "Failed to migrate cookies")
             original.clearCookies()
         }
     }

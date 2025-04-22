@@ -47,7 +47,7 @@ class SSOTokenStorage(
                 original.clearToken()
             }
         } catch (e: Throwable) {
-            Logger.error(TAG, "Failed to migrate SSO token", e)
+            Logger.error(TAG, e, "Failed to migrate SSO token")
             original.clearToken()
         }
     }

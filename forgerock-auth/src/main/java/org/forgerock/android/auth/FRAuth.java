@@ -56,7 +56,7 @@ public class FRAuth {
                     SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
                     sessionManager.close();
                 } catch (Exception e) {
-                    Logger.warn(TAG, "Failed to close the session manager", e);
+                    Logger.warn(TAG, e, "Failed to close the session manager");
                 }
             }
             Config.getInstance().init(context, currentOptions);

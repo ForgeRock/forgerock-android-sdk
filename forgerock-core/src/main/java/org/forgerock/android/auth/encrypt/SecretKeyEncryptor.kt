@@ -96,7 +96,7 @@ class SecretKeyEncryptor(block: SecretKeyEncryptorConfig.() -> Unit = {}) : Susp
     override suspend fun encrypt(data: ByteArray): ByteArray = withContext(Dispatchers.Default) {
         lock.withLock {
             withRetry(byteArrayOf(), {
-                Logger.error(TAG, "Failed to encrypt data, retrying...", it)
+                Logger.error(TAG, it, "Failed to encrypt data, retrying...")
                 keyStore.deleteEntry(config.keyAlias)
             }) {
                 Logger.debug(TAG, "Encrypting data...")
@@ -142,7 +142,7 @@ class SecretKeyEncryptor(block: SecretKeyEncryptorConfig.() -> Unit = {}) : Susp
                     )
                 )
             } catch (e: Throwable) {
-                Logger.error(TAG, "Failed to decrypt data", e)
+                Logger.error(TAG, e, "Failed to decrypt data")
                 if (config.throwWhenEncryptError) throw e
                 byteArrayOf()
             }
@@ -180,7 +180,7 @@ class SecretKeyEncryptor(block: SecretKeyEncryptorConfig.() -> Unit = {}) : Susp
             try {
                 SymmetricKey(generateAndroidKeyStoreSecretKey())
             } catch (e: Throwable) {
-                Logger.warn(TAG, "falling back to asymmetric key", e)
+                Logger.warn(TAG, e, "falling back to asymmetric key")
                 //If failed to generate Android keystore secret key, generate file-based secret key
                 generateEmbeddedSecretKey()
             }
@@ -295,7 +295,7 @@ class SecretKeyEncryptor(block: SecretKeyEncryptorConfig.() -> Unit = {}) : Susp
                 keyPairGenerator.generateKeyPair()
             } catch (e: Exception) {
                 //Retry again without strong box enabled, some platform may not response with StrongBoxUnavailableException
-                Logger.warn(TAG, "Strong Box unavailable, recover without strong box", e)
+                Logger.warn(TAG, e, "Strong Box unavailable, recover without strong box")
                 keyGenParameterSpec.setIsStrongBoxBacked(false)
                 keyPairGenerator.initialize(keyGenParameterSpec.build())
                 keyPairGenerator.generateKeyPair()
@@ -386,7 +386,7 @@ class SecretKeyEncryptor(block: SecretKeyEncryptorConfig.() -> Unit = {}) : Susp
                 return keyGenerator.generateKey()
             } catch (e: Exception) {
                 //Retry again without strong box enabled, some platform may not response with StrongBoxUnavailableException
-                Logger.warn(TAG, "Strong Box unavailable, recover without strong box", e)
+                Logger.warn(TAG, e, "Strong Box unavailable, recover without strong box")
                 specBuilder.setIsStrongBoxBacked(false)
                 keyGenerator.init(specBuilder.build())
                 return keyGenerator.generateKey()
