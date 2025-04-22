@@ -44,7 +44,7 @@ open class BiometricOnly : BiometricAuthenticator() {
         } catch (e: Exception) {
             //Failed because the key was generated with
             //KeyGenParameterSpec.Builder.setUserAuthenticationParameters
-            Logger.warn(TAG, "Fallback to time-based key", e)
+            Logger.warn(TAG, e, "Fallback to time-based key")
             biometricInterface.authenticate(authenticationCallback)
         }
     }

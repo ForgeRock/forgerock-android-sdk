@@ -40,7 +40,7 @@ class CookieMarshaller {
             outputStream.writeObject(new SerializableCookie(cookie));
             return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         } catch (Exception e) {
-            Logger.warn(TAG, "Failed to marshal the cookie to String.", e);
+            Logger.warn(TAG, e, "Failed to marshal the cookie to String.");
             return null;
         }
     }
@@ -66,7 +66,7 @@ class CookieMarshaller {
             };
             return ((SerializableCookie) objectInputStream.readObject()).getCookie();
         } catch (Exception e) {
-            Logger.warn(TAG, "Failed to unmarshal the cookie from String.", e);
+            Logger.warn(TAG, e, "Failed to unmarshal the cookie from String.");
             return null;
         }
     }

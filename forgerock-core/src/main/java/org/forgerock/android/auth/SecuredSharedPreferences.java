@@ -213,7 +213,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (Exception e) {
             //Failed to decrypt the data, reset the encryptor
-            Logger.warn(TAG, "Failed to decrypt the data.", e);
+            Logger.warn(TAG, e, "Failed to decrypt the data.");
             if (e instanceof CancellationException) {
                 throw e;
             }
