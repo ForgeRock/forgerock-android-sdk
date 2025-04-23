@@ -1,6 +1,11 @@
 ## [4.8.0]
 #### Added
-- Support for new response payload in WebAuthn authentication and regitration [SDKS-3843]
+- Support for new response payload in WebAuthn authentication and registration [SDKS-3843]
+- Ability to update Firebase Cloud Messaging (FCM) device token for existing push mechanisms [SDKS-3684]
+
+#### Fixed
+- Improved logging for errors and warning exceptions [SDKS-3990]
+- Fixed an issue causing a crash when the app process was killed in the background during the centralized login flow [SDKS-3993]
 
 ## [4.7.0]
 #### Added
