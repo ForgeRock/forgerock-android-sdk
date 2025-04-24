@@ -89,7 +89,9 @@ internal class AuthorizeContract :
         resultCode: Int,
         intent: Intent?,
     ): Result<AuthorizationResponse, Throwable> {
-        authorizationService.dispose()
+        if (::authorizationService.isInitialized) {
+            authorizationService.dispose()
+        }
         intent?.let { i ->
             val error = AuthorizationException.fromIntent(i)
             error?.let {
