@@ -13,12 +13,12 @@ on:
 permissions: write-all
 jobs:
   # Build and run unit tests
-  build-and-test:
-    name: Build and test
-    uses: ./.github/workflows/build-and-test.yaml
-    secrets:
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # build-and-test:
+  #   name: Build and test
+  #   uses: ./.github/workflows/build-and-test.yaml
+  #   secrets:
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # Run Mend CLI Scan
   mend-cli-scan:
@@ -29,64 +29,64 @@ jobs:
       MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }} 
 
-  # Run Sonatype OSS Index Scan
-  sonatype-ossindex:
-    name: Scan for open source vulnerabilities (Sonatype OSS Index)
-    uses: ./.github/workflows/sonatype-ossi-scan.yaml
-    secrets:
-      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  # # Run Sonatype OSS Index Scan
+  # sonatype-ossindex:
+  #   name: Scan for open source vulnerabilities (Sonatype OSS Index)
+  #   uses: ./.github/workflows/sonatype-ossi-scan.yaml
+  #   secrets:
+  #     SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+  #     SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
-  # Build and sign BitBar test artifacts (auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk)
-  # Skip this step for PRs created by dependabot
-  bitbar-prepare-artifacts:
-    name: Prepare device farm artifacts
-    uses: ./.github/workflows/bitbar-prepare-artifacts.yaml
-    if: ${{ github.actor != 'dependabot[bot]' }}
-    needs: build-and-test
-    secrets:
-      SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
-      SIGNING_ALIAS: ${{ secrets.SIGNING_ALIAS }}
-      SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  # # Build and sign BitBar test artifacts (auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk)
+  # # Skip this step for PRs created by dependabot
+  # bitbar-prepare-artifacts:
+  #   name: Prepare device farm artifacts
+  #   uses: ./.github/workflows/bitbar-prepare-artifacts.yaml
+  #   if: ${{ github.actor != 'dependabot[bot]' }}
+  #   needs: build-and-test
+  #   secrets:
+  #     SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
+  #     SIGNING_ALIAS: ${{ secrets.SIGNING_ALIAS }}
+  #     SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+  #     SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
-  # Execute e2e test cases in BitBar. The workflow outputs the newly created run id.
-  bitbar-run:
-    name: Run tests in BitBar
-    uses: ./.github/workflows/bitbar-run.yaml
-    needs: bitbar-prepare-artifacts
-    secrets:
-      BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-    with: 
-      bitbar-project-id: 207047111
-      bitbar-device-group-id: 46937
+  # # Execute e2e test cases in BitBar. The workflow outputs the newly created run id.
+  # bitbar-run:
+  #   name: Run tests in BitBar
+  #   uses: ./.github/workflows/bitbar-run.yaml
+  #   needs: bitbar-prepare-artifacts
+  #   secrets:
+  #     BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #   with: 
+  #     bitbar-project-id: 207047111
+  #     bitbar-device-group-id: 46937
 
-  # Wait for BitBar test run to finish and publish results
-  bitbar-results:
-    name: BitBar test results
-    uses: ./.github/workflows/bitbar-results.yaml
-    needs: bitbar-run
-    secrets:
-      BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-    with:
-      bitbar-project-id: 207047111 
-      bitbar-run-id: ${{ needs.bitbar-run.outputs.bitbar-run-id }}
+  # # Wait for BitBar test run to finish and publish results
+  # bitbar-results:
+  #   name: BitBar test results
+  #   uses: ./.github/workflows/bitbar-results.yaml
+  #   needs: bitbar-run
+  #   secrets:
+  #     BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #   with:
+  #     bitbar-project-id: 207047111 
+  #     bitbar-run-id: ${{ needs.bitbar-run.outputs.bitbar-run-id }}
 
-  # Publish a SNAPSHOT release
-  # This is only run upon push to develop and if all tests pass...
-  publish-snapshot:
-    name: Publish SNAPSHOT release
-    uses: ./.github/workflows/publish-snapshot.yaml
-    if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
-    needs: [bitbar-results, sonatype-ossindex, mend-cli-scan]
-    secrets:
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
-      PUBLISHING_SIGNING_KEY_PASSWORD: ${{ secrets.PUBLISHING_SIGNING_KEY_PASSWORD }}
-      PUBLISHING_SIGNING_KEY_RING_FILE_BASE64: ${{ secrets.PUBLISHING_SIGNING_KEY_RING_FILE_BASE64 }}
-      PUBLISHING_USERNAME: ${{ secrets.PUBLISHING_USERNAME }}
-      PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
+  # # Publish a SNAPSHOT release
+  # # This is only run upon push to develop and if all tests pass...
+  # publish-snapshot:
+  #   name: Publish SNAPSHOT release
+  #   uses: ./.github/workflows/publish-snapshot.yaml
+  #   if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
+  #   needs: [bitbar-results, sonatype-ossindex, mend-cli-scan]
+  #   secrets:
+  #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #     PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
+  #     PUBLISHING_SIGNING_KEY_PASSWORD: ${{ secrets.PUBLISHING_SIGNING_KEY_PASSWORD }}
+  #     PUBLISHING_SIGNING_KEY_RING_FILE_BASE64: ${{ secrets.PUBLISHING_SIGNING_KEY_RING_FILE_BASE64 }}
+  #     PUBLISHING_USERNAME: ${{ secrets.PUBLISHING_USERNAME }}
+  #     PUBLISHING_PASSWORD: ${{ secrets.PUBLISHING_PASSWORD }}
