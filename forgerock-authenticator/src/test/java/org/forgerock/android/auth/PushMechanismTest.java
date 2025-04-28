@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2021 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 public class PushMechanismTest extends FRABaseTest {
 
     @Test
-    public void testCreatePushMechanismSuccessfuly() throws MechanismCreationException {
+    public void testCreatePushMechanismSuccessfuly() throws Exception {
         PushMechanism mechanism = PushMechanism.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setIssuer(ISSUER)
@@ -44,6 +44,7 @@ public class PushMechanismTest extends FRABaseTest {
         assertEquals(mechanism.getType(), Mechanism.PUSH);
         assertEquals(mechanism.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
         assertEquals(mechanism.getAuthenticationEndpoint(), AUTHENTICATION_ENDPOINT);
+        assertEquals(mechanism.getUpdateEndpoint(), UPDATE_ENDPOINT);
         assertEquals(mechanism.getSecret(), SECRET);
     }
 

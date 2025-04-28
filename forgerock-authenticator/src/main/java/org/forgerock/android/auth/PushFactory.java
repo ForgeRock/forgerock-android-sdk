@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -17,6 +17,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
+import org.forgerock.android.auth.util.DeviceUtils;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -31,10 +32,8 @@ import java.util.TimeZone;
  */
 class PushFactory extends MechanismFactory {
 
-    /* The FCM device's registration token used for Push notifications */
-    private String fcmToken;
-
     private final PushParser parser = new PushParser();
+    private final PushDeviceTokenManager pushDeviceTokenManager;
 
     private static final String TAG = PushFactory.class.getSimpleName();
 
@@ -43,11 +42,11 @@ class PushFactory extends MechanismFactory {
      *
      * @param context The application context
      * @param storageClient The storage system
-     * @param fcmToken The FCM device registration token an Android app needs to receive push messages
+     * @param pushDeviceTokenManager Manages the FCM device registration token an Android app needs to receive push messages
      */
-    public PushFactory(Context context, StorageClient storageClient, String fcmToken) {
+    public PushFactory(Context context, StorageClient storageClient, PushDeviceTokenManager pushDeviceTokenManager) {
         super(context, storageClient);
-        this.fcmToken = fcmToken;
+        this.pushDeviceTokenManager = pushDeviceTokenManager;
     }
 
     @Override
@@ -55,7 +54,8 @@ class PushFactory extends MechanismFactory {
             String> map, @NonNull FRAListener<Mechanism> listener) {
 
         // Check FCM device token
-        if(this.fcmToken == null || this.fcmToken.length() == 0) {
+        String fcmToken = this.getDeviceTokenId();
+        if(fcmToken == null || fcmToken.isEmpty()) {
             listener.onException(new MechanismCreationException("Invalid FCM token. SDK will not be able to register Push mechanisms."));
             return;
         }
@@ -84,6 +84,19 @@ class PushFactory extends MechanismFactory {
         return this.parser;
     }
 
+
+//    /**
+//     * Sets the FCM device token.
+//     * @param fcmToken The FCM device registration token
+//     */
+//    protected void setFcmToken(String fcmToken) {
+//        this.fcmToken = fcmToken;
+//    }
+
+    private String getDeviceTokenId() {
+        return pushDeviceTokenManager.getDeviceTokenId();
+    }
+
     private void buildPushMechanism(String mechanismUID, Map<String,
             String> map, FRAListener<Mechanism> listener) {
         String issuer = map.get(MechanismParser.ISSUER);
@@ -94,6 +107,8 @@ class PushFactory extends MechanismFactory {
         String base64Challenge = map.get(PushParser.CHALLENGE);
         String amlbCookie = map.get(PushParser.AM_LOAD_BALANCER_COOKIE);
         String messageId = getFromMap(map, PushParser.MESSAGE_ID, null);
+        String uid = getFromMap(map, MechanismParser.UID, null);
+        String resourceId = getFromMap(map, PushParser.PUSH_RESOURCE_ID, null);
 
         String challengeResponse;
         try {
@@ -105,7 +120,8 @@ class PushFactory extends MechanismFactory {
         }
 
         Map<String, Object> payload = new HashMap<>();
-        payload.put("deviceId", this.fcmToken);
+        payload.put("deviceId", this.getDeviceTokenId());
+        payload.put("deviceName", DeviceUtils.getDeviceName(getContext()));
         payload.put("deviceType", "android");
         payload.put("communicationType", "gcm");
         payload.put("mechanismUid", mechanismUID);
@@ -124,6 +140,8 @@ class PushFactory extends MechanismFactory {
                             .setRegistrationEndpoint(registrationEndpoint)
                             .setSecret(base64Secret)
                             .setTimeAdded(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                            .setResourceId(resourceId)
+                            .setUid(uid)
                             .build();
                     listener.onSuccess(push);
                 } catch (MechanismCreationException e) {

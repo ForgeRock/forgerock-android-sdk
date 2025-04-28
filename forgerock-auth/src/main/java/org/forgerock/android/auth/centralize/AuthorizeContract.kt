@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -89,7 +89,9 @@ internal class AuthorizeContract :
         resultCode: Int,
         intent: Intent?,
     ): Result<AuthorizationResponse, Throwable> {
-        authorizationService.dispose()
+        if (::authorizationService.isInitialized) {
+            authorizationService.dispose()
+        }
         intent?.let { i ->
             val error = AuthorizationException.fromIntent(i)
             error?.let {

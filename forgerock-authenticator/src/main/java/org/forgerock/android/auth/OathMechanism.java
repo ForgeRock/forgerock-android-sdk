@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -36,9 +36,10 @@ public abstract class OathMechanism extends Mechanism {
     /** Digits as in Int for length of OTP credentials */
     protected int digits;
 
-    protected OathMechanism(String mechanismUID, String issuer, String accountName, String type, TokenType oathType,
-                            String algorithm, String secret, int digits, Calendar timeCreated) {
-        super(mechanismUID, issuer, accountName, type, secret, timeCreated);
+    protected OathMechanism(String mechanismUID, String issuer, String accountName, String type,
+                            TokenType oathType, String algorithm, String secret, String uid,
+                            String resourceId, int digits, Calendar timeCreated) {
+        super(mechanismUID, issuer, accountName, type, secret, uid, resourceId, timeCreated);
         this.oathType = oathType;
         this.algorithm = algorithm;
         this.digits = digits;
@@ -95,7 +96,7 @@ public abstract class OathMechanism extends Mechanism {
      */
     public static OathMechanism deserialize(String jsonString) {
         OathMechanism oath = null;
-        if (jsonString == null || jsonString.length() == 0) {
+        if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }
         try {
@@ -121,6 +122,8 @@ public abstract class OathMechanism extends Mechanism {
         protected String accountName;
         protected String algorithm;
         protected String secret;
+        protected String uid;
+        protected String resourceId;
         protected int digits;
         protected Calendar timeAdded;
 
@@ -177,6 +180,26 @@ public abstract class OathMechanism extends Mechanism {
          */
         public T setSecret(String secret) {
             this.secret = secret;
+            return getThis();
+        }
+
+        /**
+         * Set the user ID that this mechanism shares with the server.
+         * @param uid The user ID
+         * @return The current builder
+         */
+        public T setUid(String uid) {
+            this.uid = uid;
+            return getThis();
+        }
+
+        /**
+         * Set the resource ID for this mechanism on the server.
+         * @param resourceId The resource ID
+         * @return The current builder
+         */
+        public T setResourceId(String resourceId) {
+            this.resourceId = resourceId;
             return getThis();
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,8 @@ import java.util.Map;
  */
 class DefaultStorageClient implements StorageClient {
 
+    private static final String DEVICE_TOKEN_ID = "deviceToken";
+
     //Alias to store keys
     private static final String ORG_FORGEROCK_SHARED_PREFERENCES_KEYS = "org.forgerock.android.authenticator.KEYS";
 
@@ -30,11 +32,13 @@ class DefaultStorageClient implements StorageClient {
     private static final String ORG_FORGEROCK_SHARED_PREFERENCES_DATA_ACCOUNT = "org.forgerock.android.authenticator.DATA.ACCOUNT";
     private static final String ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM = "org.forgerock.android.authenticator.DATA.MECHANISM";
     private static final String ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS = "org.forgerock.android.authenticator.DATA.NOTIFICATIONS";
+    private static final String ORG_FORGEROCK_SHARED_PREFERENCES_DATA_DEVICE_TOKEN = "org.forgerock.android.authenticator.DATA.DEVICE_TOKEN";
 
     //The SharedPreferences to store the data
     private SharedPreferences accountData;
     private SharedPreferences mechanismData;
     private SharedPreferences notificationData;
+    private SharedPreferences deviceTokenData;
 
     private static final String TAG = DefaultStorageClient.class.getSimpleName();
 
@@ -45,6 +49,8 @@ class DefaultStorageClient implements StorageClient {
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_MECHANISM, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
         this.notificationData = new SecuredSharedPreferences(context,
                 ORG_FORGEROCK_SHARED_PREFERENCES_DATA_NOTIFICATIONS, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
+        this.deviceTokenData = new SecuredSharedPreferences(context,
+                ORG_FORGEROCK_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, ORG_FORGEROCK_SHARED_PREFERENCES_KEYS);
     }
 
     @Override
@@ -221,10 +227,25 @@ class DefaultStorageClient implements StorageClient {
     }
 
     @Override
+    public boolean setPushDeviceToken(PushDeviceToken pushDeviceToken) {
+        String pushDeviceTokenJson = pushDeviceToken.serialize();
+        return deviceTokenData.edit()
+                .putString(DEVICE_TOKEN_ID, pushDeviceTokenJson)
+                .commit();
+    }
+
+    @Override
+    public PushDeviceToken getPushDeviceToken() {
+        String json = deviceTokenData.getString(DEVICE_TOKEN_ID, null);
+        return PushDeviceToken.deserialize(json);
+    }
+
+    @Override
     public boolean isEmpty() {
         return accountData.getAll().isEmpty() &&
                 mechanismData.getAll().isEmpty() &&
-                notificationData.getAll().isEmpty();
+                notificationData.getAll().isEmpty() &&
+                deviceTokenData.getAll().isEmpty();
     }
 
     /**
@@ -239,6 +260,9 @@ class DefaultStorageClient implements StorageClient {
                 .clear()
                 .commit();
         notificationData.edit()
+                .clear()
+                .commit();
+        deviceTokenData.edit()
                 .clear()
                 .commit();
     }
@@ -257,5 +281,9 @@ class DefaultStorageClient implements StorageClient {
     void setNotificationData(SharedPreferences sharedPreferences) {
         this.notificationData = sharedPreferences;
     }
-    
+
+    @VisibleForTesting
+    void setDeviceTokenData(SharedPreferences sharedPreferences) {
+        this.deviceTokenData = sharedPreferences;
+    }
 }

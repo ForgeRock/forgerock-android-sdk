@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -33,6 +33,7 @@ import static org.forgerock.android.auth.PushParser.MECHANISM_UID;
 import static org.forgerock.android.auth.PushParser.PUSH_TYPE;
 import static org.forgerock.android.auth.PushParser.TIME_INTERVAL;
 import static org.forgerock.android.auth.PushParser.TTL;
+import static org.forgerock.android.auth.PushParser.USER_ID;
 
 /**
  * Responsible for generating instances of {@link PushNotification}.
@@ -83,6 +84,7 @@ class NotificationFactory {
         String customPayload;
         String numbersChallenge;
         String contextInfo;
+        String userId;
 
         // Check if notification with given messageId already exists
         pushNotification = storageClient.getNotificationByMessageId(messageId);
@@ -103,7 +105,8 @@ class NotificationFactory {
             pushType = (String) signedJwt.getJWTClaimsSet().getClaim(PUSH_TYPE);
             customPayload = (String) signedJwt.getJWTClaimsSet().getClaim(CUSTOM_PAYLOAD);
             contextInfo = (String) signedJwt.getJWTClaimsSet().getClaim(CONTEXT_INFO);
-            
+            userId = (String) signedJwt.getJWTClaimsSet().getClaim(USER_ID);
+
             base64amlbCookie = (String) signedJwt.getJWTClaimsSet().getClaim(AM_LOAD_BALANCER_COOKIE);
             amlbCookie = null;
             if(base64amlbCookie != null) {
@@ -155,6 +158,12 @@ class NotificationFactory {
             throw new InvalidNotificationException("Could not retrieve the PUSH mechanism associated with this remote message.");
         } else {
             push.setAccount(storageClient.getAccount(push.getAccountId()));
+        }
+
+        // Check if the push mechanism has the user id information, otherwise set it from the notification
+        if (push.getUid() == null && userId != null) {
+            push.setUid(userId);
+            storageClient.setMechanism(push);
         }
 
         // Verify the JWT signature

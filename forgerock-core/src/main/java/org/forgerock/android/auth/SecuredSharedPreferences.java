@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -213,7 +213,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
         } catch (Exception e) {
             //Failed to decrypt the data, reset the encryptor
-            Logger.warn(TAG, "Failed to decrypt the data.", e);
+            Logger.warn(TAG, e, "Failed to decrypt the data.");
             if (e instanceof CancellationException) {
                 throw e;
             }

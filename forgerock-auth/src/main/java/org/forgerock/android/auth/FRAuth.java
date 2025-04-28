@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2019 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -56,7 +56,7 @@ public class FRAuth {
                     SessionManager sessionManager = ConfigHelper.getPersistedConfig(context, cachedOptions).getSessionManager();
                     sessionManager.close();
                 } catch (Exception e) {
-                    Logger.warn(TAG, "Failed to close the session manager", e);
+                    Logger.warn(TAG, e, "Failed to close the session manager");
                 }
             }
             Config.getInstance().init(context, currentOptions);

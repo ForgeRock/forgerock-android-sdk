@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
@@ -14,6 +14,7 @@ import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
 import com.google.android.gms.fido.fido2.api.common.ResidentKeyRequirement
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.*
 import org.forgerock.android.auth.BaseTest
 import org.forgerock.android.auth.WebAuthnDataRepository
@@ -66,12 +67,14 @@ class WebAuthnRegistrationTest : BaseTest() {
 
         //Override with discourage
         var webAuthnRegistration = WebAuthnRegistration(value)
-        val options = webAuthnRegistration.options.cloneWith(ResidentKeyRequirement.RESIDENT_KEY_DISCOURAGED)
+        val options =
+            webAuthnRegistration.options.cloneWith(ResidentKeyRequirement.RESIDENT_KEY_DISCOURAGED)
 
         webAuthnRegistration = object : WebAuthnRegistration(options) {
             override suspend fun getPublicKeyCredential(context: Context): PublicKeyCredential {
                 return publicKeyCredential
             }
+
             override suspend fun persist(context: Context, source: PublicKeyCredentialSource) {
                 repository.persist(source)
             }
@@ -82,7 +85,6 @@ class WebAuthnRegistrationTest : BaseTest() {
         assertThat(repository.getPublicKeyCredentialSource("humorous-cuddly-carrot.glitch.me"))
             .hasSize(1)
     }
-
 
 
     private fun testParsingParameter(value: JSONObject) {
@@ -119,4 +121,33 @@ class WebAuthnRegistrationTest : BaseTest() {
         assertThat(options.tokenBinding).isNull()
         assertThat(options.requestId).isNull()
     }
+
+    @Test
+    fun testSupportJsonResponse(): Unit = runTest {
+        val value = JSONObject(getJson("/webAuthn_registration_supportsJsonResponse.json"))
+            .getJSONArray("callbacks")
+            .getJSONObject(0)
+            .getJSONArray("output")
+            .getJSONObject(0)
+            .getJSONObject("value")
+
+        whenever(publicKeyCredential.authenticatorAttachment).thenReturn("platform")
+        whenever(publicKeyCredential.response).thenReturn(authenticatorAttestationResponse)
+        whenever(publicKeyCredential.rawId).thenReturn("rawId".toByteArray())
+        whenever(authenticatorAttestationResponse.attestationObject).thenReturn("attestationObject".toByteArray())
+        whenever(authenticatorAttestationResponse.clientDataJSON).thenReturn("clientDataJson".toByteArray())
+
+        webAuthnRegistration = object : WebAuthnRegistration(value) {
+            override suspend fun getPublicKeyCredential(context: Context): PublicKeyCredential {
+                return publicKeyCredential
+            }
+        }
+        assertThat(webAuthnRegistration.supportsJsonResponse).isTrue
+
+        val result = webAuthnRegistration.register(context)
+
+        assertThat(result).isEqualTo("{\"authenticatorAttachment\":\"platform\",\"legacyData\":\"clientDataJson::97,116,116,101,115,116,97,116,105,111,110,79,98,106,101,99,116::cmF3SWQ\"}")
+    }
+
+
 }

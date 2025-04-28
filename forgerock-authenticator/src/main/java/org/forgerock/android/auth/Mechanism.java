@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -20,7 +20,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
 
     /** Unique identifier of the Mechanism */
     private String id;
-    /** Uniquely identifiable UUID for current mechanism */
+    /** Uniquely identifiable UUID for current mechanism on the client */
     private final String mechanismUID;
     /** Issuer of the account */
     private final String issuer;
@@ -30,8 +30,12 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     private final String type;
     /** The shared secret of the Mechanism */
     private final String secret;
+    /** The unique identifier of this mechanism on the server */
+    private final String resourceId;
     /** Date this object was stored */
     private final Calendar timeAdded;
+    /** The unique identifier of the user associated with this mechanism */
+    private String uid;
     /** The Account associated with this mechanism **/
     private Account account;
 
@@ -50,16 +54,20 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      * @param accountName String value of accountName or username
      * @param type String value of the mechanism type
      * @param secret String value of the shared secret
+     * @param uid The unique identifier of the user associated with this mechanism
+     * @param resourceId The unique identifier of this mechanism on the server
      * @param timeAdded Date and Time this Mechanism was stored
      */
     protected Mechanism(String mechanismUID, String issuer, String accountName, String type,
-                     String secret, Calendar timeAdded) {
+                        String secret, String uid, String resourceId, Calendar timeAdded) {
         this.id = issuer + "-" + accountName + "-" + type;
         this.mechanismUID = mechanismUID;
         this.issuer = issuer;
         this.accountName = accountName;
         this.type = type;
         this.secret = secret;
+        this.uid = uid;
+        this.resourceId = resourceId;
         this.timeAdded = timeAdded;
     }
 
@@ -128,6 +136,30 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
+     * Get the unique identifier of the user associated with this mechanism.
+     * @return The unique identifier of the user.
+     */
+    String getUid() {
+        return uid;
+    }
+
+    /**
+     * Sets the unique identifier of the user associated with this mechanism.
+     * @param uid The unique identifier of the user.
+     */
+    void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    /**
+     * Get the unique identifier of this mechanism on the server.
+     * @return The unique identifier of this mechanism on the server.
+     */
+    String getResourceId() {
+        return resourceId;
+    }
+
+    /**
      * Gets the account object associated with the mechanism.
      * @return the Account object.
      */
@@ -157,7 +189,7 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
      */
     public static Mechanism deserialize(String jsonString) {
         Mechanism mechanism = null;
-        if (jsonString == null || jsonString.length() == 0) {
+        if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }
         try {

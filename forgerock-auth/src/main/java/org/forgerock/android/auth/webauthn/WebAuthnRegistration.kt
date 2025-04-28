@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2022 - 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
  *
- *  This software may be modified and distributed under the terms
- *  of the MIT license. See the LICENSE file for details.
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See the LICENSE file for details.
  */
 package org.forgerock.android.auth.webauthn
 
@@ -25,6 +25,10 @@ import com.google.android.gms.fido.fido2.api.common.ResidentKeyRequirement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.json.JSONArray
 import org.json.JSONException
@@ -51,6 +55,7 @@ open class WebAuthnRegistration() : WebAuthn() {
         val excludeCredentials = getExcludeCredentials(input)
         val displayName = input.getString(DISPLAY_NAME)
         val relyingPartyId = getRelyingPartyId(input)
+        supportsJsonResponse = input.optBoolean(SUPPORTS_JSON_RESPONSE, false)
 
         options = PublicKeyCredentialCreationOptions.Builder()
             .setRp(PublicKeyCredentialRpEntity(relyingPartyId, relyingPartyName, null))
@@ -167,8 +172,14 @@ open class WebAuthnRegistration() : WebAuthn() {
                     .otherUI(options.user.displayName).build()
                 persist(context, source)
             }
-       }
-        return (sb.toString())
+        }
+        return if (supportsJsonResponse) {
+            val outcome = WebAuthnOutcome(publicKeyCredential.authenticatorAttachment ?: "platform",
+                sb.toString())
+            return Json.encodeToString(outcome)
+        } else {
+            sb.toString()
+        }
     }
 
     /**

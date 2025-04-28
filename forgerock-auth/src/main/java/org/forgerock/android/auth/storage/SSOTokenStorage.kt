@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 ForgeRock. All rights reserved.
+ * Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -47,7 +47,7 @@ class SSOTokenStorage(
                 original.clearToken()
             }
         } catch (e: Throwable) {
-            Logger.error(TAG, "Failed to migrate SSO token", e)
+            Logger.error(TAG, e, "Failed to migrate SSO token")
             original.clearToken()
         }
     }

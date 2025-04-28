@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ForgeRock. All rights reserved.
+ * Copyright (c) 2023 - 2025 Ping Identity Corporation. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -44,7 +44,7 @@ open class BiometricOnly : BiometricAuthenticator() {
         } catch (e: Exception) {
             //Failed because the key was generated with
             //KeyGenParameterSpec.Builder.setUserAuthenticationParameters
-            Logger.warn(TAG, "Fallback to time-based key", e)
+            Logger.warn(TAG, e, "Fallback to time-based key")
             biometricInterface.authenticate(authenticationCallback)
         }
     }
