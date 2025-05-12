@@ -18,6 +18,9 @@ android {
 
     namespace = "org.forgerock.android.integration"
     testNamespace = "org.forgerock.android.integration.test"
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 dependencies {

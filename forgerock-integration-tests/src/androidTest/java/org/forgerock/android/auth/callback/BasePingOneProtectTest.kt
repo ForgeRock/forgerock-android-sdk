@@ -13,6 +13,7 @@ import org.forgerock.android.auth.FROptionsBuilder
 import org.forgerock.android.auth.FRSession
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Logger.Companion.set
+import org.forgerock.android.auth.TestConfig
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -21,14 +22,14 @@ import java.util.concurrent.TimeUnit
 
 abstract class BasePingOneProtectTest {
     val context: Context = ApplicationProvider.getApplicationContext()
-    private val AM_URL = "https://openam-sdks2.forgeblocks.com/am"
-    private val REALM = "alpha"
+    private val AM_URL = TestConfig.serverUrl
+    private val REALM = TestConfig.realm
     private val COOKIE_NAME = "9dfa82bc124226d"
-    private val OAUTH_CLIENT = "AndroidTest"
-    private val OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect"
-    private val SCOPE = "openid profile email address phone"
+    private val OAUTH_CLIENT = TestConfig.clientId
+    private val OAUTH_REDIRECT_URI = TestConfig.redirectUri
+    private val SCOPE = TestConfig.scope
     companion object {
-        var USERNAME = "sdkuser"
+        var USERNAME = TestConfig.username
     }
 
     private val options = FROptionsBuilder.build {
