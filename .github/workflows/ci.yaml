@@ -46,6 +46,7 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     needs: build-and-test
     secrets:
+      E2E_CONFIG: ${{ secrets.E2E_CONFIG }}
       SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
       SIGNING_ALIAS: ${{ secrets.SIGNING_ALIAS }}
       SIGNING_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}

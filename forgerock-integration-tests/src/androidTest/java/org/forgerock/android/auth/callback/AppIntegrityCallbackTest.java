@@ -24,6 +24,7 @@ import org.forgerock.android.auth.Logger;
 import org.forgerock.android.auth.Node;
 import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
+import org.forgerock.android.auth.TestConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,13 +43,13 @@ public class AppIntegrityCallbackTest  {
 
     protected static Context context = ApplicationProvider.getApplicationContext();
 
-    protected final static String AM_URL = "https://openam-integrity1.forgeblocks.com/am";
-    protected final static String REALM = "alpha";
-    protected final static String OAUTH_CLIENT = "AndroidTest";
-    protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
-    protected final static String SCOPE = "openid profile email address phone";
+    protected final static String AM_URL = TestConfig.INSTANCE.getServerUrl();
+    protected final static String REALM = TestConfig.INSTANCE.getRealm();
+    protected final static String OAUTH_CLIENT = TestConfig.INSTANCE.getClientId();
+    protected final static String OAUTH_REDIRECT_URI = TestConfig.INSTANCE.getRedirectUri();
+    protected final static String SCOPE = TestConfig.INSTANCE.getScope();
 
-    protected final static String USERNAME = "sdkuser";
+    protected final static String USERNAME = TestConfig.INSTANCE.getUsername();
     protected final static String TREE = "TEST-app-integrity";
 
     @Rule
