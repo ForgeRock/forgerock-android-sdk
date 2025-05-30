@@ -1,6 +1,7 @@
 [versions]
 activityCompose = "1.9.2"
 agp = "8.6.0"
+androidDatabaseSqlcipher = "4.5.4"
 annotation = "1.9.0"
 appauth = "0.11.1"
 appcompat = "1.7.0"
@@ -46,8 +47,11 @@ firebase-crashlytics-buildtools = "3.0.2"
 pluginSserialization = "2.0.0"
 serialization = "1.6.3"
 material3Android = "1.3.0"
+playServicesAuthBlockstore = "16.4.0"
+sqlite = "2.3.1"
 
 [libraries]
+android-database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidDatabaseSqlcipher" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -57,6 +61,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
+androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 appauth = { module = "net.openid:appauth", version.ref = "appauth" }
@@ -96,6 +101,7 @@ rules = { module = "androidx.test:rules", version.ref = "rules" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+play-services-auth-blockstore = { group = "com.google.android.gms", name = "play-services-auth-blockstore", version.ref = "playServicesAuthBlockstore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

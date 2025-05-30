@@ -359,6 +359,32 @@ class AuthenticatorManager {
         }
     }
 
+    boolean migrateFromDefaultStorageClient(boolean deleteOldStorage) throws AuthenticatorException {
+        if (!(storageClient instanceof SQLStorageClient)) {
+            Logger.warn(TAG, "Migration is only supported from DefaultStorageClient to SQLStorageClient.");
+            throw new AuthenticatorException("Migration is only supported from DefaultStorageClient to SQLStorageClient");
+        }
+
+        try {
+            Context context = this.getContext();
+            StorageMigrationManager migrationManager = createStorageMigrationManager(context,
+                    (SQLStorageClient)storageClient);
+
+            return migrationManager.migrateData(deleteOldStorage);
+        } catch (Exception e) {
+            Logger.error(TAG, "Error during manual migration", e);
+            return false;
+        }
+    }
+
+    /**
+     * Get the application context.
+     * @return The application context
+     */
+    Context getContext() {
+        return context;
+    }
+
     private void createCombinedMechanismsFromUri(String uri, FRAListener<Mechanism> listener) {
         // Check if account already exist
         List<Mechanism> mechanismList = returnDuplicatedMechanisms(uri);
@@ -465,6 +491,11 @@ class AuthenticatorManager {
     @VisibleForTesting
     void setNotificationFactory(NotificationFactory notificationFactory) {
         this.notificationFactory = notificationFactory;
+    }
+
+    @VisibleForTesting
+    StorageMigrationManager createStorageMigrationManager(Context context, SQLStorageClient sqlStorage) {
+        return new StorageMigrationManager(context, sqlStorage);
     }
 
     @VisibleForTesting

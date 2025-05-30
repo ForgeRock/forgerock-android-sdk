@@ -58,6 +58,7 @@ public class FRAClient {
         private String fcmToken;
         private Context context;
         private FRAPolicyEvaluator policyEvaluator;
+        private boolean disableAutoMigration = false;
 
         /**
          * Initialize the FRAClient instance with an Android Context.
@@ -103,6 +104,16 @@ public class FRAClient {
             this.policyEvaluator = policyEvaluator;
             return this;
         }
+        
+        /**
+         * Disable automatic migration from DefaultStorageClient to SQLStorageClient when 
+         * SQLStorageClient is used. By default, migration is performed automatically.
+         * @return this builder
+         */
+        public FRAClientBuilder disableAutoMigration() {
+            this.disableAutoMigration = true;
+            return this;
+        }
 
         /**
          * Initialize the authenticator client {@link FRAClient}.
@@ -117,6 +128,9 @@ public class FRAClient {
             if(storageClient == null) {
                 Logger.warn(TAG, "No custom StoreClient provided, using DefaultStorageClient.");
                 storageClient = new DefaultStorageClient(context);
+            } else if (storageClient instanceof SQLStorageClient && !disableAutoMigration) {
+                // Perform automatic migration from DefaultStorageClient to SQLStorageClient
+                performStorageMigration(context, (SQLStorageClient)storageClient, false);
             }
 
             if(policyEvaluator == null) {
@@ -137,6 +151,47 @@ public class FRAClient {
                     fcmToken));
         }
 
+        @VisibleForTesting
+        StorageMigrationManager createMigrationManager(Context context, SQLStorageClient sqlStorage) {
+            return new StorageMigrationManager(context, sqlStorage);
+        }
+        
+        /**
+         * Performs the migration from DefaultStorageClient to SQLStorageClient if needed
+         * @param context Application context
+         * @param sqlStorage The SQLStorageClient instance
+         * @param deleteSourceData Whether to delete data from DefaultStorageClient after migration
+         */
+        @VisibleForTesting
+        void performStorageMigration(Context context, SQLStorageClient sqlStorage, boolean deleteSourceData) {
+            try {
+                StorageMigrationManager migrationManager = createMigrationManager(context, sqlStorage);
+                    
+                if (migrationManager.isMigrationNeeded()) {
+                    Logger.info(TAG, "Performing automatic migration from DefaultStorageClient to SQLStorageClient");
+                    boolean success = migrationManager.migrateData(deleteSourceData);
+                    if (success) {
+                        Logger.info(TAG, "Automatic migration completed successfully");
+                    } else {
+                        Logger.warn(TAG, "Automatic migration encountered issues");
+                    }
+                }
+            } catch (Exception e) {
+                Logger.error(TAG, "Error during automatic migration", e);
+            }
+        }
+    }
+    
+    /**
+     * Manually migrate data from DefaultStorageClient to the new storage implementation.
+     * This is only effective if the current storage is SQLStorageClient.
+     *
+     * @param deleteOldStorage Whether to delete data from DefaultStorageClient after migration
+     * @return true if migration was successful, false otherwise
+     * @throws AuthenticatorException If the current storage is not SQLStorageClient
+     */
+    public boolean migrateFromDefaultStorageClient(boolean deleteOldStorage) throws AuthenticatorException {
+        return this.authenticatorManager.migrateFromDefaultStorageClient(deleteOldStorage);
     }
 
     /**

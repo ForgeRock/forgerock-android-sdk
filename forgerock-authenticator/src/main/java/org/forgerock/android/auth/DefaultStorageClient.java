@@ -97,7 +97,7 @@ class DefaultStorageClient implements StorageClient {
      *
      * @return The complete list of mechanisms.
      */
-    private List<Mechanism> getAllMechanisms() {
+    List<Mechanism> getAllMechanisms() {
         List<Mechanism> mechanismList = new ArrayList<>();
 
         Map<String,?> keys = mechanismData.getAll();

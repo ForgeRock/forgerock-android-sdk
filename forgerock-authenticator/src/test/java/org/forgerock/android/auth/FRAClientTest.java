@@ -14,11 +14,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.util.Base64;
@@ -972,5 +975,111 @@ public class FRAClientTest extends FRABaseTest {
         assertTrue(result);
         assertFalse(account.isLocked());
         assertNull(account.getLockingPolicy());
+    }
+    
+    // Migration Tests
+
+    @Test
+    public void testMigrateFromDefaultStorageClient_WithNonSQLStorage() throws Exception {
+        FRAClient fraClient = FRAClient.builder()
+                .withContext(context)
+                .withStorage(storageClient) // Using regular DefaultStorageClient
+                .start();
+
+        try {
+            fraClient.migrateFromDefaultStorageClient(true);
+            fail("Should throw exception when trying to migrate with non-SQL storage");
+        } catch (AuthenticatorException e) {
+            assertTrue(e.getMessage().contains("Migration is only supported from DefaultStorageClient to SQLStorageClient"));
+        }
+    }
+
+    @Test
+    public void testMigrateFromDefaultStorageClient_Success() throws Exception {
+        // Create mocks
+        SQLStorageClient sqlStorageClient = mock(SQLStorageClient.class);
+        StorageMigrationManager migrationManager = mock(StorageMigrationManager.class);
+        AuthenticatorManager mockedAuthManager = mock(AuthenticatorManager.class);
+
+        // Set up behavior
+        given(mockedAuthManager.getContext()).willReturn(context);
+        given(mockedAuthManager.createStorageMigrationManager(context, sqlStorageClient)).willReturn(migrationManager);
+        given(migrationManager.migrateData(true)).willReturn(true);
+
+        // Create a spy of FRAClient that we can customize
+        FRAClient fraClient = spy(FRAClient.builder()
+                .withContext(context)
+                .withStorage(sqlStorageClient)
+                .disableAutoMigration()
+                .start());
+        
+        // Use doReturn for safer stubbing of the spy
+        doReturn(mockedAuthManager).when(fraClient).getAuthenticatorManagerInstance();
+
+        // Perform migration
+        boolean result = fraClient.migrateFromDefaultStorageClient(true);
+        
+        // Verify
+        assertTrue("Migration should succeed", result);
+    }
+
+    @Test
+    public void testAutoMigrationIsPerformedWithSqlStorage() throws Exception {
+        // Create mocks
+        SQLStorageClient sqlStorageClient = mock(SQLStorageClient.class);
+        StorageMigrationManager migrationManager = mock(StorageMigrationManager.class);
+        
+        // Set up behavior
+        given(migrationManager.isMigrationNeeded()).willReturn(true);
+        given(migrationManager.migrateData(false)).willReturn(true);
+        
+        // Create a spy of FRAClientBuilder
+        FRAClient.FRAClientBuilder builder = spy(FRAClient.builder()
+                .withContext(context)
+                .withStorage(sqlStorageClient));
+        
+        // Mock the createStorageMigrationManager method in the builder
+        doReturn(migrationManager).when(builder).createMigrationManager(any(), any());
+        
+        // Start the client - this should trigger auto migration
+        builder.start();
+        
+        // Verify the migration was performed
+        verify(builder).performStorageMigration(context, sqlStorageClient, false);
+        verify(migrationManager).isMigrationNeeded();
+        verify(migrationManager).migrateData(false);
+    }
+
+    @Test
+    public void testAutoMigrationDisabled() throws Exception {
+        // Create mocks
+        SQLStorageClient sqlStorageClient = mock(SQLStorageClient.class);
+        StorageMigrationManager migrationManager = mock(StorageMigrationManager.class);
+        
+        // Create a spy of FRAClientBuilder with migration disabled
+        FRAClient.FRAClientBuilder builder = spy(FRAClient.builder()
+                .withContext(context)
+                .withStorage(sqlStorageClient)
+                .disableAutoMigration());
+        
+        // Start the client - this should NOT trigger migration
+        builder.start();
+        
+        // Verify migration was not performed
+        verify(builder, never()).performStorageMigration(any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void testNoAutoMigrationWithRegularStorage() throws Exception {
+        // Create a spy of FRAClientBuilder with regular storage
+        FRAClient.FRAClientBuilder builder = spy(FRAClient.builder()
+                .withContext(context)
+                .withStorage(storageClient)); // Regular DefaultStorageClient
+        
+        // Start the client - this should NOT trigger migration
+        builder.start();
+        
+        // Verify migration was not performed
+        verify(builder, never()).performStorageMigration(any(), any(), anyBoolean());
     }
 }

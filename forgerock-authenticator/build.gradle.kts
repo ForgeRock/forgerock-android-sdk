@@ -67,6 +67,7 @@ dependencies {
     // Common
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.appcompat)
+    implementation(libs.play.services.auth.blockstore)
 
     // FCM Notifications, make it optional for developer
     compileOnly(libs.firebase.messaging)
@@ -78,6 +79,9 @@ dependencies {
     // Biometric
     implementation(libs.androidx.biometric.ktx)
 
+    // SQLCipher for encrypted database
+    implementation(libs.android.database.sqlcipher)
+    implementation(libs.androidx.sqlite)
 
     // Testing
     testImplementation(libs.androidx.test.core)
@@ -89,7 +93,12 @@ dependencies {
     testImplementation(libs.firebase.messaging)
     testImplementation(libs.mockito.core)
 
+    // Instrumented testing
     androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.rules)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.firebase.messaging)
     
 }
 
