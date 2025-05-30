@@ -1,3 +1,8 @@
+## [4.8.1]
+
+#### Fixed
+- Encryption and decryption performance has been enhanced through the implementation of caching for the KeyStore, Cipher, and Symmetric Key. Additionally, developers now have the flexibility to enable or disable StrongBox during key generation. [SDKS-4090]
+
 ## [4.8.0]
 #### Added
 - Support for new response payload in WebAuthn authentication and registration [SDKS-3843]

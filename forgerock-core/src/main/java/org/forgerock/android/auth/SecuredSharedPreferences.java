@@ -54,11 +54,26 @@ public class SecuredSharedPreferences implements SharedPreferences {
     @Getter
     private final String keyAlias;
 
+    /**
+     * Creates a new instance of SecuredSharedPreferences.
+     *
+     * @param context   The application context.
+     * @param fileName  The name of the shared preferences file.
+     * @param keyAlias  The alias for the encryption key.
+     */
     public SecuredSharedPreferences(Context context, String fileName, String keyAlias) {
         this(context, fileName, keyAlias, null);
     }
 
-    SecuredSharedPreferences(Context context, String fileName, String keyAlias, Encryptor encryptor) {
+    /**
+     * Creates a new instance of SecuredSharedPreferences.
+     *
+     * @param context   The application context.
+     * @param fileName  The name of the shared preferences file.
+     * @param keyAlias  The alias for the encryption key.
+     * @param encryptor An optional custom encryptor. If null, a default encryptor will be used.
+     */
+    public SecuredSharedPreferences(Context context, String fileName, String keyAlias, Encryptor encryptor) {
         this.sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         this.listeners = new ArrayList<>();
         this.keyAlias = keyAlias;

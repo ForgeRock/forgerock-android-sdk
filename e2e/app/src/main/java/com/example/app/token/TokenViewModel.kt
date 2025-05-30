@@ -30,7 +30,7 @@ class TokenViewModel : ViewModel() {
     fun getAccessToken() {
         viewModelScope.launch(Dispatchers.Default) {
             try {
-                FRUser.getCurrentUser().accessToken?.let { token ->
+                FRUser.getCurrentUser()?.accessToken?.let { token ->
                     state.update {
                         it.copy(token, null)
                     }

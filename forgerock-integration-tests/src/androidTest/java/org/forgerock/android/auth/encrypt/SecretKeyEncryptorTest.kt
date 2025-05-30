@@ -21,6 +21,9 @@ import org.junit.runner.RunWith
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import java.security.KeyStore.SecretKeyEntry
+import kotlin.system.measureTimeMillis
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -97,6 +100,39 @@ class SecretKeyEncryptorTest {
         encryptor2.encrypt("test".toByteArray())
         //The key is now stored as a private key after encrypt
         assertTrue(keyStore.getEntry(alias, null) is PrivateKeyEntry)
+    }
+
+    @Test
+    fun test_performance() = runTest(timeout = 3.toDuration(DurationUnit.SECONDS)) {
+        val runs = 10
+        val encryptor = SecretKeyEncryptor {
+            symmetricKeySize = 256
+            keyAlias = alias
+            context = appContext
+            strongBoxPreferred = false
+        }
+        val dataStr =
+            "{\"type\": 0, \"value\": \"[\\\"abcedadsascadsasdfakdalkd;dkj23400702erasldknapdfasdfa;sdkfa;dkjadfad\\\\a;dsklcna;sdlckna;dsfladkfa0234\\/adasdadssdfasd;adkcna;dsckna;dsc\\\\ad;kajsd;fakdfadfa\\\\n\\\"]\"}".toByteArray()
+
+        var totalEncryptTime = 0L
+        var totalDecryptTime = 0L
+
+        repeat(runs) {
+            var output: ByteArray
+            val encryptTime = measureTimeMillis {
+                output = encryptor.encrypt(dataStr)
+            }
+            val decryptTime = measureTimeMillis {
+                output = encryptor.decrypt(output)
+            }
+            totalEncryptTime += encryptTime
+            totalDecryptTime += decryptTime
+            assertEquals(String(dataStr), String(output))
+        }
+
+        println("Average encryption time: ${totalEncryptTime / runs} ms")
+        println("Average decryption time: ${totalDecryptTime / runs} ms")
+
     }
 
 }

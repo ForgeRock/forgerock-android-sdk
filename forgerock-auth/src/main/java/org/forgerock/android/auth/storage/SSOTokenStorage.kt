@@ -11,6 +11,8 @@ import android.content.Context
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.forgerock.android.auth.ContextProvider
+import org.forgerock.android.auth.Encryptor
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.SSOToken
 import org.forgerock.android.auth.SharedPreferencesSignOnManager
@@ -28,15 +30,17 @@ private const val TAG = "SSOTokenStorage"
  * @param keyAlias The alias for the encryption key.
  * @param key The key used to store the SSO tokens.
  * @param serializer The serializer for the SSO tokens.
+ * @param encryptor An optional encryptor for securing the SSO tokens.
  */
 class SSOTokenStorage(
     context: Context,
     filename: String,
     keyAlias: String,
     key: String,
-    serializer: KSerializer<SSOToken>
+    serializer: KSerializer<SSOToken>,
+    encryptor: Encryptor? = null
 ) : SecureSharedPreferencesStorage<SSOToken>(
-    context, filename, keyAlias, key, serializer
+    context, filename, keyAlias, key, serializer, encryptor
 ) {
 
     init {
@@ -56,17 +60,19 @@ class SSOTokenStorage(
 /**
  * Factory function to create a `SSOTokenStorage` instance.
  *
- * @param context The application context.
+ * @param context The application context. Defaults to [ContextProvider.context]`.
  * @param filename The name of the file where SSO tokens are stored. Defaults to `ORG_FORGEROCK_V_2_SSO_TOKENS`.
  * @param keyAlias The alias for the encryption key. Defaults to `ORG_FORGEROCK_V_2_KEYS`.
  * @param key The key used to store the SSO tokens. Defaults to `SSO_TOKEN`.
+ * @param encryptor An optional encryptor for securing the SSO tokens. Defaults to `null`.
  * @return A `StorageDelegate` for `SSOTokenStorage`.
  */
 fun SSOTokenStorage(
-    context: Context,
+    context: Context = ContextProvider.context,
     filename: String = ORG_FORGEROCK_V_2_SSO_TOKENS,
     keyAlias: String = ORG_FORGEROCK_V_2_KEYS,
-    key: String = SSO_TOKEN
+    key: String = SSO_TOKEN,
+    encryptor: Encryptor? = null
 ): StorageDelegate<SSOToken> =
     StorageDelegate {
         SSOTokenStorage(
@@ -75,5 +81,6 @@ fun SSOTokenStorage(
             keyAlias = keyAlias,
             key = key,
             serializer = Json.serializersModule.serializer(),
+            encryptor
         )
     }

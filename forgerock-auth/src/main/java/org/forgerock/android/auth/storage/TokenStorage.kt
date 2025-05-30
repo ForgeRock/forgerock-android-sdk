@@ -11,6 +11,8 @@ import android.content.Context
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.forgerock.android.auth.AccessToken
+import org.forgerock.android.auth.ContextProvider
+import org.forgerock.android.auth.Encryptor
 import org.forgerock.android.auth.OAuth2
 
 //Alias to store keys
@@ -25,13 +27,15 @@ const val ORG_FORGEROCK_V_1_TOKENS = "org.forgerock.v1.TOKENS"
  * @param filename The name of the file where tokens are stored.
  * @param keyAlias The alias for the encryption key.
  * @param key The key used to store the tokens.
+ * @param encryptor An optional Encryptor for securing the tokens.
  * @return A StorageDelegate for AccessToken.
  */
 fun TokenStorage(
-    context: Context,
+    context: Context = ContextProvider.context,
     filename: String = ORG_FORGEROCK_V_1_TOKENS,
     keyAlias: String = ORG_FORGEROCK_V_1_KEYS,
-    key: String = OAuth2.ACCESS_TOKEN
+    key: String = OAuth2.ACCESS_TOKEN,
+    encryptor: Encryptor? = null
 ): StorageDelegate<AccessToken> =
     StorageDelegate {
         SecureSharedPreferencesStorage(
@@ -40,5 +44,6 @@ fun TokenStorage(
             keyAlias = keyAlias,
             key = key,
             serializer = Json.serializersModule.serializer(),
+            encryptor
         )
     }
