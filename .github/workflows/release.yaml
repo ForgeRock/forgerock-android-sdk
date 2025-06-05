@@ -40,6 +40,7 @@ jobs:
   # Tag the repo, and create a new release
   release:
     name: Tag the repo and create a new release
+    runs-on: macos-latest
     needs: publish
     steps:
       # Clone the repo
