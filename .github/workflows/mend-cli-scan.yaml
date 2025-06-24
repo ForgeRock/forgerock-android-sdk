@@ -55,6 +55,7 @@ jobs:
           MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
           MEND_URL: ${{ vars.MEND_SERVER_URL }}
         shell: bash
+        timeout-minutes: 10
         run: |
           mend dep --no-color -s ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} -u > mend-sca-scan-result.txt
 
@@ -105,35 +106,34 @@ jobs:
           MEND_URL: ${{ vars.MEND_SERVER_URL }}
           MEND_SAST_PATH_EXCLUSIONS: ${{ vars.MEND_SAST_PATH_EXCLUSIONS }}
         shell: bash
+        timeout-minutes: 10
         run: |
-          mend code --non-interactive --scope ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} > mend-sast-scan-result.txt
-          
-          # mend code --report --filename ${{ vars.MEND_SAST_REPORT_NAME }} --formats json,pdf --non-interactive --scope ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} > mend-sast-scan-result.txt
+          mend code --report --filename ${{ vars.MEND_SAST_REPORT_NAME }} --formats json --non-interactive --scope ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} > mend-sast-scan-result.txt
 
-          # export MEND_SAST_TOTAL_VULNERABILITIES_COUNT=$(jq '.[0].stats.totalVulnerabilities' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
-          # export MEND_SAST_CRITICAL_COUNT=$(jq '.[0].stats.critical' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
-          # export MEND_SAST_HIGH_COUNT=$(jq '.[0].stats.high' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
-          # export MEND_SAST_MEDIUM_COUNT=$(jq '.[0].stats.medium' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
-          # export MEND_SAST_LOW_COUNT=$(jq '.[0].stats.low' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
-          # export MEND_SAST_SCAN_URL=$(grep -Eo '(http|https)://[^ ]+' mend-sast-scan-result.txt)
+          export MEND_SAST_TOTAL_VULNERABILITIES_COUNT=$(jq '.[0].stats.totalVulnerabilities' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
+          export MEND_SAST_CRITICAL_COUNT=$(jq '.[0].stats.critical' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
+          export MEND_SAST_HIGH_COUNT=$(jq '.[0].stats.high' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
+          export MEND_SAST_MEDIUM_COUNT=$(jq '.[0].stats.medium' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
+          export MEND_SAST_LOW_COUNT=$(jq '.[0].stats.low' ${{ vars.MEND_SAST_REPORT_NAME }}.json)
+          export MEND_SAST_SCAN_URL=$(grep -Eo '(http|https)://[^ ]+' mend-sast-scan-result.txt)
 
-          # echo "MEND_SAST_TOTAL_VULNERABILITIES_COUNT=$MEND_SAST_TOTAL_VULNERABILITIES_COUNT" >> $GITHUB_ENV
-          # echo "MEND_SAST_CRITICAL_COUNT=$MEND_SAST_CRITICAL_COUNT" >> $GITHUB_ENV
-          # echo "MEND_SAST_HIGH_COUNT=$MEND_SAST_HIGH_COUNT" >> $GITHUB_ENV
-          # echo "MEND_SAST_MEDIUM_COUNT=$MEND_SAST_MEDIUM_COUNT" >> $GITHUB_ENV
-          # echo "MEND_SAST_LOW_COUNT=$MEND_SAST_LOW_COUNT" >> $GITHUB_ENV
-          # echo "MEND_SAST_SCAN_URL=$MEND_SAST_SCAN_URL" >> $GITHUB_ENV
+          echo "MEND_SAST_TOTAL_VULNERABILITIES_COUNT=$MEND_SAST_TOTAL_VULNERABILITIES_COUNT" >> $GITHUB_ENV
+          echo "MEND_SAST_CRITICAL_COUNT=$MEND_SAST_CRITICAL_COUNT" >> $GITHUB_ENV
+          echo "MEND_SAST_HIGH_COUNT=$MEND_SAST_HIGH_COUNT" >> $GITHUB_ENV
+          echo "MEND_SAST_MEDIUM_COUNT=$MEND_SAST_MEDIUM_COUNT" >> $GITHUB_ENV
+          echo "MEND_SAST_LOW_COUNT=$MEND_SAST_LOW_COUNT" >> $GITHUB_ENV
+          echo "MEND_SAST_SCAN_URL=$MEND_SAST_SCAN_URL" >> $GITHUB_ENV
 
-      # # Check for failures in SAST scan and set the outcome of the workflow
-      # - name: Fail if Critical or High SAST vulnerabilities are found
-      #   shell: bash
-      #   run: |
-      #     if [ "$MEND_SAST_CRITICAL_COUNT" -gt 0 ] || [ "$MEND_SAST_HIGH_COUNT" -gt 0 ]; then
-      #       echo "❌ SAST scan detected critical/high vulnerabilities."
-      #       exit 1
-      #     else
-      #       echo "✅ No critical/high SAST vulnerabilities."
-      #     fi
+      # Check for failures in SAST scan and set the outcome of the workflow
+      - name: Fail if Critical or High SAST vulnerabilities are found
+        shell: bash
+        run: |
+          if [ "$MEND_SAST_CRITICAL_COUNT" -gt 0 ] || [ "$MEND_SAST_HIGH_COUNT" -gt 0 ]; then
+            echo "❌ SAST scan detected critical/high vulnerabilities."
+            exit 1
+          else
+            echo "✅ No critical/high SAST vulnerabilities."
+          fi
 
       # Publish the Mend SAST scan result (raw output)
       - name: Mend SAST Scan Result
@@ -146,43 +146,34 @@ jobs:
           output_text_description_file: mend-sast-scan-result.txt
           output: |
             {"title":"Mend SAST Scan Result", "summary":"${{ job.status }}"}
-
-      # # Publish the Mend SAST scan result (PDF report)
-      # - name: Publish${{ vars.MEND_SAST_REPORT_NAME }}.pdf
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: ${{ vars.MEND_SAST_REPORT_NAME }}.pdf
-      #     path: ${{ vars.MEND_SAST_REPORT_NAME }}.pdf
-
       
-      # # Send slack notification with result status
-      # - name: Send slack notification
-      #   uses: 8398a7/action-slack@v3
-      #   with:
-      #     status: custom
-      #     fields: all
-      #     custom_payload: |
-      #       {
-      #         "text": "*Mend Security Scan Results*",
-      #         "attachments": [
-      #           {
-      #             "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
-      #             "fields": [
-      #               {
-      #                 "title": "SCA scan",
-      #                 "value": "${{ env.MEND_SCA_SCAN_SUMMARY }}\n<${{ env.MEND_SCA_SCAN_URL }}|View full SCA report>",
-      #                 "short": false
-      #               },
-      #               {
-      #                 "title": "SAST scan",
-      #                 "value": "Total: ${{ env.MEND_SAST_TOTAL_VULNERABILITIES_COUNT }} | Critical: ${{ env.MEND_SAST_CRITICAL_COUNT }} | High: ${{ env.MEND_SAST_HIGH_COUNT }} | Medium: ${{ env.MEND_SAST_MEDIUM_COUNT }} | Low: ${{ env.MEND_SAST_LOW_COUNT }}\n<${{ env.MEND_SAST_SCAN_URL }}|View full SAST report>",
-      #                 "short": false
-      #               }
-      #             ]
-      #           }
-      #         ]
-      #       }
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-      #   if: always()
+      # Send slack notification with result status
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              "text": "*Mend Security Scan Results*",
+              "attachments": [
+                {
+                  "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
+                  "fields": [
+                    {
+                      "title": "SCA scan",
+                      "value": "${{ env.MEND_SCA_SCAN_SUMMARY }}\n<${{ env.MEND_SCA_SCAN_URL }}|View full SCA report>",
+                      "short": false
+                    },
+                    {
+                      "title": "SAST scan",
+                      "value": "Total: ${{ env.MEND_SAST_TOTAL_VULNERABILITIES_COUNT }} | Critical: ${{ env.MEND_SAST_CRITICAL_COUNT }} | High: ${{ env.MEND_SAST_HIGH_COUNT }} | Medium: ${{ env.MEND_SAST_MEDIUM_COUNT }} | Low: ${{ env.MEND_SAST_LOW_COUNT }}\n<${{ env.MEND_SAST_SCAN_URL }}|View full SAST report>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
