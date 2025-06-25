@@ -33,9 +33,9 @@ public abstract class AndroidBaseTest {
     @Rule
     public Timeout timeout = new Timeout(10000, TimeUnit.MILLISECONDS);
     protected static Context context = ApplicationProvider.getApplicationContext();
-    public static String USERNAME = "sdkuser";
-    public static String PASSWORD = "password";
-    public static String USER_EMAIL = "sdkuser@example.com";
+    public static String USERNAME = TestConfig.INSTANCE.getUsername();
+    public static String PASSWORD = TestConfig.INSTANCE.getPassword();
+    public static String USER_EMAIL = TestConfig.INSTANCE.getEmail();
 
     protected String TREE = "UsernamePassword";
 

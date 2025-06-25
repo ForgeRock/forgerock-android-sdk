@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import org.forgerock.android.auth.Encryptor
 import org.forgerock.android.auth.SecuredSharedPreferences
 import org.forgerock.android.auth.json
 
@@ -23,6 +24,7 @@ import org.forgerock.android.auth.json
  * @param keyAlias The alias for the encryption key.
  * @param key The key used to store the data.
  * @param serializer The serializer for the data.
+ * @param encryptor An optional encryptor for securing the data.
  */
 open class SecureSharedPreferencesStorage<T : @Serializable Any>(
     context: Context,
@@ -30,10 +32,11 @@ open class SecureSharedPreferencesStorage<T : @Serializable Any>(
     keyAlias: String,
     private var key: String,
     private val serializer: KSerializer<T>,
+    encryptor: Encryptor? = null
 ) : Storage<T> {
 
     private var sharedPreferences: SharedPreferences =
-        SecuredSharedPreferences(context, filename, keyAlias)
+        SecuredSharedPreferences(context, filename, keyAlias, encryptor)
 
     /**
      * Save an item to the secure shared preferences storage.

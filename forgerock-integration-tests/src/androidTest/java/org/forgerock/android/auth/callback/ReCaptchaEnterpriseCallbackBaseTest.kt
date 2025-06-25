@@ -14,6 +14,7 @@ import org.forgerock.android.auth.FROptionsBuilder
 import org.forgerock.android.auth.FRSession
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.Logger.Companion.set
+import org.forgerock.android.auth.TestConfig
 import org.junit.After
 import org.junit.BeforeClass
 
@@ -32,14 +33,14 @@ open class ReCaptchaEnterpriseCallbackBaseTest {
         val context: Context = ApplicationProvider.getApplicationContext()
         val application: Application = ApplicationProvider.getApplicationContext()
 
-        protected const val AM_URL: String = "https://openam-sdks2.forgeblocks.com/am"
-        protected const val REALM: String = "alpha"
-        protected const val OAUTH_CLIENT: String = "AndroidTest"
-        protected const val OAUTH_REDIRECT_URI: String = "org.forgerock.demo:/oauth2redirect"
-        protected const val SCOPE: String = "openid profile email address phone"
+        protected val AM_URL: String = TestConfig.serverUrl
+        protected val REALM: String = TestConfig.realm
+        protected val OAUTH_CLIENT: String = TestConfig.clientId
+        protected val OAUTH_REDIRECT_URI: String = TestConfig.redirectUri
+        protected val SCOPE: String = TestConfig.scope
         const val TREE: String = "TEST-e2e-recaptcha-enterprise"
-        const val USERNAME: String = "sdkuser"
-        const val RECAPTCHA_SITE_KEY: String = "6LfAykUqAAAAAE6aZOg9pNiS3XduyGZ5y-8U-z8B"
+        val USERNAME: String = TestConfig.username
+        val RECAPTCHA_SITE_KEY: String = TestConfig.recaptchaSiteKey
 
         @JvmStatic
         @BeforeClass
@@ -49,7 +50,7 @@ open class ReCaptchaEnterpriseCallbackBaseTest {
             val options = FROptionsBuilder.build {
                 server {
                     url = AM_URL
-                    cookieName = "b431aeda2ba0e98"
+                    cookieName = TestConfig.cookieName
                     realm = REALM
                 }
                 oauth {

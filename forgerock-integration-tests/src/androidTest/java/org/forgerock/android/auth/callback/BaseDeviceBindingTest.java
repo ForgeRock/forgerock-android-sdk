@@ -21,7 +21,7 @@ import org.forgerock.android.auth.FROptions;
 import org.forgerock.android.auth.FROptionsBuilder;
 import org.forgerock.android.auth.FRSession;
 import org.forgerock.android.auth.Logger;
-import org.forgerock.android.auth.RetryTestRule;
+import org.forgerock.android.auth.TestConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,11 +37,11 @@ public abstract class BaseDeviceBindingTest {
     protected static Context context = ApplicationProvider.getApplicationContext();
 
     // This test uses dynamic configuration with the following settings:
-    protected final static String AM_URL = "https://openam-sdks2.forgeblocks.com/am";
-    protected final static String REALM = "alpha";
-    protected final static String OAUTH_CLIENT = "AndroidTest";
-    protected final static String OAUTH_REDIRECT_URI = "org.forgerock.demo:/oauth2redirect";
-    protected final static String SCOPE = "openid profile email address phone";
+    protected final static String AM_URL = TestConfig.INSTANCE.getServerUrl();
+    protected final static String REALM = TestConfig.INSTANCE.getRealm();
+    protected final static String OAUTH_CLIENT = TestConfig.INSTANCE.getClientId();
+    protected final static String OAUTH_REDIRECT_URI = TestConfig.INSTANCE.getRedirectUri();
+    protected final static String SCOPE = TestConfig.INSTANCE.getScope();
 
     protected static String USERNAME = null;
     protected static String KID = null; // Used to store the kid of the key generated during binding
