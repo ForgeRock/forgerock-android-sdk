@@ -179,7 +179,7 @@ class BiometricAuth @JvmOverloads constructor(
         biometricManager = BiometricManager.from(activity)
         keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
         fingerprintManager =
-            context.getSystemService(Context.FINGERPRINT_SERVICE) as FingerprintManager
+            context.getSystemService(Context.FINGERPRINT_SERVICE) as? FingerprintManager
     }
 
     private fun initBiometricPrompt(authenticators: Int): BiometricPrompt {
