@@ -51,6 +51,7 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             }
 
+            ndkVersion = "28.1.13356709"
         }
     }
 
