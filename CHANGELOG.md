@@ -1,5 +1,10 @@
 ## [4.8.1]
 
+#### Added
+- Update to okhttp3 version 5.1.0 [SDKS-4214]
+
+## [4.8.1]
+
 #### Fixed
 - Encryption and decryption performance has been enhanced through the implementation of caching for the KeyStore, Cipher, and Symmetric Key. Additionally, developers now have the flexibility to enable or disable StrongBox during key generation. [SDKS-4090]
 
