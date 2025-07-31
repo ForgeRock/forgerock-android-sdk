@@ -1,5 +1,10 @@
-## [4.8.1]
 
+## [4.8.2]
+#### Added
+The SDK supports Android API level 36 (Android 16) and sets the minimum supported API level (minSdk) to 28.
+
+
+## [4.8.1]
 #### Fixed
 - Encryption and decryption performance has been enhanced through the implementation of caching for the KeyStore, Cipher, and Symmetric Key. Additionally, developers now have the flexibility to enable or disable StrongBox during key generation. [SDKS-4090]
 
