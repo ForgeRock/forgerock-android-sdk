@@ -14,7 +14,7 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.android().apply {
-            compileSdk = 35;
+            compileSdk = 36;
             defaultConfig {
                 minSdk = 23
             }
