@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentActivity;
 import org.forgerock.android.auth.biometric.BiometricAuth;
 import org.forgerock.android.auth.exception.AccountLockException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
+import org.forgerock.android.auth.exception.PushBiometricAuthException;
 import org.forgerock.android.auth.exception.PushMechanismException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -266,7 +267,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      * Sets the mechanism object associated with the notification.
      * @param mechanism the mechanism object.
      */
-    void setPushMechanism(Mechanism mechanism) {
+    public void setPushMechanism(Mechanism mechanism) {
         this.pushMechanism = (PushMechanism) mechanism;
     }
 
@@ -373,8 +374,7 @@ public class PushNotification extends ModelObject<PushNotification> {
 
                 @Override
                 public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                    listener.onException(new PushMechanismException("Error processing the Push " +
-                            "Authentication request. Biometric Authentication failed: " + errString));
+                    listener.onException(new PushBiometricAuthException(errorCode, errString.toString()));
                 }
 
                 @Override
