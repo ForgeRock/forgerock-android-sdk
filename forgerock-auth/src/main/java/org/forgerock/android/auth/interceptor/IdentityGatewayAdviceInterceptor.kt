@@ -7,13 +7,10 @@
 package org.forgerock.android.auth.interceptor
 
 import android.net.Uri
-import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.internal.http.StatusLine.Companion.HTTP_TEMP_REDIRECT
 import org.forgerock.android.auth.InitProvider
 import org.forgerock.android.auth.PolicyAdvice
 import java.io.IOException
@@ -62,7 +59,7 @@ abstract class IdentityGatewayAdviceInterceptor : Interceptor {
     abstract fun getAdviceHandler(advice: PolicyAdvice): AdviceHandler
 
     private fun getAdvice(response: Response): PolicyAdvice {
-        if (!response.isSuccessful && response.code == HTTP_TEMP_REDIRECT) {
+        if (!response.isSuccessful && response.code == 307) {
             val location = response.header(LOCATION)
             return getAdvice(location)
         } else if (response.code == HttpURLConnection.HTTP_UNAUTHORIZED &&

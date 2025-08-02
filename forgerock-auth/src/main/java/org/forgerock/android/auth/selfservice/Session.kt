@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okhttp3.Request
-import okhttp3.internal.EMPTY_REQUEST
+import okhttp3.RequestBody.Companion.EMPTY
 import org.forgerock.android.auth.FRSession
 import org.forgerock.android.auth.OkHttpClientProvider
 import org.forgerock.android.auth.SSOToken
@@ -20,6 +20,7 @@ import org.forgerock.android.auth.ServerConfig
 import org.forgerock.android.auth.exception.ApiException
 import org.forgerock.android.auth.json
 import java.net.URL
+import androidx.core.net.toUri
 
 /**
  * Retrieves the current SSO token.
@@ -38,9 +39,7 @@ internal fun ssoToken(): SSOToken {
  * @throws IllegalArgumentException if the URL is not set.
  */
 fun ServerConfig.am(): Uri.Builder {
-    url?.let {
-        return Uri.parse(url).buildUpon()
-    } ?: throw IllegalArgumentException("URL is not set")
+    return url?.toUri()?.buildUpon() ?: throw IllegalArgumentException("URL is not set")
 }
 
 /**
@@ -62,7 +61,7 @@ internal suspend fun session(server: ServerConfig, ssoTokenBlock: suspend () -> 
     }
     val request: Request = Request.Builder()
         .url(URL(uri.toString()))
-        .post(EMPTY_REQUEST)
+        .post(EMPTY)
         .header("Content-Type", "application/json")
         .header(server.cookieName, ssoTokenBlock().value)
         .header(ServerConfig.ACCEPT_API_VERSION, ServerConfig.API_VERSION_2_1)

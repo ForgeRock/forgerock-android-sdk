@@ -10,7 +10,6 @@ import android.content.Context
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import okhttp3.internal.toImmutableList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -102,7 +101,7 @@ class SecureCookieJar(context: Context,
             .filter { it.matches(url) }
             .toCollection(result)
 
-        return intercept(result.toImmutableList())
+        return intercept(result.toList())
     }
 
     private fun isExpired(cookie: Cookie): Boolean {
