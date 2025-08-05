@@ -244,8 +244,9 @@ public class PushNotification extends ModelObject<PushNotification> {
      * @return True if the notification has expired, false otherwise.
      */
     public final boolean isExpired() {
-        return timeExpired.getTimeInMillis() < Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                .getTimeInMillis();
+        // Calculate elapsed time since the notification was received (in seconds)
+        long elapsedTimeSeconds = (System.currentTimeMillis() - timeAdded.getTimeInMillis()) / 1000;
+        return elapsedTimeSeconds > ttl;
     }
 
     /**
