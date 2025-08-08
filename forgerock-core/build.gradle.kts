@@ -75,7 +75,7 @@ dependencies {
     implementation(libs.androidx.biometric.ktx)
 
     //Application Pin
-    compileOnly(libs.bcpkix.jdk15on)
+    compileOnly(libs.bcpkix.jdk18on)
 
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.runner)
@@ -88,7 +88,7 @@ dependencies {
     androidTestImplementation(libs.assertj.core)
 
     //For Application Pin
-    androidTestImplementation(libs.bcpkix.jdk15on)
+    androidTestImplementation(libs.bcpkix.jdk18on)
     androidTestImplementation(libs.androidx.security.crypto)
 
     testImplementation(libs.androidx.test.ext.junit)
@@ -97,7 +97,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(libs.assertj.core)
 
-    testImplementation(libs.bcpkix.jdk15on)
+    testImplementation(libs.bcpkix.jdk18on)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.powermock.module.junit4)

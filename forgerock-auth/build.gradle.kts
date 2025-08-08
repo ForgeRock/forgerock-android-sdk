@@ -80,7 +80,7 @@ dependencies {
     compileOnly(libs.nimbus.jose.jwt)
 
     //Application Pin
-    compileOnly(libs.bcpkix.jdk15on)
+    compileOnly(libs.bcpkix.jdk18on)
 
     //Social Login
     compileOnly(libs.play.services.auth)
@@ -101,7 +101,7 @@ dependencies {
     androidTestImplementation(libs.androidx.biometric.ktx)
     androidTestImplementation(libs.nimbus.jose.jwt)
     //For Application Pin
-    androidTestImplementation(libs.bcpkix.jdk15on)
+    androidTestImplementation(libs.bcpkix.jdk18on)
     androidTestImplementation(libs.androidx.security.crypto)
 
     //App Integrity
@@ -127,7 +127,7 @@ dependencies {
     testImplementation(libs.androidx.biometric.ktx)
 
     //Application Pin
-    testImplementation(libs.bcpkix.jdk15on)
+    testImplementation(libs.bcpkix.jdk18on)
     testImplementation(libs.androidx.security.crypto)
 
     //App Integrity

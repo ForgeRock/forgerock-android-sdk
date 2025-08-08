@@ -49,7 +49,7 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
 
     //For Application Pin
-    androidTestImplementation(libs.bcpkix.jdk15on)
+    androidTestImplementation(libs.bcpkix.jdk18on)
     androidTestImplementation(libs.androidx.security.crypto)
 
     //App Integrity
