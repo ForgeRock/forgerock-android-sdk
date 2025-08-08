@@ -1,7 +1,22 @@
-## [4.8.1]
+## [4.8.x]
 
 #### Added
 
+- Upgraded cryptographic library from bcpkix-jdk15on = "1.58.0.0" to bcpkix-jdk18on = "1.81". This
+  change only affects Application Pin for device binding. Applications using this feature need to
+  update the library as well and add the following to their build file to handle manifest conflicts:
+  ```
+  android {
+      packaging {
+          resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+      }
+  }
+  ```
+  [SDKS-4298]
+ 
+- Upgraded nimbus-jose-jwt library from version 9.37.3 to 10.4.1, improving security and adding
+  support for the latest JWT specifications. [SDKS-4298]
+ 
 - Update to okhttp3 version 5.1.0, migrating from OkHttp 4.x to 5.x. This migration involved removal
   of deprecated methods and usage of internal constant. No breaking changes were encountered in the
   SDK's usage of OkHttp, and all existing functionality remains unaffected. Developers integrating
@@ -176,9 +191,11 @@
 - `public void WebAuthnRegistrationCallback.register(Node node,FRListener<Void> listener)` to
   `suspend fun register(context: Context, node: Node)`
 -
+
 `public void WebAuthAuthenticationCallback.authenticate(@NonNull Fragment fragment, @NonNull Node node, @Nullable WebAuthnKeySelector selector, FRListener<Void> listener)`
 to
 `suspend fun authenticate(context: Context, node: Node, selector: WebAuthnKeySelector = WebAuthnKeySelector.DEFAULT)`
+
 - `FRAClient.updateAccount` now throws `AccountLockException` upon attempt to update a locked
   account [SDKS-2166]
 - `OathMechanism.getOathTokenCode()`, `HOTPMechanism.getOathTokenCode()` and
