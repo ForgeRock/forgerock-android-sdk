@@ -30,6 +30,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import kotlin.text.Charsets;
 import lombok.Getter;
 
 /**
@@ -225,7 +226,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
 
     private String decrypt(@NonNull String data) {
         try {
-            return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)));
+            return new String(encryptor.decrypt(Base64.decode(data, Base64.DEFAULT)), Charsets.UTF_8);
         } catch (Exception e) {
             //Failed to decrypt the data, reset the encryptor
             Logger.warn(TAG, e, "Failed to decrypt the data.");
@@ -354,7 +355,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
             try {
                 data.put(TYPE, type);
                 data.put(VALUE, value);
-                put(key, data.toString().getBytes());
+                put(key, data.toString().getBytes(Charsets.UTF_8));
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -374,7 +375,7 @@ public class SecuredSharedPreferences implements SharedPreferences {
                     content.put(s);
                 }
                 data.put(VALUE, content);
-                put(key, data.toString().getBytes());
+                put(key, data.toString().getBytes(Charsets.UTF_8));
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
