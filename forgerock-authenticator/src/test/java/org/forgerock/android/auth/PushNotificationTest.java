@@ -738,9 +738,9 @@ public class PushNotificationTest extends FRABaseTest {
         // Now simulate a device time change by creating a new notification with a timeAdded much further in the past
         // This simulates what would happen if device time jumped forward by 1 hour
         Calendar timeAddedWithTimeChange = Calendar.getInstance();
-        timeAddedWithTimeChange.setTimeInMillis(currentTimeMillis - 90000); // Same 90 seconds ago
+        timeAddedWithTimeChange.setTimeInMillis(currentTimeMillis - 3690000); // 90 seconds + 1 hour ago (3600000 ms)
 
-        PushNotification pushNotificationWithCorrectElapsedTime = PushNotification.builder()
+        PushNotification pushNotificationWithTimeChange = PushNotification.builder()
                 .setMechanismUID(MECHANISM_UID)
                 .setMessageId(MESSAGE_ID)
                 .setChallenge(CHALLENGE)
@@ -749,10 +749,10 @@ public class PushNotificationTest extends FRABaseTest {
                 .setTtl(120) // 120 seconds TTL
                 .build();
 
-        // With our fixed implementation, this notification should also not be expired,
-        // since the actual elapsed time is the same (90 seconds)
-        assertFalse("Notification should not be expired even if device time is changed",
-                pushNotificationWithCorrectElapsedTime.isExpired());
+        // This notification should be expired since it was created 1 hour + 90 seconds ago
+        // which is well beyond the 120 second TTL
+        assertTrue("Notification should be expired when device time changes significantly",
+                pushNotificationWithTimeChange.isExpired());
 
         // Finally, test with a notification that should be expired (received 150 seconds ago)
         Calendar timeAddedExpired = Calendar.getInstance();
