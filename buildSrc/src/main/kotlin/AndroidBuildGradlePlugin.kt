@@ -51,6 +51,10 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             }
 
+            packaging {
+                resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            }
+
             ndkVersion = "28.1.13356709"
         }
     }
