@@ -714,4 +714,61 @@ public class PushNotificationTest extends FRABaseTest {
         assertFalse(exceptionReceived[0]);
     }
 
+    @Test
+    public void testIsExpiredWithDeviceTimeChanged() throws InvalidNotificationException {
+        // Create a notification that was received in the past
+        Calendar timeAdded = Calendar.getInstance();
+        long currentTimeMillis = System.currentTimeMillis();
+
+        // Set timeAdded to 90 seconds ago
+        timeAdded.setTimeInMillis(currentTimeMillis - 90000);
+
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAdded)
+                .setTtl(120) // 120 seconds TTL
+                .build();
+
+        // The notification should not be expired (90 seconds elapsed < 120 second TTL)
+        assertFalse("Notification should not be expired with 90s elapsed and 120s TTL", pushNotification.isExpired());
+
+        // Now simulate a device time change by creating a new notification with a timeAdded much further in the past
+        // This simulates what would happen if device time jumped forward by 1 hour
+        Calendar timeAddedWithTimeChange = Calendar.getInstance();
+        timeAddedWithTimeChange.setTimeInMillis(currentTimeMillis - 3690000); // 90 seconds + 1 hour ago (3600000 ms)
+
+        PushNotification pushNotificationWithTimeChange = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAddedWithTimeChange)
+                .setTtl(120) // 120 seconds TTL
+                .build();
+
+        // This notification should be expired since it was created 1 hour + 90 seconds ago
+        // which is well beyond the 120 second TTL
+        assertTrue("Notification should be expired when device time changes significantly",
+                pushNotificationWithTimeChange.isExpired());
+
+        // Finally, test with a notification that should be expired (received 150 seconds ago)
+        Calendar timeAddedExpired = Calendar.getInstance();
+        timeAddedExpired.setTimeInMillis(currentTimeMillis - 150000); // 150 seconds ago
+
+        PushNotification expiredPushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(timeAddedExpired)
+                .setTtl(120) // 120 seconds TTL
+                .build();
+
+        // This notification should be expired (150 seconds > 120 seconds TTL)
+        assertTrue("Notification should be expired when elapsed time exceeds TTL",
+                expiredPushNotification.isExpired());
+    }
 }
