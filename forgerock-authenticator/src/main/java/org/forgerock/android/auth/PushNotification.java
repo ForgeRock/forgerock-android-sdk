@@ -21,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * PushNotification is a model class which represents a message that was received from an external
@@ -245,8 +244,7 @@ public class PushNotification extends ModelObject<PushNotification> {
      */
     public final boolean isExpired() {
         // Calculate elapsed time since the notification was received (in seconds)
-        long elapsedTimeSeconds = (System.currentTimeMillis() - timeAdded.getTimeInMillis()) / 1000;
-        return elapsedTimeSeconds > ttl;
+        return (System.currentTimeMillis() - (timeAdded.getTimeInMillis() + (ttl * 1000))) > 0;
     }
 
     /**
