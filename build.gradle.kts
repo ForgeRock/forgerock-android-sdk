@@ -24,7 +24,7 @@ buildscript {
 }
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("org.sonatype.gradle.plugins.scan") version "2.4.0"
     id("org.jetbrains.dokka") version "2.0.0"
     id("com.android.application") version "8.11.1" apply false
@@ -153,5 +153,19 @@ if (secretPropsFile.exists()) {
     p.load(FileInputStream(secretPropsFile))
     p.forEach { name, value ->
         ext[(name as? String).toString()] = value
+    }
+}
+
+group = project.findProperty("GROUP") as? String ?: "org.forgerock"
+version = project.findProperty("VERSION") as? String ?: ""
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username.set(project.findProperty("ossrhUsername") as String? ?: "")
+            password.set(project.findProperty("ossrhPassword") as String? ?: "")
+        }
     }
 }
