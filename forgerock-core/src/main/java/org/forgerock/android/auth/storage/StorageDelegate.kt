@@ -7,6 +7,10 @@
 
 package org.forgerock.android.auth.storage
 
+import org.forgerock.android.auth.Logger
+
+private val TAG = StorageDelegate::class.simpleName
+
 /**
  * A delegate class for managing storage.
  *
@@ -38,12 +42,19 @@ class StorageDelegate<T : Any>(
 
     /**
      * Retrieve an item from the storage, using the cache if available.
+     * If an exception occurs during retrieval, the item will be deleted.
      *
-     * @return The retrieved item, or null if no item is found.
+     * @return The retrieved item, or null if no item is found or an exception occurs.
      */
     override fun get(): T? {
         synchronized(lock) {
-            return cached ?: delegate.get()
+            return cached ?: try {
+                delegate.get()
+            } catch (e: Exception) {
+                Logger.error(TAG, e, "Failed to retrieve item from storage")
+                delete()
+                null
+            }
         }
     }
 
@@ -52,7 +63,12 @@ class StorageDelegate<T : Any>(
      */
     override fun delete() {
         synchronized(lock) {
-            delegate.delete()
+            try {
+                delegate.delete()
+            } catch (e: Exception) {
+                Logger.error(TAG, e, "Failed to delete item from storage", e)
+            }
+
             if (cacheable) {
                 cached = null
             }
