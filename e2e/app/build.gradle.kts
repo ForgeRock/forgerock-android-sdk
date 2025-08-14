@@ -8,14 +8,15 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.example.app"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
-        targetSdk = 35
-        minSdk = 23
+        targetSdk = 36
+        minSdk = 28
     }
 
     buildTypes {
@@ -44,6 +45,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
+
+    packaging {
+        resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+
 }
 
 
@@ -66,12 +72,12 @@ dependencies {
     //For Custom Storage
     implementation(libs.kotlinx.serialization.json)
 
-    //implementation("org.forgerock:forgerock-auth:4.8.2-beta1")
-    //implementation("org.forgerock:ping-protect:4.8.2-beta1")
+    //implementation("org.forgerock:forgerock-auth:4.8.1")
+    //implementation("org.forgerock:ping-protect:4.8.1")
 
     // implementation 'org.forgerock:forgerock-auth:4.2.0'
     // Device Binding + JWT + Application Pin
-    implementation(libs.bcpkix.jdk15on) // Application Pin
+    implementation(libs.bcpkix.jdk18on) // Application Pin
     implementation(libs.androidx.security.crypto)
     implementation(libs.nimbus.jose.jwt)
     implementation(libs.androidx.biometric.ktx)
