@@ -23,8 +23,13 @@
   the SDK should not experience any impact, but should ensure their own dependencies are compatible
   with OkHttp 5.x. [SDKS-4214]
 
-## [4.8.1]
 
+## [4.8.2]
+#### Added
+The SDK supports Android API level 36 (Android 16) and sets the minimum supported API level (minSdk) to 28.
+
+
+## [4.8.1]
 #### Fixed
 
 - Encryption and decryption performance has been enhanced through the implementation of caching for
