@@ -30,8 +30,8 @@ Use the SDKs to leverage _[Intelligent Access](https://www.pingidentity.com/en/p
     * Ping Advanced Identity Cloud
     * PingAM 6.5.2+
 
-* Android API level 23+
-    * Android 6.0 (Marshmallow), 7.0 (Nougat), 8.0 (Oreo), 9.0 (Pie), 10.0, 11.0, 12.0, 13.0, 14.0, 15.0
+* Android API level 28+
+    * Android 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- INSTALLATION - If you want to start quickly with minimal assistance. -->

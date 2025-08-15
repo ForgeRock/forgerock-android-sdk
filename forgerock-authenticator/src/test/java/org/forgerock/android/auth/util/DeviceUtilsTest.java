@@ -34,33 +34,6 @@ public class DeviceUtilsTest {
     }
 
     @Test
-    @Config(sdk = Build.VERSION_CODES.N_MR1)
-    public void testGetDeviceNameFromSettingsSuccess() {
-        // Given
-        String expectedDeviceName = "Test Device Name";
-        Settings.Global.putString(contentResolver, Settings.Global.DEVICE_NAME, expectedDeviceName);
-
-        // When
-        String actualDeviceName = DeviceUtils.getDeviceName(context);
-
-        // Then
-        assertEquals(expectedDeviceName, actualDeviceName);
-    }
-
-    @Test
-    @Config(sdk = Build.VERSION_CODES.M)
-    public void testGetDeviceNameFromBuildLowerThanN_MR1() {
-        // Given
-        String expectedDeviceName = getDeviceNameFromBuild();
-
-        // When
-        String actualDeviceName = DeviceUtils.getDeviceName(context);
-
-        // Then
-        assertEquals(expectedDeviceName, actualDeviceName);
-    }
-
-    @Test
     public void testGetDeviceNameFromBuildManufacturerAndModelSame() {
         // Given
         String manufacturer = "Google";
