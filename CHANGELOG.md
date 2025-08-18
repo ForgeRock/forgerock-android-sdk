@@ -10,8 +10,14 @@
 - Upgraded `nimbus-jose-jwt` from 9.37.3 to 10.4.1. [SDKS-4298]
 - Upgraded `bcpkix-jdk15on` 1.58.0.0 to `bcpkix-jdk18on` 1.81. [SDKS-4298]
 - Upgraded `OkHttp` from 4.x to 5.1.0. [SDKS-4214]
+- Upgraded `security-crypto` from 1.1.0-alpha to 1.1.0, and enforced `com.google.code.gson` version 
+  2.13.1 to address a stack-based buffer overflow vulnerability (CVE-2025-53864, CWE-121). [SDKS-4316]
+- The SDK now automatically clears corrupted data from storage instead of throwing an exception. 
+  UTF-8 encoding is now explicitly set for all strings saved to and loaded from storage, ensuring data consistency. [SDKS-4307]
+- Unified push notification expiration logic with iOS SDK to ensure consistent cross-platform behavior. [SDKS-4286]
 
 ## [4.8.1]
+
 #### Fixed
 
 - Encryption and decryption performance has been enhanced through the implementation of caching for
