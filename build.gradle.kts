@@ -60,6 +60,9 @@ allprojects {
             //Due to this https://github.com/powermock/powermock/issues/1125, we have to keep using an
             //older version of mockito until mockito release a fix
             force("org.mockito:mockito-core:3.12.4")
+            //Due to [CVE-2025-53864] CWE-121: Stack-based Buffer Overflow,
+            //androidx.security:security-crypto:1.1.0 has transitive to gson library
+            force("com.google.code.gson:gson:2.13.1")
         }
     }
 }
