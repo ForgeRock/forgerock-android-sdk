@@ -1,35 +1,23 @@
-## [4.8.x]
-
-#### Added
-
-- Upgraded cryptographic library from bcpkix-jdk15on = "1.58.0.0" to bcpkix-jdk18on = "1.81". This
-  change only affects Application Pin for device binding. Applications using this feature need to
-  update the library as well and add the following to their build file to handle manifest conflicts:
-  ```
-  android {
-      packaging {
-          resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
-      }
-  }
-  ```
-  [SDKS-4298]
- 
-- Upgraded nimbus-jose-jwt library from version 9.37.3 to 10.4.1, improving security and adding
-  support for the latest JWT specifications. [SDKS-4298]
- 
-- Update to okhttp3 version 5.1.0, migrating from OkHttp 4.x to 5.x. This migration involved removal
-  of deprecated methods and usage of internal constant. No breaking changes were encountered in the
-  SDK's usage of OkHttp, and all existing functionality remains unaffected. Developers integrating
-  the SDK should not experience any impact, but should ensure their own dependencies are compatible
-  with OkHttp 5.x. [SDKS-4214]
-
-
 ## [4.8.2]
-#### Added
-The SDK supports Android API level 36 (Android 16) and sets the minimum supported API level (minSdk) to 28.
 
+#### Added
+- Support for 16 KB memory page sizes on 64-bit devices. [SDKS-4163]
+- Support for Android 16 (API level 36) and updated the minimum support API level (minSdk) to 28. [SDKS-4278]
+
+#### Fixed
+- Fixed a crash occurring during face biometric authentication. [SDKS-4190]
+- Enhanced biometric authentication error handling to return specific failure statuses. [SDKS-4272]
+- Upgraded `nimbus-jose-jwt` from 9.37.3 to 10.4.1. [SDKS-4298]
+- Upgraded `bcpkix-jdk15on` 1.58.0.0 to `bcpkix-jdk18on` 1.81. [SDKS-4298]
+- Upgraded `OkHttp` from 4.x to 5.1.0. [SDKS-4214]
+- Upgraded `security-crypto` from 1.1.0-alpha to 1.1.0, and enforced `com.google.code.gson` version 
+  2.13.1 to address a stack-based buffer overflow vulnerability (CVE-2025-53864, CWE-121). [SDKS-4316]
+- The SDK now automatically clears corrupted data from storage instead of throwing an exception. 
+  UTF-8 encoding is now explicitly set for all strings saved to and loaded from storage, ensuring data consistency. [SDKS-4307]
+- Unified push notification expiration logic with iOS SDK to ensure consistent cross-platform behavior. [SDKS-4286]
 
 ## [4.8.1]
+
 #### Fixed
 
 - Encryption and decryption performance has been enhanced through the implementation of caching for
