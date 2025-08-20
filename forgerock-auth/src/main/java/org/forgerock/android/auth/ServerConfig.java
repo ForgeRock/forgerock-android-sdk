@@ -71,7 +71,7 @@ public class ServerConfig extends NetworkConfig {
                 getTimeOut(context, timeout),
                 timeUnit, cookieJarSupplier,
                 getPins(context, pins),
-                () -> singletonList(new OkHttpRequestInterceptor()),
+                () -> Arrays.asList(new OkHttpRequestInterceptor(), new OkHttpResponseInterceptor()),
                 buildSteps);
         this.url = url;
         this.realm = realm == null ? context.getResources().getString(R.string.forgerock_realm) : realm;
