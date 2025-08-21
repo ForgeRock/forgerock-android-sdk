@@ -17,19 +17,19 @@ val customTemplatesFolder = file("$projectDir/dokka/templates")
 buildscript {
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.7.1")
+        classpath("com.android.tools.build:gradle:8.11.1")
         classpath("com.adarshr:gradle-test-logger-plugin:2.0.0")
         classpath("com.google.gms:google-services:4.3.15")
     }
 }
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("org.sonatype.gradle.plugins.scan") version "2.4.0"
     id("org.jetbrains.dokka") version "2.0.0"
-    id("com.android.application") version "8.6.0" apply false
-    id("com.android.library") version "8.6.0" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.android.application") version "8.11.1" apply false
+    id("com.android.library") version "8.11.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.0" apply false
 }
 
 // Configure all single-project Dokka tasks at the same time,
@@ -57,13 +57,12 @@ allprojects {
             // on version < 18.0.1, this library is depended by most of the google libraries.
             // and needs to be reviewed on upgrades
             force("com.google.android.gms:play-services-basement:18.1.0")
-            //Due to Vulnerability [CVE-2023-3635] CWE-681: Incorrect Conversion between Numeric Types
-            //on version < 3.4.0, this library is depended by okhttp, when okhttp upgrade, this needs
-            //to be reviewed
-            force("com.squareup.okio:okio:3.4.0")
             //Due to this https://github.com/powermock/powermock/issues/1125, we have to keep using an
             //older version of mockito until mockito release a fix
             force("org.mockito:mockito-core:3.12.4")
+            //Due to [CVE-2025-53864] CWE-121: Stack-based Buffer Overflow,
+            //androidx.security:security-crypto:1.1.0 has transitive to gson library
+            force("com.google.code.gson:gson:2.13.1")
         }
     }
 }
@@ -157,5 +156,19 @@ if (secretPropsFile.exists()) {
     p.load(FileInputStream(secretPropsFile))
     p.forEach { name, value ->
         ext[(name as? String).toString()] = value
+    }
+}
+
+group = project.findProperty("GROUP") as? String ?: "org.forgerock"
+version = project.findProperty("VERSION") as? String ?: ""
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username.set(project.findProperty("ossrhUsername") as String? ?: "")
+            password.set(project.findProperty("ossrhPassword") as String? ?: "")
+        }
     }
 }

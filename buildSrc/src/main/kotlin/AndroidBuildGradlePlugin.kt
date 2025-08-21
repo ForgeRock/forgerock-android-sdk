@@ -14,9 +14,9 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.android().apply {
-            compileSdk = 35;
+            compileSdk = 36;
             defaultConfig {
-                minSdk = 23
+                minSdk = 28
             }
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
@@ -51,6 +51,11 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             }
 
+            packaging {
+                resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            }
+
+            ndkVersion = "28.1.13356709"
         }
     }
 
