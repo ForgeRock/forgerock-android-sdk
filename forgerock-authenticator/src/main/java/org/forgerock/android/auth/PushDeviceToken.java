@@ -20,6 +20,8 @@ import java.util.Objects;
  */
 public class PushDeviceToken extends ModelObject<PushDeviceToken> {
 
+    private static final String TAG = PushDeviceToken.class.getSimpleName();
+
     private final String tokenId;
     private final Calendar timeAdded;
 
@@ -109,7 +111,7 @@ public class PushDeviceToken extends ModelObject<PushDeviceToken> {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("tokenId", getTokenId());
-            jsonObject.put("timeAdded", getTimeAdded());
+            jsonObject.put("timeAdded", getTimeAdded().getTimeInMillis());
         } catch (JSONException e) {
             throw new RuntimeException("Error parsing PushDeviceToken object to JSON string representation.", e);
         }
@@ -134,10 +136,25 @@ public class PushDeviceToken extends ModelObject<PushDeviceToken> {
 
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
-            return new PushDeviceToken(
-                    jsonObject.getString("tokenId"),
-                    getDate(jsonObject.optLong("timeAdded")));
+            String tokenId = jsonObject.optString("tokenId", null);
+            if (tokenId.isEmpty()) {
+                Logger.warn(TAG, "Failed to deserialize PushDeviceToken: missing or empty tokenId");
+                return null;
+            }
+            
+            long timeAddedMillis = jsonObject.optLong("timeAdded", 0);
+            if (timeAddedMillis == 0) {
+                // For old format or corrupted data, use current time as fallback
+                Logger.warn(TAG, "Failed to parse timeAdded from PushDeviceToken, using current time as fallback");
+                timeAddedMillis = System.currentTimeMillis();
+            }
+            
+            return new PushDeviceToken(tokenId, getDate(timeAddedMillis));
         } catch (JSONException e) {
+            Logger.warn(TAG, e, "Failed to deserialize PushDeviceToken due to corrupted JSON data");
+            return null;
+        } catch (Exception e) {
+            Logger.warn(TAG, e, "Failed to deserialize PushDeviceToken due to unexpected error");
             return null;
         }
     }
