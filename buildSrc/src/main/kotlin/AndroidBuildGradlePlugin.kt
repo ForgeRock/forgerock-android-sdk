@@ -14,9 +14,9 @@ class AndroidBuildGradlePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.android().apply {
-            compileSdk = 36;
+            compileSdk = 36
             defaultConfig {
-                minSdk = 28
+                minSdk = 23
             }
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
