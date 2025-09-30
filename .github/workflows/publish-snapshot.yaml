@@ -24,7 +24,7 @@ on:
 jobs:
   # Extract the version number from CHANGELOG.md
   changelog-version:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version_output.outputs.version }}
     steps:

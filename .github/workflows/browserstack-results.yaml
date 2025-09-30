@@ -1,0 +1,164 @@
+#
+# Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
+#
+# This software may be modified and distributed under the terms
+# of the MIT license. See the LICENSE file for details.
+#
+
+name: BrowserStack Test Results
+
+on:
+  workflow_call:
+    inputs:
+      browserstack-build-id:
+        description: BrowserStack Build ID
+        type: string
+        required: true
+    secrets:
+      BROWSERSTACK_USERNAME:
+        description: BrowserStack Username
+        required: true
+      BROWSERSTACK_ACCESS_KEY:
+        description: BrowserStack Access Key
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+
+jobs:
+  browserstack-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Workflow inputs:"
+        run: echo "Build ID - ${{ inputs.browserstack-build-id }}"
+
+      - name: Wait for BrowserStack build to finish
+        id: wait_browserstack
+        timeout-minutes: 60
+        run: |
+          BROWSERSTACK_BUILD_ID="${{ inputs.browserstack-build-id }}"
+          echo "Waiting for BrowserStack build: $BROWSERSTACK_BUILD_ID"
+
+          RUNNING_STATES=("queued" "running")
+          TERMINAL_STATES=("passed" "failed" "error" "timed out" "skipped")
+
+          while true; do
+            RESPONSE=$(curl -s -u "${{ secrets.BROWSERSTACK_USERNAME }}:${{ secrets.BROWSERSTACK_ACCESS_KEY }}" \
+              "https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/${BROWSERSTACK_BUILD_ID}")
+
+            STATUS=$(echo "$RESPONSE" | jq -r '.status')
+            echo "Current build status: $STATUS"
+
+            if printf '%s\n' "${RUNNING_STATES[@]}" | grep -qx "$STATUS"; then
+              echo "Build still $STATUS... waiting..."
+              sleep 10
+              continue
+            fi
+
+            if printf '%s\n' "${TERMINAL_STATES[@]}" | grep -qx "$STATUS"; then
+              echo "BrowserStack build reached terminal state: $STATUS"
+              echo "$RESPONSE" > browserstack-build-result.json
+              echo "BROWSERSTACK_BUILD_RESULT=$RESPONSE" >> $GITHUB_ENV
+              echo "BROWSERSTACK_BUILD_STATUS=$STATUS" >> $GITHUB_ENV
+              exit 0
+            fi
+
+            echo "Unexpected status '$STATUS', will retry..."
+            sleep 10
+          done
+
+      - name: Upload raw BrowserStack build JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: browserstack-build-result
+          path: browserstack-build-result.json
+          retention-days: 7
+
+      - name: Parse build outcome json
+        id: parse_build
+        run: |
+          RESULT='${{ env.BROWSERSTACK_BUILD_RESULT }}'
+          echo "$RESULT" | jq '.'
+
+          BUILD_ID=$(echo "$RESULT" | jq -r '.id')
+          BUILD_STATUS=$(echo "$RESULT" | jq -r '.status')
+          BUILD_DURATION=$(echo "$RESULT" | jq -r '.duration')
+          BUILD_DEVICE_COUNT=$(echo "$RESULT" | jq '.devices | length')
+          
+          # Aggregate pass/fail/skip counts across all devices
+          TOTAL_PASSED=$(echo "$RESULT" | jq '[.devices[].sessions[].testcases.status.passed] | add // 0')
+          TOTAL_FAILED=$(echo "$RESULT" | jq '[.devices[].sessions[].testcases.status.failed] | add // 0')
+          TOTAL_SKIPPED=$(echo "$RESULT" | jq '[.devices[].sessions[].testcases.status.skipped] | add // 0')
+
+          echo "BROWSERSTACK_BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_URL=https://app-automate.browserstack.com/dashboard/v2/builds/$BUILD_ID" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_STATUS=$BUILD_STATUS" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_DURATION=$BUILD_DURATION" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_DEVICE_COUNT=$BUILD_DEVICE_COUNT" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_PASSED=$TOTAL_PASSED" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_FAILED=$TOTAL_FAILED" >> $GITHUB_ENV
+          echo "BROWSERSTACK_BUILD_SKIPPED=$TOTAL_SKIPPED" >> $GITHUB_ENV
+
+      - name: Publish BrowserStack Results Summary
+        run: |
+          echo "## 🌐 BrowserStack Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build ID:** ${{ env.BROWSERSTACK_BUILD_ID }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build URL:** [View on BrowserStack](${{ env.BROWSERSTACK_BUILD_URL }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ env.BROWSERSTACK_BUILD_STATUS }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Duration:** ${{ env.BROWSERSTACK_BUILD_DURATION }} seconds" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Passed | ${{ env.BROWSERSTACK_BUILD_PASSED }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ Failed | ${{ env.BROWSERSTACK_BUILD_FAILED }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏭️ Skipped | ${{ env.BROWSERSTACK_BUILD_SKIPPED }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📱 Devices Used | ${{ env.BROWSERSTACK_BUILD_DEVICE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Device & Session Details" >> $GITHUB_STEP_SUMMARY
+          echo "| Device | OS  | Status | Passed | Failed | Skipped | Duration (s) | Session Link |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-----|--------|--------|--------|---------|--------------|--------------|" >> $GITHUB_STEP_SUMMARY
+
+          echo '${{ env.BROWSERSTACK_BUILD_RESULT }}' | jq -c '.devices[]' | while read device; do
+            DEVICE_NAME=$(echo "$device" | jq -r '.device')
+            DEVICE_OS=$(echo "$device" | jq -r '.os_version')
+            echo "$device" | jq -c '.sessions[]' | while read session; do
+              SESSION_STATUS=$(echo "$session" | jq -r '.status')
+              SESSION_DURATION=$(echo "$session" | jq -r '.duration')
+              SESSION_URL="https://app-automate.browserstack.com/builds/${{ env.BROWSERSTACK_BUILD_ID }}/sessions/$(echo "$session" | jq -r '.id')"
+              PASSED=$(echo "$session" | jq -r '.testcases.status.passed')
+              FAILED=$(echo "$session" | jq -r '.testcases.status.failed')
+              SKIPPED=$(echo "$session" | jq -r '.testcases.status.skipped')
+              echo "| $DEVICE_NAME | $DEVICE_OS | $SESSION_STATUS | $PASSED | $FAILED | $SKIPPED | $SESSION_DURATION | [View Session]($SESSION_URL) |" >> $GITHUB_STEP_SUMMARY
+            done
+          done
+
+      - name: Set job status
+        run: |
+          if [[ ${{ env.BROWSERSTACK_BUILD_FAILED }} != '0' ]]; then
+            echo "One or more tests failed."
+            exit 1
+          else
+            echo "All tests passed."
+            exit 0
+          fi
+
+          
+       # Send slack notification with result status
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: 'BrowserStack Build: ${{ env.BROWSERSTACK_BUILD_ID }}',
+                title_link: '${{ env.BROWSERSTACK_BUILD_URL }}',
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                "text": "Test summary: ${{ job.status }}\nPassed: ${{ env.BROWSERSTACK_BUILD_PASSED }}, Failed: ${{ env.BROWSERSTACK_BUILD_FAILED }}, Skipped: ${{ env.BROWSERSTACK_BUILD_SKIPPED }}\nDevices: ${{ env.BROWSERSTACK_BUILD_DEVICE_COUNT }}\nDuration: ${{ env.BROWSERSTACK_BUILD_DURATION }}s\nWorkflow: ${{ github.workflow }} -> ${{ github.job }}\nPull request: ${{ github.event.pull_request.html_url || 'N/A' }}\nCommit: ${{ github.sha }} by ${{ github.actor }}\nMessage: ${{ github.event.head_commit.message || 'N/A' }}"
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

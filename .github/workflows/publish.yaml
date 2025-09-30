@@ -28,7 +28,7 @@ on:
 
 jobs:
   publish-to-nexus:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       # Clone the repo
