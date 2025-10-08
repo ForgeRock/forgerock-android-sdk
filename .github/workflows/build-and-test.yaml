@@ -1,11 +1,6 @@
 name: Build and Test
 on:
   workflow_call:
-    inputs:
-      runs-on:
-        description: Platform to execute on
-        type: string
-        default: macos-latest
     secrets:
       SLACK_WEBHOOK:
         description: Slack Notifier Incoming Webhook
@@ -15,7 +10,7 @@ on:
         required: true
 jobs:
   build-and-test:
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ubuntu-latest
 
     steps:
       # Clone the repo
@@ -34,33 +29,29 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      # Execute forgerock-core debug unit tests with coverage report
-      - name: Run forgerock-core debug unit tests
-        run: ./gradlew :forgerock-core:testDebugUnitTestCoverage --stacktrace --no-daemon
-        
-      # Execute forgerock-auth debug unit tests with coverage report
-      - name: Run forgerock-auth debug unit tests
-        run: ./gradlew :forgerock-auth:testDebugUnitTestCoverage --stacktrace --no-daemon
-
-      # Execute forgerock-authenticator debug unit tests with coverage report
-      - name: Run forgerock-authenticator debug unit tests
-        run: ./gradlew :forgerock-authenticator:testDebugUnitTestCoverage --stacktrace --no-daemon
-
-      # Execute forgerock-authenticator debug unit tests with coverage report
-      - name: Run ping-protect debug unit tests
-        run: ./gradlew :ping-protect:testDebugUnitTestCoverage --stacktrace --no-daemon
-
+      # Execute all debug unit tests with coverage report
+      - name: Run debug unit tests
+        run: ./gradlew --rerun-tasks testDebugUnitTestCoverage --stacktrace --no-daemon
+      
       # Publish test reports for the unit tests
       - name: Publish test results
         if: success() || failure()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: Unit tests results
-          path: 'forgerock-core/build/test-results/**/TEST-*.xml,forgerock-auth/build/test-results/**/TEST-*.xml,forgerock-authenticator/build/test-results/**/TEST-*.xml,ping-protect/build/test-results/**/TEST-*.xml'
+          path: '**/build/test-results/**/TEST-*.xml'
           list-suites: 'all'
-          list-tests: 'all'
+          list-tests: 'failed'
           fail-on-error: 'true'
+          fail-on-empty: 'true'
           reporter: java-junit
+
+      - name: Upload Android Test Report (HTML)
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unti-tests-report
+          path: '**/build/reports/tests/testDebugUnitTest/**'
 
       # Upload coverage reports to Codecov
       - name: Upload coverage reports to Codecov
@@ -72,7 +63,7 @@ jobs:
 
       - uses: 8398a7/action-slack@v3
         with:
-          mention: 'stoyan.petrov,andy.witrisna,jey.periyasamy'
+          mention: 'stoyan.petrov,andy.witrisna'
           if_mention: 'failure,cancelled'
           fields: repo,author,eventName,message,job,pullRequest,took
           status: ${{ job.status }}

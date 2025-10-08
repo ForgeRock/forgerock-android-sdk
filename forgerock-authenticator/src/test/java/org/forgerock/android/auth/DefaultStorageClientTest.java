@@ -8,6 +8,7 @@
 package org.forgerock.android.auth;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -24,6 +25,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class DefaultStorageClientTest extends FRABaseTest {
@@ -609,6 +613,8 @@ public class DefaultStorageClientTest extends FRABaseTest {
                 .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE));
         defaultStorage.setNotificationData(context.getApplicationContext()
                 .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_NOTIFICATIONS, Context.MODE_PRIVATE));
+        defaultStorage.setDeviceTokenData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, Context.MODE_PRIVATE));
 
         Calendar timeAdded = Calendar.getInstance();
 
@@ -617,16 +623,127 @@ public class DefaultStorageClientTest extends FRABaseTest {
                 REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT);
         PushNotification pushNotification = createPushNotification(MECHANISM_UID, MESSAGE_ID, CHALLENGE,
                 AMLB_COOKIE, timeAdded, TTL);
+        PushDeviceToken deviceToken = new PushDeviceToken("testToken123", timeAdded);
 
         defaultStorage.setAccount(account);
         defaultStorage.setMechanism(mechanism);
         defaultStorage.setNotification(pushNotification);
+        defaultStorage.setPushDeviceToken(deviceToken);
 
         assertFalse(defaultStorage.isEmpty());
 
         defaultStorage.removeAll();
 
         assertTrue(defaultStorage.isEmpty());
+    }
+
+    @Test
+    public void testStorePushDeviceToken() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        defaultStorage.setDeviceTokenData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, Context.MODE_PRIVATE));
+        
+        // Create test token and its JSON representation
+        Calendar timeAdded = Calendar.getInstance();
+        timeAdded.setTimeInMillis(1704099600000L);
+        PushDeviceToken deviceToken = new PushDeviceToken("testToken123", timeAdded);
+        String expectedJson = deviceToken.toJson();
+
+        // Store the device token
+        boolean result = defaultStorage.setPushDeviceToken(deviceToken);
+        assertTrue(result);
+
+        // Retrieve and verify
+        PushDeviceToken retrieved = defaultStorage.getPushDeviceToken();
+        assertNotNull(retrieved);
+        assertEquals(expectedJson, retrieved.toJson());
+        assertEquals("testToken123", retrieved.getTokenId());
+        assertEquals(timeAdded.getTimeInMillis(), retrieved.getTimeAdded().getTimeInMillis());
+    }
+
+    @Test
+    public void testGetPushDeviceTokenWhenNoneExists() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        defaultStorage.setDeviceTokenData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_DEVICE_TOKEN, Context.MODE_PRIVATE));
+
+        PushDeviceToken retrieved = defaultStorage.getPushDeviceToken();
+        assertNull(retrieved);
+    }
+
+    @Test
+    public void testPushDeviceTokenCorruptionRecovery() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        
+        // Create a mock SharedPreferences that will throw an exception when getString is called
+        SharedPreferences mockPrefs = mock(SharedPreferences.class);
+        SharedPreferences.Editor mockEditor = mock(SharedPreferences.Editor.class);
+        
+        // Configure mock to throw RuntimeException (simulating the corruption scenario)
+        when(mockPrefs.getString("deviceToken", null))
+            .thenThrow(new RuntimeException("org.json.JSONException: Unterminated string at character 804"));
+        
+        // Configure mock editor for cleanup
+        when(mockPrefs.edit()).thenReturn(mockEditor);
+        when(mockEditor.remove("deviceToken")).thenReturn(mockEditor);
+        when(mockEditor.commit()).thenReturn(true);
+        
+        // Inject the mock into the storage client
+        defaultStorage.setDeviceTokenData(mockPrefs);
+        
+        // This should not throw an exception and should return null
+        PushDeviceToken retrieved = defaultStorage.getPushDeviceToken();
+        assertNull(retrieved);
+        
+        // Verify that remove was called (cleanup happened)
+        verify(mockEditor).remove("deviceToken");
+        verify(mockEditor).commit();
+    }
+
+    @Test
+    public void testPushDeviceTokenBackwardCompatibility() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        
+        // Create a mock SharedPreferences that returns old format JSON (with Calendar.toString())
+        SharedPreferences mockPrefs = mock(SharedPreferences.class);
+        SharedPreferences.Editor mockEditor = mock(SharedPreferences.Editor.class);
+        
+        // Simulate old format JSON that would have caused the corruption
+        String oldFormatJson = "{\"tokenId\":\"oldToken123\",\"timeAdded\":\"java.util.GregorianCalendar[time=1704099600000,areFieldsSet=true,areAllFieldsSet=true,lenient=true,zone=java.util.SimpleTimeZone[id=UTC,offset=0,dstSavings=3600000,useDaylight=false,startYear=0,startMode=0,startMonth=0,startDay=0,startDayOfWeek=0,startTime=0,startTimeMode=0,endMode=0,endMonth=0,endDay=0,endDayOfWeek=0,endTime=0,endTimeMode=0],firstDayOfWeek=2,minimalDaysInFirstWeek=1,ERA=1,YEAR=2025,MONTH=8,WEEK_OF_YEAR=37,WEEK_OF_MONTH=2,DAY_OF_MONTH=14,DAY_OF_YEAR=257,DAY_OF_WEEK=1,DAY_OF_WEEK_IN_MONTH=2,AM_PM=1,HOUR=6,HOUR_OF_DAY=18,MINUTE=52,SECOND=21,MILLISECOND=637,ZONE_OFFSET=0,DST_OFFSET=0]\"}";
+        
+        when(mockPrefs.getString("deviceToken", null)).thenReturn(oldFormatJson);
+        when(mockPrefs.edit()).thenReturn(mockEditor);
+        when(mockEditor.remove("deviceToken")).thenReturn(mockEditor);
+        when(mockEditor.commit()).thenReturn(true);
+        
+        // Inject the mock into the storage client
+        defaultStorage.setDeviceTokenData(mockPrefs);
+        
+        // This should handle the old format gracefully
+        PushDeviceToken retrieved = defaultStorage.getPushDeviceToken();
+        assertNotNull(retrieved);
+        assertEquals("oldToken123", retrieved.getTokenId());
+        // Time should be set to current time as fallback since optLong("timeAdded") returns 0 for the string value
+        assertTrue(retrieved.getTimeAdded().getTimeInMillis() > 0);
+    }
+
+    @Test
+    public void testNewFormatPushDeviceTokenSerialization() {
+        // Test serialization format without involving DefaultStorageClient
+        Calendar timeAdded = Calendar.getInstance();
+        timeAdded.setTimeInMillis(1704099600000L); // Fixed timestamp for testing
+        PushDeviceToken deviceToken = new PushDeviceToken("newFormatToken", timeAdded);
+
+        // Verify new format serialization stores timestamp as long
+        String json = deviceToken.toJson();
+        assertTrue("New format should contain timeAdded as number", json.contains("\"timeAdded\":1704099600000"));
+        assertFalse("New format should not contain Calendar object string", json.contains("GregorianCalendar"));
+
+        // Test deserialization
+        PushDeviceToken deserialized = PushDeviceToken.deserialize(json);
+        assertNotNull(deserialized);
+        assertEquals("newFormatToken", deserialized.getTokenId());
+        assertEquals(1704099600000L, deserialized.getTimeAdded().getTimeInMillis());
     }
 
 }

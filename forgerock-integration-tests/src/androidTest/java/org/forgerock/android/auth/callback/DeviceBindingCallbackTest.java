@@ -145,6 +145,11 @@ public class DeviceBindingCallbackTest extends BaseDeviceBindingTest {
 
     @Test
     public void test04DeviceBindingExceed() throws ExecutionException, InterruptedException {
+        test03DeviceBindingBind(); // Bind one device for the current user
+        if (FRSession.getCurrentSession() != null) {
+            FRSession.getCurrentSession().logout();
+        }
+
         final int[] hit = {0};
         NodeListenerFuture<FRSession> nodeListenerFuture = new DeviceBindingNodeListener(context, "exceed-limit") {
             final NodeListener<FRSession> nodeListener = this;

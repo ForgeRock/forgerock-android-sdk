@@ -20,14 +20,23 @@ jobs:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # Run Mend CLI Scan
-  mend-cli-scan:
-    name: Mend CLI Scan
-    uses: ./.github/workflows/mend-cli-scan.yaml
+  # Run Mend SCA Scan
+  mend-sca-scan:
+    name: Mend SCA Scan
+    uses: ./.github/workflows/mend-sca-scan.yaml
     secrets:
       MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
       MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }} 
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Run Mend SAST Scan
+  mend-sast-scan:
+    name: Mend SAST Scan
+    uses: ./.github/workflows/mend-sast-scan.yaml
+    secrets:
+      MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
+      MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   # Run Sonatype OSS Index Scan
   sonatype-ossindex:
@@ -38,11 +47,11 @@ jobs:
       SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
-  # Build and sign BitBar test artifacts (auth-debug-androidTest-signed.apk and forgerock-auth-debug-androidTest-signed.apk)
+  # Build and sign BrowserStack test artifacts (app-debug.apk and forgerock-auth-debug-androidTest-signed.apk)
   # Skip this step for PRs created by dependabot
-  bitbar-prepare-artifacts:
+  browserstack-prepare-artifacts:
     name: Prepare device farm artifacts
-    uses: ./.github/workflows/bitbar-prepare-artifacts.yaml
+    uses: ./.github/workflows/browserstack-prepare-artifacts.yaml
     if: ${{ github.actor != 'dependabot[bot]' }}
     needs: build-and-test
     secrets:
@@ -53,29 +62,27 @@ jobs:
       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
-  # Execute e2e test cases in BitBar. The workflow outputs the newly created run id.
-  bitbar-run:
-    name: Run tests in BitBar
-    uses: ./.github/workflows/bitbar-run.yaml
-    needs: bitbar-prepare-artifacts
+  # Execute e2e test cases in BrowserStack. The workflow outputs the newly created run id.
+  browserstack-run:
+    name: Run tests in BrowserStack
+    uses: ./.github/workflows/browserstack-run.yaml
+    needs: browserstack-prepare-artifacts
     secrets:
-      BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-    with: 
-      bitbar-project-id: 207047111
-      bitbar-device-group-id: 46937
 
-  # Wait for BitBar test run to finish and publish results
-  bitbar-results:
-    name: BitBar test results
-    uses: ./.github/workflows/bitbar-results.yaml
-    needs: bitbar-run
+  # Wait for BrowserStack test run to finish and publish results
+  browserstack-results:
+    name: BrowserStack test results
+    uses: ./.github/workflows/browserstack-results.yaml
+    needs: browserstack-run
     secrets:
-      BITBAR_API_KEY: ${{ secrets.BITBAR_API_KEY }}
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     with:
-      bitbar-project-id: 207047111 
-      bitbar-run-id: ${{ needs.bitbar-run.outputs.bitbar-run-id }}
+      browserstack-build-id: ${{ needs.browserstack-run.outputs.browserstack-build-id }}
 
   # Publish a SNAPSHOT release
   # This is only run upon push to develop and if all tests pass...
@@ -83,7 +90,7 @@ jobs:
     name: Publish SNAPSHOT release
     uses: ./.github/workflows/publish-snapshot.yaml
     if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
-    needs: [bitbar-results, sonatype-ossindex, mend-cli-scan]
+    needs: [browserstack-results, sonatype-ossindex, mend-sca-scan, mend-sast-scan]
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}

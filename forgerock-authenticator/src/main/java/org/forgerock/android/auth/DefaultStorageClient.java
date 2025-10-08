@@ -236,8 +236,28 @@ class DefaultStorageClient implements StorageClient {
 
     @Override
     public PushDeviceToken getPushDeviceToken() {
-        String json = deviceTokenData.getString(DEVICE_TOKEN_ID, null);
-        return PushDeviceToken.deserialize(json);
+        try {
+            String json = deviceTokenData.getString(DEVICE_TOKEN_ID, null);
+            if (json != null) {
+                PushDeviceToken token = PushDeviceToken.deserialize(json);
+                if (token == null) {
+                    // If deserialization failed due to corrupted data, clear it to allow recovery
+                    Logger.warn(TAG, "Corrupted PushDeviceToken data detected, clearing it to allow recovery");
+                    deviceTokenData.edit().remove(DEVICE_TOKEN_ID).commit();
+                }
+                return token;
+            }
+            return null;
+        } catch (Exception e) {
+            // Handle corrupted data that causes exceptions during decryption/parsing
+            Logger.warn(TAG, e, "Failed to retrieve PushDeviceToken due to corrupted data, clearing it to allow recovery");
+            try {
+                deviceTokenData.edit().remove(DEVICE_TOKEN_ID).commit();
+            } catch (Exception clearException) {
+                Logger.error(TAG, clearException, "Failed to clear corrupted PushDeviceToken data");
+            }
+            return null;
+        }
     }
 
     @Override
