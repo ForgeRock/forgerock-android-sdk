@@ -144,7 +144,7 @@ jobs:
           fi
 
           
-       # Send slack notification with result status
+      # Send slack notification with result status
       - name: Send slack notification
         uses: 8398a7/action-slack@v3
         with:
@@ -152,12 +152,14 @@ jobs:
           fields: all
           custom_payload: |
             {
-              attachments: [{
-                title: 'BrowserStack Build: ${{ env.BROWSERSTACK_BUILD_ID }}',
-                title_link: '${{ env.BROWSERSTACK_BUILD_URL }}',
-                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-                "text": "Test summary: ${{ job.status }}\nPassed: ${{ env.BROWSERSTACK_BUILD_PASSED }}, Failed: ${{ env.BROWSERSTACK_BUILD_FAILED }}, Skipped: ${{ env.BROWSERSTACK_BUILD_SKIPPED }}\nDevices: ${{ env.BROWSERSTACK_BUILD_DEVICE_COUNT }}\nDuration: ${{ env.BROWSERSTACK_BUILD_DURATION }}s\nWorkflow: ${{ github.workflow }} -> ${{ github.job }}\nPull request: ${{ github.event.pull_request.html_url || 'N/A' }}\nCommit: ${{ github.sha }} by ${{ github.actor }}\nMessage: ${{ github.event.head_commit.message || 'N/A' }}"
-              }]
+              "attachments": [
+                {
+                  "title": "BrowserStack Build: ${{ env.BROWSERSTACK_BUILD_ID }}",
+                  "title_link": "${{ env.BROWSERSTACK_BUILD_URL }}",
+                  "color": "${{ job.status == 'success' && 'good' || job.status == 'failure' && 'danger' || 'warning' }}",
+                  "text": "Test summary: ${{ job.status }}\nPassed: ${{ env.BROWSERSTACK_BUILD_PASSED }}, Failed: ${{ env.BROWSERSTACK_BUILD_FAILED }}, Skipped: ${{ env.BROWSERSTACK_BUILD_SKIPPED }}\nDevices: ${{ env.BROWSERSTACK_BUILD_DEVICE_COUNT }}\nDuration: ${{ env.BROWSERSTACK_BUILD_DURATION }}s\nWorkflow: ${{ github.workflow }} -> ${{ github.job }}\nPull request: ${{ github.event.pull_request.html_url || 'N/A' }}\nCommit: ${{ github.sha }} by ${{ github.actor }}\nMessage: ${{ github.event.head_commit.message || 'N/A' }}"
+                }
+              ]
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
