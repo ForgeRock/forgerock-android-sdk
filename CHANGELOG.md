@@ -1,3 +1,8 @@
+## [4.8.x]
+
+#### Fixed
+- Fixed Sign in with Apple fails on Android devices. [SDKS-4658]
+
 ## [4.8.2]
 
 #### Added
