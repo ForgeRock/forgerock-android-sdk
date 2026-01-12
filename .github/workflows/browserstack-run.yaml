@@ -1,0 +1,126 @@
+#
+# Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
+#
+# This software may be modified and distributed under the terms
+# of the MIT license. See the LICENSE file for details.
+#
+
+name: Run Tests in BrowserStack
+on:
+  workflow_call:
+    outputs:
+      browserstack-build-id:
+        description: The newly created BrowserStack build ID
+        value: ${{ jobs.browserstack-run.outputs.browserstack_build_id }}
+    secrets:
+      BROWSERSTACK_USERNAME:
+        description: BrowserStack Username
+        required: true
+      BROWSERSTACK_ACCESS_KEY:
+        description: BrowserStack Access Key
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+
+jobs:
+  browserstack-run:
+    runs-on: ubuntu-latest
+    outputs:
+      browserstack_build_id: ${{ steps.start_run.outputs.browserstack_build_id }}
+
+    steps:
+      # Get the test artifacts prepared in previous step
+      - name: Get the app-debug-signed.apk artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-debug-signed.apk
+
+      - name: Get the forgerock-integration-tests-debug-androidTest.apk BrowserStack artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: forgerock-integration-tests-debug-androidTest-signed.apk
+
+      - name: Unzip app-debug-signed.apk and forgerock-integration-tests-debug-androidTest-signed.apk
+        run: |
+          unzip -o app-debug-signed.apk || echo "Skipping unzip for app-debug"
+          unzip -o forgerock-integration-tests-debug-androidTest-signed.apk || echo "Skipping unzip for test apk"
+
+      # Upload app to BrowserStack
+      - name: Upload app-debug-signed.apk to BrowserStack
+        id: upload_app
+        run: |
+          APP_UPLOAD_RESPONSE=$(curl -u "${{ secrets.BROWSERSTACK_USERNAME }}:${{ secrets.BROWSERSTACK_ACCESS_KEY }}" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/espresso/v2/app" \
+            -F "file=@app-debug-signed.apk")
+          echo "APP_URL=$(echo $APP_UPLOAD_RESPONSE | jq -r '.app_url')" >> $GITHUB_ENV
+
+      
+      # Upload test suite APK to BrowserStack
+      - name: Upload forgerock-integration-tests-debug-androidTest-signed.apk to BrowserStack
+        id: upload_test_suite
+        run: |
+          TEST_UPLOAD_RESPONSE=$(curl -u "${{ secrets.BROWSERSTACK_USERNAME }}:${{ secrets.BROWSERSTACK_ACCESS_KEY }}" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/espresso/v2/test-suite" \
+            -F "file=@forgerock-integration-tests-debug-androidTest-signed.apk")
+          echo "TEST_SUITE_URL=$(echo $TEST_UPLOAD_RESPONSE | jq -r '.test_suite_url')" >> $GITHUB_ENV
+
+
+      # Prepare BrowserStack run configuration. 
+      # To run tests in parallel on multiple devices, use the "shards" option. Example:
+      #      "shards": {
+      #        "numberOfShards": 3,
+      #        "deviceSelection": "all"
+      #      }
+      #
+      - name: Prepare BrowserStack run configuration
+        run: |
+          DEVICES_JSON=$(echo '${{ vars.BS_DEVICES }}' | jq -R 'split(",")')
+          cat <<EOF > browserstack-run-config.json
+          {
+            "app": "${{ env.APP_URL }}",
+            "testSuite": "${{ env.TEST_SUITE_URL }}",
+            "singleRunnerInvocation": ${{ vars.BS_SINGLE_RUNNER_INVOCATION }},
+            "devices": $DEVICES_JSON,
+            "deviceLogs": ${{ vars.BS_DEVICE_LOGS }},
+            "networkLogs": ${{ vars.BS_NETWORK_LOGS }},
+            "video": ${{ vars.BS_VIDEO }}, 
+            "shards": {
+              "numberOfShards": ${{ vars.BS_NUMBER_OF_SHARDS }}, 
+              "deviceSelection": "all"
+            }
+          }
+          EOF
+          echo "BrowserStack run configuration:"
+          cat browserstack-run-config.json
+
+     
+      # Start the BrowserStack run
+      - name: Start a BrowserStack test run
+        id: start_run
+        run: |
+          RUN_RESPONSE=$(curl -u "${{ secrets.BROWSERSTACK_USERNAME }}:${{ secrets.BROWSERSTACK_ACCESS_KEY }}" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/espresso/v2/build" \
+            -H "Content-Type: application/json" \
+            -d @browserstack-run-config.json)
+          echo "RUN_RESPONSE: $RUN_RESPONSE"
+          echo "BROWSERSTACK_BUILD_ID=$(echo $RUN_RESPONSE | jq -r '.build_id')" >> $GITHUB_ENV
+          echo "browserstack_build_id=$(echo $RUN_RESPONSE | jq -r '.build_id')" >> $GITHUB_OUTPUT
+
+      # Send slack notification ONLY if any of the steps above fail
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              attachments: [{
+                title: ':no_entry: Failed to start BrowserStack test run!',
+                color: 'danger',
+                text: `\nWorkflow: ${process.env.AS_WORKFLOW} -> ${process.env.AS_JOB}\nPull request: ${process.env.AS_PULL_REQUEST}\nCommit: ${process.env.AS_COMMIT} by ${process.env.AS_AUTHOR}`, 
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: failure()

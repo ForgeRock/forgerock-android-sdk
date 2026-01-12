@@ -1,0 +1,210 @@
+#
+# Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
+#
+# This software may be modified and distributed under the terms
+# of the MIT license. See the LICENSE file for details.
+#
+
+name: Run Mend SCA Scan
+on:
+  workflow_call:
+    secrets:
+      MEND_EMAIL:
+        description: Mend email
+        required: true
+      MEND_USER_KEY:
+        description: Mend user key
+        required: true
+      SLACK_WEBHOOK:
+        description: Slack Notifier Incoming Webhook
+        required: true
+      
+jobs:
+  mend-sca-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      - name: Download and cache the Mend CLI executable
+        id: cache-mend
+        uses: actions/cache@v3
+        env:
+          mend-cache-name: cache-mend-executable
+        with:
+          path: /usr/local/bin/mend
+          key: ${{ runner.os }}-${{ env.mend-cache-name }}-${{ hashFiles('/usr/local/bin/mend') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.mend-cache-name }}-
+
+      - if: ${{ steps.cache-mend.outputs.cache-hit != 'true' }}
+        name: Download Mend CLI executable (cache miss...)
+        continue-on-error: true
+        shell: bash
+        run: |
+          curl https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend && chmod +x /usr/local/bin/mend
+
+      - name: Mend SCA scan
+        env:
+          MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
+          MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+          MEND_URL: ${{ vars.MEND_SERVER_URL }}
+          MEND_SCA_EXCLUDE_DEP_CLASS: ${{ vars.MEND_SCA_EXCLUDE_DEP_CLASS }}
+        shell: bash
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          # Run Mend scan and tee output to both console and file
+          mend dep --no-color -s ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} -u 2>&1 | tee mend-sca-scan-result.txt
+
+          # Extract scan results with more robust parsing
+          MEND_SCA_SCAN_URL=$(grep -Eo '(http|https)://[^ ]+' mend-sca-scan-result.txt)
+          MEND_SCA_SCAN_SUMMARY=$(grep -E "Detected.*vulnerabilities" mend-sca-scan-result.txt || echo 'No vulnerabilities detected')
+          
+          # Initialize counts with default value of 0
+          MEND_SCA_CRITICAL_COUNT=0
+          MEND_SCA_HIGH_COUNT=0
+          MEND_SCA_MEDIUM_COUNT=0
+          MEND_SCA_LOW_COUNT=0
+
+          # Extract vulnerability counts with error handling
+          if grep -q "Critical" mend-sca-scan-result.txt; then
+            MEND_SCA_CRITICAL_COUNT=$(grep -Eo '[0-9]+ Critical' mend-sca-scan-result.txt | awk '{print $1}')
+          fi
+          if grep -q "High" mend-sca-scan-result.txt; then
+            MEND_SCA_HIGH_COUNT=$(grep -Eo '[0-9]+ High' mend-sca-scan-result.txt | awk '{print $1}')
+          fi
+          if grep -q "Medium" mend-sca-scan-result.txt; then
+            MEND_SCA_MEDIUM_COUNT=$(grep -Eo '[0-9]+ Medium' mend-sca-scan-result.txt | awk '{print $1}')
+          fi
+          if grep -q "Low" mend-sca-scan-result.txt; then
+            MEND_SCA_LOW_COUNT=$(grep -Eo '[0-9]+ Low' mend-sca-scan-result.txt | awk '{print $1}')
+          fi
+
+          # Set environment variables with error checking
+          if [ ! -z "$MEND_SCA_SCAN_URL" ]; then
+            echo "MEND_SCA_SCAN_URL=$MEND_SCA_SCAN_URL" >> $GITHUB_ENV
+          fi
+          echo "MEND_SCA_SCAN_SUMMARY=$MEND_SCA_SCAN_SUMMARY" >> $GITHUB_ENV
+          echo "MEND_SCA_CRITICAL_COUNT=$MEND_SCA_CRITICAL_COUNT" >> $GITHUB_ENV
+          echo "MEND_SCA_HIGH_COUNT=$MEND_SCA_HIGH_COUNT" >> $GITHUB_ENV
+          echo "MEND_SCA_MEDIUM_COUNT=$MEND_SCA_MEDIUM_COUNT" >> $GITHUB_ENV
+          echo "MEND_SCA_LOW_COUNT=$MEND_SCA_LOW_COUNT" >> $GITHUB_ENV
+
+      - name: Show the SCA Report in Summary
+        shell: bash
+        run: |
+          # Pick badge color based on severity counts
+          if [ "$MEND_SCA_CRITICAL_COUNT" -gt 0 ]; then
+            BADGE_COLOR="red"
+            BADGE_TEXT="${MEND_SCA_CRITICAL_COUNT}_critical"
+          elif [ "$MEND_SCA_HIGH_COUNT" -gt 0 ]; then
+            BADGE_COLOR="orange"
+            BADGE_TEXT="${MEND_SCA_HIGH_COUNT}_high"
+          elif [ "$MEND_SCA_MEDIUM_COUNT" -gt 0 ]; then
+            BADGE_COLOR="yellow"
+            BADGE_TEXT="${MEND_SCA_MEDIUM_COUNT}_medium"
+          elif [ "$MEND_SCA_LOW_COUNT" -gt 0 ]; then
+            BADGE_COLOR="blue"
+            BADGE_TEXT="${MEND_SCA_LOW_COUNT}_low"
+          else
+            BADGE_COLOR="brightgreen"
+            BADGE_TEXT="clean"
+          fi
+
+          BADGE_URL="https://img.shields.io/badge/SCA-${BADGE_TEXT}-${BADGE_COLOR}"
+
+          echo "## Mend SCA Report ![SCA Badge](${BADGE_URL})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show counts in a table
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔴 Critical | $MEND_SCA_CRITICAL_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟠 High     | $MEND_SCA_HIGH_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟡 Medium   | $MEND_SCA_MEDIUM_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔵 Low      | $MEND_SCA_LOW_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Add Mend report link if available
+          if [ -n "$MEND_SCA_SCAN_URL" ]; then
+            echo "**🔗 [View Full Mend SCA Report]($MEND_SCA_SCAN_URL)**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Expandable section for full output
+          echo "<details><summary>Expand for details</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat mend-sca-scan-result.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+
+      # Step 1: Decide Check Conclusion
+      - name: Determine Mend SCA Check Conclusion
+        id: sca_conclusion
+        shell: bash
+        run: |
+          if [ "$MEND_SCA_CRITICAL_COUNT" -gt 0 ] || [ "$MEND_SCA_HIGH_COUNT" -gt 0 ]; then
+            echo "conclusion=failure" >> $GITHUB_OUTPUT
+          else
+            echo "conclusion=success" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 2: Publish Mend SCA Check
+      - name: Publish Mend SCA Check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('mend-sca-scan-result.txt', 'utf8');
+
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "Mend SCA Report",
+              head_sha: context.sha,
+              status: "completed",
+              conclusion: "${{ steps.sca_conclusion.outputs.conclusion }}",
+              output: {
+                title: "Mend SCA Report",
+                summary: `Critical: ${process.env.MEND_SCA_CRITICAL_COUNT}, High: ${process.env.MEND_SCA_HIGH_COUNT}`,
+                text: "```\n" + body + "\n```"
+              }
+            });
+
+      - name: Upload SCA scan report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mend-sca-report
+          path: mend-sca-scan-result.txt
+
+      - name: Send slack notification
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: custom
+          fields: all
+          custom_payload: |
+            {
+              "text": "*Mend SCA Scan Results*",
+              "attachments": [
+                {
+                  "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
+                  "fields": [
+                    {
+                      "title": "SCA scan",
+                      "value": "${{ env.MEND_SCA_SCAN_SUMMARY }}\n<${{ env.MEND_SCA_SCAN_URL }}|View full SCA report>",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

@@ -23,6 +23,7 @@ import org.forgerock.android.auth.detector.RootRequiredAppDetector
 import org.forgerock.android.auth.detector.SuCommandDetector
 import org.forgerock.android.auth.detector.BusyBoxProgramFileDetector
 import org.junit.Assert
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -111,6 +112,8 @@ class RootDetectorTest {
 
     @Test
     fun testBusyBoxProgramFileDetector() {
+        // ubuntu-latest runner actually has BusyBox installed, so skip the test on Linux
+        assumeTrue(!System.getProperty("os.name").equals("Linux", ignoreCase = true))
         val rootDetector: RootDetector = FRRootDetector.builder()
             .detector(BusyBoxProgramFileDetector())
             .build()
@@ -119,6 +122,8 @@ class RootDetectorTest {
 
     @Test
     fun testPartialDetector() {
+        // ubuntu-latest runner actually has BusyBox installed, so skip the test on Linux
+        assumeTrue(!System.getProperty("os.name").equals("Linux", ignoreCase = true))
         val rootDetector: RootDetector = FRRootDetector.builder()
             .detector(DangerousPropertyDetector())
             .detector(NativeDetector())
