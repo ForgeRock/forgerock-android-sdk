@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -21,7 +21,7 @@ import java.util.Map;
  * Data Access Object which implements StorageClient interface and uses SecureSharedPreferences from
  * forgerock-core SDK to store and load Accounts, Mechanisms and Notifications.
  */
-class DefaultStorageClient implements StorageClient {
+public class DefaultStorageClient implements StorageClient {
 
     private static final String DEVICE_TOKEN_ID = "deviceToken";
 
