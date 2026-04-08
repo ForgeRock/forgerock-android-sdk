@@ -1,7 +1,8 @@
-## [4.8.x]
+## [4.8.4]
 
 #### Fixed
 - Fixed Sign in with Apple fails on Android devices. [SDKS-4658]
+- Exposed `DefaultStorageClient` as public API to support MFA authentication migration. [SDKS-4828]
 
 ## [4.8.3]
 
