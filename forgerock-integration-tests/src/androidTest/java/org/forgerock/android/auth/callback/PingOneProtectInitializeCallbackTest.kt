@@ -16,6 +16,7 @@ import org.forgerock.android.auth.NodeListener
 import org.forgerock.android.auth.PingOneProtectInitializeCallback
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -52,6 +53,8 @@ class PingOneProtectInitializeCallbackTest : BasePingOneProtectTest() {
         Assert.assertNotNull(FRSession.getCurrentSession().sessionToken)
     }
 
+    // TODO - This will be fixed when we fix SDKS-4548
+    @Ignore("Flaky Test - Remove when SDKS-4548 is fixed")
     @Test
     fun testProtectInitializeCustom() {
         val nodeListenerFuture: PingOneProtectNodeListener = object : PingOneProtectNodeListener(

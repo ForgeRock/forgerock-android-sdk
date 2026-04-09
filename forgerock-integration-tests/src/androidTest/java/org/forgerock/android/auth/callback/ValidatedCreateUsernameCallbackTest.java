@@ -37,8 +37,8 @@ public class ValidatedCreateUsernameCallbackTest extends TreeTest {
                     hit++;
                 }
 
-                if (node.getCallback(ValidatedPasswordCallback.class) != null) {
-                    node.getCallback(ValidatedPasswordCallback.class).setPassword(PASSWORD.toCharArray());
+                if (node.getCallback(PasswordCallback.class) != null) {
+                    node.getCallback(PasswordCallback.class).setPassword(PASSWORD.toCharArray());
                     moveToNext = true;
                     hit++;
                 }
