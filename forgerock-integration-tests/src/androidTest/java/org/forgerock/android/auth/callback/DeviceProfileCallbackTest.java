@@ -34,6 +34,15 @@ public class DeviceProfileCallbackTest extends TreeTest {
         return new UsernamePasswordNodeListener(context) {
             @Override
             public void onCallbackReceived(Node node) {
+                if (node.getCallback(ChoiceCallback.class) != null) {
+                    ChoiceCallback callback = node.getCallback(ChoiceCallback.class);
+                    assertThat(callback.getPrompt()).isEqualTo("Collect location data?");
+                    assertThat(callback.getChoices()).containsExactly("Yes", "No");
+                    assertThat(callback.getDefaultChoice()).isEqualTo(0);
+                    callback.setSelectedIndex(0);
+                    node.next(context, this );
+                    return;
+                }
                 if (node.getCallback(DeviceProfileCallback.class) != null) {
                     DeviceProfileCallback callback = node.getCallback(DeviceProfileCallback.class);
                     assertThat(callback.getMessage()).isEqualTo("Collecting profile ...");

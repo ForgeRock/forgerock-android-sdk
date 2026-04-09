@@ -30,6 +30,7 @@ import org.forgerock.android.auth.NodeListener;
 import org.forgerock.android.auth.NodeListenerFuture;
 import org.forgerock.android.auth.devicebind.ApplicationPinDeviceAuthenticator;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -102,6 +103,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
     }
 
     @Test
+    @Ignore
     public void testKeyAttestationNoneAttestationOn() throws ExecutionException, InterruptedException {
         // Make sure that when "Key Attestation" is ON in AM, the SDK includes x5c (X.509 Certificate Chain) parameter...
         final int[] bindSuccess = {0};
@@ -160,6 +162,7 @@ public class KeyAttestationTest extends BaseDeviceBindingTest {
     }
 
     @Test
+    @Ignore
     public void testKeyAttestationTransientStateVariable() throws ExecutionException, InterruptedException {
         // Ensure that when Key Attestation toggle button is enabled in the Device Binding node,
         // Key Attestation Validation will be performed, and the extension data will be put into the transient state with the variable

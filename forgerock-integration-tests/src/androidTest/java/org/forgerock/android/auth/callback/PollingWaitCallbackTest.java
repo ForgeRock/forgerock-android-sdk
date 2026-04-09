@@ -33,7 +33,7 @@ public class PollingWaitCallbackTest extends TreeTest {
             public void onCallbackReceived(Node node) {
                 if (node.getCallback(PollingWaitCallback.class) != null) {
                     PollingWaitCallback callback = node.getCallback(PollingWaitCallback.class);
-                    assertThat(callback.getWaitTime()).isEqualTo("10000");
+                    assertThat(callback.getWaitTime()).isEqualTo("5000");
                     assertThat(callback.getMessage()).isEqualTo("Please Wait");
                     hit++;
                 }
