@@ -66,7 +66,8 @@ public class AppleSignInHandler extends Fragment implements IdPHandler {
                 Uri.parse(idPClient.getRedirectUri()))
                 .setScopes(idPClient.getScopes())
                 .setState(null)
-                .setResponseMode(FORM_POST);
+                .setResponseMode(FORM_POST)
+                .setCodeVerifier(null);
 
         authRequestBuilder.setNonce(idPClient.getNonce());
 

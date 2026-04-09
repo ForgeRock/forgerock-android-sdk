@@ -1357,7 +1357,7 @@ class FRUserMockTest : BaseTest() {
 }""")
             .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST))
         //Let the token expire, so that we use the refresh token flow
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         server.takeRequest() //access_token
 
@@ -1438,7 +1438,7 @@ class FRUserMockTest : BaseTest() {
 }""")
             .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST))
         //Let the token expire, so that we use the refresh token flow
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         //Use the session token to retrieve the Access token
         server.enqueue(MockResponse()

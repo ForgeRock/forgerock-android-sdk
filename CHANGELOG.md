@@ -1,9 +1,16 @@
+## [4.8.4]
+
+#### Fixed
+- Fixed Sign in with Apple fails on Android devices. [SDKS-4658]
+- Exposed `DefaultStorageClient` as public API to support MFA authentication migration. [SDKS-4828]
+
 ## [4.8.3]
 
 #### Fixed
 - Reverted the minimum support API level (`minSdk`) back to 23 from 28. [SDKS-4409]
 - Changed the default option for key generation to not use StrongBox. [SDKS-4420]
 - Resolved a crash on some devices by improving error handling of date fields and adding a fallback when retrieving a push device token. [SDKS-4392]
+
 
 ## [4.8.2]
 
