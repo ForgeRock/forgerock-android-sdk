@@ -86,7 +86,7 @@ The support portal shows all currently open support tickets and allows you to ra
 
 ## Contributing
 
-If you would like to contribute to this project, please see the [contributions guide](./CONTRIBUTION.md).
+If you would like to contribute to this project, please see the [contributions guide](./CONTRIBUTING.md).
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- LEGAL -->
