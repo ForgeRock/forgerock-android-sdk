@@ -2,22 +2,16 @@
 [![Build Status](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml/badge.svg)](https://github.com/ForgeRock/forgerock-android-sdk/actions/workflows/ci.yaml)
 [![Coverage](https://codecov.io/gh/ForgeRock/forgerock-android-sdk/graph/badge.svg?token=PGfmkaLyIC)](https://codecov.io/gh/ForgeRock/forgerock-android-sdk)
 
-<p align="center">
-  <a href="https://github.com/ForgeRock">
-    <img src="https://cdn-docs.pingidentity.com/navbar/ping-logo-horizontal.svg" alt="Logo">
-  </a>
-  <h2 align="center">Ping SDK for Android</h2>
-  <p align="center">
-    <a href="CHANGELOG.md">Change Log</a>
-    ·
-    <a href="#support">Support</a>
-    ·
-    <a href="#documentation">Docs</a>
-  </p>
-  <hr/>
-</p>
+[![Ping Identity](https://www.pingidentity.com/content/dam/picr/nav/Ping-Logo-2.svg)](https://github.com/ForgeRock/forgerock-android-sdk)
 
-The Ping SDK for Android enables you to quickly integrate Ping products into your Android apps.
+> [!IMPORTANT]
+> **In alignment with our maintenance policy, the **ForgeRock SDKs v4.x** will enter maintenance mode on April 15, 2026, and reach end-of-support on April 15, 2028.**
+>
+> **Existing applications that use ForgeRock SDKs v4.x will continue to function as intended. Between April 15, 2026, and end-of-support on April 15, 2028, the ForgeRock SDKs v4.x will only receive critical bug fixes and security updates. The SDK will not be updated to support new PingAM, Ping AIC, or PingOne services, new service features, or changes to existing services.**
+>
+> **We recommend that you migrate to [Ping Orchestration SDK v2.x](https://github.com/ForgeRock/ping-android-sdk). The new SDK provides improved features, enhanced performance, and continued support from Ping. By adopting the latest version of the SDK, developers can ensure the security, compatibility, and stability of their solutions. Migration guides are available in the new SDK repository.**
+
+The SDK for Android enables you to quickly integrate Ping products into your Android apps.
 
 Use the SDKs to leverage _[Intelligent Access](https://www.pingidentity.com/en/platform/capabilities/intelligent-access.html)_ to easily step through each stage of an authentication tree by using callbacks.
 
@@ -26,7 +20,7 @@ Use the SDKs to leverage _[Intelligent Access](https://www.pingidentity.com/en/p
 
 ## Requirements
 
-* ForgeRock Identity Platform
+* Ping Identity Platform
     * Ping Advanced Identity Cloud
     * PingAM 6.5.2+
 
@@ -92,7 +86,7 @@ The support portal shows all currently open support tickets and allows you to ra
 
 ## Contributing
 
-If you would like to contribute to this project, please see the [contributions guide](./CONTRIBUTION.md).
+If you would like to contribute to this project, please see the [contributions guide](./CONTRIBUTING.md).
 
 <!------------------------------------------------------------------------------------------------------------------------------------>
 <!-- LEGAL -->
@@ -113,5 +107,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-&copy; Copyright 2020-2025 Ping Identity Corporation. All Rights Reserved
+&copy; Copyright 2020-2026 Ping Identity Corporation. All Rights Reserved.
 
