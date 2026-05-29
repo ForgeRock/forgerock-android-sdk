@@ -36,6 +36,7 @@ jobs:
     secrets:
       MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
       MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
   # Build and sign BrowserStack test artifacts (app-debug.apk and forgerock-auth-debug-androidTest-signed.apk)
   # Skip this step for PRs created by dependabot
@@ -80,7 +81,7 @@ jobs:
     name: Publish SNAPSHOT release
     uses: ./.github/workflows/publish-snapshot.yaml
     if: (github.ref == 'refs/heads/develop' && github.event_name == 'push')
-    needs: [browserstack-results, sonatype-ossindex, mend-sca-scan, mend-sast-scan]
+    needs: [browserstack-results, mend-sca-scan, mend-sast-scan]
     secrets:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       PUBLISHING_SIGNING_KEY_ID: ${{ secrets.PUBLISHING_SIGNING_KEY_ID }}
