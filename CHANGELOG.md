@@ -1,3 +1,8 @@
+## [4.8.5]
+
+#### Fixed
+- Upgraded `bcpkix-jdk18on` from `1.81` to `1.84` to address a security vulnerability (CVE-2026-5588). [SDKS-5037]
+
 ## [4.8.4]
 
 #### Fixed
