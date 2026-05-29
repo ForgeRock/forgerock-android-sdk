@@ -36,16 +36,6 @@ jobs:
     secrets:
       MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
       MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-
-  # Run Sonatype OSS Index Scan
-  sonatype-ossindex:
-    name: Scan for open source vulnerabilities (Sonatype OSS Index)
-    uses: ./.github/workflows/sonatype-ossi-scan.yaml
-    secrets:
-      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   
   # Build and sign BrowserStack test artifacts (app-debug.apk and forgerock-auth-debug-androidTest-signed.apk)
   # Skip this step for PRs created by dependabot
