@@ -62,7 +62,9 @@ jobs:
           mend dep --no-color -s ${{ vars.MEND_PRODUCT_NAME }}//${{ vars.MEND_PROJECT_NAME }} -u 2>&1 | tee mend-sca-scan-result.txt
 
           # Extract scan results with more robust parsing
-          MEND_SCA_SCAN_URL=$(grep -Eo '(http|https)://[^ ]+' mend-sca-scan-result.txt)
+          # Filter URLs to the Mend server domain only to avoid picking up CVE/dependency URLs
+          MEND_SERVER_DOMAIN=$(echo "$MEND_URL" | sed 's|https\?://||' | cut -d'/' -f1)
+          MEND_SCA_SCAN_URL=$(grep -Eo '(http|https)://[^ ]+' mend-sca-scan-result.txt | grep "$MEND_SERVER_DOMAIN" | head -1)
           MEND_SCA_SCAN_SUMMARY=$(grep -E "Detected.*vulnerabilities" mend-sca-scan-result.txt || echo 'No vulnerabilities detected')
           
           # Initialize counts with default value of 0
@@ -208,3 +210,11 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Fail pipeline if critical or high vulnerabilities found
+        shell: bash
+        run: |
+          if [ "$MEND_SCA_CRITICAL_COUNT" -gt 0 ] || [ "$MEND_SCA_HIGH_COUNT" -gt 0 ]; then
+            echo "Mend SCA detected critical/high vulnerabilities: Critical=$MEND_SCA_CRITICAL_COUNT, High=$MEND_SCA_HIGH_COUNT"
+            exit 1
+          fi
