@@ -61,9 +61,9 @@ open class WebAuthnRegistrationCallback : MetadataCallback, WebAuthnCallback {
                 webAuthnRegistration.options = webAuthnRegistration.options.cloneWith(
                     ResidentKeyRequirement.valueOf(it))
             }
-            var result = webAuthnRegistration.register(context)
-            deviceName?.apply { result += "::$deviceName" }
-            setHiddenCallbackValue(node, result);
+
+            val result = webAuthnRegistration.register(context, deviceName)
+            setHiddenCallbackValue(node, result)
         } catch (e: Exception) {
             setErrorRethrow(node, e)
         }

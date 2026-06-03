@@ -144,9 +144,9 @@ class WebAuthnRegistrationTest : BaseTest() {
         }
         assertThat(webAuthnRegistration.supportsJsonResponse).isTrue
 
-        val result = webAuthnRegistration.register(context)
+        val result = webAuthnRegistration.register(context, deviceName = "testDevice")
 
-        assertThat(result).isEqualTo("{\"authenticatorAttachment\":\"platform\",\"legacyData\":\"clientDataJson::97,116,116,101,115,116,97,116,105,111,110,79,98,106,101,99,116::cmF3SWQ\"}")
+        assertThat(result).isEqualTo("{\"authenticatorAttachment\":\"platform\",\"legacyData\":\"clientDataJson::97,116,116,101,115,116,97,116,105,111,110,79,98,106,101,99,116::cmF3SWQ::testDevice\"}")
     }
 
 

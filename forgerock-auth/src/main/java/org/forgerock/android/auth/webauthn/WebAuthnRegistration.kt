@@ -27,8 +27,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.json.JSONArray
 import org.json.JSONException
@@ -149,7 +147,7 @@ open class WebAuthnRegistration() : WebAuthn() {
         return getCredentials(excludeCredentials)
     }
 
-    suspend fun register(context: Context): String {
+    suspend fun register(context: Context, deviceName: String? = null): String {
         val publicKeyCredential = getPublicKeyCredential(context)
         val response = publicKeyCredential.response as AuthenticatorAttestationResponse
         val sb = StringBuilder()
@@ -173,10 +171,11 @@ open class WebAuthnRegistration() : WebAuthn() {
                 persist(context, source)
             }
         }
+        deviceName?.let { sb.append("::$it") }
         return if (supportsJsonResponse) {
             val outcome = WebAuthnOutcome(publicKeyCredential.authenticatorAttachment ?: "platform",
                 sb.toString())
-            return Json.encodeToString(outcome)
+            Json.encodeToString(outcome)
         } else {
             sb.toString()
         }

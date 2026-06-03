@@ -7,7 +7,9 @@
 
 package org.forgerock.android.auth.webauthn
 
+import android.annotation.SuppressLint
 import kotlinx.serialization.Serializable
 
+@SuppressLint("UnsafeOptInUsageError")
 @Serializable
 data class WebAuthnOutcome(val authenticatorAttachment: String , val legacyData: String)
