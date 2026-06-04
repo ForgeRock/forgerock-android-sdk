@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -147,6 +147,15 @@ open class WebAuthnRegistration() : WebAuthn() {
         return getCredentials(excludeCredentials)
     }
 
+    /**
+     * Registers a new WebAuthn credential.
+     *
+     * @param context Application context used to launch the registration intent.
+     * @param deviceName Optional friendly name appended to the response so the server can label the credential.
+     *
+     * @return The registration outcome as a `::` delimited string, or a JSON-encoded
+     *   [WebAuthnOutcome] when the server supports JSON responses.
+     */
     suspend fun register(context: Context, deviceName: String? = null): String {
         val publicKeyCredential = getPublicKeyCredential(context)
         val response = publicKeyCredential.response as AuthenticatorAttestationResponse
