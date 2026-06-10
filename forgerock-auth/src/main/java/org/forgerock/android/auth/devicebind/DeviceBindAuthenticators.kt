@@ -72,7 +72,10 @@ interface DeviceAuthenticator {
      * @param kid Generated kid from the Preference
      * @param userId userId received from server
      * @param challenge challenge received from server
-     * @param customClaims A map of custom claims to be added to the jws payload
+     * @param expiration token expiration time
+     * @param attestation Attestation type to decide whether to include certificate chain in the JWS header
+     *
+     * @return the signed JWT as String
      */
     fun sign(context: Context,
              keyPair: KeyPair,
@@ -89,7 +92,7 @@ interface DeviceAuthenticator {
         if (attestation !is Attestation.None) {
             builder.x509CertChain(getCertificateChain(userId))
         }
-        val jwk = builder.build();
+        val jwk = builder.build()
         val signedJWT = SignedJWT(JWSHeader.Builder(parse(getAlgorithm()))
             .keyID(kid).jwk(jwk).build(),
             JWTClaimsSet.Builder().subject(userId)
@@ -210,7 +213,16 @@ interface DeviceAuthenticator {
 
 }
 
-fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt): DeviceAuthenticator {
+/**
+ * Initialize the DeviceAuthenticator with userId, authentication validity duration and prompt
+ * @param userId The user ID for which the keys will be generated.
+ * @param authenticationValidityDuration The duration (in seconds) for which the generated key remains valid
+ * for user authentication. Passed to the underlying crypto key during key generation. Defaults to 5 seconds.
+ * @param prompt The Prompt to modify the title, subtitle, description
+ *
+ * @return The initialized DeviceAuthenticator instance.
+ */
+fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuration: Int,  prompt: Prompt): DeviceAuthenticator {
 
     //Inject objects
     if (this is BiometricAuthenticator) {
@@ -219,15 +231,23 @@ fun DeviceAuthenticator.initialize(userId: String, prompt: Prompt): DeviceAuthen
             prompt.description,
             deviceBindAuthenticationType = this.type()))
     }
-    initialize(userId)
+    initialize(userId, authenticationValidityDuration)
     this.prompt(prompt)
     return this
 }
 
-fun DeviceAuthenticator.initialize(userId: String): DeviceAuthenticator {
+/**
+ * Initialize the DeviceAuthenticator with userId and authentication validity duration
+ * @param userId The user ID for which the keys will be generated.
+ * @param authenticationValidityDuration The duration (in seconds) for which the generated key remains valid
+ * for user authentication. Passed to the underlying crypto key during key generation. Defaults to 5 seconds.
+ *
+ * @return The initialized DeviceAuthenticator instance.
+ */
+fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuration: Int = 5): DeviceAuthenticator {
     //Inject objects
     if (this is CryptoAware) {
-        this.setKey(CryptoKey(userId))
+        this.setKey(CryptoKey(userId, authenticationValidityDuration))
     }
     return this
 }

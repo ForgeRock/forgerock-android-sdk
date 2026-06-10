@@ -115,6 +115,12 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     }
 
     /**
+     * The duration (in seconds) for which the generated key remains valid for user authentication.
+     * Passed to the underlying crypto key during key generation. Defaults to 5 seconds.
+     */
+    var authenticationValidityDuration: Int = 5
+
+    /**
      * Sign the challenge with bounded device keys.
      *
      * @param context  The Application Context
@@ -178,7 +184,7 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
                                             customClaims: Map<String, Any> = emptyMap(),
                                             prompt: Prompt? = null) {
 
-        deviceAuthenticator.initialize(userKey.userId, prompt?: Prompt(title, subtitle, description))
+        deviceAuthenticator.initialize(userKey.userId, authenticationValidityDuration, prompt?: Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context).not()) {
             handleException(DeviceBindingException(Unsupported()))

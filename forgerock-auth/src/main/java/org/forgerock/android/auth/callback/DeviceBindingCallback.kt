@@ -104,6 +104,12 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
     lateinit var attestation: Attestation
         private set
 
+    /**
+     * The duration (in seconds) for which the generated key remains valid for user authentication.
+     * Passed to [CryptoKey] during key generation. Defaults to 5 seconds.
+     */
+    var authenticationValidityDuration: Int = 5
+
     init {
         //If attestation is not provided, default to NONE
         if (!::attestation.isInitialized) {
@@ -222,7 +228,7 @@ open class DeviceBindingCallback : AbstractCallback, Binding {
                                      .build().identifier,
                                  prompt: Prompt? = null) {
 
-        deviceAuthenticator.initialize(userId, prompt ?: Prompt(title, subtitle, description))
+        deviceAuthenticator.initialize(userId, authenticationValidityDuration, prompt ?: Prompt(title, subtitle, description))
 
         if (deviceAuthenticator.isSupported(context, attestation).not()) {
             handleException(DeviceBindingException(Unsupported()))

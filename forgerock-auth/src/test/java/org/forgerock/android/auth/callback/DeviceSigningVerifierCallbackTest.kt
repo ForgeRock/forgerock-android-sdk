@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.KeyPair
@@ -163,6 +164,37 @@ class DeviceSigningVerifierCallbackTest {
         val testObject =
             DeviceSigningVerifierCallbackMock(rawContent)
         testObject.executeAllKey(context, userKeyService) { deviceAuthenticator }
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationDefaultValue() {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":5}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val testObject = DeviceSigningVerifierCallback(JSONObject(rawContent), 0)
+        assertEquals(5, testObject.authenticationValidityDuration)
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationCustomValuePassedToAuthenticator() = runBlocking {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val userKey =
+            UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.NONE, System.currentTimeMillis())
+        val noneAuthenticator = mock<None>()
+        whenever(noneAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(noneAuthenticator.validateCustomClaims(any())).thenReturn(true)
+        whenever(noneAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(noneAuthenticator.sign(
+            any<Context>(), any<UserKey>(), any<PrivateKey>(), any(), any<String>(), any<Date>(), any<Map<String, Any>>()
+        )).thenReturn("jws")
+
+        val testObject = DeviceSigningVerifierCallbackMock(rawContent)
+        testObject.authenticationValidityDuration = 30
+        testObject.executeAuthenticate(context, userKey, noneAuthenticator)
+
+        val captor: KArgumentCaptor<org.forgerock.android.auth.CryptoKey> = argumentCaptor()
+        verify(noneAuthenticator).setKey(captor.capture())
+        assertEquals(30, captor.firstValue.timeout)
     }
 
     fun getExpiration(): Date {

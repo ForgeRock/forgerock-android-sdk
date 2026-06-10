@@ -25,12 +25,11 @@ import java.security.spec.AlgorithmParameterSpec
 /**
  * Helper class to generate and sign the keys
  */
-class CryptoKey(private var keyId: String) {
+class CryptoKey(private var keyId: String, val timeout: Int = 5) {
 
     //For hashing the keyId
     private val hashingAlgorithm = "SHA-256"
     val keySize = 2048
-    val timeout = 5
     private val androidKeyStore = "AndroidKeyStore"
     private val encryptionBlockMode = KeyProperties.BLOCK_MODE_ECB
     private val encryptionPadding = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
@@ -65,7 +64,7 @@ class CryptoKey(private var keyId: String) {
         }
 
         keyPairGenerator.initialize(spec)
-        val keyPair = keyPairGenerator.generateKeyPair();
+        val keyPair = keyPairGenerator.generateKeyPair()
 
         return KeyPair(keyPair.public as RSAPublicKey, keyPair.private)
     }
