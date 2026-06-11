@@ -1,3 +1,7 @@
+## [Unreleased]
+#### Fixed
+- Fixed an issue where selecting the wrong number in a Push Number Challenge returned a generic error instead of a distinct exception [SDKS-5114]
+
 ## [4.8.5]
 
 #### Fixed
