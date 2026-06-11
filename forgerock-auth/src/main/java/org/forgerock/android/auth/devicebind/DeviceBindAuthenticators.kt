@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -22,6 +22,7 @@ import com.nimbusds.jwt.SignedJWT
 import kotlinx.parcelize.Parcelize
 import org.forgerock.android.auth.CryptoKey
 import org.forgerock.android.auth.Logger
+import org.forgerock.android.auth.DEFAULT_AUTHENTICATION_VALIDITY_DURATION
 import org.forgerock.android.auth.callback.Attestation
 import org.forgerock.android.auth.callback.DeviceBindingAuthenticationType
 import java.security.PrivateKey
@@ -217,12 +218,12 @@ interface DeviceAuthenticator {
  * Initialize the DeviceAuthenticator with userId, authentication validity duration and prompt
  * @param userId The user ID for which the keys will be generated.
  * @param authenticationValidityDuration The duration (in seconds) for which the generated key remains valid
- * for user authentication. Passed to the underlying crypto key during key generation. Defaults to 5 seconds.
+ * for user authentication. Passed to the underlying crypto key during key generation.
  * @param prompt The Prompt to modify the title, subtitle, description
  *
  * @return The initialized DeviceAuthenticator instance.
  */
-fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuration: Int,  prompt: Prompt): DeviceAuthenticator {
+fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuration: Int, prompt: Prompt): DeviceAuthenticator {
 
     //Inject objects
     if (this is BiometricAuthenticator) {
@@ -244,7 +245,10 @@ fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuratio
  *
  * @return The initialized DeviceAuthenticator instance.
  */
-fun DeviceAuthenticator.initialize(userId: String, authenticationValidityDuration: Int = 5): DeviceAuthenticator {
+fun DeviceAuthenticator.initialize(
+    userId: String,
+    authenticationValidityDuration: Int = DEFAULT_AUTHENTICATION_VALIDITY_DURATION,
+): DeviceAuthenticator {
     //Inject objects
     if (this is CryptoAware) {
         this.setKey(CryptoKey(userId, authenticationValidityDuration))

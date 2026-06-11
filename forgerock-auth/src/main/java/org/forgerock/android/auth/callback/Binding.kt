@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth.callback
 import android.os.OperationCanceledException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
+import org.forgerock.android.auth.DEFAULT_AUTHENTICATION_VALIDITY_DURATION
 import org.forgerock.android.auth.Logger
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus.Abort
@@ -21,6 +22,7 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 private val TAG = Binding::class.java.simpleName
+
 
 /**
  * Device Binding interface to provide utility method for [DeviceBindingCallback] and [DeviceSigningVerifierCallback]
@@ -82,6 +84,16 @@ interface Binding {
     }
 
     fun setClientError(clientError: String?)
+
+    /**
+     * Validates that [authenticationValidityDuration] is greater than 0.
+     * The Android Keystore treats 0 and -1 as special values that disable the time-based window
+     * and require fresh user authentication on every single key use.
+     * @throws IllegalArgumentException if [value] is not greater than 0
+     */
+    fun validateAuthenticationValidityDuration(value: Int) {
+        require(value > 0) { "authenticationValidityDuration must be greater than 0" }
+    }
 
     /**
      * Default function to identify [DeviceAuthenticator]

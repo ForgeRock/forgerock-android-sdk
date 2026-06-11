@@ -319,6 +319,20 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).persist(any())
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsZero() {
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceBindingCallback(JSONObject(rawContent), 0).authenticationValidityDuration = 0
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsNegative() {
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceBindingCallback(JSONObject(rawContent), 0).authenticationValidityDuration = -1
+    }
+
     @Test
     fun testAuthenticationValidityDurationDefaultValue() {
         val rawContent =
@@ -329,23 +343,27 @@ class DeviceBindingCallbackTest {
 
     @Test
     fun testAuthenticationValidityDurationCustomValuePassedToAuthenticator() = runBlocking {
+        // Uses BIOMETRIC_ONLY because NONE and APPLICATION_PIN ignore authenticationValidityDuration —
+        // CryptoKey.timeout is only consumed by biometric authenticators via
+        // setUserAuthenticationValidityDurationSeconds / setUserAuthenticationParameters.
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ONLY\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val encryptedPref = mock<DeviceBindingRepository>()
-        val deviceAuthenticator = mock<None>()
-        whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
-        whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
-        whenever(deviceAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        val biometricAuthenticator = mock<BiometricOnly>()
+        whenever(biometricAuthenticator.type()).thenReturn(DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        whenever(biometricAuthenticator.isSupported(any(), any())).thenReturn(true)
+        whenever(biometricAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
+        whenever(biometricAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         testObject.authenticationValidityDuration = 30
         testObject.testExecute(context,
-            deviceAuthenticator = deviceAuthenticator,
+            deviceAuthenticator = biometricAuthenticator,
             encryptedPreference = encryptedPref,
             "device_id")
 
         val captor: KArgumentCaptor<CryptoKey> = argumentCaptor()
-        verify(deviceAuthenticator).setKey(captor.capture())
+        verify(biometricAuthenticator).setKey(captor.capture())
         assertEquals(30, captor.firstValue.timeout)
     }
 

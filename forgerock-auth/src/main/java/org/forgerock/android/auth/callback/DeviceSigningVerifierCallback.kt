@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,6 +8,7 @@ package org.forgerock.android.auth.callback
 
 import android.content.Context
 import androidx.annotation.Keep
+import org.forgerock.android.auth.DEFAULT_AUTHENTICATION_VALIDITY_DURATION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -115,10 +116,24 @@ open class DeviceSigningVerifierCallback : AbstractCallback, Binding {
     }
 
     /**
-     * The duration (in seconds) for which the generated key remains valid for user authentication.
-     * Passed to the underlying crypto key during key generation. Defaults to 5 seconds.
+     * The duration in seconds for which the generated key remains valid for user authentication
+     * without requiring a fresh biometric/credential prompt. Only affects biometric-backed key
+     * types ([DeviceBindingAuthenticationType.BIOMETRIC_ONLY] and
+     * [DeviceBindingAuthenticationType.BIOMETRIC_ALLOW_FALLBACK]); ignored for [DeviceBindingAuthenticationType.NONE]
+     * and [DeviceBindingAuthenticationType.APPLICATION_PIN].
+     *
+     * Must be greater than 0. The Android Keystore treats 0 and -1 as special values that disable
+     * the time-based window and require fresh user authentication on every single key use — which
+     * is very different from any positive duration. Setting this to 0 or -1 will throw
+     * [IllegalArgumentException].
+     *
+     * Defaults to [DEFAULT_AUTHENTICATION_VALIDITY_DURATION] seconds.
      */
-    var authenticationValidityDuration: Int = 5
+    var authenticationValidityDuration: Int = DEFAULT_AUTHENTICATION_VALIDITY_DURATION
+        set(value) {
+            validateAuthenticationValidityDuration(value)
+            field = value
+        }
 
     /**
      * Sign the challenge with bounded device keys.
