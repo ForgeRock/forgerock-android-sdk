@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -22,15 +22,16 @@ import java.security.interfaces.RSAPublicKey
 import java.security.spec.AlgorithmParameterSpec
 
 
+const val DEFAULT_AUTHENTICATION_VALIDITY_DURATION = 5
+
 /**
  * Helper class to generate and sign the keys
  */
-class CryptoKey(private var keyId: String) {
+class CryptoKey @JvmOverloads constructor(private var keyId: String, val timeout: Int = DEFAULT_AUTHENTICATION_VALIDITY_DURATION) {
 
     //For hashing the keyId
     private val hashingAlgorithm = "SHA-256"
     val keySize = 2048
-    val timeout = 5
     private val androidKeyStore = "AndroidKeyStore"
     private val encryptionBlockMode = KeyProperties.BLOCK_MODE_ECB
     private val encryptionPadding = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
@@ -65,7 +66,7 @@ class CryptoKey(private var keyId: String) {
         }
 
         keyPairGenerator.initialize(spec)
-        val keyPair = keyPairGenerator.generateKeyPair();
+        val keyPair = keyPairGenerator.generateKeyPair()
 
         return KeyPair(keyPair.public as RSAPublicKey, keyPair.private)
     }
