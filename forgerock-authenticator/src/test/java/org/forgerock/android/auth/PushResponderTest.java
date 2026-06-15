@@ -275,8 +275,35 @@ public class PushResponderTest extends FRABaseTest {
 
     @Test
     public void testReplyAuthenticationMessageNumberChallenge400() {
-        // AC (a): 400 on a CHALLENGE notification → PushNumberChallengeException with "incorrect"
-        //         message; notification stays pending=true, approved=false.
+        // AC (a): 400 on a CHALLENGE notification with AM JSON body → PushNumberChallengeException
+        //         surfaces AM's message; notification stays pending=true, approved=false.
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody("{\"code\":400,\"reason\":\"Bad Request\",\"message\":\"Number challenge predicate not met.\"}"));
+
+        PushNotification notification = null;
+        try {
+            notification = newChallengePushNotification();
+        } catch (Exception e) {
+            Assert.fail("Failed to build challenge notification: " + e.getMessage());
+        }
+
+        try {
+            PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushNumberChallengeException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushNumberChallengeException);
+            assertTrue(e.getLocalizedMessage().contains("Number challenge predicate not met."));
+            assertTrue(notification.isPending());
+            assertFalse(notification.isApproved());
+        }
+    }
+
+    @Test
+    public void testReplyAuthenticationMessageNumberChallenge400NoAmMessage() {
+        // AC (a2): 400 on a CHALLENGE notification with no body → fallback message used;
+        //          notification stays pending=true, approved=false.
         server.enqueue(new MockResponse().setResponseCode(400));
 
         PushNotification notification = null;
@@ -292,7 +319,7 @@ public class PushResponderTest extends FRABaseTest {
             Assert.fail("Should throw PushNumberChallengeException");
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof PushNumberChallengeException);
-            assertTrue(e.getLocalizedMessage().contains("incorrect"));
+            assertTrue(e.getLocalizedMessage().contains("Number challenge failed."));
             assertTrue(notification.isPending());
             assertFalse(notification.isApproved());
         }

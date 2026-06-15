@@ -356,9 +356,18 @@ class PushResponder {
                     }
                     listener.onSuccess(null);
                 } else if (response.code() == 400 && pushNotification.getPushType() == PushType.CHALLENGE) {
-                    // Number challenge failed — notification stays pending so the user can retry.
-                    listener.onException(new PushNumberChallengeException(
-                            "Number challenge failed: the selected number was incorrect."));
+                    String challengeMessage = "Number challenge failed.";
+                    try {
+                        if (response.body() != null) {
+                            JSONObject json = new JSONObject(response.body().string());
+                            String amMessage = json.optString("message", null);
+                            if (amMessage != null && !amMessage.isEmpty()) {
+                                challengeMessage = amMessage;
+                            }
+                        }
+                    } catch (IOException | JSONException ignored) {}
+                    Logger.warn(TAG, "Push 400 response for CHALLENGE notification: %s", challengeMessage);
+                    listener.onException(new PushNumberChallengeException(challengeMessage));
                 } else {
                     listener.onException(new PushMechanismException("Communication with " +
                             "server returned " + response.code() + " code."));
