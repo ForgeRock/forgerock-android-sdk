@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -27,8 +27,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.forgerock.android.auth.WebAuthnDataRepository
 import org.json.JSONArray
 import org.json.JSONException
@@ -149,7 +147,16 @@ open class WebAuthnRegistration() : WebAuthn() {
         return getCredentials(excludeCredentials)
     }
 
-    suspend fun register(context: Context): String {
+    /**
+     * Registers a new WebAuthn credential.
+     *
+     * @param context Application context used to launch the registration intent.
+     * @param deviceName Optional friendly name appended to the response so the server can label the credential.
+     *
+     * @return The registration outcome as a `::` delimited string, or a JSON-encoded
+     *   [WebAuthnOutcome] when the server supports JSON responses.
+     */
+    suspend fun register(context: Context, deviceName: String? = null): String {
         val publicKeyCredential = getPublicKeyCredential(context)
         val response = publicKeyCredential.response as AuthenticatorAttestationResponse
         val sb = StringBuilder()
@@ -173,10 +180,11 @@ open class WebAuthnRegistration() : WebAuthn() {
                 persist(context, source)
             }
         }
+        deviceName?.let { sb.append("::$it") }
         return if (supportsJsonResponse) {
             val outcome = WebAuthnOutcome(publicKeyCredential.authenticatorAttachment ?: "platform",
                 sb.toString())
-            return Json.encodeToString(outcome)
+            Json.encodeToString(outcome)
         } else {
             sb.toString()
         }

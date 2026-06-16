@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -67,7 +67,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testValuesAreSetProperly() {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val obj = JSONObject(rawContent)
         val testObject = DeviceBindingCallback(obj, 0)
         assertEquals(rawContent, testObject.getContent())
@@ -76,7 +76,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testConfig() {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val obj = JSONObject(rawContent)
         val testObject = DeviceBindingCallback(obj, 0)
         testObject.setDeviceName("jey")
@@ -85,14 +85,14 @@ class DeviceBindingCallbackTest {
         testObject.setClientError("Abort")
         val actualOutput = testObject.getContent()
         val expectedOut =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"jws\"},{\"name\":\"IDToken1deviceName\",\"value\":\"jey\"},{\"name\":\"IDToken1deviceId\",\"value\":\"device_id\"},{\"name\":\"IDToken1clientError\",\"value\":\"Abort\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"jws\"},{\"name\":\"IDToken1deviceName\",\"value\":\"jey\"},{\"name\":\"IDToken1deviceId\",\"value\":\"device_id\"},{\"name\":\"IDToken1clientError\",\"value\":\"Abort\"}]}"
         assertEquals(expectedOut, actualOutput)
     }
 
     @Test
     fun testSuccessPathForNoneType() = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val encryptedPref = mock<DeviceBindingRepository>()
         val deviceAuthenticator = mock<None>()
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
@@ -115,7 +115,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testSuccessPathForBiometricType() = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ONLY\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ONLY\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val deviceAuthenticator = mock<BiometricOnly>()
         whenever(deviceAuthenticator.type()).thenReturn(DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
@@ -150,7 +150,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testSuccessPathForBiometricAndCredentialType() = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ALLOW_FALLBACK\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ALLOW_FALLBACK\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val scenario: ActivityScenario<DummyActivity> =
             ActivityScenario.launch(DummyActivity::class.java)
         scenario.onActivity {
@@ -182,7 +182,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testFailurePathForBiometricAbort(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         val errorCode = -1
         val abort = Abort(code = errorCode)
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
@@ -220,7 +220,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testFailurePathForBiometricTimeout(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
         whenever(deviceAuthenticator.authenticate(any())).thenReturn(Timeout())
@@ -253,7 +253,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testFailurePathForUnsupported(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(false)
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         try {
@@ -270,7 +270,7 @@ class DeviceBindingCallbackTest {
 
         val actualOutput = testObject.getContent()
         val expectedOut =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"Unsupported\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"Unsupported\"}]}"
         assertEquals(expectedOut, actualOutput)
 
         verify(encryptedPref, times(0)).delete(any())
@@ -290,7 +290,7 @@ class DeviceBindingCallbackTest {
     @Test
     fun testFailurePathForKeyGeneration(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
         whenever(deviceAuthenticator.isSupported(any(), any())).thenReturn(true)
         whenever(deviceAuthenticator.generateKeys(any(),
             any())).thenThrow(NullPointerException::class.java)
@@ -319,10 +319,58 @@ class DeviceBindingCallbackTest {
         verify(encryptedPref, times(0)).persist(any())
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsZero() {
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceBindingCallback(JSONObject(rawContent), 0).authenticationValidityDuration = 0
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsNegative() {
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceBindingCallback(JSONObject(rawContent), 0).authenticationValidityDuration = -1
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationDefaultValue() {
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"NONE\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val testObject = DeviceBindingCallback(JSONObject(rawContent), 0)
+        assertEquals(5, testObject.authenticationValidityDuration)
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationCustomValuePassedToAuthenticator() = runBlocking {
+        // Uses BIOMETRIC_ONLY because NONE and APPLICATION_PIN ignore authenticationValidityDuration —
+        // CryptoKey.timeout is only consumed by biometric authenticators via
+        // setUserAuthenticationValidityDurationSeconds / setUserAuthenticationParameters.
+        val rawContent =
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"BIOMETRIC_ONLY\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val encryptedPref = mock<DeviceBindingRepository>()
+        val biometricAuthenticator = mock<BiometricOnly>()
+        whenever(biometricAuthenticator.type()).thenReturn(DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        whenever(biometricAuthenticator.isSupported(any(), any())).thenReturn(true)
+        whenever(biometricAuthenticator.generateKeys(any(), any())).thenReturn(keyPair)
+        whenever(biometricAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+
+        val testObject = DeviceBindingCallbackMockTest(rawContent)
+        testObject.authenticationValidityDuration = 30
+        testObject.testExecute(context,
+            deviceAuthenticator = biometricAuthenticator,
+            encryptedPreference = encryptedPref,
+            "device_id")
+
+        val captor: KArgumentCaptor<CryptoKey> = argumentCaptor()
+        verify(biometricAuthenticator).setKey(captor.capture())
+        assertEquals(30, captor.firstValue.timeout)
+    }
+
     @Test
     fun testWithApplicationPinBinding(): Unit = runBlocking {
         val rawContent =
-            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}";
+            "{\"type\":\"DeviceBindingCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"id=demo,ou=user,dc=openam,dc=forgerock,dc=org\"},{\"name\":\"username\",\"value\":\"demo\"},{\"name\":\"authenticationType\",\"value\":\"APPLICATION_PIN\"},{\"name\":\"challenge\",\"value\":\"CS3+g40VkHXx+dN7rpnJKhrEAvwZaYgbaXoEcpO5twM=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":60},{\"name\":\"attestation\",\"value\":false}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1deviceName\",\"value\":\"\"},{\"name\":\"IDToken1deviceId\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
 
         val testObject = DeviceBindingCallbackMockTest(rawContent)
         val scenario: ActivityScenario<DummyActivity> =
@@ -338,9 +386,9 @@ class DeviceBindingCallbackTest {
     }
 
     fun getExpiration(): Date {
-        val date = Calendar.getInstance();
+        val date = Calendar.getInstance()
         date.add(Calendar.SECOND, 60)
-        return date.time;
+        return date.time
     }
 }
 
@@ -384,7 +432,7 @@ class DeviceBindingCallbackMockTest constructor(rawContent: String,
                     var byteArrayOutputStream = ByteArrayOutputStream(1024)
 
                     override fun getInputStream(context: Context): InputStream {
-                        return byteArrayOutputStream.toByteArray().inputStream();
+                        return byteArrayOutputStream.toByteArray().inputStream()
                     }
 
                     override fun getOutputStream(context: Context): OutputStream {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -23,6 +23,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.PushMechanismException;
+import org.forgerock.android.auth.exception.PushNumberChallengeException;
 import org.forgerock.android.auth.util.RequestBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -354,6 +355,19 @@ class PushResponder {
                         return;
                     }
                     listener.onSuccess(null);
+                } else if (response.code() == 400 && pushNotification.getPushType() == PushType.CHALLENGE) {
+                    String challengeMessage = "Number challenge failed.";
+                    try {
+                        if (response.body() != null) {
+                            JSONObject json = new JSONObject(response.body().string());
+                            String amMessage = json.optString("message", null);
+                            if (amMessage != null && !amMessage.isEmpty()) {
+                                challengeMessage = amMessage;
+                            }
+                        }
+                    } catch (IOException | JSONException ignored) {}
+                    Logger.warn(TAG, "Push 400 response for CHALLENGE notification: %s", challengeMessage);
+                    listener.onException(new PushNumberChallengeException(challengeMessage));
                 } else {
                     listener.onException(new PushMechanismException("Communication with " +
                             "server returned " + response.code() + " code."));

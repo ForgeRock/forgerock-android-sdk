@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  *  This software may be modified and distributed under the terms
  *  of the MIT license. See the LICENSE file for details.
@@ -22,6 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
@@ -49,7 +50,7 @@ class WebAuthnRegistrationCallbackTest {
 
         val spCallback = spy(callback)
         doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
-        whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
+        whenever(webAuthnRegistration.register(any(), anyOrNull())).thenReturn("SuccessResult")
         spCallback.register(context, node = node)
         val hiddenValueCallback = node.getCallback(HiddenValueCallback::class.java)
         assertThat(hiddenValueCallback.contentAsJson.getJSONArray("input").getJSONObject(0)
@@ -89,7 +90,7 @@ class WebAuthnRegistrationCallbackTest {
 
         val spCallback = spy(callback)
         doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
-        whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
+        whenever(webAuthnRegistration.register(any(), anyOrNull())).thenReturn("SuccessResult")
         val future = FRListenerFuture<Void>()
         spCallback.register(context, node = node, listener = future)
         future.get()
@@ -106,7 +107,7 @@ class WebAuthnRegistrationCallbackTest {
         val callback = node.getCallback(WebAuthnRegistrationCallback::class.java)
         val spCallback = spy(callback)
         doReturn(webAuthnRegistration).`when`(spCallback).getWebAuthnRegistration()
-        whenever(webAuthnRegistration.register(any())).thenReturn("SuccessResult")
+        whenever(webAuthnRegistration.register(any(), anyOrNull())).thenReturn("SuccessResult::MyDeviceName")
         spCallback.register(context, "MyDeviceName", node)
         val hiddenValueCallback = node.getCallback(HiddenValueCallback::class.java)
         assertThat(hiddenValueCallback.contentAsJson.getJSONArray("input").getJSONObject(0)

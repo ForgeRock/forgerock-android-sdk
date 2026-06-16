@@ -11,6 +11,7 @@ import org.forgerock.android.auth.exception.ChallengeResponseException;
 import org.forgerock.android.auth.exception.InvalidNotificationException;
 import org.forgerock.android.auth.exception.MechanismCreationException;
 import org.forgerock.android.auth.exception.PushMechanismException;
+import org.forgerock.android.auth.exception.PushNumberChallengeException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,6 +37,7 @@ import okhttp3.mockwebserver.SocketPolicy;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -267,6 +269,113 @@ public class PushResponderTest extends FRABaseTest {
         assertEquals(hash, jwtSignature);
     }
 
+    // -----------------------------------------------------------------------
+    // Push Number Challenge (400) tests
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testReplyAuthenticationMessageNumberChallenge400() {
+        // AC (a): 400 on a CHALLENGE notification with AM JSON body → PushNumberChallengeException
+        //         surfaces AM's message; notification stays pending=true, approved=false.
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody("{\"code\":400,\"reason\":\"Bad Request\",\"message\":\"Number challenge predicate not met.\"}"));
+
+        PushNotification notification = null;
+        try {
+            notification = newChallengePushNotification();
+        } catch (Exception e) {
+            Assert.fail("Failed to build challenge notification: " + e.getMessage());
+        }
+
+        try {
+            PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushNumberChallengeException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushNumberChallengeException);
+            assertTrue(e.getLocalizedMessage().contains("Number challenge predicate not met."));
+            assertTrue(notification.isPending());
+            assertFalse(notification.isApproved());
+        }
+    }
+
+    @Test
+    public void testReplyAuthenticationMessageNumberChallenge400NoAmMessage() {
+        // AC (a2): 400 on a CHALLENGE notification with no body → fallback message used;
+        //          notification stays pending=true, approved=false.
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        PushNotification notification = null;
+        try {
+            notification = newChallengePushNotification();
+        } catch (Exception e) {
+            Assert.fail("Failed to build challenge notification: " + e.getMessage());
+        }
+
+        try {
+            PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushNumberChallengeException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushNumberChallengeException);
+            assertTrue(e.getLocalizedMessage().contains("Number challenge failed."));
+            assertTrue(notification.isPending());
+            assertFalse(notification.isApproved());
+        }
+    }
+
+    @Test
+    public void testReplyAuthenticationMessage400DefaultNotificationIsNotNumberChallengeException() throws Exception {
+        // AC (b): 400 on a DEFAULT notification → PushMechanismException (NOT PushNumberChallengeException)
+        //         with "400 code" in the message. Regression guard.
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        PushNotification notification = newPushNotification();
+
+        try {
+            PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertFalse(e.getCause() instanceof PushNumberChallengeException);
+            assertTrue(e.getLocalizedMessage().contains("400 code"));
+        }
+    }
+
+    @Test
+    public void testReplyAuthenticationMessage500ChallengeNotificationIsNotNumberChallengeException() throws Exception {
+        // AC (c): 500 on a CHALLENGE notification → PushMechanismException (NOT PushNumberChallengeException)
+        //         with "500 code" in the message. Regression guard.
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        PushNotification notification = newChallengePushNotification();
+
+        try {
+            PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+            pushListenerFuture.get();
+            Assert.fail("Should throw PushMechanismException");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof PushMechanismException);
+            assertFalse(e.getCause() instanceof PushNumberChallengeException);
+            assertTrue(e.getLocalizedMessage().contains("500 code"));
+        }
+    }
+
+    @Test
+    public void testReplyAuthenticationMessageNumberChallenge200Success() throws Exception {
+        // AC (d): 200 on a CHALLENGE notification → onSuccess called; isPending=false, isApproved=true.
+        server.enqueue(new MockResponse());
+
+        PushNotification notification = newChallengePushNotification();
+        PushResponder.getInstance(storageClient).authentication(notification, true, pushListenerFuture);
+        pushListenerFuture.get();
+
+        assertFalse(notification.isPending());
+        assertTrue(notification.isApproved());
+    }
+
     private PushNotification newPushNotification() throws InvalidNotificationException, MechanismCreationException {
         Calendar time = Calendar.getInstance();
         PushNotification pushNotification = PushNotification.builder()
@@ -279,6 +388,26 @@ public class PushResponderTest extends FRABaseTest {
                 .setApproved(false)
                 .setPending(true)
                 .setTtl(TTL)
+                .build();
+
+        pushNotification.setPushMechanism(newPushMechanism());
+
+        return pushNotification;
+    }
+
+    private PushNotification newChallengePushNotification() throws InvalidNotificationException, MechanismCreationException {
+        Calendar time = Calendar.getInstance();
+        PushNotification pushNotification = PushNotification.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setMessageId(MESSAGE_ID)
+                .setChallenge(CHALLENGE)
+                .setAmlbCookie(AMLB_COOKIE)
+                .setTimeAdded(time)
+                .setTimeExpired(time)
+                .setApproved(false)
+                .setPending(true)
+                .setTtl(TTL)
+                .setPushType("challenge")
                 .build();
 
         pushNotification.setPushMechanism(newPushMechanism());

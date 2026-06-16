@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2022 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -8,11 +8,16 @@ package org.forgerock.android.auth.callback
 
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.forgerock.android.auth.DummyActivity
+import org.forgerock.android.auth.InitProvider
 import kotlinx.coroutines.runBlocking
+import org.forgerock.android.auth.devicebind.BiometricOnly
 import org.forgerock.android.auth.devicebind.DeviceAuthenticator
 import org.forgerock.android.auth.devicebind.DeviceBindFragment
+import org.forgerock.android.auth.devicebind.None
 import org.forgerock.android.auth.devicebind.DeviceBindingErrorStatus
 import org.forgerock.android.auth.devicebind.DeviceBindingException
 import org.forgerock.android.auth.devicebind.KeyPair
@@ -165,12 +170,65 @@ class DeviceSigningVerifierCallbackTest {
         testObject.executeAllKey(context, userKeyService) { deviceAuthenticator }
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsZero() {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":5}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceSigningVerifierCallback(JSONObject(rawContent), 0).authenticationValidityDuration = 0
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testAuthenticationValidityDurationRejectsNegative() {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":5}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        DeviceSigningVerifierCallback(JSONObject(rawContent), 0).authenticationValidityDuration = -1
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationDefaultValue() {
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":5}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val testObject = DeviceSigningVerifierCallback(JSONObject(rawContent), 0)
+        assertEquals(5, testObject.authenticationValidityDuration)
+    }
+
+    @Test
+    fun testAuthenticationValidityDurationCustomValuePassedToAuthenticator() = runBlocking {
+        // Uses BIOMETRIC_ONLY because NONE and APPLICATION_PIN ignore authenticationValidityDuration —
+        // CryptoKey.timeout is only consumed by biometric authenticators via
+        // setUserAuthenticationValidityDurationSeconds / setUserAuthenticationParameters.
+        val rawContent =
+            "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
+        val userKey =
+            UserKey("id1", "jey", "jey", "kid", DeviceBindingAuthenticationType.BIOMETRIC_ONLY, System.currentTimeMillis())
+        val biometricAuthenticator = mock<BiometricOnly>()
+        whenever(biometricAuthenticator.type()).thenReturn(DeviceBindingAuthenticationType.BIOMETRIC_ONLY)
+        whenever(biometricAuthenticator.isSupported(context)).thenReturn(true)
+        whenever(biometricAuthenticator.validateCustomClaims(any())).thenReturn(true)
+        whenever(biometricAuthenticator.authenticate(any())).thenReturn(Success(keyPair.privateKey))
+        whenever(biometricAuthenticator.sign(
+            any<Context>(), any<UserKey>(), any<PrivateKey>(), any(), any<String>(), any<Date>(), any<Map<String, Any>>()
+        )).thenReturn("jws")
+
+        val scenario: ActivityScenario<DummyActivity> = ActivityScenario.launch(DummyActivity::class.java)
+        scenario.onActivity { InitProvider.setCurrentActivity(it) }
+
+        val testObject = DeviceSigningVerifierCallbackMock(rawContent)
+        testObject.authenticationValidityDuration = 30
+        testObject.executeAuthenticate(context, userKey, biometricAuthenticator)
+
+        val captor: KArgumentCaptor<org.forgerock.android.auth.CryptoKey> = argumentCaptor()
+        verify(biometricAuthenticator).setKey(captor.capture())
+        assertEquals(30, captor.firstValue.timeout)
+    }
+
     fun getExpiration(): Date {
         val date = Calendar.getInstance();
         date.add(Calendar.SECOND, 60)
         return date.time;
     }
 
+    @Test
     fun testSignForForValidClaims() = runBlocking {
         val rawContent =
             "{\"type\":\"DeviceSigningVerifierCallback\",\"output\":[{\"name\":\"userId\",\"value\":\"jey\"},{\"name\":\"challenge\",\"value\":\"zYwKaKnqS2YzvhXSK+sFjC7FKBoprArqz6LpJ8qe9+g=\"},{\"name\":\"title\",\"value\":\"Authentication required\"},{\"name\":\"subtitle\",\"value\":\"Cryptography device binding\"},{\"name\":\"description\",\"value\":\"Please complete with biometric to proceed\"},{\"name\":\"timeout\",\"value\":20}],\"input\":[{\"name\":\"IDToken1jws\",\"value\":\"\"},{\"name\":\"IDToken1clientError\",\"value\":\"\"}]}"
@@ -192,6 +250,7 @@ class DeviceSigningVerifierCallbackTest {
     }
 
 
+    @Test
     fun testSignForForInvalidClaims() = runBlocking {
         val errorCode = -1
         val invalidCustomClaims = DeviceBindingErrorStatus.InvalidCustomClaims(code = errorCode)
