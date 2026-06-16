@@ -1,6 +1,9 @@
-## [Unreleased]
+## [4.8.6]
+
 #### Fixed
 - Fixed an issue where selecting the wrong number in a Push Number Challenge returned a generic error instead of a distinct exception [SDKS-5114]
+- Fixed an issue where the custom device name provided during WebAuthn registration was ignored when `supportsJsonResponse` is enabled. [SDKS-5096]
+- Added configurable `authenticationValidityDuration` to `DeviceBindingCallback` and `DeviceSigningVerifierCallback`, allowing the biometric key authorization window to be extended beyond the default 5 seconds. [SDKS-5120]
 
 ## [4.8.5]
 
