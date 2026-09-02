@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.GeneratingTokens
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.OnDeviceTraining
 import androidx.compose.material.icons.filled.OpenInBrowser
@@ -40,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.app.Destinations.CENTRALIZE_REAUTH_ROUTE
 import com.example.app.Destinations.CENTRALIZE_ROUTE
 import com.example.app.Destinations.DEVICE_PROFILE
 import com.example.app.Destinations.ENV_ROUTE
@@ -98,16 +96,6 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.OpenInBrowser, null) },
             onClick = {
                 navigateTo(CENTRALIZE_ROUTE);
-                closeDrawer()
-            },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-        )
-        NavigationDrawerItem(
-            label = { Text("Centralize Reauth (SDKS-3046)") },
-            selected = false,
-            icon = { Icon(Icons.Filled.Replay, null) },
-            onClick = {
-                navigateTo(CENTRALIZE_REAUTH_ROUTE);
                 closeDrawer()
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)

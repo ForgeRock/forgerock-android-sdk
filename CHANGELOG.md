@@ -1,7 +1,7 @@
 ## [Unreleased]
 
-#### Fixed
-- Fixed an issue where OAuth2 tokens obtained via centralized login were revoked by a subsequent Journey [SDKS-3046]
+### Fixed
+- Fixed an issue where the session established by a re-authentication Journey (e.g. `forceAuth=true` after centralized login) destroyed the centralized-login OAuth2.0 tokens by calling revokeAndEndSession. The SDK now revokes only the stale OAuth2.0 token set (when one exists) and ends no session, allowing step-up Journeys to complete. [SDKS-3046]
 
 ## [4.8.6]
 

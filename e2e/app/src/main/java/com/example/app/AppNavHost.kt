@@ -19,8 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.app.centralize.Centralize
 import com.example.app.centralize.CentralizeLoginViewModel
-import com.example.app.centralize.CentralizeReauth
-import com.example.app.centralize.CentralizeReauthViewModel
 import com.example.app.device.DeviceProfileRoute
 import com.example.app.device.DeviceProfileViewModel
 import com.example.app.env.EnvRoute
@@ -81,12 +79,6 @@ fun AppNavHost(navController: NavHostController,
         composable(Destinations.CENTRALIZE_ROUTE) {
             val centralizeLoginViewModel = viewModel<CentralizeLoginViewModel>()
             Centralize(centralizeLoginViewModel)
-        }
-        composable(Destinations.CENTRALIZE_REAUTH_ROUTE) {
-            val centralizeReauthViewModel = viewModel<CentralizeReauthViewModel>(
-                factory = CentralizeReauthViewModel.factory(LocalContext.current)
-            )
-            CentralizeReauth(centralizeReauthViewModel)
         }
         composable(Destinations.MANAGE_WEBAUTHN_KEYS) {
             val webAuthnViewModel = viewModel<WebAuthnViewModel>(

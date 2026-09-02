@@ -25,6 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class FRSessionMockTest : BaseTest() {
@@ -343,6 +344,11 @@ class FRSessionMockTest : BaseTest() {
         enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
         enqueue("/authTreeMockTest_Authenticate_success_centralizedLogin.json",
             HttpURLConnection.HTTP_OK)
+        //Async /token/revoke fired by the interceptor when it finds the stale access token.
+        server.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .addHeader("Content-Type", "application/json")
+            .setBody("{}"))
 
         val nodeListenerFuture: NodeListenerFuture<FRSession> = object : NodeListenerFuture<FRSession>() {
             override fun onCallbackReceived(state: Node) {
@@ -368,12 +374,15 @@ class FRSessionMockTest : BaseTest() {
         //The new SSOToken is now persisted.
         Assertions.assertThat(ssoTokenStorage.get()).isNotNull()
 
-        //The authenticate request carried forceAuth=true (Use Case 1), and none of the requests
-        //sent to AM should be a /token/revoke call (OAuth2.0 tokens must NOT be revoked).
+        //The authenticate request carried forceAuth=true (Use Case 1). With the new
+        //implementation (mirroring iOS KeychainManager.handleSessionToken), the stale
+        //centralized-login OAuth2.0 token set is revoked (a /token/revoke request is observed)
+        //while the session itself is NOT ended — the SDK must not hold stale credentials of the
+        //previous user/session, but the just-established session must survive.
         val recordedPaths = (1..server.requestCount).map { server.takeRequest().path.orEmpty() }
         Assertions.assertThat(recordedPaths).anyMatch { it.contains("forceAuth=true") }
-        Assertions.assertThat(recordedPaths).noneMatch { it.contains("token/revoke") }
-        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+        Assertions.assertThat(recordedPaths).anyMatch { it.contains("token/revoke") }
+        Assert.assertFalse(Config.getInstance().tokenManager.hasToken())
     }
 
     @Test
@@ -425,6 +434,7 @@ class FRSessionMockTest : BaseTest() {
                     return@FRRequestInterceptor request.newBuilder()
                         .url(Uri.parse(request.url().toString())
                             .buildUpon()
+                            .appendQueryParameter("forceAuth", "true")
                             .appendQueryParameter("noSession", "true").toString())
                         .build()
                 }
@@ -516,8 +526,11 @@ class FRSessionMockTest : BaseTest() {
         server.takeRequest() //PasswordCallback (round 2, mismatch)
         server.takeRequest() //Success with a different tokenId (round 2, triggers the revoke)
 
-        val revokeRequest = server.takeRequest() //Async /token/revoke triggered by the mismatch
-        Assertions.assertThat(revokeRequest.path).contains("token/revoke")
+        //The /token/revoke call is asynchronous — use a bounded timeout so the test fails
+        //instead of hanging if the revoke never fires.
+        val revokeRequest = server.takeRequest(5, TimeUnit.SECONDS) //Async /token/revoke
+        Assertions.assertThat(revokeRequest).isNotNull()
+        Assertions.assertThat(revokeRequest!!.path).contains("token/revoke")
     }
 
     @Test(expected = IllegalArgumentException::class)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2019 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -44,18 +44,58 @@ class SingleSignOnInterceptorTest {
     }
 
     @Test
-    fun testNoStoredTokenPersistsNewTokenWithoutRevoking() {
-        //Centralized login: no existing session token, the existing session does not apply,
-        //the received token must be persisted without revoking the OAuth2.0 tokens.
+    fun testNoStoredTokenNoAccessTokenPersistsNewTokenWithoutRevoking() {
+        //Centralized login: no existing session token and no access token either (fresh state),
+        //the received token must be persisted without any revocation.
         val token = SSOToken("newToken")
         whenever(sessionManager.singleSignOnManager).thenReturn(singleSignOnManager)
         whenever(singleSignOnManager.token).thenReturn(null)
+        whenever(sessionManager.tokenManager).thenReturn(tokenManager)
+        whenever(tokenManager.accessToken).thenReturn(null)
 
         interceptor.intercept(chain, token)
 
         verify(singleSignOnManager).persist(token)
-        verifyNoInteractions(tokenManager)
+        verify(tokenManager, never()).revoke(any<FRListener<Void>>())
+        verify(tokenManager, never()).revokeAndEndSession(any<FRListener<Void>>())
         verify(chain).proceed(token)
+    }
+
+    @Test
+    fun testNoStoredTokenWithAccessTokenRevokesStaleTokenSetThenPersists() {
+        //Centralized login: no existing session token but a stale access token from the previous
+        //authentication exists — the stale OAuth2.0 token set must be revoked (without ending
+        //the session) before the new session token is persisted. Mirrors iOS
+        //KeychainManager.handleSessionToken's no-session-with-access-token case.
+        val token = SSOToken("newToken")
+        whenever(sessionManager.singleSignOnManager).thenReturn(singleSignOnManager)
+        whenever(singleSignOnManager.token).thenReturn(null)
+        whenever(sessionManager.tokenManager).thenReturn(tokenManager)
+        whenever(tokenManager.accessToken).thenReturn(
+            AccessToken.builder()
+                .value("staleAccessToken")
+                .idToken("staleIdToken")
+                .tokenType("Bearer")
+                .expiresIn(3600)
+                .build())
+
+        interceptor.intercept(chain, token)
+
+        val order = inOrder(tokenManager, singleSignOnManager, chain)
+        order.verify(tokenManager).revoke(null as FRListener<Void>?)
+        order.verify(tokenManager, never()).revokeAndEndSession(any<FRListener<Void>>())
+        order.verify(singleSignOnManager).persist(token)
+        order.verify(chain).proceed(token)
+    }
+
+    @Test
+    fun testEmptyTokenValueProceedsWithoutTouchingSession() {
+        //Empty token value (noSession passthrough), we don't destroy the existing session.
+        interceptor.intercept(chain, SSOToken(""))
+
+        verify(chain).proceed(any<SSOToken>())
+        verify(sessionManager, never()).getSingleSignOnManager()
+        verify(sessionManager, never()).getTokenManager()
     }
 
     @Test
