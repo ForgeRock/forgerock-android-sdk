@@ -20,6 +20,7 @@ object Destinations {
     const val SELF_SERVICE = "Self Service"
     const val SETTING = "Setting"
     const val CENTRALIZE_ROUTE = "Centralize Login"
+    const val CENTRALIZE_REAUTH_ROUTE = "Centralize Reauth"
     const val USER_SESSION = "User Session"
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2019 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.OperationCanceledException
 import android.util.Pair
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import okhttp3.mockwebserver.MockResponse
 import org.assertj.core.api.Assertions
 import org.forgerock.android.auth.PolicyAdvice.Companion.builder
 import org.forgerock.android.auth.callback.NameCallback
@@ -45,6 +46,8 @@ class FRSessionMockTest : BaseTest() {
     @After
     @Throws(Exception::class)
     fun closeSession() {
+        //The centralized-login tests below seed an AccessToken, so this logout fires an extra
+        //async /token/revoke against the MockWebServer at teardown — fire-and-forget, harmless.
         if (FRSession.getCurrentSession() != null) {
             FRSession.getCurrentSession().logout()
         }
@@ -298,6 +301,223 @@ class FRSessionMockTest : BaseTest() {
         recordedRequest = server.takeRequest() //PasswordCallback without Session
         Assertions.assertThat(Uri.parse(recordedRequest.path).getQueryParameter("noSession"))
             .isEqualTo("true")
+    }
+
+    @Test
+    @Throws(ExecutionException::class, InterruptedException::class)
+    fun test_centralizedLogin_forceAuth_doesNotRevokeOAuth2Tokens() {
+        //Seed the Centralized Login precondition: OAuth2.0 tokens were obtained via the
+        //browser/AppAuth flow (SSOToken.sessionToken is null), and no SSOToken is stored.
+        Config.getInstance().oidcStorage = Memory()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
+        Config.getInstance().url = url
+
+        val centralizedLoginAccessToken = AccessToken.builder()
+            .value("centralized-login-access-token")
+            .idToken("centralized-login-id-token")
+            .tokenType("Bearer")
+            .refreshToken("centralized-login-refresh-token")
+            .expiresIn(3600)
+            .build()
+        Config.getInstance().tokenManager.persist(centralizedLoginAccessToken)
+        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+        Assertions.assertThat(ssoTokenStorage.get()).isNull()
+
+        //A Journey with forceAuth=true returns a brand-new SSOToken (Use Case 1).
+        //forceAuth=true is injected on the authenticate request the same way noSession=true is
+        //in testWithNoSession, so the recorded request reflects the ticket's Use Case 1 call.
+        RequestInterceptorRegistry.getInstance()
+            .register(FRRequestInterceptor { request: Request, tag: Action ->
+                if (tag.type == Action.AUTHENTICATE) {
+                    return@FRRequestInterceptor request.newBuilder()
+                        .url(Uri.parse(request.url().toString())
+                            .buildUpon()
+                            .appendQueryParameter("forceAuth", "true").toString())
+                        .build()
+                }
+                request
+            } as FRRequestInterceptor<Action>)
+
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_success_centralizedLogin.json",
+            HttpURLConnection.HTTP_OK)
+
+        val nodeListenerFuture: NodeListenerFuture<FRSession> = object : NodeListenerFuture<FRSession>() {
+            override fun onCallbackReceived(state: Node) {
+                if (state.getCallback(NameCallback::class.java) != null) {
+                    state.getCallback(NameCallback::class.java).setName("tester")
+                    state.next(context, this)
+                    return
+                }
+
+                if (state.getCallback(PasswordCallback::class.java) != null) {
+                    state.getCallback(PasswordCallback::class.java)
+                        .setPassword("password".toCharArray())
+                    state.next(context, this)
+                }
+            }
+        }
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture)
+        Assert.assertTrue(nodeListenerFuture.get() is FRSession)
+        Assert.assertNotNull(FRSession.getCurrentSession())
+        Assert.assertNotNull(FRSession.getCurrentSession().sessionToken)
+
+        //The new SSOToken is now persisted.
+        Assertions.assertThat(ssoTokenStorage.get()).isNotNull()
+
+        //The authenticate request carried forceAuth=true (Use Case 1), and none of the requests
+        //sent to AM should be a /token/revoke call (OAuth2.0 tokens must NOT be revoked).
+        val recordedPaths = (1..server.requestCount).map { server.takeRequest().path.orEmpty() }
+        Assertions.assertThat(recordedPaths).anyMatch { it.contains("forceAuth=true") }
+        Assertions.assertThat(recordedPaths).noneMatch { it.contains("token/revoke") }
+        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+    }
+
+    @Test
+    @Throws(ExecutionException::class, InterruptedException::class)
+    fun test_centralizedLogin_forceAuthNoSession_doesNotRevokeOAuth2Tokens() {
+        //Seed the Centralized Login precondition: OAuth2.0 tokens were obtained via the
+        //browser/AppAuth flow (SSOToken.sessionToken is null), and no SSOToken is stored.
+        Config.getInstance().oidcStorage = Memory()
+        Config.getInstance().ssoTokenStorage = ssoTokenStorage
+        Config.getInstance().cookiesStorage = cookiesStorage
+        Config.getInstance().url = url
+
+        val centralizedLoginAccessToken = AccessToken.builder()
+            .value("centralized-login-access-token")
+            .idToken("centralized-login-id-token")
+            .tokenType("Bearer")
+            .refreshToken("centralized-login-refresh-token")
+            .expiresIn(3600)
+            .build()
+        Config.getInstance().tokenManager.persist(centralizedLoginAccessToken)
+        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+        Assertions.assertThat(ssoTokenStorage.get()).isNull()
+
+        //A Journey with forceAuth=true&noSession=true never returns a tokenId (Use Case 2).
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_success_withNoSession.json",
+            HttpURLConnection.HTTP_OK)
+
+        val nodeListenerFuture: NodeListenerFuture<FRSession> = object : NodeListenerFuture<FRSession>() {
+            override fun onCallbackReceived(state: Node) {
+                if (state.getCallback(NameCallback::class.java) != null) {
+                    state.getCallback(NameCallback::class.java).setName("tester")
+                    state.next(context, this)
+                    return
+                }
+
+                if (state.getCallback(PasswordCallback::class.java) != null) {
+                    state.getCallback(PasswordCallback::class.java)
+                        .setPassword("password".toCharArray())
+                    state.next(context, this)
+                }
+            }
+        }
+
+        RequestInterceptorRegistry.getInstance()
+            .register(FRRequestInterceptor { request: Request, tag: Action ->
+                if (tag.type == Action.AUTHENTICATE) {
+                    return@FRRequestInterceptor request.newBuilder()
+                        .url(Uri.parse(request.url().toString())
+                            .buildUpon()
+                            .appendQueryParameter("noSession", "true").toString())
+                        .build()
+                }
+                request
+            } as FRRequestInterceptor<Action>)
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture)
+        //The noSession Journey returns no token (already-correct behavior for Use Case 2).
+        Assertions.assertThat(nodeListenerFuture.get()).isNull()
+
+        //No SSOToken is persisted. Note: FRSession.getCurrentSession() is not asserted null here,
+        //since the seeded centralized-login OAuth2.0 tokens alone make
+        //SessionManager.hasSession() true regardless of the SSO token state.
+        Assertions.assertThat(ssoTokenStorage.get()).isNull()
+
+        //The OAuth2.0 tokens obtained via centralized login must remain intact.
+        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+
+        var recordedRequest = server.takeRequest() //NameCallback
+        recordedRequest = server.takeRequest() //PasswordCallback without Session
+        Assertions.assertThat(Uri.parse(recordedRequest.path).getQueryParameter("noSession"))
+            .isEqualTo("true")
+        recordedRequest = server.takeRequest() //End of tree without Session
+
+        //None of the requests sent to AM should be a /token/revoke call.
+        Assertions.assertThat(recordedRequest.path.orEmpty()).doesNotContain("token/revoke")
+    }
+
+    @Test
+    @Throws(ExecutionException::class, InterruptedException::class)
+    fun test_realSessionMismatch_stillRevokesOAuth2Tokens() {
+        //Establish a real prior session, backed by an actual SSOToken.
+        frSessionHappyPath()
+        val priorSessionToken = FRSession.getCurrentSession().sessionToken
+        Assert.assertNotNull(priorSessionToken)
+
+        //Bind an OAuth2.0 AccessToken to that real session (not a centralized-login token).
+        Config.getInstance().oidcStorage = Memory()
+        val boundAccessToken = AccessToken.builder()
+            .value("real-session-access-token")
+            .idToken("real-session-id-token")
+            .tokenType("Bearer")
+            .refreshToken("real-session-refresh-token")
+            .expiresIn(3600)
+            .sessionToken(priorSessionToken)
+            .build()
+        Config.getInstance().tokenManager.persist(boundAccessToken)
+        Assert.assertTrue(Config.getInstance().tokenManager.hasToken())
+
+        //A second Journey returns a genuinely different SSOToken (real mismatch, not
+        //centralized login).
+        enqueue("/authTreeMockTest_Authenticate_NameCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_PasswordCallback.json", HttpURLConnection.HTTP_OK)
+        enqueue("/authTreeMockTest_Authenticate_success2.json", HttpURLConnection.HTTP_OK)
+        //revokeAndEndSession's fire-and-forget /token/revoke call.
+        server.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .addHeader("Content-Type", "application/json")
+            .setBody("{}"))
+
+        val nodeListenerFuture: NodeListenerFuture<FRSession> = object : NodeListenerFuture<FRSession>() {
+            override fun onCallbackReceived(state: Node) {
+                if (state.getCallback(NameCallback::class.java) != null) {
+                    state.getCallback(NameCallback::class.java).setName("tester")
+                    state.next(context, this)
+                    return
+                }
+
+                if (state.getCallback(PasswordCallback::class.java) != null) {
+                    state.getCallback(PasswordCallback::class.java)
+                        .setPassword("password".toCharArray())
+                    state.next(context, this)
+                }
+            }
+        }
+
+        FRSession.authenticate(context, "Example", nodeListenerFuture)
+        Assert.assertTrue(nodeListenerFuture.get() is FRSession)
+        Assert.assertNotEquals(priorSessionToken, FRSession.getCurrentSession().sessionToken)
+
+        //The OAuth2.0 tokens must be revoked (gone) after a genuine session-token mismatch.
+        Assert.assertFalse(Config.getInstance().tokenManager.hasToken())
+
+        server.takeRequest() //NameCallback (round 1, happy path)
+        server.takeRequest() //PasswordCallback (round 1, happy path)
+        server.takeRequest() //Success (round 1, happy path)
+
+        server.takeRequest() //NameCallback (round 2, mismatch)
+        server.takeRequest() //PasswordCallback (round 2, mismatch)
+        server.takeRequest() //Success with a different tokenId (round 2, triggers the revoke)
+
+        val revokeRequest = server.takeRequest() //Async /token/revoke triggered by the mismatch
+        Assertions.assertThat(revokeRequest.path).contains("token/revoke")
     }
 
     @Test(expected = IllegalArgumentException::class)

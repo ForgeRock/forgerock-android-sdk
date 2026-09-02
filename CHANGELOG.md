@@ -1,3 +1,8 @@
+## [Unreleased]
+
+#### Fixed
+- Fixed an issue where OAuth2 tokens obtained via centralized login were revoked by a subsequent Journey [SDKS-3046]
+
 ## [4.8.6]
 
 #### Fixed
