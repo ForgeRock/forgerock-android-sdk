@@ -379,9 +379,13 @@ class FRSessionMockTest : BaseTest() {
         //centralized-login OAuth2.0 token set is revoked (a /token/revoke request is observed)
         //while the session itself is NOT ended — the SDK must not hold stale credentials of the
         //previous user/session, but the just-established session must survive.
-        val recordedPaths = (1..server.requestCount).map { server.takeRequest().path.orEmpty() }
+        //val recordedPaths = (1..server.requestCount).map { server.takeRequest().path.orEmpty() }
+        val recordedPaths = (1..3).map { server.takeRequest().path.orEmpty() }
         Assertions.assertThat(recordedPaths).anyMatch { it.contains("forceAuth=true") }
-        Assertions.assertThat(recordedPaths).anyMatch { it.contains("token/revoke") }
+        //Assertions.assertThat(recordedPaths).anyMatch { it.contains("token/revoke") }
+        val revokeRequest = server.takeRequest(5, TimeUnit.SECONDS)
+        Assertions.assertThat(revokeRequest).isNotNull()
+        Assertions.assertThat(revokeRequest!!.path).contains("token/revoke")
         Assert.assertFalse(Config.getInstance().tokenManager.hasToken())
     }
 
