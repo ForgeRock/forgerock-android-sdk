@@ -63,6 +63,10 @@ allprojects {
             //Due to [CVE-2025-53864] CWE-121: Stack-based Buffer Overflow,
             //androidx.security:security-crypto:1.1.0 has transitive to gson library
             force("com.google.code.gson:gson:2.13.1")
+            //Due to [CVE-2026-71497]:
+            // org.jsoup:jsoup:1.16.1, transitive runtime dependency of
+            // org.jetbrains.dokka:dokka-base:2.0.0 (build-time only, not shipped in the SDK).
+            force("org.jsoup:jsoup:1.23.1")
         }
     }
 }
