@@ -66,7 +66,7 @@ allprojects {
             //Due to [CVE-2026-71497]:
             // org.jsoup:jsoup:1.16.1, transitive runtime dependency of
             // org.jetbrains.dokka:dokka-base:2.0.0 (build-time only, not shipped in the SDK).
-            force("org.jsoup:jsoup:1.23.1")
+            force("org.jsoup:jsoup:1.23.2")
         }
     }
 }
