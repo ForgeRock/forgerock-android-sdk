@@ -46,10 +46,10 @@ allprojects {
     configurations.all {
 
         resolutionStrategy {
-            // Due to vulnerability [CVE-2022-40152] from dokka project.
-            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
-            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.0")
-            force("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+            // Due to vulnerability [CVE-2026-68494], [CVE-2026-54512], [CVE-2026-54513] from dokka project.
+            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
+            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.2")
+            force("com.fasterxml.jackson.core:jackson-databind:2.22.2")
             // Junit test project
             force("junit:junit:4.13.2")
             //Due to Vulnerability [CVE-2022-2390]: CWE-471 The product does not properly
