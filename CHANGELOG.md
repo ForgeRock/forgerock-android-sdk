@@ -2,6 +2,7 @@
 
 ### Fixed
 - Fixed an issue where the session established by a re-authentication Journey (e.g. `forceAuth=true` after centralized login) destroyed the centralized-login OAuth2.0 tokens by calling revokeAndEndSession. The SDK now revokes only the stale OAuth2.0 token set (when one exists) and ends no session, allowing step-up Journeys to complete. [SDKS-3046]
+- Upgraded `bcpkix-jdk18on` from `1.84` to `1.85` to address a security vulnerability (CVE-2026-8763). [SDKS-5415]
 
 ## [4.8.6]
 

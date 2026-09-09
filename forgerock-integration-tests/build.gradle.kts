@@ -21,6 +21,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    packaging {
+        // Bouncy Castle 1.85 ships an identical META-INF/LICENSE.md in each of its jars
+        // (bcpkix, bcprov, bcutil); keep one copy instead of failing the merge.
+        resources.pickFirsts.add("META-INF/LICENSE.md")
+    }
 }
 
 dependencies {
