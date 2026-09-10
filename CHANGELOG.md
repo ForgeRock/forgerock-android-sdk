@@ -1,3 +1,11 @@
+## [4.8.7]
+
+### Fixed
+- Fixed an issue where the session established by a re-authentication Journey (e.g. `forceAuth=true` after centralized login) destroyed the centralized-login OAuth2.0 tokens by calling revokeAndEndSession. The SDK now revokes only the stale OAuth2.0 token set (when one exists) and ends no session, allowing step-up Journeys to complete. [SDKS-3046]
+- Upgraded `bcpkix-jdk18on` from `1.84` to `1.85` to address a security vulnerability (CVE-2026-8763). [SDKS-5415]
+- Upgraded `jackson-module-kotlin`, `jackson-dataformat-xml` and `jackson-databind` from `2.15.0` to `2.22.2` to address security vulnerabilities (CVE-2026-68494, CVE-2026-54512, CVE-2026-54513). [SDKS-5415]
+- Enforced `org.jsoup:jsoup` to `1.23.2` (transitive of the Dokka documentation tooling) to address a security vulnerability (CVE-2026-71497). [SDKS-5415]
+
 ## [4.8.6]
 
 #### Fixed
