@@ -29,3 +29,4 @@ local.properties
 build/
 
 .polaris/
+.sdk/

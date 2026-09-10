@@ -46,10 +46,10 @@ allprojects {
     configurations.all {
 
         resolutionStrategy {
-            // Due to vulnerability [CVE-2022-40152] from dokka project.
-            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
-            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.0")
-            force("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+            // Due to vulnerability [CVE-2026-68494], [CVE-2026-54512], [CVE-2026-54513] from dokka project.
+            force("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
+            force("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.2")
+            force("com.fasterxml.jackson.core:jackson-databind:2.22.2")
             // Junit test project
             force("junit:junit:4.13.2")
             //Due to Vulnerability [CVE-2022-2390]: CWE-471 The product does not properly
@@ -63,6 +63,10 @@ allprojects {
             //Due to [CVE-2025-53864] CWE-121: Stack-based Buffer Overflow,
             //androidx.security:security-crypto:1.1.0 has transitive to gson library
             force("com.google.code.gson:gson:2.13.1")
+            //Due to [CVE-2026-71497]:
+            // org.jsoup:jsoup:1.16.1, transitive runtime dependency of
+            // org.jetbrains.dokka:dokka-base:2.0.0 (build-time only, not shipped in the SDK).
+            force("org.jsoup:jsoup:1.23.2")
         }
     }
 }

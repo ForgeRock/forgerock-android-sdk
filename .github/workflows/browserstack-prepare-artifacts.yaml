@@ -63,8 +63,7 @@ jobs:
         run: |
           ./gradlew assembleDebug assembleDebugAndroidTest \
             --stacktrace \
-            --build-cache \
-            --parallel
+            --build-cache 
 
       # List the available build tools versions see https://github.com/r0adkll/sign-android-release/issues/84
       - name: List build tools versions

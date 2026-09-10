@@ -1,0 +1,120 @@
+# CodeRabbit configuration for forgerock-android-sdk
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+---
+language: "en-US"
+
+tone_instructions: >
+  Be concise and direct. Focus on correctness, security, public API compatibility,
+  Android API 23+, and maintenance-mode constraints. Flag only critical fixes,
+  security updates, and backwards-compatibility issues.
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "develop"
+      - "master"
+
+  path_instructions:
+    - path: "**/*.kt"
+      instructions: >
+        This is a maintenance-mode Kotlin/Java SDK targeting Android API 23+.
+        Review for:
+        - No new public API additions — this repo accepts only critical bug
+          fixes and security updates. Flag any new public classes, methods, or
+          properties that are not direct replacements for broken ones.
+        - New public API must be documented with KDoc (`/** */`).
+        - Every source file must start with the MIT copyright header:
+          `Copyright (c) <year> - <year> Ping Identity Corporation.`
+        - Avoid coroutine-only public APIs; preserve `NodeListener` callback
+          compatibility for existing consumers.
+        - Avoid force-unwraps (`!!`) and unsafe casts (`as X`) in non-test code.
+        - Do not introduce new dependencies without a clear necessity; any new
+          `compileOnly` optional dependency must be guarded with a try/catch
+          `ClassNotFoundException` or equivalent at runtime.
+
+    - path: "**/*.gradle.kts"
+      instructions: >
+        Review Gradle Kotlin DSL build files for:
+        - The `resolutionStrategy` force-pins in root `build.gradle.kts` are
+          load-bearing CVE mitigations — do not remove or downgrade any of
+          them without verifying the CVE is resolved in the target version.
+        - `compileOnly` declarations for optional integrations (SafetyNet,
+          AppAuth, Firebase, reCAPTCHA) are intentional; do not promote them
+          to `implementation`.
+        - `compileSdk = 36`, `minSdk = 23`, JVM toolchain 17 must not change.
+        - New modules must apply the `AndroidBuildGradlePlugin` from
+          `buildSrc` and follow the existing module structure.
+
+    - path: "**/*.gradle"
+      instructions: >
+        Review Groovy Gradle build files with the same rules as `*.gradle.kts`:
+        CVE pins must not be removed, `compileOnly` optionals must stay
+        `compileOnly`, and SDK/JVM versions must remain unchanged.
+
+    - path: ".github/workflows/**"
+      instructions: >
+        Review GitHub Actions workflows for:
+        - Hard-coded secrets or credentials (must use `${{ secrets.* }}`).
+        - JDK version should remain 17 (Temurin) to match the project
+          toolchain in `buildSrc`.
+        - The canonical test command is
+          `./gradlew --rerun-tasks testDebugUnitTestCoverage --stacktrace --no-daemon`;
+          do not replace it with plain `test` or `testDebugUnitTest`.
+
+    - path: "e2e/**"
+      instructions: >
+        Sample/e2e app code is for demonstration and BrowserStack testing only
+        — it is not part of the public SDK surface. Lower the review bar: flag
+        security issues (hard-coded credentials, real tokens) but do not
+        require production-grade error handling or full test coverage.
+
+    - path: "samples/**"
+      instructions: >
+        Sample app code is for demonstration only — not part of the public SDK
+        surface. Flag hard-coded credentials or real tokens; do not require
+        production-grade error handling or full test coverage.
+
+    - path: "**/src/test/**"
+      instructions: >
+        Unit test files use JUnit 4 + Robolectric + Mockito/Mockito-Kotlin +
+        PowerMock. Review for:
+        - Every new or changed public API must be covered by at least one unit
+          test.
+        - PowerMock is version-pinned due to Mockito 3.x incompatibility with
+          Mockito 4.x+; do not bump `mockito-core` past `3.12.4`.
+        - Prefer `assertThat` (AssertJ) over plain JUnit `assertEquals` for
+          new assertions.
+        - Mock/stub types should not be exported (`internal` or `private`
+          scope).
+        - Tests must not use `Thread.sleep` or wall-clock delays; use
+          `CountDownLatch`, `idlingResource`, or coroutine test utilities.
+
+    - path: "**/src/androidTest/**"
+      instructions: >
+        Instrumented integration tests require a connected device or emulator
+        and a live AM/AIC instance — they are not part of the normal local
+        development loop. Review for obvious configuration mistakes (wrong
+        server URLs, hardcoded credentials). Do not require full coverage
+        here; flag security issues only.
+
+    - path: "forgerock-auth-ui/**"
+      instructions: >
+        This module is **deprecated** and must not be modified except for
+        critical security fixes. Flag any non-security change as out of scope.
+
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: false
+
+chat:
+  auto_reply: true

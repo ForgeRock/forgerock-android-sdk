@@ -35,6 +35,12 @@ android {
         }
     }
 
+    packaging {
+        // Bouncy Castle 1.85 ships an identical META-INF/LICENSE.md in each of its jars
+        // (bcpkix, bcprov, bcutil); keep one copy instead of failing the merge.
+        resources.pickFirsts.add("META-INF/LICENSE.md")
+    }
+
     unitTestVariants.all {
         this.mergedFlavor.manifestPlaceholders["appAuthRedirectScheme"] = "org.forgerock.demo"
     }
