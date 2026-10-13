@@ -175,7 +175,7 @@ class AuthServiceClient {
         } else {
             builder.appendPath("json")
                     .appendPath("realms")
-                    .appendPath(serverConfig.getRealm())
+                    .appendEncodedPath(serverConfig.getRealm())
                     .appendPath("authenticate");
         }
         return builder;
