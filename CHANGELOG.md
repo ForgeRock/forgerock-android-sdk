@@ -1,3 +1,8 @@
+## [Unreleased]
+
+#### Fixed
+- The SDK now discards a corrupted record from `SecuredSharedPreferences` when it cannot be read after a retry, instead of throwing on every access. Previously, a record that decrypted successfully but contained malformed data caused the SDK to crash on every launch until the app data was cleared. [SDKS-5549]
+
 ## [4.8.7]
 
 ### Fixed

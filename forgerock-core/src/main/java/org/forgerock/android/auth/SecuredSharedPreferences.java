@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2019 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -212,11 +212,20 @@ public class SecuredSharedPreferences implements SharedPreferences {
             } else {
                 return null;
             }
+        } catch (CancellationException e) {
+            //Never swallow or discard data for a cancelled coroutine
+            throw e;
         } catch (Exception ex) {
             if (retry) {
                 return get(key, false);
             }
-            throw new RuntimeException(ex);
+            // The failure persisted on re-read, the stored record is unreadable (e.g. the
+            // plaintext decrypts but is malformed, as reported in SDKS-5549). Discard the
+            // poisoned entry instead of throwing on every read, otherwise the SDK crash
+            // loops until the app data is cleared.
+            Logger.warn(TAG, ex, "Failed to read the secured data, discarding the corrupted entry.");
+            edit().remove(key).commit();
+            return null;
         }
     }
 
