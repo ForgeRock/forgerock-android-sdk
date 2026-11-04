@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2024 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -9,6 +9,7 @@ package org.forgerock.android.auth.encrypt
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -133,6 +134,95 @@ class SecretKeyEncryptorTest {
         println("Average encryption time: ${totalEncryptTime / runs} ms")
         println("Average decryption time: ${totalDecryptTime / runs} ms")
 
+    }
+
+    /**
+     * Reproduces the 4.8.0 key-generation path: StrongBox forced on whenever the device
+     * advertises the feature (4.8.0 had no flag, so there was no way to turn this off).
+     * Related ticket: SDKS-5549. On a device with an unreliable StrongBox implementation
+     * this is where corruption originates. The key's security level is logged (and asserted
+     * on API 31+ when StrongBox is advertised) so device logs answer the attribution
+     * question: does THIS device advertise StrongBox, and did the key actually land in it?
+     */
+    @Test
+    fun testStrongBoxBackedKeyGeneration() = runTest {
+        val strongBoxFeature = appContext.packageManager
+            .hasSystemFeature(android.content.pm.PackageManager.FEATURE_STRONGBOX_KEYSTORE)
+        println("device=${Build.MANUFACTURER} ${Build.MODEL} sdk=${Build.VERSION.SDK_INT} " +
+                "strongBoxFeature=$strongBoxFeature")
+
+        val strongBoxAlias = "strongbox-key"
+        val encryptor = SecretKeyEncryptor {
+            context = appContext
+            keyAlias = strongBoxAlias
+            strongBoxPreferred = true // 4.8.0 behaviour: StrongBox forced when available
+        }
+
+        // Round-trip through the 4.8.0 encryption pipeline.
+        val payload = "attribution-roundtrip".toByteArray()
+        val encrypted = encryptor.encrypt(payload)
+        val decrypted = encryptor.decrypt(encrypted)
+        assertEquals(String(payload), String(decrypted))
+
+        // Where did the key end up? SECURITY_LEVEL_STRONGBOX proves StrongBox-backed;
+        // SOFTWARE or TRUSTED_ENVIRONMENT means the device fell back or lacks the feature.
+        val entry = keyStore.getEntry(strongBoxAlias, null) as SecretKeyEntry
+        val factory = javax.crypto.SecretKeyFactory.getInstance(
+            entry.secretKey.algorithm, "AndroidKeyStore")
+        val keyInfo = factory.getKeySpec(entry.secretKey, android.security.keystore.KeyInfo::class.java)
+            as android.security.keystore.KeyInfo
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // KeyInfo.getSecurityLevel() requires API 31+; below that only
+            // isInsideSecureHardware() exists.
+            println("key securityLevel=${keyInfo.securityLevel} " +
+                    "insideSecureHardware=${keyInfo.isInsideSecureHardware}")
+            if (strongBoxFeature) {
+                assertEquals(
+                    "Device advertises StrongBox but key did not land in StrongBox",
+                    android.security.keystore.KeyProperties.SECURITY_LEVEL_STRONGBOX,
+                    keyInfo.securityLevel
+                )
+            }
+        } else {
+            println("key insideSecureHardware=${keyInfo.isInsideSecureHardware} " +
+                    "(securityLevel requires API 31+, device sdk=${Build.VERSION.SDK_INT})")
+        }
+        keyStore.deleteEntry(strongBoxAlias)
+    }
+
+    /**
+     * High-volume soak through the 4.8.0 crypto path (StrongBox forced on when the device
+     * advertises it). Related ticket: SDKS-5549. The customer's corruption surfaced once in
+     * production; catching an intermittent secure-hardware fault needs operation volume,
+     * not app relaunches. Each iteration encrypts a unique payload and verifies the
+     * round-trip, so a single faulty operation fails the test. On devices without StrongBox
+     * this exercises the TEE/software fallback path instead - a control, not attribution.
+     */
+    @Test
+    fun testStrongBoxSoak() = runTest(timeout = 5.toDuration(DurationUnit.MINUTES)) {
+        val iterations = 300
+        val soakAlias = "soak-key"
+        val encryptor = SecretKeyEncryptor {
+            context = appContext
+            keyAlias = soakAlias
+            strongBoxPreferred = true // 4.8.0 behaviour
+        }
+
+        val failures = StringBuilder()
+        for (i in 1..iterations) {
+            // Unique, realistic-size payload per iteration (~customer record size).
+            val payload = ("soak-$i-" + "x".repeat(200) + "-$i").toByteArray()
+            try {
+                val decrypted = encryptor.decrypt(encryptor.encrypt(payload))
+                if (!decrypted.contentEquals(payload)) {
+                    failures.append("iter $i: round-trip mismatch\n")
+                }
+            } catch (e: Throwable) {
+                failures.append("iter $i: ${e.javaClass.simpleName}: ${e.message}\n")
+            }
+        }
+        assertEquals("Crypto failures during soak:\n$failures", 0, failures.length)
+        keyStore.deleteEntry(soakAlias)
     }
 
 }
