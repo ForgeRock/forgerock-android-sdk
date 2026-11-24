@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -275,6 +277,134 @@ public class PushMechanismTest extends FRABaseTest {
         assertEquals(mechanism.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
         assertEquals(mechanism.getAuthenticationEndpoint(), AUTHENTICATION_ENDPOINT);
         assertEquals(mechanism.getSecret(), SECRET);
+    }
+
+    @Test
+    public void testShouldSerializeResourceId() throws MechanismCreationException {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-pushauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"pushauth\"," +
+                "\"uid\":\"uid1\"," +
+                "\"resourceId\":\"resourceId1\"," +
+                "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
+                "}";
+
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .setUid("uid1")
+                .setResourceId("resourceId1")
+                .build();
+
+        String mechanismAsJson = mechanism.toJson();
+
+        assertNotNull(mechanismAsJson);
+        assertEquals(json, mechanismAsJson);
+    }
+
+    @Test
+    public void testShouldRoundTripResourceIdThroughSerialization() throws MechanismCreationException {
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .setUid("uid1")
+                .setResourceId("resourceId1")
+                .build();
+
+        PushMechanism deserialized = PushMechanism.deserialize(mechanism.serialize());
+
+        assertNotNull(deserialized);
+        assertEquals("resourceId1", deserialized.getResourceId());
+        assertEquals(mechanism.getMechanismUID(), deserialized.getMechanismUID());
+        assertEquals(mechanism.getIssuer(), deserialized.getIssuer());
+        assertEquals(mechanism.getAccountName(), deserialized.getAccountName());
+        assertEquals(mechanism.getType(), deserialized.getType());
+        assertEquals(mechanism.getUid(), deserialized.getUid());
+        assertEquals(mechanism.getRegistrationEndpoint(), deserialized.getRegistrationEndpoint());
+        assertEquals(mechanism.getAuthenticationEndpoint(), deserialized.getAuthenticationEndpoint());
+        assertEquals(mechanism.getSecret(), deserialized.getSecret());
+    }
+
+    @Test
+    public void testShouldRoundTripResourceIdThroughPolymorphicDeserialize() throws MechanismCreationException {
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .setUid("uid1")
+                .setResourceId("resourceId1")
+                .build();
+
+        Mechanism deserialized = Mechanism.deserialize(mechanism.serialize());
+
+        assertNotNull(deserialized);
+        assertTrue(deserialized instanceof PushMechanism);
+        assertEquals("resourceId1", deserialized.getResourceId());
+        assertEquals(mechanism.getMechanismUID(), deserialized.getMechanismUID());
+        assertEquals(mechanism.getIssuer(), deserialized.getIssuer());
+        assertEquals(mechanism.getAccountName(), deserialized.getAccountName());
+        assertEquals(mechanism.getType(), deserialized.getType());
+    }
+
+    @Test
+    public void testShouldDeserializeLegacyJsonWithoutResourceId() {
+        String json = "{" +
+                "\"id\":\"issuer1-user1-pushauth\"," +
+                "\"issuer\":\"issuer1\"," +
+                "\"accountName\":\"user1\"," +
+                "\"mechanismUID\":\"b162b325-ebb1-48e0-8ab7-b38cf341da95\"," +
+                "\"secret\":\"JMEZ2W7D462P3JYBDG2HV7PFBM\"," +
+                "\"type\":\"pushauth\"," +
+                "\"registrationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=register\"," +
+                "\"authenticationEndpoint\":\"http:\\/\\/openam.forgerock.com:8080\\/openam\\/json\\/push\\/sns\\/message?_action=authenticate\"" +
+                "}";
+
+        PushMechanism mechanism = PushMechanism.deserialize(json);
+
+        assertNotNull(mechanism);
+        assertNull(mechanism.getResourceId());
+        assertEquals(mechanism.getMechanismUID(), MECHANISM_UID);
+        assertEquals(mechanism.getIssuer(), ISSUER);
+        assertEquals(mechanism.getAccountName(), ACCOUNT_NAME);
+        assertEquals(mechanism.getType(), Mechanism.PUSH);
+        assertEquals(mechanism.getRegistrationEndpoint(), REGISTRATION_ENDPOINT);
+        assertEquals(mechanism.getAuthenticationEndpoint(), AUTHENTICATION_ENDPOINT);
+        assertEquals(mechanism.getSecret(), SECRET);
+    }
+
+    @Test
+    public void testResourceIdGetterIsPublicApi() throws Exception {
+        Method getResourceId = Mechanism.class.getMethod("getResourceId");
+        assertTrue("Mechanism.getResourceId() should be public API",
+                Modifier.isPublic(getResourceId.getModifiers()));
+
+        PushMechanism mechanism = PushMechanism.builder()
+                .setMechanismUID(MECHANISM_UID)
+                .setIssuer(ISSUER)
+                .setAccountName(ACCOUNT_NAME)
+                .setAuthenticationEndpoint(AUTHENTICATION_ENDPOINT)
+                .setRegistrationEndpoint(REGISTRATION_ENDPOINT)
+                .setSecret(SECRET)
+                .setResourceId(RESOURCE_ID)
+                .build();
+
+        assertEquals(RESOURCE_ID, getResourceId.invoke(mechanism));
     }
 
 }
