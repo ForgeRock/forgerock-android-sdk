@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -202,6 +202,36 @@ public class DefaultStorageClientTest extends FRABaseTest {
         assertEquals(account.getId(), accountFromStorage.getId());
         assertNotNull(mechanismsFromStorage);
         assertEquals(mechanism.getMechanismUID(), mechanismsFromStorage.get(0).getMechanismUID());
+    }
+
+    @Test
+    public void testStorePushMechanismPreservesResourceId() {
+        DefaultStorageClient defaultStorage = new DefaultStorageClient(context);
+        defaultStorage.setAccountData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_ACCOUNT, Context.MODE_PRIVATE));
+        defaultStorage.setMechanismData(context.getApplicationContext()
+                .getSharedPreferences(TEST_SHARED_PREFERENCES_DATA_MECHANISM, Context.MODE_PRIVATE));
+
+        Account account = createAccountWithoutAdditionalData(ISSUER, ACCOUNT_NAME);
+        Mechanism mechanism = createPushMechanism(MECHANISM_UID, ISSUER, ACCOUNT_NAME, SECRET,
+                REGISTRATION_ENDPOINT, AUTHENTICATION_ENDPOINT, RESOURCE_ID);
+
+        defaultStorage.setAccount(account);
+        defaultStorage.setMechanism(mechanism);
+
+        Account accountFromStorage = defaultStorage.getAccount(account.getId());
+        List<Mechanism> mechanismsFromStorage = defaultStorage.getMechanismsForAccount(accountFromStorage);
+        Mechanism mechanismByUUID = defaultStorage.getMechanismByUUID(MECHANISM_UID);
+
+        assertNotNull(accountFromStorage);
+        assertEquals(account.getId(), accountFromStorage.getId());
+        assertNotNull(mechanismsFromStorage);
+        assertEquals(1, mechanismsFromStorage.size());
+        assertEquals(RESOURCE_ID, mechanismsFromStorage.get(0).getResourceId());
+
+        assertNotNull(mechanismByUUID);
+        assertEquals(MECHANISM_UID, mechanismByUUID.getMechanismUID());
+        assertEquals(RESOURCE_ID, mechanismByUUID.getResourceId());
     }
 
     @Test

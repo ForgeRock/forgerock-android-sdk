@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -152,10 +152,13 @@ public abstract class Mechanism extends ModelObject<Mechanism> {
     }
 
     /**
-     * Get the unique identifier of this mechanism on the server.
-     * @return The unique identifier of this mechanism on the server.
+     * Get the unique server-side identifier of this mechanism.
+     * The resource ID is assigned by the server when the mechanism is registered and identifies
+     * the mechanism's corresponding resource on the server.
+     * @return The unique server-side identifier of this mechanism, or {@code null} if the mechanism
+     * was created without one.
      */
-    String getResourceId() {
+    public String getResourceId() {
         return resourceId;
     }
 

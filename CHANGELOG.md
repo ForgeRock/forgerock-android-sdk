@@ -1,3 +1,8 @@
+## [Unreleased]
+
+### Fixed
+- Fixed an issue where the push mechanism's `resourceId` was lost when persisted through `StorageClient`, and exposed `Mechanism.getResourceId()` as public API. [SDKS-5540]
+
 ## [4.8.7]
 
 ### Fixed

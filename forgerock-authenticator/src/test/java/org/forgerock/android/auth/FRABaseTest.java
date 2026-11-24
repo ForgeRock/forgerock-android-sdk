@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2025 Ping Identity Corporation. All rights reserved.
+ * Copyright (c) 2020 - 2026 Ping Identity Corporation. All rights reserved.
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -50,6 +50,7 @@ public abstract class FRABaseTest {
     public static final String BACKGROUND_COLOR = "032b75";
     public static final String MECHANISM_UID = "b162b325-ebb1-48e0-8ab7-b38cf341da95";
     public static final String OTHER_MECHANISM_UID = "013be51a-8c14-356d-b0fc-b3660cc8a101";
+    public static final String RESOURCE_ID = "resourceId1";
     public static final String SECRET = "JMEZ2W7D462P3JYBDG2HV7PFBM";
     public static final String CORRECT_SECRET = "2afd55692b492e60df7e9c0b4f55b0492afd55692b492e60df7e9c0b4f55b049";
     public static final String INCORRECT_SECRET = "INVALID-52e2563abe7d27f3476117ba2bc802a952e2563abe7d27f3476117ba2bc802a9";
@@ -227,6 +228,26 @@ public abstract class FRABaseTest {
                     .setAuthenticationEndpoint(authenticationEndpoint)
                     .setRegistrationEndpoint(registrationEndpoint)
                     .setSecret(secret)
+                    .build();
+        } catch (MechanismCreationException e) {
+            e.printStackTrace();
+        }
+
+        return push;
+    }
+
+    public static PushMechanism createPushMechanism(String mechanismUID, String issuer, String accountName, String secret,
+                                                    String registrationEndpoint, String authenticationEndpoint, String resourceId) {
+        PushMechanism push = null;
+        try {
+            push = PushMechanism.builder()
+                    .setMechanismUID(mechanismUID)
+                    .setIssuer(issuer)
+                    .setAccountName(accountName)
+                    .setAuthenticationEndpoint(authenticationEndpoint)
+                    .setRegistrationEndpoint(registrationEndpoint)
+                    .setSecret(secret)
+                    .setResourceId(resourceId)
                     .build();
         } catch (MechanismCreationException e) {
             e.printStackTrace();
